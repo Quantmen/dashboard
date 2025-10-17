@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trading Sidebar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #2d4a8a; }
+
+    .sidebar { width: 60px; height: 100vh; background: #2d4a8a; box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+               display: flex; flex-direction: column; transition: width 0.3s ease; position: relative; }
+    .sidebar.expanded { width: 240px; }
+
+    .sidebar-header { display: flex; align-items: center; justify-content: center; padding: 28px 10px 20px;
+                      border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; }
+    .sidebar.expanded .sidebar-header { padding: 28px 20px 20px; justify-content: space-between; }
+
+    .sidebar-logo { font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;
+                    opacity: 0; width: 0; overflow: hidden; transition: opacity 0.3s ease; }
+    .sidebar.expanded .sidebar-logo { opacity: 1; width: auto; }
+    .logo-icon { font-size: 24px; }
+
+    .toggle-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 30px; height: 30px; border-radius: 6px;
+                  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
+                  font-size: 16px; transform: rotate(180deg); }
+    .toggle-btn:hover { background: rgba(255,255,255,0.2); }
+    .sidebar.expanded .toggle-btn { transform: rotate(0deg); }
+
+    .sidebar-item { display: flex; align-items: center; justify-content: center; padding: 13px 0; color: #a3b8e0;
+                    text-decoration: none; transition: all 0.2s ease; cursor: pointer; font-size: 14px; font-weight: 500;
+                    position: relative; margin: 2px 0; white-space: nowrap; }
+    .sidebar.expanded .sidebar-item { padding: 13px 20px; justify-content: flex-start; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .sidebar-item.active { background: #1a2844; color: #fff; font-weight: 600; }
+
+    .sidebar-icon { font-size: 18px; width: 20px; display: flex; align-items: center; justify-content: center; }
+    .sidebar.expanded .sidebar-icon { margin-right: 14px; }
+    .sidebar-text { opacity: 0; width: 0; overflow: hidden; transition: opacity 0.3s ease; }
+    .sidebar.expanded .sidebar-text { opacity: 1; width: auto; }
+
+    input[type="file"] { display: none; }
+    .loading-overlay { display: none !important; }
+
+    #toast {
+      display: none !important;
+      position: fixed; bottom: 20px; right: 20px; background: #28a745; color: #fff;
+      padding: 10px 18px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-size: 14px; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; z-index: 9999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="logo-icon">🦅</span>
+        <span>Quantmens</span>
+      </div>
+      <button class="toggle-btn" onclick="toggleSidebar()">«</button>
+    </div>
+
+    <div class="sidebar-item active" onclick="navigateTo(event, 'dashboard.html')">
+      <span class="sidebar-icon">🏠</span>
+      <span class="sidebar-text">Dashboard</span>
+    </div>
+    <div class="sidebar-item" onclick="navigateTo(event, 'monthly-pnl.html')">
+      <span class="sidebar-icon">📅</span>
+      <span class="sidebar-text">Monthly P&L</span>
+    </div>
+    <div class="sidebar-item" onclick="navigateTo(event, 'strategy-performance.html')">
+      <span class="sidebar-icon">💰</span>
+      <span class="sidebar-text">Strategy Performance</span>
+    </div>
+    <div class="sidebar-item" onclick="navigateTo(event, 'report.html')">
+      <span class="sidebar-icon">📋</span>
+      <span class="sidebar-text">Detailed Report</span>
+    </div>
+
+    <label for="fileInput" class="sidebar-item">
+      <span class="sidebar-icon">🗂️</span>
+      <span class="sidebar-text">Data Management</span>
+    </label>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileUpload(event)" />
+
+    <div class="sidebar-item" onclick="setGoogleDriveLink(event)">
+      <span class="sidebar-icon">🔗</span>
+      <span class="sidebar-text">Save Google Drive Link</span>
+    </div>
+
+    <div id="loadDriveBtn" class="sidebar-item" onclick="loadFromGoogleDrive(event)">
+      <span class="sidebar-icon">☁️</span>
+      <span class="sidebar-text">Load from Google Drive</span>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const DEFAULT_DRIVE_XLSX_URL = "";
+    const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+    const LS_KEY_DRIVE_URL = "driveXlsxUrl";
+
+    const state = { loaded: false, loading: false, attempts: 0, maxAttempts: 3 };
+    const el = { sidebar: document.getElementById('sidebar') };
+
+    (function init() {
+      const collapsed = localStorage.getItem('sidebarCollapsed') !== 'false';
+      if (!collapsed) el.sidebar.classList.add('expanded');
+      postMessage('SIDEBAR_TOGGLE', { collapsed });
+      loadFiltersOnly();
+      updateDriveButtonVisibility();
+      // Try load only if link exists
+      loadFromGoogleDrive({ preventDefault: () => {} });
+    })();
+
+    function postMessage(type, data = {}) {
+      window.parent.postMessage({ type, ...data }, '*');
+    }
+    function showLoading(text, progress) {
+      postMessage('SHOW_LOADING', { text, progress });
+    }
+    function hideLoading() {
+      postMessage('HIDE_LOADING');
+    }
+    function toggleSidebar() {
+      el.sidebar.classList.toggle('expanded');
+      const collapsed = !el.sidebar.classList.contains('expanded');
+      localStorage.setItem('sidebarCollapsed', collapsed);
+      postMessage('SIDEBAR_TOGGLE', { collapsed });
+    }
+    function navigateTo(event, page) {
+      event.preventDefault();
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      postMessage('NAVIGATE', { page });
+    }
+    function loadFiltersOnly() {
+      try {
+        const filters = localStorage.getItem('dashboardFilters');
+        if (filters) postMessage('LOAD_FILTERS', { filters: JSON.parse(filters) });
+      } catch (e) {
+        console.warn('Failed loading filters:', e);
+      }
+    }
+
+    function showToast(msg, ok = true) {
+      postMessage('SHOW_TOAST', { text: msg, success: ok });
+    }
+
+    function normalizeGSheetUrl(url) {
+      const u = (url || '').trim();
+      if (!u) return '';
+      if (u.includes('/pubhtml')) return u.replace('/pubhtml', '/pub?output=xlsx');
+      if (u.includes('/pub?output=')) return u.replace(/output=\w+/i, 'output=xlsx');
+      const match = u.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        return `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=xlsx`;
+      }
+      return u;
+    }
+    function getDriveUrl() {
+      return localStorage.getItem(LS_KEY_DRIVE_URL) || DEFAULT_DRIVE_XLSX_URL || "";
+    }
+    function getBustedDriveUrl() {
+      const base = getDriveUrl();
+      if (!base) return "";
+      const sep = base.includes('?') ? '&' : '?';
+      return `${base}${sep}cb=${Date.now()}`;
+    }
+
+    function setGoogleDriveLink(event) {
+      event.preventDefault();
+      const current = getDriveUrl();
+      const input = prompt('Paste your Google Sheets link (leave blank to clear):', current);
+      if (input === null) {
+        // User cancelled — do nothing
+        return;
+      }
+      const norm = normalizeGSheetUrl(input);
+      localStorage.setItem(LS_KEY_DRIVE_URL, norm);
+      showToast(norm ? '✅ Link saved!' : '🔄 Link cleared', norm);
+      updateDriveButtonVisibility();
+    }
+
+    function updateDriveButtonVisibility() {
+      const btn = document.getElementById('loadDriveBtn');
+      if (!getDriveUrl()) {
+        btn.style.opacity = "0.5";
+        btn.style.pointerEvents = "none";
+      } else {
+        btn.style.opacity = "";
+        btn.style.pointerEvents = "";
+      }
+    }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      showLoading('Reading file...');
+      try {
+        const buffer = await file.arrayBuffer();
+        const wb = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+        await processWorkbook(wb);
+        showToast('✅ Data updated');
+      } catch (e) {
+        console.error('File upload error:', e);
+        showToast('❌ File load failed', false);
+      } finally {
+        event.target.value = '';
+        hideLoading();
+      }
+    }
+
+    async function clearIndexedDB() {
+      const db = await openDB();
+      const tx = db.transaction(['trades'], 'readwrite');
+      return new Promise((res, rej) => {
+        const req = tx.objectStore('trades').delete('tradesData');
+        req.onsuccess = () => res();
+        req.onerror = () => rej(req.error);
+      });
+    }
+    async function clearDataInternal() {
+      localStorage.removeItem('uploadedTradesData');
+      localStorage.removeItem('dataUploadTime');
+      localStorage.removeItem('useIndexedDB');
+      await clearIndexedDB().catch(e => {
+        console.warn('IndexedDB clear failed:', e);
+      });
+    }
+
+    async function loadFromGoogleDrive(event) {
+      if (event && event.preventDefault) event.preventDefault();
+
+      const driveUrl = getDriveUrl();
+      if (!driveUrl || driveUrl.trim() === "") {
+        console.log("No Google Sheets link set. Skipping fetch.");
+        return;
+      }
+
+      showLoading('Clearing previous data...');
+      await clearDataInternal();
+
+      showLoading('Fetching file from Google Drive...');
+      const maxRetries = 2;
+      let lastError = null;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000);  // 15s timeout
+
+          const fetchURL = CORS_PROXY + encodeURIComponent(getBustedDriveUrl());
+          const res = await fetch(fetchURL, { cache: 'no-store', signal: controller.signal });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) {
+            throw new Error(`Fetch failed, status: ${res.status}`);
+          }
+
+          const arrayBuffer = await res.arrayBuffer();
+
+          let workbook;
+          try {
+            workbook = XLSX.read(arrayBuffer, { type: 'array' });
+          } catch (parseErr) {
+            throw new Error('Parsing workbook error: ' + parseErr.message);
+          }
+
+          showLoading('Processing Google Sheet...');
+          await processWorkbook(workbook);
+
+          showToast('✅ Data updated');
+          hideLoading();
+          return;
+
+        } catch (err) {
+          lastError = err;
+          console.error(`Drive fetch attempt ${attempt + 1} failed:`, err);
+
+          if (attempt < maxRetries) {
+            // small backoff before retry
+            await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+            showLoading(`Retrying... (${attempt + 2}/${maxRetries + 1})`);
+          }
+        }
+      }
+
+      // After all retries failed
+      hideLoading();
+      showToast('❌ Update failed: ' + (lastError?.message || ''), false);
+    }
+
+    async function processWorkbook(workbook) {
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      if (!rows || rows.length === 0) return;
+
+      const headers = rows[0];
+      const totalRows = rows.length - 1;
+
+      const cols = {};
+      const stratCols = {
+        pnl: {}, pnltax: {}, dpnl: {}, br: {},
+        buy: {}, sell: {}, dbuy: {}, dsell: {},
+        qty: {}, unpnl: {}, margin: {}, lot: {}, apro: {}
+      };
+
+      headers.forEach((h, i) => {
+        if (!h) return;
+        const hs = h.toString();
+        cols[h] = i;
+
+        const m = hs.match(/^([A-Z]+)_(.+)$/);
+        if (m) {
+          const prefix = m[1].toLowerCase();
+          const name = m[2];
+          if (stratCols[prefix]) {
+            stratCols[prefix][name] = i;
+          }
+        } else if (hs.startsWith('A.PRO')) {
+          stratCols.apro[hs] = i;
+        }
+      });
+
+      const strategies = Object.keys(stratCols.pnl);
+      const trades = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || !row.length) continue;
+
+        if (totalRows > 10000 && i % 1000 === 0) {
+          const pct = Math.floor((i / totalRows) * 100);
+          showLoading('Processing...', `${pct}% (${i.toLocaleString()} / ${totalRows.toLocaleString()})`);
+          await new Promise(r => setTimeout(r, 0));
+        }
+
+        const trade = {
+          sno: row[cols['S.NO']] || i,
+          date: formatDate(row[cols['Date']]),
+          strategy: row[cols['Strategy']] || 'Unknown',
+          trade: row[cols['Trade']] || row[cols['trade']] || '',
+          symbol: row[cols['Symbol']] || 'Unknown',
+          qty: parseFloat(row[cols['A. Qty']]) || 0,
+          profit: parseFloat(row[cols['A. Profit']]) || 0,
+          cumPnl: parseFloat(row[cols['Cumulative PNLTAX']]) || 0,
+          entry: parseFloat(row[cols['A.EnPrice']]) || 0,
+          exit: parseFloat(row[cols['A.ExPrice']]) || 0,
+          strategyPnls: {}, strategyPnlTax: {}, strategyDetails: {}, brokerCodes: {}
+        };
+
+        Object.entries(stratCols.apro).forEach(([name, idx]) => {
+          const pnl = parseFloat(row[idx]) || 0;
+          trade.strategyPnls[name] = pnl;
+          trade.strategyPnlTax[name] = pnl;
+          trade.strategyDetails[name] = {
+            buy: 0, qty: 0, sell: 0, dbuy: 0, dsell: 0, unpnl: 0, margin: 0,
+            lot: pnl !== 0 ? 1 : 0, pnl, dpnl: pnl
+          };
+          trade.brokerCodes[name] = 'A';
+        });
+
+        strategies.forEach(s => {
+          trade.strategyPnls[s] = parseFloat(row[stratCols.pnl[s]]) || 0;
+          trade.strategyPnlTax[s] = parseFloat(row[stratCols.pnltax[s]]) || 0;
+          if (stratCols.br[s]) trade.brokerCodes[s] = row[stratCols.br[s]]?.toString();
+          const dpnl = parseFloat(row[stratCols.dpnl[s]]) || parseFloat(row[stratCols.pnltax[s]]) || 0;
+
+          trade.strategyDetails[s] = {
+            buy: parseFloat(row[stratCols.buy[s]]) || 0,
+            qty: parseFloat(row[stratCols.qty[s]]) || 0,
+            sell: parseFloat(row[stratCols.sell[s]]) || 0,
+            dbuy: parseFloat(row[stratCols.dbuy[s]]) || 0,
+            dsell: parseFloat(row[stratCols.dsell[s]]) || 0,
+            unpnl: parseFloat(row[stratCols.unpnl[s]]) || 0,
+            margin: parseFloat(row[stratCols.margin[s]]) || 0,
+            lot: parseFloat(row[stratCols.lot[s]]) || 0,
+            pnl: trade.strategyPnls[s],
+            dpnl
+          };
+        });
+
+        trades.push(trade);
+      }
+
+      await saveData(trades);
+      postMessage('TRADES_DATA', { data: trades });
+      state.loaded = true;
+    }
+
+    function formatDate(val) {
+      if (!val) return '';
+      if (typeof val === 'string') {
+        if (val.includes('T')) {
+          const d = new Date(val);
+          return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+        }
+        return val;
+      }
+      if (typeof val === 'number') {
+        const d = new Date((val - 25569) * 86400 * 1000);
+        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+      }
+      try {
+        const d = new Date(val);
+        if (!isNaN(d.getTime())) {
+          return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+        }
+      } catch (e) { }
+      return String(val);
+    }
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    async function saveData(trades) {
+      const json = JSON.stringify(trades);
+      const size = json.length;
+      const limit = 4.5 * 1024 * 1024;
+      try {
+        if (size > limit) {
+          await saveToIndexedDB(trades);
+          localStorage.setItem('useIndexedDB', 'true');
+        } else {
+          localStorage.setItem('uploadedTradesData', json);
+          localStorage.removeItem('useIndexedDB');
+        }
+        localStorage.setItem('dataUploadTime', new Date().toISOString());
+      } catch (err) {
+        console.warn('SaveData fallback to IndexedDB:', err);
+        await saveToIndexedDB(trades);
+        localStorage.setItem('useIndexedDB', 'true');
+        localStorage.setItem('dataUploadTime', new Date().toISOString());
+      }
+    }
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('TradingDashboard', 3);
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => resolve(req.result);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('trades')) {
+            db.createObjectStore('trades', { keyPath: 'id' });
+          }
+        };
+      });
+    }
+
+    async function saveToIndexedDB(data) {
+      const db = await openDB();
+      const tx = db.transaction(['trades'], 'readwrite');
+      return new Promise((res, rej) => {
+        const req = tx.objectStore('trades').put({
+          id: 'tradesData',
+          data,
+          timestamp: new Date().toISOString()
+        });
+        req.onsuccess = () => res();
+        req.onerror = () => rej(req.error);
+      });
+    }
+  </script>
+</body>
+</html>

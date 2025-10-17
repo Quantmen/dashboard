@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Performance</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        .main-content {
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 32px 32px 32px;
+            background: #f8fafc;
+            height: 100vh;
+            width: 100%;
+        }
+        .page-header { margin-bottom: 16px; }
+        .page-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
+        .page-subtitle { font-size: 12px; color: #6b7280; font-weight: 400; }
+        .controls-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .control-group { display: flex; align-items: center; gap: 8px; }
+        .control-label { font-size: 12px; color: #374151; font-weight: 600; }
+        .strategy-filter-container { position: relative; }
+        .strategy-filter-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .strategy-filter-button:hover { border-color: #9ca3af; background: #f9fafb; }
+        .strategy-filter-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 6px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+            min-width: 280px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .strategy-filter-dropdown.active { display: block; }
+        .strategy-filter-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .strategy-filter-title { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .strategy-filter-actions { display: flex; gap: 8px; }
+        .filter-action-btn {
+            font-size: 11px;
+            color: #1e40af;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        .filter-action-btn:hover { background: #eff6ff; }
+        .filter-action-btn[style*="color: #dc2626"]:hover { background: #fee2e2; }
+        .strategy-filter-list { padding: 8px 0; }
+        .strategy-filter-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .strategy-filter-item:hover { background: #f8fafc; }
+        .strategy-filter-checkbox { margin-right: 10px; width: 16px; height: 16px; cursor: pointer; }
+        .strategy-filter-label { font-size: 13px; color: #475569; cursor: pointer; user-select: none; }
+        .filter-badge {
+            display: inline-block;
+            background: #1e40af;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+        select, button {
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        select:hover, button:hover { border-color: #9ca3af; background: #f9fafb; }
+        select:focus, button:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button.primary { background: #3b82f6; color: white; border-color: #3b82f6; }
+        button.primary:hover { background: #2563eb; border-color: #2563eb; }
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            border: 1px solid #e5e7eb;
+            overflow: visible;
+        }
+        .table-wrapper { overflow-x: auto; overflow-y: visible; background: white; border-radius: 0; }
+        .performance-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            min-width: 800px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+        }
+        .performance-table thead { position: sticky; top: 0; z-index: 10; background: white; }
+        .performance-table thead tr { height: 0; border-spacing: 0; border-collapse: collapse; }
+        .performance-table thead tr.header-row-1, .performance-table thead tr.header-row-2 { height: auto; }
+        .performance-table thead tr.header-row-1 th {
+            padding: 12px 8px 6px 8px;
+            position: sticky;
+            top: 0;
+            background: #f3f4f6;
+            z-index: 10;
+            font-size: 11px;
+            text-align: center;
+            font-weight: 700;
+            color: #1f2937;
+            border-bottom: 1px solid #d1d5db;
+            border-right: 1px solid #e5e7eb;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+            vertical-align: middle;
+            height: 32px;
+        }
+        .performance-table thead tr.header-row-1 th[rowspan="2"] {
+            border-bottom: 2px solid #d1d5db;
+            text-align: center;
+            background: #f3f4f6;
+            padding: 12px 8px;
+            height: auto;
+            vertical-align: middle;
+        }
+        .performance-table thead tr.header-row-2 th {
+            padding: 6px 8px 12px 8px;
+            font-size: 10px;
+            position: sticky;
+            top: 32px;
+            background: #f3f4f6;
+            z-index: 10;
+            font-weight: 600;
+            color: #6b7280;
+            text-align: center;
+            border-bottom: 2px solid #d1d5db;
+            border-right: 1px solid #e5e7eb;
+            white-space: nowrap;
+            text-transform: uppercase;
+            line-height: 1.2;
+            vertical-align: middle;
+            height: 32px;
+        }
+        .performance-table thead tr.header-row-1 th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 11;
+            background: #f9fafb;
+            min-width: 100px;
+            max-width: 100px;
+            border-right: 2px solid #cbd5e1;
+            padding: 12px 8px;
+            vertical-align: middle;
+        }
+        .performance-table th {
+            background: #f3f4f6;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 700;
+            color: #6b7280;
+            border-bottom: 2px solid #d1d5db;
+            border-right: 1px solid #e5e7eb;
+            white-space: nowrap;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            min-width: 75px;
+            max-width: 90px;
+            vertical-align: middle;
+        }
+        .performance-table th.strategy-group-end { border-right: 2px solid #cbd5e1; }
+        .performance-table td.strategy-group-end { border-right: 2px solid #cbd5e1; }
+        .performance-table th.apro-boundary { border-right: 2px solid #cbd5e1 !important; }
+        .performance-table td.apro-boundary { border-right: 2px solid #cbd5e1 !important; }
+        .performance-table th.broker-boundary { border-right: 2px solid #cbd5e1 !important; }
+        .performance-table td.broker-boundary { border-right: 2px solid #cbd5e1 !important; }
+        .performance-table th.strategy-bg-0, .performance-table td.strategy-bg-0 { background: #f8f9fb; }
+        .performance-table th.strategy-bg-1, .performance-table td.strategy-bg-1 { background: #f0f4ff; }
+        .performance-table th.strategy-bg-2, .performance-table td.strategy-bg-2 { background: #fff5f5; }
+        .performance-table th.strategy-bg-3, .performance-table td.strategy-bg-3 { background: #f0fdf7; }
+        .performance-table th.strategy-bg-4, .performance-table td.strategy-bg-4 { background: #fdf2f8; }
+        .performance-table td.lot-col.strategy-bg-0,
+        .performance-table td.lot-col.strategy-bg-1,
+        .performance-table td.lot-col.strategy-bg-2,
+        .performance-table td.lot-col.strategy-bg-3,
+        .performance-table td.lot-col.strategy-bg-4 {
+            width: 65px;
+            min-width: 65px;
+            max-width: 65px;
+        }
+        .performance-table tr:hover td.strategy-bg-0,
+        .performance-table tr:hover td.strategy-bg-1,
+        .performance-table tr:hover td.strategy-bg-2,
+        .performance-table tr:hover td.strategy-bg-3,
+        .performance-table tr:hover td.strategy-bg-4 { background: #fafbfc; }
+        .performance-table tr:hover td.lot-col.strategy-bg-0,
+        .performance-table tr:hover td.lot-col.strategy-bg-1,
+        .performance-table tr:hover td.lot-col.strategy-bg-2,
+        .performance-table tr:hover td.lot-col.strategy-bg-3,
+        .performance-table tr:hover td.lot-col.strategy-bg-4 {
+            background: #fafbfc;
+            width: 65px;
+            min-width: 65px;
+            max-width: 65px;
+        }
+        .performance-table tr:hover td.apro-pnl-col {
+            background: #fafbfc;
+            width: 85px;
+            min-width: 75px;
+            max-width: 90px;
+        }
+        .performance-table tr:hover td.apro-pnl-col.strategy-bg-0,
+        .performance-table tr:hover td.apro-pnl-col.strategy-bg-1,
+        .performance-table tr:hover td.apro-pnl-col.strategy-bg-2,
+        .performance-table tr:hover td.apro-pnl-col.strategy-bg-3,
+        .performance-table tr:hover td.apro-pnl-col.strategy-bg-4 {
+            background: #fafbfc;
+            width: 85px;
+            min-width: 75px;
+            max-width: 90px;
+        }
+        .performance-table th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 11;
+            background: #f8fafc;
+            min-width: 110px;
+            max-width: 110px;
+            border-right: 2px solid #cbd5e1;
+            vertical-align: middle;
+        }
+        .performance-table th.number-col { text-align: center; max-width: 80px; }
+        .performance-table th.apro-pnl-col, .performance-table td.apro-pnl-col {
+            min-width: 75px;
+            max-width: 90px;
+            width: 85px;
+        }
+        .performance-table td.apro-pnl-col.strategy-bg-0 { background: #f8f9fb; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-1 { background: #f0f4ff; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-2 { background: #fff5f5; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-3 { background: #f0fdf7; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-4 { background: #fdf2f8; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td {
+            padding: 11px 8px;
+            border-bottom: 1px solid #f3f4f6;
+            border-right: 1px solid #f3f4f6;
+            color: #374151;
+            text-align: right;
+            white-space: nowrap;
+            min-width: 75px;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 13px;
+            font-weight: 400;
+        }
+        .performance-table td.lot-col { min-width: 65px; max-width: 65px; width: 65px; }
+        .performance-table th.lot-col { min-width: 65px; max-width: 65px; width: 65px; }
+        .performance-table td:first-child {
+            position: sticky;
+            left: 0;
+            background: white;
+            font-weight: 500;
+            z-index: 9;
+            border-right: 2px solid #cbd5e1;
+            min-width: 100px;
+            max-width: 100px;
+            padding: 11px 8px;
+            text-align: left;
+            color: #111827;
+        }
+        .performance-table td.number-col {
+            text-align: right;
+            font-weight: 400;
+            font-size: 13px;
+            min-width: 75px;
+            max-width: 90px;
+            padding: 11px 8px;
+            font-variant-numeric: tabular-nums;
+        }
+        .performance-table th.number-col { text-align: center; max-width: 90px; }
+        .performance-table td.number-col.total-net-col {
+            min-width: 100px;
+            max-width: none;
+            font-weight: 600;
+            background: #fefce8 !important;
+        }
+        .performance-table tbody tr.month-row td.number-col.total-net-col { background: #fef9c3 !important; }
+        .performance-table tbody tr.total-row td.number-col.total-net-col { background: #fef9c3 !important; }
+        .performance-table th.total-net-col { min-width: 100px; max-width: none; }
+        .performance-table td.number-col.drawdown-col {
+            min-width: 90px;
+            max-width: none;
+            background: #fef3f2 !important;
+        }
+        .performance-table tbody tr.month-row td.number-col.drawdown-col { background: #fee2e2 !important; }
+        .performance-table tbody tr.total-row td.number-col.drawdown-col { background: #fee2e2 !important; }
+        .performance-table th.drawdown-col { min-width: 90px; max-width: none; }
+        .performance-table td.positive { color: #059669; }
+        .performance-table td.negative { color: #f43f5e; }
+        .performance-table tr:hover { background: #fafbfc; }
+        .performance-table tr:hover td:first-child { background: #fafbfc; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
+        .performance-table tbody tr.total-row {
+            background: #f9fafb;
+            font-weight: 700;
+            border-top: 2px solid #d1d5db;
+        }
+        .performance-table tbody tr.total-row:hover { background: #f3f4f6; }
+        .performance-table tbody tr.total-row td {
+            border-top: 2px solid #d1d5db;
+            padding: 14px 8px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .performance-table tbody tr.total-row td:first-child { background: #f9fafb; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
+        .performance-table tbody tr.total-row:hover td:first-child { background: #f3f4f6; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-0 { background: #f0f2f5; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-1 { background: #e5edfd; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-2 { background: #fde6e3; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-3 { background: #e4f4ea; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-4 { background: #fce7f3; }
+        .performance-table tbody tr.total-row:hover td.lot-col { width: 65px; min-width: 65px; max-width: 65px; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col { width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-0 { background: #f0f2f5; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-1 { background: #e5edfd; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-2 { background: #fde6e3; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-3 { background: #e4f4ea; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-4 { background: #fce7f3; }
+        .performance-table tbody tr.total-row td.apro-pnl-col { width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row {
+            background: #f9fafb;
+            font-weight: 600 !important;
+            cursor: pointer;
+            user-select: none;
+            border-left: 3px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .performance-table tbody tr.month-row:hover { background: #f3f4f6; border-left-color: #3b82f6; }
+        .performance-table tbody tr.month-row td {
+            font-weight: 600 !important;
+            font-size: 12px !important;
+        }
+        .performance-table tbody tr.month-row td:first-child {
+            background: #f9fafb;
+            color: #111827;
+            min-width: 100px;
+            max-width: 100px;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            border-right: 2px solid #cbd5e1;
+        }
+        .performance-table tbody tr.month-row:hover td:first-child { background: #f3f4f6; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-0 { background: #e5e8eb; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-1 { background: #d9e2f7; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-2 { background: #f7dad6; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-3 { background: #d7e7de; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-4 { background: #fce7f3; }
+        .performance-table tbody tr.month-row:hover td.lot-col { width: 65px; min-width: 65px; max-width: 65px; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col { width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-0 { background: #e5e8eb; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-1 { background: #d9e2f7; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-2 { background: #f7dad6; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-3 { background: #d7e7de; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-4 { background: #fce7f3; }
+        .performance-table tbody tr.month-row td.strategy-bg-0 { background: #edf0f2; }
+        .performance-table tbody tr.month-row td.strategy-bg-1 { background: #e2e9fa; }
+        .performance-table tbody tr.month-row td.strategy-bg-2 { background: #fce4e1; }
+        .performance-table tbody tr.month-row td.strategy-bg-3 { background: #e1f0e8; }
+        .performance-table tbody tr.month-row td.strategy-bg-4 { background: #fce7f3; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-0 { background: #edf0f2; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-1 { background: #e2e9fa; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-2 { background: #fce4e1; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-3 { background: #e1f0e8; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-4 { background: #fce7f3; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.day-row { display: none; }
+        .performance-table tbody tr.day-row.expanded { display: table-row; }
+        .performance-table tbody tr.day-row td { padding: 7px 8px; font-size: 12px; }
+        .performance-table tbody tr.day-row td:first-child {
+            padding-left: 40px;
+            padding-top: 7px;
+            padding-bottom: 7px;
+            font-weight: 500;
+            color: #6b7280;
+            min-width: 100px;
+            max-width: 100px;
+            font-size: 12px;
+            border-right: 2px solid #cbd5e1;
+        }
+        .performance-table tbody tr.day-row td.apro-pnl-col { width: 85px; min-width: 75px; max-width: 90px; }
+        .expand-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            transition: transform 0.2s ease;
+            font-size: 12px;
+            line-height: 18px;
+        }
+        .expand-icon.expanded { transform: rotate(90deg); }
+        .no-data { text-align: center; color: #cbd5e1; padding: 40px; font-size: 14px; }
+        .summary-cards {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            align-items: stretch;
+        }
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            border: 1px solid #e5e7eb;
+            flex: 1 1 0;
+            min-width: 160px;
+        }
+        #brokerCardsContainer {
+            display: contents;
+        }
+        .summary-card-title {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .summary-card-value {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.2;
+            font-variant-numeric: tabular-nums;
+        }
+        .summary-card-value.positive { color: #059669; }
+        .summary-card-value.negative { color: #f43f5e; }
+        @media (max-width: 768px) {
+            .main-content { padding: 12px; }
+            .controls-section { flex-direction: column; align-items: stretch; }
+            .control-group { flex-direction: column; align-items: stretch; }
+            select, button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Strategy Performance</h1>
+            <p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p>
+        </div>
+
+        <div class="summary-cards" id="summaryCards">
+            <div class="summary-card">
+                <div class="summary-card-title">Total Profit</div>
+                <div class="summary-card-value positive" id="totalProfit">₹0</div>
+                <div class="summary-card-subtitle" id="totalProfitFiltered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-title">Net Broker Profit</div>
+                <div class="summary-card-value" id="netBrProfit">₹0</div>
+                <div class="summary-card-subtitle" id="netBrProfitFiltered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-title">Charges</div>
+                <div class="summary-card-value negative" id="charges">₹0</div>
+                <div class="summary-card-subtitle" id="chargesFiltered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
+            </div>
+            <div id="brokerCardsContainer"></div>
+            <div class="summary-card" style="order: 100;">
+                <div class="summary-card-title">Current Drawdown</div>
+                <div class="summary-card-value negative" id="currentDrawdown">-</div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="control-group">
+                <label class="control-label">Month:</label>
+                <select id="monthFilter">
+                    <option value="all">All Months</option>
+                </select>
+            </div>
+            <div class="strategy-filter-container">
+                <button class="strategy-filter-button" onclick="toggleStrategyFilter()">
+                    <span>Hide Strategies</span>
+                    <span class="filter-badge" id="filterBadge" style="display: none;">0</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="strategyFilterDropdown">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Select Strategies</span>
+                        <div class="strategy-filter-actions">
+                            <span class="filter-action-btn" onclick="selectAllStrategies()">All</span>
+                            <span class="filter-action-btn" onclick="deselectAllStrategies()">None</span>
+                            <span class="filter-action-btn" onclick="clearSavedFilters()" style="color: #dc2626;">Reset</span>
+                        </div>
+                    </div>
+                    <div class="strategy-filter-list" id="strategyFilterList"></div>
+                </div>
+            </div>
+            <div class="control-group">
+                <input type="checkbox" id="showFilteredTotals" onchange="toggleTotalsMode()" style="margin-right: 6px; cursor: pointer;">
+                <label for="showFilteredTotals" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Filtered Totals</label>
+            </div>
+            <div class="control-group">
+                <input type="checkbox" id="showTradeCount" onchange="toggleLotTradeMode()" style="margin-right: 6px; cursor: pointer;">
+                <label for="showTradeCount" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Trade Count</label>
+            </div>
+            <div class="control-group">
+                <input type="checkbox" id="showDrawdown" onchange="toggleDrawdownMode()" style="margin-right: 6px; cursor: pointer;">
+                <label for="showDrawdown" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Drawdown</label>
+            </div>
+            <button class="primary" onclick="refreshData()">Refresh</button>
+            <button onclick="expandAll()">Expand All</button>
+            <button onclick="collapseAll()">Collapse All</button>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table class="performance-table" id="performanceTable">
+                    <thead id="tableHeaders"></thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="100" class="no-data">Upload Excel file to view performance data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const elements = {
+            totalProfit: document.getElementById('totalProfit'),
+            totalProfitFiltered: document.getElementById('totalProfitFiltered'),
+            netBrProfit: document.getElementById('netBrProfit'),
+            netBrProfitFiltered: document.getElementById('netBrProfitFiltered'),
+            charges: document.getElementById('charges'),
+            chargesFiltered: document.getElementById('chargesFiltered'),
+            currentDrawdown: document.getElementById('currentDrawdown'),
+            brokerCardsContainer: document.getElementById('brokerCardsContainer'),
+            monthFilter: document.getElementById('monthFilter'),
+            strategyFilterDropdown: document.getElementById('strategyFilterDropdown'),
+            strategyFilterList: document.getElementById('strategyFilterList'),
+            filterBadge: document.getElementById('filterBadge'),
+            tableHeaders: document.getElementById('tableHeaders'),
+            tableBody: document.getElementById('tableBody')
+        };
+
+        let brokerCards = {};
+
+        let allTrades = [];
+        let hiddenStrategies = new Set();
+        let allStrategies = [];
+        let updateTimeout;
+        let showFilteredTotals = false;
+        let showTradeCount = false;
+        let showDrawdown = false;
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedFilters();
+            
+            elements.monthFilter.addEventListener('change', function() {
+                try {
+                    localStorage.setItem('selectedMonth', this.value);
+                } catch (e) {}
+                processAndDisplayData();
+            });
+            
+            document.addEventListener('click', (event) => {
+                if (!elements.strategyFilterDropdown.contains(event.target) && 
+                    !event.target.closest('.strategy-filter-button')) {
+                    elements.strategyFilterDropdown.classList.remove('active');
+                }
+            });
+        });
+
+        window.addEventListener('message', (event) => {
+            const { type, data } = event.data;
+            if (type === 'TRADES_DATA') {
+                allTrades = data;
+                processAndDisplayData();
+            } else if (type === 'LOAD_SAMPLE_DATA') {
+                loadSampleData();
+            }
+        });
+
+        function loadSavedFilters() {
+            try {
+                const savedFilters = localStorage.getItem('strategyFilters');
+                if (savedFilters) {
+                    hiddenStrategies = new Set(JSON.parse(savedFilters));
+                }
+                const savedTotalsMode = localStorage.getItem('showFilteredTotals');
+                if (savedTotalsMode !== null) {
+                    showFilteredTotals = savedTotalsMode === 'true';
+                    const checkbox = document.getElementById('showFilteredTotals');
+                    if (checkbox) checkbox.checked = showFilteredTotals;
+                }
+                const savedTradeMode = localStorage.getItem('showTradeCount');
+                if (savedTradeMode !== null) {
+                    showTradeCount = savedTradeMode === 'true';
+                    const checkbox = document.getElementById('showTradeCount');
+                    if (checkbox) checkbox.checked = showTradeCount;
+                }
+                const savedDrawdownMode = localStorage.getItem('showDrawdown');
+                if (savedDrawdownMode !== null) {
+                    showDrawdown = savedDrawdownMode === 'true';
+                    const checkbox = document.getElementById('showDrawdown');
+                    if (checkbox) checkbox.checked = showDrawdown;
+                }
+            } catch (e) {
+                hiddenStrategies = new Set();
+            }
+        }
+
+        function toggleTotalsMode() {
+            const checkbox = document.getElementById('showFilteredTotals');
+            showFilteredTotals = checkbox.checked;
+            try {
+                localStorage.setItem('showFilteredTotals', showFilteredTotals);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleLotTradeMode() {
+            const checkbox = document.getElementById('showTradeCount');
+            showTradeCount = checkbox.checked;
+            try {
+                localStorage.setItem('showTradeCount', showTradeCount);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleDrawdownMode() {
+            const checkbox = document.getElementById('showDrawdown');
+            showDrawdown = checkbox.checked;
+            try {
+                localStorage.setItem('showDrawdown', showDrawdown);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function saveFilters() {
+            try {
+                localStorage.setItem('strategyFilters', JSON.stringify(Array.from(hiddenStrategies)));
+            } catch (e) {}
+        }
+
+        function cleanupSavedFilters() {
+            if (hiddenStrategies.size > 0 && allStrategies.length > 0) {
+                const validHiddenStrategies = new Set();
+                hiddenStrategies.forEach(strategy => {
+                    if (allStrategies.includes(strategy)) {
+                        validHiddenStrategies.add(strategy);
+                    }
+                });
+                hiddenStrategies = validHiddenStrategies;
+                saveFilters();
+            }
+        }
+
+        function toggleStrategyFilter() {
+            elements.strategyFilterDropdown.classList.toggle('active');
+        }
+
+        function updateStrategyFilterList() {
+            if (allStrategies.length > 0) {
+                const validHiddenStrategies = new Set();
+                hiddenStrategies.forEach(strategy => {
+                    if (allStrategies.includes(strategy)) {
+                        validHiddenStrategies.add(strategy);
+                    }
+                });
+                hiddenStrategies = validHiddenStrategies;
+            }
+            
+            const html = allStrategies.map(strategy => {
+                const isChecked = !hiddenStrategies.has(strategy);
+                const displayName = formatStrategyName(strategy);
+                return `<div class="strategy-filter-item" onclick="toggleStrategyRow('${strategy}')">
+                    <input type="checkbox" class="strategy-filter-checkbox" id="check_${strategy}" 
+                           ${isChecked ? 'checked' : ''}>
+                    <label class="strategy-filter-label" for="check_${strategy}">${displayName}</label>
+                </div>`;
+            }).join('');
+            
+            elements.strategyFilterList.innerHTML = html;
+            updateFilterBadge();
+        }
+
+        function toggleStrategyRow(strategyName) {
+            const checkbox = document.getElementById(`check_${strategyName}`);
+            if (!checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                hiddenStrategies.delete(strategyName);
+            } else {
+                hiddenStrategies.add(strategyName);
+            }
+            
+            saveFilters();
+            updateFilterBadge();
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(() => processAndDisplayData(), 250);
+        }
+
+        function selectAllStrategies() {
+            hiddenStrategies.clear();
+            saveFilters();
+            allStrategies.forEach(strategy => {
+                const checkbox = document.getElementById(`check_${strategy}`);
+                if (checkbox) checkbox.checked = true;
+            });
+            updateFilterBadge();
+            processAndDisplayData();
+        }
+
+        function deselectAllStrategies() {
+            allStrategies.forEach(strategy => hiddenStrategies.add(strategy));
+            saveFilters();
+            allStrategies.forEach(strategy => {
+                const checkbox = document.getElementById(`check_${strategy}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            updateFilterBadge();
+            processAndDisplayData();
+        }
+
+        function clearSavedFilters() {
+            try {
+                localStorage.removeItem('strategyFilters');
+                localStorage.removeItem('selectedMonth');
+                localStorage.removeItem('showFilteredTotals');
+                localStorage.removeItem('showTradeCount');
+                localStorage.removeItem('showDrawdown');
+            } catch (e) {}
+            hiddenStrategies.clear();
+            showFilteredTotals = false;
+            showTradeCount = false;
+            showDrawdown = false;
+            elements.monthFilter.value = 'all';
+            const filteredCheckbox = document.getElementById('showFilteredTotals');
+            if (filteredCheckbox) filteredCheckbox.checked = false;
+            const tradeCheckbox = document.getElementById('showTradeCount');
+            if (tradeCheckbox) tradeCheckbox.checked = false;
+            const drawdownCheckbox = document.getElementById('showDrawdown');
+            if (drawdownCheckbox) drawdownCheckbox.checked = false;
+            updateStrategyFilterList();
+            processAndDisplayData();
+        }
+
+        function updateFilterBadge() {
+            const hiddenCount = hiddenStrategies.size;
+            if (hiddenCount > 0 && allStrategies.length > 0) {
+                elements.filterBadge.textContent = hiddenCount;
+                elements.filterBadge.style.display = 'inline-block';
+            } else {
+                elements.filterBadge.style.display = 'none';
+            }
+        }
+
+        function formatStrategyName(strategyName) {
+            if (!strategyName) return strategyName;
+            if (strategyName.startsWith('A.PRO')) return strategyName;
+            
+            return strategyName.replace(/_/g, ' ').replace(/(\d)(PRO)/g, '$1 $2');
+        }
+
+        function formatNumber(num) {
+            if (num === 0) return '';
+            const formatted = Math.abs(num).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+            return num >= 0 ? formatted : `-${formatted}`;
+        }
+
+        function loadSampleData() {
+            allTrades = [];
+            const strategies = ['PRO 2', 'PRO 3', 'PRO 4', 'PRO 5', 'PRO 7'];
+            const aProStrategies = ['A.PRO 1', 'A.PRO 2', 'A.PRO 3', 'A.PRO 4', 'A.PRO 5', 'A.PRO 7'];
+            const brokerCodes = ['B1', 'B2'];
+            const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'];
+            let cumPnl = 0;
+            
+            for (let monthIdx = 0; monthIdx < months.length; monthIdx++) {
+                const daysInMonth = 20 + Math.floor(Math.random() * 10);
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const strategy = strategies[Math.floor(Math.random() * strategies.length)];
+                    const profit = (Math.random() - 0.45) * 5000;
+                    cumPnl += profit;
+                    
+                    const strategyDetails = {};
+                    const pnlStrategies = {};
+                    const pnlTaxStrategies = {};
+                    const brokerCodesMap = {};
+                    
+                    aProStrategies.forEach((aProStrat) => {
+                        const aProProfit = (Math.random() - 0.5) * 2000;
+                        pnlStrategies[aProStrat] = aProProfit;
+                        pnlTaxStrategies[aProStrat] = aProProfit;
+                        brokerCodesMap[aProStrat] = 'A';
+                        strategyDetails[aProStrat] = {
+                            lot: aProProfit !== 0 ? 1 : 0,
+                            pnl: aProProfit,
+                            dpnl: aProProfit,
+                            buy: 0, qty: 0, sell: 0, unpnl: 0, margin: 0
+                        };
+                    });
+                    
+                    strategies.forEach((strat, idx) => {
+                        const brokerCode = idx < 2 ? 'B1' : 'B2';
+                        const stratName = `${brokerCode}${strat.replace(' ', '')}`;
+                        const isActive = strat === strategy;
+                        
+                        pnlStrategies[stratName] = isActive ? profit : 0;
+                        pnlTaxStrategies[stratName] = isActive ? profit * 0.95 : 0;
+                        brokerCodesMap[stratName] = brokerCode;
+                        strategyDetails[stratName] = {
+                            lot: isActive ? (Math.random() > 0.5 ? 2 : 4) : 0,
+                            pnl: isActive ? profit : 0,
+                            dpnl: isActive ? profit * 0.95 : 0,
+                            buy: 0, qty: 0, sell: 0, unpnl: 0, margin: 0
+                        };
+                    });
+                    
+                    allTrades.push({
+                        date: `${String(day).padStart(2, '0')}/${months[monthIdx]}/2025`,
+                        strategy: strategy,
+                        profit: profit,
+                        cumPnl: cumPnl,
+                        strategyPnls: pnlStrategies,
+                        strategyPnlTax: pnlTaxStrategies,
+                        strategyDetails: strategyDetails,
+                        brokerCodes: brokerCodesMap
+                    });
+                }
+            }
+            
+            processAndDisplayData();
+            window.parent.postMessage({ type: 'TRADES_DATA', data: allTrades }, '*');
+        }
+
+        function processAndDisplayData() {
+            if (allTrades.length === 0) return;
+
+            let monthFilter = elements.monthFilter.value;
+            if (!monthFilter || monthFilter === 'all') {
+                try {
+                    const savedMonth = localStorage.getItem('selectedMonth');
+                    if (savedMonth) monthFilter = savedMonth;
+                } catch (e) {}
+            }
+            
+            const filteredTrades = monthFilter && monthFilter !== 'all' 
+                ? allTrades.filter(trade => trade.date?.split('/')[1] === monthFilter)
+                : allTrades;
+
+            displayPivotData(filteredTrades);
+            updateMonthFilter();
+            updateSummaryCards(filteredTrades);
+            updateStrategyFilterList();
+            cleanupSavedFilters();
+        }
+
+        function updateMonthFilter() {
+            const monthsSet = new Set();
+            allTrades.forEach(trade => {
+                const parts = trade.date.split('/');
+                if (parts.length >= 2) monthsSet.add(parts[1]);
+            });
+
+            let savedMonth = null;
+            try {
+                savedMonth = localStorage.getItem('selectedMonth');
+            } catch (e) {}
+            
+            const currentValue = savedMonth || elements.monthFilter.value;
+            elements.monthFilter.innerHTML = '<option value="all">All Months</option>';
+            
+            Array.from(monthsSet).sort().forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = monthNames[parseInt(month) - 1];
+                elements.monthFilter.appendChild(option);
+            });
+
+            if (currentValue && (currentValue === 'all' || monthsSet.has(currentValue))) {
+                elements.monthFilter.value = currentValue;
+            }
+        }
+
+        function displayPivotData(trades) {
+            const monthlyData = {};
+            const dailyData = {};
+            const strategies = new Set();
+            
+            const monthlyTotals = {};
+            const dailyTotals = {};
+            const monthlyFilteredTotals = {};
+            const dailyFilteredTotals = {};
+            const cumulativeData = {};
+            let runningTotal = 0;
+            let peakTotal = 0;
+
+            const sortedTrades = [...trades].sort((a, b) => {
+                const dateA = a.date.split('/').reverse().join('');
+                const dateB = b.date.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+
+            sortedTrades.forEach(trade => {
+                const dateParts = trade.date.split('/');
+                const monthKey = dateParts[1];
+                const dateKey = trade.date;
+                
+                if (!monthlyData[monthKey]) monthlyData[monthKey] = {};
+                if (!dailyData[monthKey]) dailyData[monthKey] = {};
+                if (!dailyData[monthKey][dateKey]) dailyData[monthKey][dateKey] = {};
+                if (!monthlyTotals[monthKey]) monthlyTotals[monthKey] = { total: 0, net: 0 };
+                if (!dailyTotals[monthKey]) dailyTotals[monthKey] = {};
+                if (!dailyTotals[monthKey][dateKey]) dailyTotals[monthKey][dateKey] = { total: 0, net: 0 };
+                if (!monthlyFilteredTotals[monthKey]) monthlyFilteredTotals[monthKey] = { total: 0, net: 0 };
+                if (!dailyFilteredTotals[monthKey]) dailyFilteredTotals[monthKey] = {};
+                if (!dailyFilteredTotals[monthKey][dateKey]) dailyFilteredTotals[monthKey][dateKey] = { total: 0, net: 0 };
+
+                Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
+                    strategies.add(stratName);
+                    
+                    if (!monthlyData[monthKey][stratName]) {
+                        monthlyData[monthKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                    }
+                    if (!dailyData[monthKey][dateKey][stratName]) {
+                        dailyData[monthKey][dateKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                    }
+                    
+                    if (details.lot > 0) {
+                        monthlyData[monthKey][stratName].lotSum += details.lot;
+                        monthlyData[monthKey][stratName].lotCount += 1;
+                        monthlyData[monthKey][stratName].tradeCount += 1;
+                    }
+                    monthlyData[monthKey][stratName].pnl += details.pnl;
+                    monthlyData[monthKey][stratName].dpnl += details.dpnl;
+                    monthlyData[monthKey][stratName].net += (trade.strategyPnlTax[stratName] || 0);
+                    
+                    if (details.lot > 0) {
+                        dailyData[monthKey][dateKey][stratName].lotSum += details.lot;
+                        dailyData[monthKey][dateKey][stratName].lotCount += 1;
+                        dailyData[monthKey][dateKey][stratName].tradeCount += 1;
+                    }
+                    dailyData[monthKey][dateKey][stratName].pnl += details.pnl;
+                    dailyData[monthKey][dateKey][stratName].dpnl += details.dpnl;
+                    dailyData[monthKey][dateKey][stratName].net += (trade.strategyPnlTax[stratName] || 0);
+                    
+                    const isAPro = stratName.startsWith('A.PRO');
+                    if (!isAPro) {
+                        const netPnl = trade.strategyPnlTax[stratName] || 0;
+                        runningTotal += netPnl;
+                        if (runningTotal > peakTotal) peakTotal = runningTotal;
+                        
+                        monthlyTotals[monthKey].total += details.pnl;
+                        monthlyTotals[monthKey].net += netPnl;
+                        dailyTotals[monthKey][dateKey].total += details.pnl;
+                        dailyTotals[monthKey][dateKey].net += netPnl;
+                        
+                        if (!hiddenStrategies.has(stratName)) {
+                            monthlyFilteredTotals[monthKey].total += details.pnl;
+                            monthlyFilteredTotals[monthKey].net += netPnl;
+                            dailyFilteredTotals[monthKey][dateKey].total += details.pnl;
+                            dailyFilteredTotals[monthKey][dateKey].net += netPnl;
+                        }
+                    }
+                    
+                    if (!cumulativeData[monthKey]) cumulativeData[monthKey] = {};
+                    cumulativeData[monthKey][dateKey] = {
+                        cumTotal: runningTotal,
+                        peak: peakTotal,
+                        drawdown: peakTotal - runningTotal
+                    };
+                });
+            });
+
+            Object.keys(monthlyData).forEach(monthKey => {
+                const datesInMonth = Object.keys(dailyData[monthKey] || {}).sort((a, b) => {
+                    const dateA = a.split('/').reverse().join('');
+                    const dateB = b.split('/').reverse().join('');
+                    return dateA.localeCompare(dateB);
+                });
+                if (datesInMonth.length > 0) {
+                    const lastDate = datesInMonth[datesInMonth.length - 1];
+                    if (cumulativeData[monthKey] && cumulativeData[monthKey][lastDate]) {
+                        monthlyTotals[monthKey].cumTotal = cumulativeData[monthKey][lastDate].cumTotal;
+                        monthlyTotals[monthKey].peak = cumulativeData[monthKey][lastDate].peak;
+                        monthlyTotals[monthKey].drawdown = cumulativeData[monthKey][lastDate].drawdown;
+                        monthlyFilteredTotals[monthKey].cumTotal = cumulativeData[monthKey][lastDate].cumTotal;
+                        monthlyFilteredTotals[monthKey].peak = cumulativeData[monthKey][lastDate].peak;
+                        monthlyFilteredTotals[monthKey].drawdown = cumulativeData[monthKey][lastDate].drawdown;
+                    }
+                }
+            });
+
+            allStrategies = Array.from(strategies).sort((a, b) => {
+                const aIsAPro = a.startsWith('A.PRO');
+                const bIsAPro = b.startsWith('A.PRO');
+                
+                if (aIsAPro && !bIsAPro) return -1;
+                if (!aIsAPro && bIsAPro) return 1;
+                
+                if (aIsAPro && bIsAPro) {
+                    const aNum = parseInt(a.match(/\d+/)?.[0] || '0');
+                    const bNum = parseInt(b.match(/\d+/)?.[0] || '0');
+                    return aNum - bNum;
+                }
+                
+                return a.localeCompare(b);
+            });
+            
+            const visibleStrategies = allStrategies.filter(s => !hiddenStrategies.has(s));
+            renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData);
+        }
+
+        function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData) {
+            if (strategies.length === 0) {
+                const drawdownHeader = showDrawdown ? '<th class="number-col">DRAWDOWN</th>' : '';
+                const colspan = showDrawdown ? '4' : '3';
+                elements.tableHeaders.innerHTML = `<tr><th>Period</th><th class="number-col">TOTAL</th><th class="number-col">NET</th>${drawdownHeader}</tr>`;
+                elements.tableBody.innerHTML = `<tr><td colspan="${colspan}" class="no-data">No strategies selected. Use "Hide Strategies" filter to show strategies.</td></tr>`;
+                return;
+            }
+
+            let headerRow1 = '<tr class="header-row-1"><th rowspan="2">Period</th>';
+            strategies.forEach((strategy) => {
+                const displayName = formatStrategyName(strategy);
+                const isAPro = strategy.startsWith('A.PRO');
+                const colspan = isAPro ? '1' : '3';
+                
+                const stratIndexInVisible = strategies.indexOf(strategy);
+                const nextStrategy = strategies[stratIndexInVisible + 1];
+                const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
+                let isBrokerBoundary = false;
+                if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
+                    const currentBroker = strategy.match(/^(B\d+)/)?.[1];
+                    const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
+                    isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
+                }
+                const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : '');
+                headerRow1 += `<th class="number-col${boundaryClass}" colspan="${colspan}">${displayName}</th>`;
+            });
+            headerRow1 += '<th class="number-col total-net-col" rowspan="2">TOTAL</th>';
+            headerRow1 += '<th class="number-col total-net-col" rowspan="2">NET</th>';
+            if (showDrawdown) {
+                headerRow1 += '<th class="number-col drawdown-col" rowspan="2">DRAWDOWN</th>';
+            }
+            headerRow1 += '</tr>';
+
+            let headerRow2 = '<tr class="header-row-2">';
+            strategies.forEach((strategy) => {
+                const isAPro = strategy.startsWith('A.PRO');
+                const stratIndexInVisible = strategies.indexOf(strategy);
+                const nextStrategy = strategies[stratIndexInVisible + 1];
+                const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
+                let isBrokerBoundary = false;
+                if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
+                    const currentBroker = strategy.match(/^(B\d+)/)?.[1];
+                    const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
+                    isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
+                }
+                const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : '');
+                
+                if (isAPro) {
+                    headerRow2 += `<th class="number-col apro-pnl-col${boundaryClass}">PNL</th>`;
+                } else {
+                    const lotOrTradeLabel = showTradeCount ? 'TRADE' : 'LOT';
+                    headerRow2 += `<th class="number-col lot-col">${lotOrTradeLabel}</th>`;
+                    headerRow2 += `<th class="number-col">PNL</th>`;
+                    headerRow2 += `<th class="number-col${boundaryClass}">DPNL</th>`;
+                }
+            });
+            headerRow2 += '</tr>';
+            elements.tableHeaders.innerHTML = headerRow1 + headerRow2;
+
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const totals = { strategies: {}, totalProfits: 0, netBrProfits: 0 };
+            strategies.forEach(strat => {
+                totals.strategies[strat] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+            });
+            
+            const totalsToUse = showFilteredTotals ? monthlyFilteredTotals : monthlyTotals;
+            Object.values(totalsToUse).forEach(monthTotal => {
+                totals.totalProfits += monthTotal.total;
+                totals.netBrProfits += monthTotal.net;
+            });
+
+            let bodyHtml = '';
+            sortedMonths.forEach(month => {
+                const displayMonth = monthNames[parseInt(month) - 1];
+                bodyHtml += `<tr class="month-row" onclick="toggleMonth('${month}')">`;
+                bodyHtml += `<td><span class="expand-icon" id="icon-${month}">▶</span>${displayMonth}</td>`;
+
+                const totalsToUse = showFilteredTotals ? monthlyFilteredTotals : monthlyTotals;
+                const monthTotal = totalsToUse[month]?.total || 0;
+                const monthNetTotal = totalsToUse[month]?.net || 0;
+
+                strategies.forEach((strategy) => {
+                    const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                    const { pnl, dpnl, net, tradeCount, lotSum, lotCount } = stratData;
+                    const lot = lotCount > 0 ? lotSum / lotCount : 0;
+
+                    totals.strategies[strategy].lotSum += lotSum;
+                    totals.strategies[strategy].lotCount += lotCount;
+                    totals.strategies[strategy].pnl += pnl;
+                    totals.strategies[strategy].dpnl += dpnl;
+                    totals.strategies[strategy].net += net;
+                    totals.strategies[strategy].tradeCount += tradeCount;
+
+                    const stratIndex = allStrategies.indexOf(strategy);
+                    const stratIndexInVisible = strategies.indexOf(strategy);
+                    const isLast = stratIndexInVisible === strategies.length - 1;
+                    const bgClass = `strategy-bg-${stratIndex % 5}`;
+                    const nextStrategy = strategies[stratIndexInVisible + 1];
+                    const isAPro = strategy.startsWith('A.PRO');
+                    const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
+                    let isBrokerBoundary = false;
+                    if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
+                        const currentBroker = strategy.match(/^(B\d+)/)?.[1];
+                        const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
+                        isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
+                    }
+                    const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : (isLast ? ' strategy-group-end' : ''));
+                    
+                    if (isAPro) {
+                        bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+                    } else {
+                        const displayValue = showTradeCount ? (tradeCount > 0 ? tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
+                        bodyHtml += `<td class="number-col lot-col ${bgClass}">${displayValue}</td>`;
+                        bodyHtml += `<td class="number-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
+                        bodyHtml += `<td class="number-col ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
+                    }
+                });
+
+                bodyHtml += `<td class="number-col total-net-col ${monthTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(monthTotal)}</td>`;
+                bodyHtml += `<td class="number-col total-net-col ${monthNetTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(monthNetTotal)}</td>`;
+                if (showDrawdown) {
+                    const monthDrawdown = totalsToUse[month]?.drawdown || 0;
+                    bodyHtml += `<td class="number-col drawdown-col negative">${formatNumber(monthDrawdown)}</td>`;
+                }
+                bodyHtml += '</tr>';
+
+                if (dailyData[month]) {
+                    const sortedDays = Object.keys(dailyData[month]).sort((a, b) => {
+                        const dateA = a.split('/').reverse().join('');
+                        const dateB = b.split('/').reverse().join('');
+                        return dateA.localeCompare(dateB);
+                    });
+
+                    sortedDays.forEach(date => {
+                        const dateParts = date.split('/');
+                        const displayDate = `${dateParts[0]}-${monthNames[parseInt(dateParts[1]) - 1]}`;
+                        bodyHtml += `<tr class="day-row" data-month="${month}"><td>${displayDate}</td>`;
+
+                        const totalsToUse = showFilteredTotals ? dailyFilteredTotals : dailyTotals;
+                        const dayTotal = totalsToUse[month][date]?.total || 0;
+                        const dayNetTotal = totalsToUse[month][date]?.net || 0;
+
+                        strategies.forEach((strategy) => {
+                            const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                            const { pnl, dpnl, net, tradeCount, lotSum, lotCount } = stratData;
+                            const lot = lotCount > 0 ? lotSum / lotCount : 0;
+
+                            const stratIndex = allStrategies.indexOf(strategy);
+                            const stratIndexInVisible = strategies.indexOf(strategy);
+                            const isLast = stratIndexInVisible === strategies.length - 1;
+                            const bgClass = `strategy-bg-${stratIndex % 5}`;
+                            const nextStrategy = strategies[stratIndexInVisible + 1];
+                            const isAPro = strategy.startsWith('A.PRO');
+                            const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
+                            let isBrokerBoundary = false;
+                            if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
+                                const currentBroker = strategy.match(/^(B\d+)/)?.[1];
+                                const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
+                                isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
+                            }
+                            const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : (isLast ? ' strategy-group-end' : ''));
+                            
+                            if (isAPro) {
+                                bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+                            } else {
+                                const displayValue = showTradeCount ? (tradeCount > 0 ? tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
+                                bodyHtml += `<td class="number-col lot-col ${bgClass}">${displayValue}</td>`;
+                                bodyHtml += `<td class="number-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
+                                bodyHtml += `<td class="number-col ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
+                            }
+                        });
+
+                        bodyHtml += `<td class="number-col total-net-col ${dayTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(dayTotal)}</td>`;
+                        bodyHtml += `<td class="number-col total-net-col ${dayNetTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(dayNetTotal)}</td>`;
+                        if (showDrawdown) {
+                            const dayDrawdown = (cumulativeData[month] && cumulativeData[month][date]) ? cumulativeData[month][date].drawdown : 0;
+                            bodyHtml += `<td class="number-col drawdown-col negative">${formatNumber(dayDrawdown)}</td>`;
+                        }
+                        bodyHtml += '</tr>';
+                    });
+                }
+            });
+
+            bodyHtml += '<tr class="total-row"><td>Grand Total</td>';
+            strategies.forEach((strategy) => {
+                const stratTotal = totals.strategies[strategy];
+                const lot = stratTotal.lotCount > 0 ? stratTotal.lotSum / stratTotal.lotCount : 0;
+                const stratIndex = allStrategies.indexOf(strategy);
+                const stratIndexInVisible = strategies.indexOf(strategy);
+                const isLast = stratIndexInVisible === strategies.length - 1;
+                const bgClass = `strategy-bg-${stratIndex % 5}`;
+                const isAPro = strategy.startsWith('A.PRO');
+                const nextStrategy = strategies[stratIndexInVisible + 1];
+                const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
+                let isBrokerBoundary = false;
+                if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
+                    const currentBroker = strategy.match(/^(B\d+)/)?.[1];
+                    const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
+                    isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
+                }
+                const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : (isLast ? ' strategy-group-end' : ''));
+                
+                if (isAPro) {
+                    bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.pnl)}</td>`;
+                } else {
+                    const displayValue = showTradeCount ? (stratTotal.tradeCount > 0 ? stratTotal.tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
+                    bodyHtml += `<td class="number-col lot-col ${bgClass}">${displayValue}</td>`;
+                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
+                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.dpnl)}</td>`;
+                }
+            });
+            bodyHtml += `<td class="number-col total-net-col ${totals.totalProfits >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalProfits)}</td>`;
+            bodyHtml += `<td class="number-col total-net-col ${totals.netBrProfits >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.netBrProfits)}</td>`;
+            
+            if (showDrawdown) {
+                let maxDrawdown = 0;
+                Object.values(cumulativeData).forEach(monthData => {
+                    Object.values(monthData).forEach(dayData => {
+                        if (dayData.drawdown > maxDrawdown) maxDrawdown = dayData.drawdown;
+                    });
+                });
+                bodyHtml += `<td class="number-col drawdown-col negative">${formatNumber(maxDrawdown)}</td>`;
+            }
+            bodyHtml += '</tr>';
+
+            elements.tableBody.innerHTML = bodyHtml;
+        }
+
+        function toggleMonth(month) {
+            const dayRows = document.querySelectorAll(`.day-row[data-month="${month}"]`);
+            const icon = document.getElementById(`icon-${month}`);
+            dayRows.forEach(row => row.classList.toggle('expanded'));
+            if (icon) icon.classList.toggle('expanded');
+        }
+
+        function expandAll() {
+            document.querySelectorAll('.day-row').forEach(row => row.classList.add('expanded'));
+            document.querySelectorAll('.expand-icon').forEach(icon => icon.classList.add('expanded'));
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.day-row').forEach(row => row.classList.remove('expanded'));
+            document.querySelectorAll('.expand-icon').forEach(icon => icon.classList.remove('expanded'));
+        }
+
+        function updateSummaryCards(trades) {
+            const allMonthlyProfits = {};
+            const allMonthlyNetProfits = {};
+            let runningCumTotal = 0;
+            let peakCumTotal = 0;
+            let currentDrawdown = 0;
+            const strategyTracking = {};
+            
+            const sortedAllTrades = [...allTrades].sort((a, b) => {
+                const dateA = a.date.split('/').reverse().join('');
+                const dateB = b.date.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+            
+            sortedAllTrades.forEach(trade => {
+                const monthKey = trade.date.split('/')[1];
+                if (!allMonthlyProfits[monthKey]) allMonthlyProfits[monthKey] = 0;
+                if (!allMonthlyNetProfits[monthKey]) allMonthlyNetProfits[monthKey] = 0;
+                
+                Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
+                    if (!stratName.startsWith('A.PRO')) {
+                        const netPnl = trade.strategyPnlTax[stratName] || 0;
+                        allMonthlyProfits[monthKey] += (trade.strategyPnls[stratName] || 0);
+                        allMonthlyNetProfits[monthKey] += netPnl;
+                        
+                        runningCumTotal += netPnl;
+                        if (runningCumTotal > peakCumTotal) peakCumTotal = runningCumTotal;
+                        
+                        if (!strategyTracking[stratName]) {
+                            strategyTracking[stratName] = { cumTotal: 0, peak: 0, drawdown: 0 };
+                        }
+                        strategyTracking[stratName].cumTotal += netPnl;
+                        if (strategyTracking[stratName].cumTotal > strategyTracking[stratName].peak) {
+                            strategyTracking[stratName].peak = strategyTracking[stratName].cumTotal;
+                        }
+                        strategyTracking[stratName].drawdown = strategyTracking[stratName].peak - strategyTracking[stratName].cumTotal;
+                    }
+                });
+            });
+            
+            currentDrawdown = peakCumTotal - runningCumTotal;
+
+            const totalProfitAll = Object.values(allMonthlyProfits).reduce((sum, val) => sum + val, 0);
+            const netBrProfitAll = Object.values(allMonthlyNetProfits).reduce((sum, val) => sum + val, 0);
+            
+            const monthlyProfits = {};
+            const monthlyNetProfits = {};
+            
+            trades.forEach(trade => {
+                const monthKey = trade.date.split('/')[1];
+                if (!monthlyProfits[monthKey]) monthlyProfits[monthKey] = 0;
+                if (!monthlyNetProfits[monthKey]) monthlyNetProfits[monthKey] = 0;
+                
+                Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
+                    if (!stratName.startsWith('A.PRO') && !hiddenStrategies.has(stratName)) {
+                        monthlyProfits[monthKey] += (trade.strategyPnls[stratName] || 0);
+                        monthlyNetProfits[monthKey] += (trade.strategyPnlTax[stratName] || 0);
+                    }
+                });
+            });
+            
+            const totalProfitFiltered = Object.values(monthlyProfits).reduce((sum, val) => sum + val, 0);
+            const netBrProfitFiltered = Object.values(monthlyNetProfits).reduce((sum, val) => sum + val, 0);
+
+            const isMonthFiltered = elements.monthFilter.value !== 'all';
+            const isStrategyFiltered = hiddenStrategies.size > 0;
+            const isFiltered = isMonthFiltered || isStrategyFiltered;
+
+            elements.totalProfit.textContent = `₹${totalProfitAll >= 0 ? '' : '-'}${Math.abs(totalProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            elements.totalProfit.className = `summary-card-value ${totalProfitAll >= 0 ? 'positive' : 'negative'}`;
+            
+            if (isFiltered) {
+                const filtered = `₹${totalProfitFiltered >= 0 ? '' : '-'}${Math.abs(totalProfitFiltered).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                elements.totalProfitFiltered.innerHTML = `Filtered: <span style="font-weight: 600; color: ${totalProfitFiltered >= 0 ? '#059669' : '#dc2626'};">${filtered}</span>`;
+            } else {
+                elements.totalProfitFiltered.innerHTML = '';
+            }
+
+            elements.netBrProfit.textContent = `₹${netBrProfitAll >= 0 ? '' : '-'}${Math.abs(netBrProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            elements.netBrProfit.className = `summary-card-value ${netBrProfitAll >= 0 ? 'positive' : 'negative'}`;
+            
+            if (isFiltered) {
+                const filtered = `₹${netBrProfitFiltered >= 0 ? '' : '-'}${Math.abs(netBrProfitFiltered).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                elements.netBrProfitFiltered.innerHTML = `Filtered: <span style="font-weight: 600; color: ${netBrProfitFiltered >= 0 ? '#059669' : '#dc2626'};">${filtered}</span>`;
+            } else {
+                elements.netBrProfitFiltered.innerHTML = '';
+            }
+
+            const chargesAll = totalProfitAll - netBrProfitAll;
+            const chargesFiltered = totalProfitFiltered - netBrProfitFiltered;
+            elements.charges.textContent = `₹-${Math.abs(chargesAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            
+            if (isFiltered) {
+                const filtered = `₹-${Math.abs(chargesFiltered).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                elements.chargesFiltered.innerHTML = `Filtered: <span style="font-weight: 600; color: #dc2626;">${filtered}</span>`;
+            } else {
+                elements.chargesFiltered.innerHTML = '';
+            }
+
+            const brokerDrawdownsAll = {};
+            const brokerDrawdownsFiltered = {};
+            
+            for (const stratName in strategyTracking) {
+                if (!stratName.startsWith('A.PRO')) {
+                    const brokerMatch = stratName.match(/^(B\d+)/);
+                    if (brokerMatch) {
+                        const brokerCode = brokerMatch[1];
+                        brokerDrawdownsAll[brokerCode] = (brokerDrawdownsAll[brokerCode] || 0) + strategyTracking[stratName].drawdown;
+                    }
+                }
+            }
+            
+            for (const stratName in strategyTracking) {
+                if (!stratName.startsWith('A.PRO') && !hiddenStrategies.has(stratName)) {
+                    const brokerMatch = stratName.match(/^(B\d+)/);
+                    if (brokerMatch) {
+                        const brokerCode = brokerMatch[1];
+                        brokerDrawdownsFiltered[brokerCode] = (brokerDrawdownsFiltered[brokerCode] || 0) + strategyTracking[stratName].drawdown;
+                    }
+                }
+            }
+
+            const brokerCodes = Object.keys(brokerDrawdownsAll).sort();
+            
+            // Create broker cards dynamically if they don't exist
+            brokerCodes.forEach((brokerCode, idx) => {
+                if (!brokerCards[brokerCode]) {
+                    const card = document.createElement('div');
+                    card.className = 'summary-card';
+                    card.style.order = 10 + idx;
+                    card.id = `broker-${brokerCode}-card`;
+                    
+                    card.innerHTML = `
+                        <div class="summary-card-title">${brokerCode} Drawdown</div>
+                        <div class="summary-card-value negative" id="broker-${brokerCode}-value">₹0</div>
+                        <div class="summary-card-subtitle" id="broker-${brokerCode}-filtered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
+                    `;
+                    
+                    elements.brokerCardsContainer.appendChild(card);
+                    
+                    brokerCards[brokerCode] = {
+                        card: card,
+                        value: document.getElementById(`broker-${brokerCode}-value`),
+                        filtered: document.getElementById(`broker-${brokerCode}-filtered`)
+                    };
+                }
+            });
+
+            // Update broker card values
+            brokerCodes.forEach((brokerCode) => {
+                const elem = brokerCards[brokerCode];
+                if (!elem) return;
+                
+                const allDrawdown = brokerDrawdownsAll[brokerCode];
+                const filteredDrawdown = brokerDrawdownsFiltered[brokerCode] || 0;
+                
+                if (allDrawdown > 0) {
+                    elem.value.textContent = `-₹${Math.abs(allDrawdown).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                    elem.value.className = 'summary-card-value negative';
+                } else {
+                    elem.value.textContent = '₹0';
+                    elem.value.className = 'summary-card-value positive';
+                }
+                
+                if (isStrategyFiltered && filteredDrawdown !== allDrawdown) {
+                    if (filteredDrawdown > 0) {
+                        elem.filtered.innerHTML = `Filtered: <span style="font-weight: 600; color: #dc2626;">-₹${Math.abs(filteredDrawdown).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>`;
+                    } else {
+                        elem.filtered.innerHTML = `Filtered: <span style="font-weight: 600; color: #059669;">₹0</span>`;
+                    }
+                } else {
+                    elem.filtered.innerHTML = '';
+                }
+            });
+
+            if (currentDrawdown > 0) {
+                elements.currentDrawdown.textContent = `-₹${Math.abs(currentDrawdown).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                elements.currentDrawdown.className = 'summary-card-value negative';
+            } else {
+                elements.currentDrawdown.textContent = '₹0';
+                elements.currentDrawdown.className = 'summary-card-value positive';
+            }
+        }
+
+        function refreshData() {
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
+            }
+            processAndDisplayData();
+        }
+    </script>
+</body>
+</html>

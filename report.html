@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8fafc;
+            color: #1a1a1a;
+        }
+        .main-content {
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 32px 32px 32px;
+            background: #f8fafc;
+            height: 100vh;
+            width: 100%;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(248, 250, 252, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(8px);
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-content {
+            background: white;
+            padding: 36px 52px;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .loading-spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #1e40af;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 18px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .loading-subtext {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .page-header { margin-bottom: 16px; }
+        .page-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
+        .page-subtitle { font-size: 12px; color: #6b7280; font-weight: 400; }
+        
+        .controls-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .control-group { display: flex; align-items: center; gap: 8px; }
+        .control-label { font-size: 12px; color: #374151; font-weight: 600; }
+        .strategy-filter-container { position: relative; }
+        .strategy-filter-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .strategy-filter-button:hover { border-color: #9ca3af; background: #f9fafb; }
+        .strategy-filter-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 6px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+            min-width: 280px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .strategy-filter-dropdown.active { display: block; }
+        .strategy-filter-dropdown * { pointer-events: auto; }
+        .strategy-filter-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+        .strategy-filter-title { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .strategy-filter-actions { display: flex; gap: 8px; }
+        .filter-action-btn {
+            font-size: 11px;
+            color: #1e40af;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        .filter-action-btn:hover { background: #eff6ff; }
+        .quick-date-btn {
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        .quick-date-btn:hover {
+            background: #eff6ff;
+            border-color: #1e40af;
+            color: #1e40af;
+        }
+        .strategy-filter-list { padding: 8px 0; }
+        .filter-info-note {
+            padding: 10px 14px;
+            background: #eff6ff;
+            border-top: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #1e40af;
+            line-height: 1.4;
+            margin-top: 8px;
+        }
+        .strategy-filter-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .strategy-filter-item:hover { background: #f8fafc; }
+        .strategy-filter-checkbox { 
+            margin-right: 10px; 
+            width: 16px; 
+            height: 16px; 
+            cursor: pointer; 
+            pointer-events: none;
+        }
+        .strategy-filter-label { 
+            font-size: 13px; 
+            color: #475569; 
+            cursor: pointer; 
+            user-select: none; 
+            flex: 1;
+            pointer-events: none;
+        }
+        .date-month-item { font-weight: 500; color: #1e293b; }
+        .date-day-item { padding-left: 32px; font-size: 12px; }
+        .expand-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+            font-size: 11px;
+            color: #6b7280;
+            text-align: center;
+            line-height: 18px;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+            pointer-events: none;
+        }
+        .expand-icon.expanded { transform: rotate(90deg); }
+        .month-children { display: none; }
+        .month-children.expanded { display: block; }
+        .filter-badge {
+            display: inline-block;
+            background: #1e40af;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+        
+        select, input, button {
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        select:hover, input:hover, button:hover { 
+            border-color: #9ca3af;
+            background: #f9fafb;
+        }
+        select:focus, input:focus, button:focus {
+            outline: none;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+        button.primary { 
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+            font-weight: 500;
+        }
+        button.primary:hover { 
+            background: #1e3a8a;
+            border-color: #1e3a8a;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+        .table-wrapper { 
+            overflow-x: auto; 
+            overflow-y: auto; 
+            max-height: calc(100vh - 200px);
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db #f9fafb;
+        }
+        .table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-wrapper::-webkit-scrollbar-track { background: #f9fafb; }
+        .table-wrapper::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .table-wrapper::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .report-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            min-width: 1050px;
+        }
+        .report-table thead { 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .report-table thead tr { height: 0; }
+        .report-table thead tr.header-row-1, .report-table thead tr.header-row-2, .report-table thead tr.totals-row { height: auto; }
+        .report-table thead tr.totals-row th {
+            padding: 10px 6px;
+            position: sticky;
+            top: 0;
+            background: linear-gradient(to bottom, #eff6ff 0%, #dbeafe 100%);
+            z-index: 11;
+            font-size: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #1e40af;
+            border-bottom: 2px solid #3b82f6;
+            border-right: 1px solid #93c5fd;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+        }
+        .report-table thead tr.totals-row th.number-col {
+            text-align: right;
+        }
+        .report-table thead tr.totals-row th.positive { color: #15803d; }
+        .report-table thead tr.totals-row th.negative { color: #b91c1c; }
+        .report-table thead tr.header-row-1 th {
+            padding: 10px 6px 10px 6px;
+            position: sticky;
+            top: 36px;
+            background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+            z-index: 10;
+            font-size: 11px;
+            text-align: center;
+            font-weight: 600;
+            color: #0f172a;
+            border-bottom: 2px solid #cbd5e1;
+            border-right: 1px solid #e2e8f0;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            min-width: 42px;
+            max-width: 68px;
+            transition: background 0.2s ease;
+        }
+        .report-table thead tr.header-row-1 th[rowspan="2"] {
+            border-bottom: 2px solid #94a3b8;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
+        }
+        .report-table thead tr.header-row-1 th[rowspan="2"]:hover { 
+            background: linear-gradient(to bottom, #eff6ff 0%, #dbeafe 100%);
+            color: #1e40af;
+        }
+        .report-table thead tr.header-row-2 th {
+            padding: 6px 6px 10px 6px;
+            font-size: 10px;
+            position: sticky;
+            top: 58px;
+            background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
+            z-index: 10;
+            font-weight: 500;
+            color: #475569;
+            text-align: center;
+            border-bottom: 2px solid #94a3b8;
+            border-right: 1px solid #e2e8f0;
+            white-space: nowrap;
+            text-transform: uppercase;
+            cursor: pointer;
+            user-select: none;
+            letter-spacing: 0.3px;
+            min-width: 42px;
+            max-width: 58px;
+            transition: all 0.2s ease;
+        }
+        .report-table thead tr.header-row-2 th:hover { 
+            background: linear-gradient(to bottom, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+        .report-table th.sortable::after {
+            content: '';
+            opacity: 0;
+            font-size: 10px;
+            margin-left: 3px;
+        }
+        .report-table th.sorted-asc::after { 
+            content: ' ↑'; 
+            opacity: 1; 
+            color: #1e40af;
+            font-weight: 900;
+        }
+        .report-table th.sorted-desc::after { 
+            content: ' ↓'; 
+            opacity: 1; 
+            color: #1e40af;
+            font-weight: 900;
+        }
+        .report-table th.number-col { text-align: right; min-width: 48px; max-width: 63px; }
+        
+        .filter-icon {
+            display: inline-block;
+            margin-left: 3px;
+            font-size: 10px;
+            opacity: 0.5;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .filter-icon:hover { opacity: 1; }
+        .filter-icon.active { 
+            opacity: 1;
+    	    color: #ffffff;
+            background: #dc2626;
+	    font-weight: 900;
+        }
+        
+        .filter-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
+            display: none;
+            z-index: 10001;
+        }
+        .filter-popup-overlay.active { display: block; }
+        
+        .filter-popup {
+            position: absolute;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid #d1d5db;
+            width: 180px;
+            max-height: 280px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-popup-header {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+        
+        .filter-popup-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .filter-popup-close {
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+        }
+        .filter-popup-close:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .filter-popup-body {
+            padding: 8px;
+            overflow-y: auto;
+        }
+        
+        .filter-type-selector {
+            margin-bottom: 6px;
+        }
+        
+        .filter-type-selector label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+        
+        .filter-type-selector select {
+            width: 100%;
+            padding: 4px 6px;
+            font-size: 11px;
+        }
+        
+        .filter-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .filter-input-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+        
+        .filter-input-group input {
+            width: 100%;
+            padding: 4px 6px;
+            font-size: 11px;
+        }
+        
+        .filter-popup-footer {
+            padding: 6px 8px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+            background: #f8fafc;
+        }
+        
+        .filter-popup-footer button {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        
+        .report-table tbody tr {
+            transition: all 0.15s ease;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .report-table tbody tr:hover { 
+            background: #fafbfc;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .report-table tbody tr:nth-child(even) { background: #f8fafc; }
+        .report-table tbody tr:nth-child(even):hover { background: #fafbfc; }
+        .report-table td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #f3f4f6;
+            border-right: 1px solid #f0f0f0;
+            color: #374151;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 400;
+            max-width: 75px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+        .report-table td:nth-child(1) { min-width: 35px; max-width: 45px; text-align: center; color: #6b7280; font-weight: 500; }
+        .report-table td:nth-child(2) { min-width: 65px; max-width: 75px; font-weight: 500; color: #1f2937; }
+        .report-table td:nth-child(3) { min-width: 55px; max-width: 70px; font-weight: 500; color: #374151; }
+        .report-table td:nth-child(4) { min-width: 48px; max-width: 58px; }
+        .report-table td:nth-child(5) { min-width: 70px; max-width: 90px; font-weight: 500; color: #1f2937; }
+        .report-table td:nth-child(6) { min-width: 42px; max-width: 52px; }
+        .report-table td:nth-child(7), .report-table td:nth-child(8) { min-width: 52px; max-width: 67px; }
+        .report-table td:nth-child(9) { 
+            min-width: 58px; 
+            max-width: 73px;
+            border-right: 2px solid #d1d5db;
+        }
+        .report-table td.number-col {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            min-width: 48px;
+            max-width: 63px;
+            font-weight: 500;
+        }
+        .report-table td.positive { color: #15803d; font-weight: 600; }
+        .report-table td.negative { color: #b91c1c; font-weight: 600; }
+        .buy-sell-column { display: none; }
+        .buy-sell-column.visible { display: table-cell; }
+        .no-data { 
+            text-align: center; 
+            color: #9ca3af; 
+            padding: 60px 40px; 
+            font-size: 13px;
+            font-weight: 400;
+            background: #f8fafc;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+        }
+        .pagination-info { font-size: 12px; color: #6b7280; font-weight: 400; }
+        .pagination-controls { display: flex; gap: 8px; }
+        .pagination-btn {
+            padding: 5px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .pagination-btn:hover:not(:disabled) { 
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination-btn.active { 
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content { padding: 12px; }
+            .controls-section { flex-direction: column; align-items: stretch; }
+            .control-group { flex-direction: column; align-items: stretch; }
+            select, input, button { width: 100%; }
+            .filter-popup { 
+                width: calc(100vw - 20px);
+                max-width: 180px;
+                left: 10px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loadingText">Processing data...</div>
+                <div class="loading-subtext" id="loadingSubtext">Please wait</div>
+            </div>
+        </div>
+
+        <div class="filter-popup-overlay" id="filterPopupOverlay">
+            <div class="filter-popup">
+                <div class="filter-popup-header">
+                    <div class="filter-popup-title" id="filterPopupTitle">Filter Column</div>
+                    <button class="filter-popup-close" onclick="closeFilterPopup()">×</button>
+                </div>
+                <div class="filter-popup-body">
+                    <div class="filter-type-selector">
+                        <label>Type:</label>
+
+                        <select id="filterType" onchange="updateFilterInputs()">
+                            <option value="contains">Contains</option>
+                            <option value="equals">Equals</option>
+                            <option value="notEquals">Not Equal</option>
+                            <option value="greaterThan">Greater Than</option>
+                            <option value="lessThan">Less Than</option>
+                            <option value="between">Between</option>
+                            <option value="isBlank">Is Blank</option>
+                            <option value="isNotBlank">Is Not Blank</option>
+                        </select>
+
+                    </div>
+                    <div class="filter-inputs" id="filterInputs">
+                        <div class="filter-input-group">
+                            <label id="filterLabel1">Value:</label>
+                            <input type="text" id="filterValue1" placeholder="Value">
+                        </div>
+                        <div class="filter-input-group" id="filterValue2Group" style="display: none;">
+                            <label>To:</label>
+                            <input type="text" id="filterValue2" placeholder="Value">
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-popup-footer">
+                    <button onclick="clearColumnFilter()">Clear</button>
+                    <button class="primary" onclick="applyColumnFilter()">Apply</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h1 class="page-title">Detailed Trade Report</h1>
+            <p class="page-subtitle">Complete transaction history with broker-wise data</p>
+        </div>
+
+        <div class="controls-section">
+            <div class="strategy-filter-container">
+                <button class="strategy-filter-button" id="dateFilterBtn">
+                    <span>Date Filter</span>
+                    <span class="filter-badge" id="dateFilterBadge" style="display: none;">0</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="dateFilterDropdown" style="min-width: 240px;">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Select Dates</span>
+                        <div class="strategy-filter-actions">
+                            <span class="filter-action-btn" id="selectAllDatesBtn">All</span>
+                            <span class="filter-action-btn" id="deselectAllDatesBtn">Clear</span>
+                        </div>
+                    </div>
+                    <div style="padding: 8px 14px; border-bottom: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+                        <button class="quick-date-btn" id="todayBtn">Today</button>
+                        <button class="quick-date-btn" id="yesterdayBtn">Yesterday</button>
+                        <button class="quick-date-btn" id="thisWeekBtn">This Week</button>
+                        <button class="quick-date-btn" id="lastWeekBtn">Last Week</button>
+                        <button class="quick-date-btn" id="thisMonthBtn">This Month</button>
+                        <button class="quick-date-btn" id="lastMonthBtn">Last Month</button>
+                    </div>
+                    <div class="strategy-filter-list" id="dateFilterList"></div>
+                </div>
+            </div>
+            <div class="strategy-filter-container">
+                <button class="strategy-filter-button" id="strategyFilterBtn">
+                    <span>Hide Strategies</span>
+                    <span class="filter-badge" id="strategyFilterBadge" style="display: none;">0</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="strategyFilterDropdown">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Select Strategies</span>
+                        <div class="strategy-filter-actions">
+                            <span class="filter-action-btn" id="selectAllStrategiesBtn">All</span>
+                            <span class="filter-action-btn" id="deselectAllStrategiesBtn">Clear</span>
+                        </div>
+                    </div>
+                    <div class="strategy-filter-list" id="strategyFilterList"></div>
+                </div>
+            </div>
+            <div class="strategy-filter-container">
+                <button class="strategy-filter-button" id="brokerStrategyFilterBtn">
+                    <span>Hide Broker Columns</span>
+                    <span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="brokerStrategyFilterDropdown">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Hide Broker Columns</span>
+                        <div class="strategy-filter-actions">
+                            <span class="filter-action-btn" id="selectAllBrokerStrategiesBtn">All</span>
+                            <span class="filter-action-btn" id="deselectAllBrokerStrategiesBtn">Clear</span>
+                        </div>
+                    </div>
+                    <div class="strategy-filter-list" id="brokerStrategyFilterList"></div>
+                    <div class="filter-info-note">
+                        ℹ️ Only hides columns, not rows
+                    </div>
+                </div>
+            </div>
+            <button id="toggleBuySellBtn" onclick="toggleBuySellColumns()">
+                <span id="buySellBtnText">Show Buy/Sell/Qty</span>
+            </button>
+            <div class="control-group">
+                <label class="control-label">Symbol:</label>
+                <input type="text" id="symbolFilter" placeholder="Filter...">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Rows:</label>
+                <select id="rowsPerPage">
+                    <option value="10">10</option>
+                    <option value="15" selected>15</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <button class="primary" id="applyFiltersBtn">Apply</button>
+            <button id="resetFiltersBtn">Reset</button>
+            <button id="loadSampleDataBtn">Load Sample (500)</button>
+            <button id="exportCSVBtn">Export CSV</button>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table class="report-table" id="reportTable">
+                    <thead id="tableHeaders">
+                        <tr>
+                            <th rowspan="2" class="sortable" data-column="sno">S.No</th>
+                            <th rowspan="2" class="sortable" data-column="date">Date</th>
+                            <th rowspan="2" class="sortable" data-column="strategy">Strategy</th>
+                            <th rowspan="2" class="sortable" data-column="trade">Trade</th>
+                            <th rowspan="2" class="sortable" data-column="symbol">Symbol</th>
+                            <th rowspan="2" class="sortable number-col" data-column="qty">Qty</th>
+                            <th rowspan="2" class="sortable number-col" data-column="entry">Entry</th>
+                            <th rowspan="2" class="sortable number-col" data-column="exit">Exit</th>
+                            <th rowspan="2" class="sortable number-col" data-column="profit">Profit</th>
+                        </tr>
+                        <tr class="header-row-2"></tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="100" class="no-data">Click "Load Sample" to view data</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination" style="display: none;">
+                <div class="pagination-info" id="paginationInfo">Showing 0 of 0</div>
+                <div class="pagination-controls" id="paginationControls"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTrades = [];
+        let filteredTrades = [];
+        let currentPage = 1;
+        let sortColumn = null;
+        let sortDirection = 'asc';
+        let brokerStrategies = [];
+        let strategies = [];
+        let hiddenBrokerStrategies = new Set();
+        let hiddenStrategies = new Set();
+        let dateStructure = {};
+        let hiddenDates = new Set();
+        let collapsedMonths = new Set();
+        let showBuySellColumns = false;
+        let columnFilters = {};
+        let currentFilterColumn = null;
+
+        const elements = {
+            loadingOverlay: document.getElementById('loadingOverlay'),
+            loadingText: document.getElementById('loadingText'),
+            loadingSubtext: document.getElementById('loadingSubtext'),
+            dateFilterBtn: document.getElementById('dateFilterBtn'),
+            dateFilterDropdown: document.getElementById('dateFilterDropdown'),
+            dateFilterList: document.getElementById('dateFilterList'),
+            dateFilterBadge: document.getElementById('dateFilterBadge'),
+            selectAllDatesBtn: document.getElementById('selectAllDatesBtn'),
+            deselectAllDatesBtn: document.getElementById('deselectAllDatesBtn'),
+            strategyFilterBtn: document.getElementById('strategyFilterBtn'),
+            strategyFilterDropdown: document.getElementById('strategyFilterDropdown'),
+            strategyFilterList: document.getElementById('strategyFilterList'),
+            strategyFilterBadge: document.getElementById('strategyFilterBadge'),
+            selectAllStrategiesBtn: document.getElementById('selectAllStrategiesBtn'),
+            deselectAllStrategiesBtn: document.getElementById('deselectAllStrategiesBtn'),
+            brokerStrategyFilterBtn: document.getElementById('brokerStrategyFilterBtn'),
+            brokerStrategyFilterDropdown: document.getElementById('brokerStrategyFilterDropdown'),
+            brokerStrategyFilterList: document.getElementById('brokerStrategyFilterList'),
+            brokerFilterBadge: document.getElementById('brokerFilterBadge'),
+            selectAllBrokerStrategiesBtn: document.getElementById('selectAllBrokerStrategiesBtn'),
+            deselectAllBrokerStrategiesBtn: document.getElementById('deselectAllBrokerStrategiesBtn'),
+            symbolFilter: document.getElementById('symbolFilter'),
+            rowsPerPage: document.getElementById('rowsPerPage'),
+            applyFiltersBtn: document.getElementById('applyFiltersBtn'),
+            resetFiltersBtn: document.getElementById('resetFiltersBtn'),
+            loadSampleDataBtn: document.getElementById('loadSampleDataBtn'),
+            exportCSVBtn: document.getElementById('exportCSVBtn'),
+            tableHeaders: document.getElementById('tableHeaders'),
+            tableBody: document.getElementById('tableBody'),
+            pagination: document.getElementById('pagination'),
+            paginationInfo: document.getElementById('paginationInfo'),
+            paginationControls: document.getElementById('paginationControls'),
+            filterPopupOverlay: document.getElementById('filterPopupOverlay'),
+            filterPopupTitle: document.getElementById('filterPopupTitle'),
+            filterType: document.getElementById('filterType'),
+            filterValue1: document.getElementById('filterValue1'),
+            filterValue2: document.getElementById('filterValue2'),
+            filterValue2Group: document.getElementById('filterValue2Group')
+        };
+
+        function openFilterPopup(column, stratName = null, field = null, iconElement = null) {
+            currentFilterColumn = { column, stratName, field };
+            
+            let columnName;
+            if (column) {
+                columnName = column === 'sno' ? 'No' : 
+                            column === 'strategy' ? 'Strat' :
+                            column === 'symbol' ? 'Sym' :
+                            column.toUpperCase();
+            } else if (stratName && field) {
+                const shortStrat = stratName.replace(/^B\d+PRO/, 'P');
+                columnName = `${shortStrat} ${field.toUpperCase()}`;
+            }
+            
+            elements.filterPopupTitle.textContent = columnName;
+            
+            const filterKey = getFilterKey(column, stratName, field);
+            const existingFilter = columnFilters[filterKey];
+            
+            if (existingFilter) {
+                elements.filterType.value = existingFilter.type;
+                elements.filterValue1.value = existingFilter.value1 || '';
+                elements.filterValue2.value = existingFilter.value2 || '';
+            } else {
+                elements.filterType.value = 'contains';
+                elements.filterValue1.value = '';
+                elements.filterValue2.value = '';
+            }
+            
+            updateFilterInputs();
+            elements.filterPopupOverlay.classList.add('active');
+            
+            // Position the popup near the clicked icon
+            if (iconElement) {
+                const rect = iconElement.getBoundingClientRect();
+                const popup = document.querySelector('.filter-popup');
+                
+                // Calculate position
+                let left = rect.left;
+                let top = rect.bottom + 5;
+                
+                // Adjust if popup would go off-screen
+                const popupWidth = 180;
+                const popupHeight = 220;
+                
+                if (left + popupWidth > window.innerWidth) {
+                    left = window.innerWidth - popupWidth - 10;
+                }
+                
+                if (top + popupHeight > window.innerHeight) {
+                    top = rect.top - popupHeight - 5;
+                }
+                
+                popup.style.left = `${left}px`;
+                popup.style.top = `${top}px`;
+            }
+            
+            // Add Enter key listener
+            const handleEnter = (e) => {
+                if (e.key === 'Enter') {
+                    applyColumnFilter();
+                }
+            };
+            
+            elements.filterValue1.removeEventListener('keypress', handleEnter);
+            elements.filterValue2.removeEventListener('keypress', handleEnter);
+            elements.filterValue1.addEventListener('keypress', handleEnter);
+            elements.filterValue2.addEventListener('keypress', handleEnter);
+            
+            // Focus on first input
+            setTimeout(() => elements.filterValue1.focus(), 100);
+        }
+
+        function closeFilterPopup() {
+            elements.filterPopupOverlay.classList.remove('active');
+            currentFilterColumn = null;
+        }
+
+        function updateFilterInputs() {
+            const filterType = elements.filterType.value;
+            const isBetween = filterType === 'between';
+            const isBlankFilter = filterType === 'isBlank' || filterType === 'isNotBlank';
+            
+            elements.filterValue2Group.style.display = isBetween ? 'block' : 'none';
+            
+            // Hide both input groups for blank filters
+            if (isBlankFilter) {
+                document.querySelector('.filter-input-group').style.display = 'none';
+                elements.filterValue2Group.style.display = 'none';
+            } else {
+                document.querySelector('.filter-input-group').style.display = 'block';
+            }
+            
+            const labels = {
+                contains: 'Value:',
+                equals: 'Value:',
+                notEquals: 'Value:',
+                greaterThan: 'Greater:',
+                lessThan: 'Less:',
+                greaterOrEqual: 'Min:',
+                lessOrEqual: 'Max:',
+                between: 'From:',
+                isBlank: '',
+                isNotBlank: ''
+            };
+            
+            document.getElementById('filterLabel1').textContent = labels[filterType] || 'Value:';
+        }
+                           
+        function getFilterKey(column, stratName, field) {
+            if (column) {
+                return column;
+            } else if (stratName && field) {
+                return `${stratName}_${field}`;
+            }
+            return null;
+        }
+
+        function applyColumnFilter() {
+            if (!currentFilterColumn) return;
+            
+            const { column, stratName, field } = currentFilterColumn;
+            const filterKey = getFilterKey(column, stratName, field);
+            
+            const filterType = elements.filterType.value;
+            const value1 = elements.filterValue1.value.trim();
+            const value2 = elements.filterValue2.value.trim();
+            
+            // Allow blank filters without requiring input values
+            if (filterType === 'isBlank' || filterType === 'isNotBlank') {
+                columnFilters[filterKey] = {
+                    type: filterType,
+                    value1: '',
+                    value2: ''
+                };
+                closeFilterPopup();
+                applyFilters();
+                return;
+            }
+            
+            if (!value1 && filterType !== 'between') {
+                closeFilterPopup();
+                return;
+            }
+            
+            if (filterType === 'between' && (!value1 || !value2)) {
+                alert('Please enter both values for Between filter');
+                return;
+            }
+            
+            columnFilters[filterKey] = {
+                type: filterType,
+                value1: value1,
+                value2: value2
+            };
+            
+            closeFilterPopup();
+            applyFilters();
+        }
+
+        function clearColumnFilter() {
+            if (!currentFilterColumn) return;
+            
+            const { column, stratName, field } = currentFilterColumn;
+            const filterKey = getFilterKey(column, stratName, field);
+            
+            delete columnFilters[filterKey];
+            
+            closeFilterPopup();
+            applyFilters();
+        }
+
+        function testFilter(value, filter) {
+            // Handle blank filters
+            if (filter.type === 'isBlank') {
+                return value === undefined || value === null || value === '' || value === 0;
+            }
+            
+            if (filter.type === 'isNotBlank') {
+                return value !== undefined && value !== null && value !== '' && value !== 0;
+            }
+            
+            if (value === undefined || value === null) return false;
+            
+            const strValue = String(value).toLowerCase();
+            const numValue = parseFloat(value);
+            const isNumeric = !isNaN(numValue);
+            
+            const filterValue1 = filter.value1.toLowerCase();
+            const filterNum1 = parseFloat(filter.value1);
+            const filterNum2 = parseFloat(filter.value2);
+            
+            switch (filter.type) {
+                case 'contains':
+                    return strValue.includes(filterValue1);
+                    
+                case 'equals':
+                    if (isNumeric && !isNaN(filterNum1)) {
+                        return numValue === filterNum1;
+                    }
+                    return strValue === filterValue1;
+                    
+                case 'notEquals':
+                    if (isNumeric && !isNaN(filterNum1)) {
+                        return numValue !== filterNum1;
+                    }
+                    return strValue !== filterValue1;
+                    
+                case 'greaterThan':
+                    if (isNumeric && !isNaN(filterNum1)) {
+                        return numValue > filterNum1;
+                    }
+                    return false;
+                    
+                case 'lessThan':
+                    if (isNumeric && !isNaN(filterNum1)) {
+                        return numValue < filterNum1;
+                    }
+                    return false;
+                    
+                case 'greaterOrEqual':
+                    if (isNumeric && !isNaN(filterNum1)) {
+                        return numValue >= filterNum1;
+                    }
+                    return false;
+                    
+                case 'lessOrEqual':
+                    if (isNumeric && !isNaN(filterNum1)) {
+                        return numValue <= filterNum1;
+                    }
+                    return false;
+                    
+                case 'between':
+                    if (isNumeric && !isNaN(filterNum1) && !isNaN(filterNum2)) {
+                        return numValue >= filterNum1 && numValue <= filterNum2;
+                    }
+                    return false;
+                    
+                default:
+                    return true;
+            }
+        }
+
+        function loadSavedFilters() {
+            try {
+                const savedStrategyFilters = localStorage.getItem('reportStrategyFilters');
+                if (savedStrategyFilters) {
+                    hiddenStrategies = new Set(JSON.parse(savedStrategyFilters));
+                }
+                
+                const savedBrokerFilters = localStorage.getItem('reportBrokerStrategyFilters');
+                if (savedBrokerFilters) {
+                    hiddenBrokerStrategies = new Set(JSON.parse(savedBrokerFilters));
+                }
+                
+                const savedDateFilters = localStorage.getItem('reportDateFilters');
+                if (savedDateFilters) {
+                    hiddenDates = new Set(JSON.parse(savedDateFilters));
+                }
+                
+                const savedCollapsedMonths = localStorage.getItem('reportCollapsedMonths');
+                if (savedCollapsedMonths) {
+                    collapsedMonths = new Set(JSON.parse(savedCollapsedMonths));
+                }
+            } catch (e) {
+                hiddenStrategies = new Set();
+                hiddenBrokerStrategies = new Set();
+                hiddenDates = new Set();
+                collapsedMonths = new Set();
+            }
+        }
+
+        function saveStrategyFilters() {
+            try {
+                localStorage.setItem('reportStrategyFilters', JSON.stringify(Array.from(hiddenStrategies)));
+            } catch (e) {}
+        }
+
+        function saveBrokerFilters() {
+            try {
+                localStorage.setItem('reportBrokerStrategyFilters', JSON.stringify(Array.from(hiddenBrokerStrategies)));
+            } catch (e) {}
+        }
+
+        function saveDateFilters() {
+            try {
+                localStorage.setItem('reportDateFilters', JSON.stringify(Array.from(hiddenDates)));
+                localStorage.setItem('reportCollapsedMonths', JSON.stringify(Array.from(collapsedMonths)));
+            } catch (e) {}
+        }
+
+        function cleanupSavedFilters() {
+            if (hiddenStrategies.size > 0 && strategies.length > 0) {
+                const validHiddenStrategies = new Set();
+                hiddenStrategies.forEach(strategy => {
+                    if (strategies.includes(strategy)) {
+                        validHiddenStrategies.add(strategy);
+                    }
+                });
+                if (validHiddenStrategies.size !== hiddenStrategies.size) {
+                    hiddenStrategies = validHiddenStrategies;
+                    saveStrategyFilters();
+                }
+            }
+            
+            if (hiddenBrokerStrategies.size > 0 && brokerStrategies.length > 0) {
+                const validHiddenBrokerStrategies = new Set();
+                hiddenBrokerStrategies.forEach(strategy => {
+                    if (brokerStrategies.includes(strategy)) {
+                        validHiddenBrokerStrategies.add(strategy);
+                    }
+                });
+                if (validHiddenBrokerStrategies.size !== hiddenBrokerStrategies.size) {
+                    hiddenBrokerStrategies = validHiddenBrokerStrategies;
+                    saveBrokerFilters();
+                }
+            }
+            
+            if (hiddenDates.size > 0 && Object.keys(dateStructure).length > 0) {
+                const allValidDates = Object.values(dateStructure).flat();
+                const validHiddenDates = new Set();
+                hiddenDates.forEach(date => {
+                    if (allValidDates.includes(date)) {
+                        validHiddenDates.add(date);
+                    }
+                });
+                if (validHiddenDates.size !== hiddenDates.size) {
+                    hiddenDates = validHiddenDates;
+                    saveDateFilters();
+                }
+            }
+        }
+
+        function initEventListeners() {
+            loadSavedFilters();
+            
+            elements.dateFilterBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeOtherDropdowns('date');
+                elements.dateFilterDropdown.classList.toggle('active');
+            });
+            
+            elements.strategyFilterBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeOtherDropdowns('strategy');
+                elements.strategyFilterDropdown.classList.toggle('active');
+            });
+            
+            elements.brokerStrategyFilterBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeOtherDropdowns('broker');
+                elements.brokerStrategyFilterDropdown.classList.toggle('active');
+            });
+            
+            elements.selectAllDatesBtn.addEventListener('click', selectAllDates);
+            elements.deselectAllDatesBtn.addEventListener('click', deselectAllDates);
+            
+            document.getElementById('todayBtn').addEventListener('click', filterToday);
+            document.getElementById('yesterdayBtn').addEventListener('click', filterYesterday);
+            document.getElementById('thisWeekBtn').addEventListener('click', filterThisWeek);
+            document.getElementById('lastWeekBtn').addEventListener('click', filterLastWeek);
+            document.getElementById('thisMonthBtn').addEventListener('click', filterThisMonth);
+            document.getElementById('lastMonthBtn').addEventListener('click', filterLastMonth);
+            
+            elements.selectAllStrategiesBtn.addEventListener('click', selectAllStrategies);
+            elements.deselectAllStrategiesBtn.addEventListener('click', deselectAllStrategies);
+            elements.selectAllBrokerStrategiesBtn.addEventListener('click', selectAllBrokerStrategies);
+            elements.deselectAllBrokerStrategiesBtn.addEventListener('click', deselectAllBrokerStrategies);
+            
+            elements.applyFiltersBtn.addEventListener('click', applyFilters);
+            elements.resetFiltersBtn.addEventListener('click', resetFilters);
+            elements.loadSampleDataBtn.addEventListener('click', loadSampleData);
+            elements.exportCSVBtn.addEventListener('click', exportToCSV);
+            
+            elements.symbolFilter.addEventListener('input', debounce(applyFilters, 300));
+            
+            elements.dateFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
+            elements.strategyFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
+            elements.brokerStrategyFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
+            
+            elements.filterPopupOverlay.addEventListener('click', (e) => {
+                if (e.target === elements.filterPopupOverlay) {
+                    closeFilterPopup();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.strategy-filter-container')) {
+                    closeAllDropdowns();
+                }
+            });
+            
+            elements.tableHeaders.addEventListener('click', async (e) => {
+                if (e.target.closest('.filter-icon')) {
+                    e.stopPropagation();
+                    const icon = e.target.closest('.filter-icon');
+                    const column = icon.dataset.filterColumn;
+                    const stratName = icon.dataset.filterStrat;
+                    const field = icon.dataset.filterField;
+                    openFilterPopup(column, stratName, field, icon);
+                    return;
+                }
+                
+                const th = e.target.closest('th.sortable');
+                if (th && th.dataset.column) {
+                    await sortTable(th.dataset.column, th);
+                } else if (th && th.dataset.stratname && th.dataset.field) {
+                    await sortTableByStrategy(th.dataset.stratname, th.dataset.field, th);
+                }
+            });
+        }
+
+        function closeOtherDropdowns(keepOpen) {
+            if (keepOpen !== 'date') elements.dateFilterDropdown.classList.remove('active');
+            if (keepOpen !== 'strategy') elements.strategyFilterDropdown.classList.remove('active');
+            if (keepOpen !== 'broker') elements.brokerStrategyFilterDropdown.classList.remove('active');
+        }
+
+        function closeAllDropdowns() {
+            elements.dateFilterDropdown.classList.remove('active');
+            elements.strategyFilterDropdown.classList.remove('active');
+            elements.brokerStrategyFilterDropdown.classList.remove('active');
+        }
+
+        function showLoading(text = 'Processing...', subtext = 'Please wait') {
+            elements.loadingText.textContent = text;
+            elements.loadingSubtext.textContent = subtext;
+            elements.loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            elements.loadingOverlay.classList.remove('active');
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function convertDateToShortFormat(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return dateStr;
+            const year = parts[2];
+            if (year.length === 4) {
+                return `${parts[0]}/${parts[1]}/${year.slice(-2)}`;
+            }
+            return dateStr;
+        }
+
+        function parseDateString(dateStr) {
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            let year = parseInt(parts[2]);
+            if (year < 100) {
+                year += 2000;
+            }
+            return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+        }
+
+        function formatDateString(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = String(date.getFullYear()).slice(-2);
+            return `${day}/${month}/${year}`;
+        }
+
+        function getDateRange(type) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let startDate, endDate;
+            
+            switch(type) {
+                case 'today':
+                    startDate = new Date(today);
+                    endDate = new Date(today);
+                    break;
+                    
+                case 'yesterday':
+                    startDate = new Date(today);
+                    startDate.setDate(startDate.getDate() - 1);
+                    endDate = new Date(startDate);
+                    break;
+                    
+                case 'thisWeek':
+                    const dayOfWeek = today.getDay();
+                    startDate = new Date(today);
+                    startDate.setDate(startDate.getDate() - dayOfWeek);
+                    endDate = new Date(today);
+                    break;
+                    
+                case 'lastWeek':
+                    const lastWeekEnd = new Date(today);
+                    lastWeekEnd.setDate(lastWeekEnd.getDate() - today.getDay() - 1);
+                    const lastWeekStart = new Date(lastWeekEnd);
+                    lastWeekStart.setDate(lastWeekStart.getDate() - 6);
+                    startDate = lastWeekStart;
+                    endDate = lastWeekEnd;
+                    break;
+                    
+                case 'thisMonth':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today);
+                    break;
+                    
+                case 'lastMonth':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+            }
+            
+            return { startDate, endDate };
+        }
+
+        function filterDatesByRange(type) {
+            const { startDate, endDate } = getDateRange(type);
+            const allDatesInData = Object.values(dateStructure).flat();
+            
+            hiddenDates.clear();
+            allDatesInData.forEach(dateStr => {
+                const tradeDate = parseDateString(dateStr);
+                if (tradeDate) {
+                    if (tradeDate < startDate || tradeDate > endDate) {
+                        hiddenDates.add(dateStr);
+                    }
+                }
+            });
+            
+            saveDateFilters();
+            updateDateFilterList();
+            applyFilters();
+        }
+
+        function filterToday() { filterDatesByRange('today'); }
+        function filterYesterday() { filterDatesByRange('yesterday'); }
+        function filterThisWeek() { filterDatesByRange('thisWeek'); }
+        function filterLastWeek() { filterDatesByRange('lastWeek'); }
+        function filterThisMonth() { filterDatesByRange('thisMonth'); }
+        function filterLastMonth() { filterDatesByRange('lastMonth'); }
+
+        function buildDateStructure() {
+            dateStructure = {};
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            allTrades.forEach(trade => {
+                if (!trade.date) return;
+                const parts = trade.date.split('/');
+                if (parts.length !== 3) return;
+                const monthIndex = parseInt(parts[1]) - 1;
+                const monthName = monthNames[monthIndex];
+                if (!dateStructure[monthName]) dateStructure[monthName] = [];
+                if (!dateStructure[monthName].includes(trade.date)) {
+                    dateStructure[monthName].push(trade.date);
+                }
+            });
+            
+            Object.keys(dateStructure).forEach(month => {
+                dateStructure[month].sort((a, b) => {
+                    const dayA = parseInt(a.split('/')[0]);
+                    const dayB = parseInt(b.split('/')[0]);
+                    return dayA - dayB;
+                });
+                if (!collapsedMonths.has(month)) {
+                    collapsedMonths.add(month);
+                }
+            });
+        }
+
+        function updateDateFilterList() {
+            if (Object.keys(dateStructure).length === 0) {
+                elements.dateFilterList.innerHTML = '<div style="padding: 14px; text-align: center; color: #9ca3af; font-size: 12px;">No dates</div>';
+                updateDateFilterBadge();
+                return;
+            }
+            
+            const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            const sortedMonths = Object.keys(dateStructure).sort((a, b) => 
+                monthOrder.indexOf(a) - monthOrder.indexOf(b)
+            );
+            
+            elements.dateFilterList.innerHTML = '';
+            
+            sortedMonths.forEach((month) => {
+                const dates = dateStructure[month];
+                const allDatesHidden = dates.every(d => hiddenDates.has(d));
+                const someDatesHidden = dates.some(d => hiddenDates.has(d)) && !allDatesHidden;
+                const isExpanded = !collapsedMonths.has(month);
+                
+                const monthItem = document.createElement('div');
+                monthItem.className = 'strategy-filter-item date-month-item';
+                monthItem.onclick = () => toggleMonth(month);
+                
+                const expandIcon = document.createElement('span');
+                expandIcon.className = 'expand-icon' + (isExpanded ? ' expanded' : '');
+                expandIcon.textContent = '▶';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'strategy-filter-checkbox';
+                checkbox.id = `month_${month}`;
+                checkbox.checked = !allDatesHidden;
+                if (someDatesHidden) checkbox.style.opacity = '0.5';
+                checkbox.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleMonthDatesRow(month);
+                };
+                
+                const label = document.createElement('label');
+                label.className = 'strategy-filter-label';
+                label.textContent = month;
+                
+                monthItem.appendChild(expandIcon);
+                monthItem.appendChild(checkbox);
+                monthItem.appendChild(label);
+                elements.dateFilterList.appendChild(monthItem);
+                
+                const childrenDiv = document.createElement('div');
+                childrenDiv.className = 'month-children' + (isExpanded ? ' expanded' : '');
+                
+                dates.forEach((date) => {
+                    const dateItem = document.createElement('div');
+                    dateItem.className = 'strategy-filter-item date-day-item';
+                    dateItem.onclick = () => toggleDateRow(date);
+                    
+                    const dateCheckbox = document.createElement('input');
+                    dateCheckbox.type = 'checkbox';
+                    dateCheckbox.className = 'strategy-filter-checkbox';
+                    dateCheckbox.id = `date_${date.replace(/\//g, '_')}`;
+                    dateCheckbox.checked = !hiddenDates.has(date);
+                    
+                    const dateLabel = document.createElement('label');
+                    dateLabel.className = 'strategy-filter-label';
+                    dateLabel.textContent = date;
+                    
+                    dateItem.appendChild(dateCheckbox);
+                    dateItem.appendChild(dateLabel);
+                    childrenDiv.appendChild(dateItem);
+                });
+                
+                elements.dateFilterList.appendChild(childrenDiv);
+            });
+            
+            updateDateFilterBadge();
+        }
+
+        function toggleMonth(month) {
+            if (collapsedMonths.has(month)) {
+                collapsedMonths.delete(month);
+            } else {
+                collapsedMonths.add(month);
+            }
+            saveDateFilters();
+            updateDateFilterList();
+        }
+
+        function toggleMonthDatesRow(month) {
+            const checkbox = document.getElementById(`month_${month}`);
+            if (!checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            const dates = dateStructure[month];
+            if (!dates) return;
+            
+            if (checkbox.checked) {
+                dates.forEach(d => hiddenDates.delete(d));
+            } else {
+                dates.forEach(d => hiddenDates.add(d));
+            }
+            
+            saveDateFilters();
+            updateDateFilterList();
+            applyFilters();
+        }
+
+        function toggleDateRow(date) {
+            const checkbox = document.getElementById(`date_${date.replace(/\//g, '_')}`);
+            if (!checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                hiddenDates.delete(date);
+            } else {
+                hiddenDates.add(date);
+            }
+            
+            saveDateFilters();
+            updateDateFilterList();
+            applyFilters();
+        }
+
+        function selectAllDates() {
+            hiddenDates.clear();
+            collapsedMonths.clear();
+            Object.keys(dateStructure).forEach(month => collapsedMonths.add(month));
+            saveDateFilters();
+            updateDateFilterList();
+            applyFilters();
+        }
+
+        function deselectAllDates() {
+            Object.values(dateStructure).forEach(dates => {
+                dates.forEach(d => hiddenDates.add(d));
+            });
+            collapsedMonths.clear();
+            Object.keys(dateStructure).forEach(month => collapsedMonths.add(month));
+            saveDateFilters();
+            updateDateFilterList();
+            applyFilters();
+        }
+
+        function updateDateFilterBadge() {
+            const totalDates = Object.values(dateStructure).flat().length;
+            const hiddenCount = hiddenDates.size;
+            
+            if (hiddenCount > 0 && totalDates > 0) {
+                elements.dateFilterBadge.textContent = hiddenCount;
+                elements.dateFilterBadge.style.display = 'inline-block';
+            } else {
+                elements.dateFilterBadge.style.display = 'none';
+            }
+        }
+
+        function updateStrategyFilterList() {
+            if (!strategies.length) {
+                elements.strategyFilterList.innerHTML = '<div style="padding: 14px; text-align: center; color: #9ca3af; font-size: 12px;">No strategies</div>';
+                updateStrategyFilterBadge();
+                return;
+            }
+            
+            elements.strategyFilterList.innerHTML = '';
+            
+            strategies.forEach((strategy) => {
+                const item = document.createElement('div');
+                item.className = 'strategy-filter-item';
+                item.onclick = () => toggleStrategyRow(strategy);
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'strategy-filter-checkbox';
+                checkbox.id = `strat_${strategy}`;
+                checkbox.checked = !hiddenStrategies.has(strategy);
+                
+                const label = document.createElement('label');
+                label.className = 'strategy-filter-label';
+                label.textContent = strategy;
+                
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                elements.strategyFilterList.appendChild(item);
+            });
+            
+            updateStrategyFilterBadge();
+        }
+
+        function toggleStrategyRow(strategy) {
+            const checkbox = document.getElementById(`strat_${strategy}`);
+            if (!checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                hiddenStrategies.delete(strategy);
+            } else {
+                hiddenStrategies.add(strategy);
+            }
+            
+            saveStrategyFilters();
+            updateStrategyFilterBadge();
+            setTimeout(() => applyFilters(), 10);
+        }
+
+        function selectAllStrategies() {
+            hiddenStrategies.clear();
+            saveStrategyFilters();
+            updateStrategyFilterList();
+            setTimeout(() => applyFilters(), 10);
+        }
+
+        function deselectAllStrategies() {
+            strategies.forEach(s => hiddenStrategies.add(s));
+            saveStrategyFilters();
+            updateStrategyFilterList();
+            setTimeout(() => applyFilters(), 10);
+        }
+
+        function updateStrategyFilterBadge() {
+            const hiddenCount = hiddenStrategies.size;
+            if (hiddenCount > 0 && strategies.length > 0) {
+                elements.strategyFilterBadge.textContent = hiddenCount;
+                elements.strategyFilterBadge.style.display = 'inline-block';
+            } else {
+                elements.strategyFilterBadge.style.display = 'none';
+            }
+        }
+
+        function updateBrokerStrategyFilterList() {
+            if (!brokerStrategies.length) {
+                elements.brokerStrategyFilterList.innerHTML = '<div style="padding: 14px; text-align: center; color: #9ca3af; font-size: 12px;">No broker strategies</div>';
+                updateBrokerFilterBadge();
+                return;
+            }
+            
+            elements.brokerStrategyFilterList.innerHTML = '';
+            
+            brokerStrategies.forEach((strategy) => {
+                const item = document.createElement('div');
+                item.className = 'strategy-filter-item';
+                item.onclick = () => toggleBrokerStrategyRow(strategy);
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'strategy-filter-checkbox';
+                checkbox.id = `broker_${strategy}`;
+                checkbox.checked = !hiddenBrokerStrategies.has(strategy);
+                
+                const label = document.createElement('label');
+                label.className = 'strategy-filter-label';
+                label.textContent = formatStrategyName(strategy);
+                
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                elements.brokerStrategyFilterList.appendChild(item);
+            });
+            
+            updateBrokerFilterBadge();
+        }
+
+        function toggleBrokerStrategyRow(strategy) {
+            const checkbox = document.getElementById(`broker_${strategy}`);
+            if (!checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                hiddenBrokerStrategies.delete(strategy);
+            } else {
+                hiddenBrokerStrategies.add(strategy);
+            }
+            
+            saveBrokerFilters();
+            updateBrokerFilterBadge();
+            setTimeout(() => applyFilters(), 10);
+        }
+
+        function selectAllBrokerStrategies() {
+            hiddenBrokerStrategies.clear();
+            saveBrokerFilters();
+            updateBrokerStrategyFilterList();
+            setTimeout(() => applyFilters(), 10);
+        }
+
+        function deselectAllBrokerStrategies() {
+            brokerStrategies.forEach(s => hiddenBrokerStrategies.add(s));
+            saveBrokerFilters();
+            updateBrokerStrategyFilterList();
+            setTimeout(() => applyFilters(), 10);
+        }
+
+        function updateBrokerFilterBadge() {
+            const hiddenCount = hiddenBrokerStrategies.size;
+            if (hiddenCount > 0 && brokerStrategies.length > 0) {
+                elements.brokerFilterBadge.textContent = hiddenCount;
+                elements.brokerFilterBadge.style.display = 'inline-block';
+            } else {
+                elements.brokerFilterBadge.style.display = 'none';
+            }
+        }
+
+        function formatStrategyName(strategyName) {
+            if (!strategyName) return strategyName;
+            return strategyName.replace(/_/g, ' ').replace(/(\d)(PRO)/g, '$1 $2');
+        }
+
+        function extractBrokerStrategies() {
+            const strategiesSet = new Set();
+            const mainStrategiesSet = new Set();
+            
+            allTrades.forEach(trade => {
+                if (trade.strategy) mainStrategiesSet.add(trade.strategy);
+                if (trade.strategyDetails) {
+                    Object.keys(trade.strategyDetails).forEach(stratName => {
+                        if (!stratName.startsWith('A.PRO')) {
+                            strategiesSet.add(stratName);
+                        }
+                    });
+                }
+            });
+            
+            brokerStrategies = Array.from(strategiesSet).sort((a, b) => {
+                const aBroker = a.match(/^(B\d+)/)?.[1] || '';
+                const bBroker = b.match(/^(B\d+)/)?.[1] || '';
+                const aPro = a.match(/PRO\s*(\d+)/i)?.[1] || '0';
+                const bPro = b.match(/PRO\s*(\d+)/i)?.[1] || '0';
+                if (aBroker !== bBroker) return aBroker.localeCompare(bBroker);
+                return parseInt(aPro) - parseInt(bPro);
+            });
+            
+            strategies = Array.from(mainStrategiesSet).sort();
+            
+            updateBrokerStrategyFilterList();
+            updateStrategyFilterList();
+            buildTableHeaders('all');
+        }
+
+        async function applyFilters() {
+            const symbolFilter = elements.symbolFilter.value.toUpperCase().trim();
+            let tempTrades = [...allTrades];
+            
+            if (hiddenDates.size > 0) {
+                tempTrades = tempTrades.filter(trade => !hiddenDates.has(trade.date));
+            }
+            
+            const visibleStrategies = strategies.filter(s => !hiddenStrategies.has(s));
+            if (strategies.length && visibleStrategies.length < strategies.length) {
+                tempTrades = tempTrades.filter(trade => visibleStrategies.includes(trade.strategy));
+            }
+            
+            if (symbolFilter) {
+                tempTrades = tempTrades.filter(trade => trade.symbol?.toUpperCase().includes(symbolFilter));
+            }
+            
+            // Apply column filters
+            Object.keys(columnFilters).forEach(filterKey => {
+                const filter = columnFilters[filterKey];
+                
+                tempTrades = tempTrades.filter(trade => {
+                    let value;
+                    
+                    if (filterKey.includes('_')) {
+                        const [stratName, field] = filterKey.split('_');
+                        value = trade.strategyDetails?.[stratName]?.[field];
+                    } else {
+                        value = trade[filterKey];
+                    }
+                    
+                    return testFilter(value, filter);
+                });
+            });
+            
+            const visibleBrokerStrategies = brokerStrategies.filter(s => !hiddenBrokerStrategies.has(s));
+            
+            filteredTrades = tempTrades;
+            
+            const showAll = !brokerStrategies.length || visibleBrokerStrategies.length === brokerStrategies.length;
+            buildTableHeaders(showAll ? 'all' : visibleBrokerStrategies);
+            currentPage = 1;
+            renderTable();
+        }
+
+        async function resetFilters() {
+            elements.symbolFilter.value = '';
+            elements.rowsPerPage.value = '15';
+            hiddenStrategies.clear();
+            hiddenBrokerStrategies.clear();
+            hiddenDates.clear();
+            collapsedMonths.clear();
+            Object.keys(dateStructure).forEach(month => collapsedMonths.add(month));
+            columnFilters = {};
+            currentPage = 1;
+            
+            try {
+                localStorage.removeItem('reportStrategyFilters');
+                localStorage.removeItem('reportBrokerStrategyFilters');
+                localStorage.removeItem('reportDateFilters');
+                localStorage.removeItem('reportCollapsedMonths');
+            } catch (e) {}
+            
+            updateStrategyFilterList();
+            updateBrokerStrategyFilterList();
+            updateDateFilterList();
+            sortColumn = null;
+            sortDirection = 'asc';
+            document.querySelectorAll('.report-table th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+            buildTableHeaders('all');
+            filteredTrades = [...allTrades];
+            renderTable();
+        }
+
+        function buildTableHeaders(filterBrokerStrategy = 'all') {
+            let displayStrategies;
+            if (filterBrokerStrategy === 'all') {
+                displayStrategies = brokerStrategies;
+            } else if (Array.isArray(filterBrokerStrategy)) {
+                displayStrategies = filterBrokerStrategy;
+            } else {
+                displayStrategies = [filterBrokerStrategy];
+            }
+            
+            const colors = ['#fef5f5', '#fefaf5', '#fefef5', '#f5fef8', '#f5f8fe', '#f8f5fe'];
+            const colsPerStrategy = showBuySellColumns ? 7 : 4;
+            
+            const totals = { profit: 0 };
+            const brokerTotals = {};
+            displayStrategies.forEach(stratName => {
+                brokerTotals[stratName] = { pnl: 0, dpnl: 0, dbuy: 0, dsell: 0 };
+            });
+            
+            filteredTrades.forEach(trade => {
+                totals.profit += trade.profit || 0;
+                displayStrategies.forEach(stratName => {
+                    const details = trade.strategyDetails?.[stratName] || {};
+                    brokerTotals[stratName].pnl += details.pnl || 0;
+                    brokerTotals[stratName].dpnl += details.dpnl || 0;
+                    brokerTotals[stratName].dbuy += details.dbuy || 0;
+                    brokerTotals[stratName].dsell += details.dsell || 0;
+                });
+            });
+            
+            let totalsRow = `<tr class="totals-row">
+                <th colspan="5" style="text-align: left; font-weight: 600;">FILTERED TOTALS</th>
+                <th class="number-col" style="border-right: none;"></th>
+                <th class="number-col" style="border-right: none;"></th>
+                <th class="number-col" style="border-right: none;"></th>
+                <th class="number-col ${totals.profit >= 0 ? 'positive' : 'negative'}">₹${Math.abs(totals.profit).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+            
+            displayStrategies.forEach((stratName, index) => {
+                const bt = brokerTotals[stratName];
+                const bgColor = colors[index % colors.length];
+                const groupStyle = `style="background: linear-gradient(to bottom, ${adjustColor(bgColor, -10)} 0%, ${adjustColor(bgColor, -15)} 100%);"`;
+                const lastColStyle = `style="background: linear-gradient(to bottom, ${adjustColor(bgColor, -10)} 0%, ${adjustColor(bgColor, -15)} 100%); border-right: 2px solid #bae6fd;"`;
+                
+                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.dpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.dbuy >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.dbuy).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.dsell >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.dsell).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
+                totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
+                totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColStyle}></th>`;
+            });
+            totalsRow += '</tr>';
+            
+            const mainColumns = ['sno', 'date', 'strategy', 'trade', 'symbol', 'qty', 'entry', 'exit', 'profit'];
+            const columnLabels = { sno: 'S.No', date: 'Date', strategy: 'Strategy', trade: 'Trade', symbol: 'Symbol', qty: 'Qty', entry: 'Entry', exit: 'Exit', profit: 'Profit' };
+            
+            let headerRow1 = '<tr class="header-row-1">';
+            mainColumns.forEach(col => {
+                const hasFilter = columnFilters[col];
+                const filterIcon = hasFilter ? ' active' : '';
+                const isNumber = ['qty', 'entry', 'exit', 'profit'].includes(col);
+                headerRow1 += `<th rowspan="2" class="sortable${isNumber ? ' number-col' : ''}" data-column="${col}">
+                    ${columnLabels[col]}
+                    <span class="filter-icon${filterIcon}" data-filter-column="${col}">🔽</span>
+                </th>`;
+            });
+            
+            displayStrategies.forEach((stratName, index) => {
+                const displayName = formatStrategyName(stratName);
+                const bgColor = colors[index % colors.length];
+                const borderStyle = 'border-right: 2px solid #d1d5db; border-left: ' + (index === 0 ? '2px solid #d1d5db;' : '0;');
+                headerRow1 += `<th colspan="${colsPerStrategy}" class="number-col" style="background: linear-gradient(to bottom, ${bgColor} 0%, ${adjustColor(bgColor, -3)} 100%); ${borderStyle}">${displayName}</th>`;
+            });
+            headerRow1 += '</tr>';
+            
+            let headerRow2 = '<tr class="header-row-2">';
+            displayStrategies.forEach((stratName, index) => {
+                const bgColor = colors[index % colors.length];
+                const baseBg = `background: linear-gradient(to bottom, ${adjustColor(bgColor, -3)} 0%, ${adjustColor(bgColor, -6)} 100%);`;
+                const firstColBorder = index === 0 ? 'border-left: 2px solid #d1d5db;' : '';
+                const lastColBorder = 'border-right: 2px solid #d1d5db;';
+                
+                const fields = ['pnl', 'dpnl', 'dbuy', 'dsell', 'buy', 'sell', 'qty'];
+                const fieldLabels = { pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', buy: 'BUY', sell: 'SELL', qty: 'QTY' };
+                
+                fields.forEach((field, fIdx) => {
+                    const filterKey = `${stratName}_${field}`;
+                    const hasFilter = columnFilters[filterKey];
+                    const filterIcon = hasFilter ? ' active' : '';
+                    const isBuySell = ['buy', 'sell', 'qty'].includes(field);
+                    const border = fIdx === 0 ? firstColBorder : (fIdx === fields.length - 1 ? lastColBorder : '');
+                    const buySellClass = isBuySell ? ` buy-sell-column${showBuySellColumns ? ' visible' : ''}` : '';
+                    
+                    headerRow2 += `<th class="number-col sortable${buySellClass}" data-stratname="${stratName}" data-field="${field}" style="${baseBg} ${border}">
+                        ${fieldLabels[field]}
+                        <span class="filter-icon${filterIcon}" data-filter-strat="${stratName}" data-filter-field="${field}">🔽</span>
+                    </th>`;
+                });
+            });
+            headerRow2 += '</tr>';
+            
+            elements.tableHeaders.innerHTML = totalsRow + headerRow1 + headerRow2;
+        }
+
+        function adjustColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255))
+                .toString(16).slice(1);
+        }
+
+        function createTableRow(trade, displayStrategies) {
+            const profit = trade.profit || 0;
+            const profitClass = profit > 0 ? 'positive' : profit < 0 ? 'negative' : '';
+            const colors = ['#fef5f5', '#fefaf5', '#fefef5', '#f5fef8', '#f5f8fe', '#f8f5fe'];
+            
+            let row = `<tr>
+                <td>${trade.sno || ''}</td>
+                <td>${convertDateToShortFormat(trade.date)}</td>
+                <td>${trade.strategy || ''}</td>
+                <td>${trade.trade || ''}</td>
+                <td>${trade.symbol || ''}</td>
+                <td class="number-col">${trade.qty || ''}</td>
+                <td class="number-col">${trade.entry ? trade.entry.toFixed(2) : ''}</td>
+                <td class="number-col">${trade.exit ? trade.exit.toFixed(2) : ''}</td>
+                <td class="number-col ${profitClass}">${profit !== 0 ? `₹${Math.abs(profit).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : ''}</td>`;
+            
+            displayStrategies.forEach((stratName, index) => {
+                const details = trade.strategyDetails?.[stratName] || {};
+                const pnl = details.pnl || 0;
+                const dpnl = details.dpnl || 0;
+                const buy = details.buy || 0;
+                const sell = details.sell || 0;
+                const dbuy = details.dbuy || 0;
+                const dsell = details.dsell || 0;
+                const qty = details.qty || 0;
+                
+                const bgColor = colors[index % colors.length];
+                const pnlClass = pnl > 0 ? 'positive' : pnl < 0 ? 'negative' : '';
+                const dpnlClass = dpnl > 0 ? 'positive' : dpnl < 0 ? 'negative' : '';
+                const dbuyClass = dbuy > 0 ? 'positive' : dbuy < 0 ? 'negative' : '';
+                const dsellClass = dsell > 0 ? 'positive' : dsell < 0 ? 'negative' : '';
+                const groupBorder = 'style="background-color: ' + bgColor + ';"';
+                const lastColBorder = 'style="background-color: ' + bgColor + '; border-right: 2px solid #d1d5db;"';
+                
+                row += `<td class="number-col ${pnlClass}" ${groupBorder}>${pnl !== 0 ? Math.abs(pnl).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dpnlClass}" ${groupBorder}>${dpnl !== 0 ? Math.abs(dpnl).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dbuyClass}" ${groupBorder}>${dbuy !== 0 ? Math.abs(dbuy).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dsellClass}" ${groupBorder}>${dsell !== 0 ? Math.abs(dsell).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorder}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorder}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${qty !== 0 ? qty : ''}</td>`;
+            });
+            
+            return row + '</tr>';
+        }
+
+        function renderTable() {
+            const visibleBrokerStrategies = brokerStrategies.filter(s => !hiddenBrokerStrategies.has(s));
+            const displayStrategies = visibleBrokerStrategies.length === brokerStrategies.length ? 
+                brokerStrategies : visibleBrokerStrategies;
+            
+            const rowsPerPage = elements.rowsPerPage.value === 'all' ? 
+                filteredTrades.length : parseInt(elements.rowsPerPage.value);
+            const totalPages = Math.ceil(filteredTrades.length / rowsPerPage);
+            
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+            
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, filteredTrades.length);
+            const pageData = filteredTrades.slice(startIndex, endIndex);
+
+            const colsPerStrategy = showBuySellColumns ? 7 : 4;
+            const totalCols = 9 + (displayStrategies.length * colsPerStrategy);
+
+            if (filteredTrades.length === 0) {
+                elements.tableBody.innerHTML = `<tr><td colspan="${totalCols}" class="no-data">No trades found</td></tr>`;
+                elements.pagination.style.display = 'none';
+                return;
+            }
+
+            const rowsHTML = pageData.map(trade => createTableRow(trade, displayStrategies)).join('');
+            elements.tableBody.innerHTML = rowsHTML;
+
+            if (elements.rowsPerPage.value !== 'all') {
+                elements.pagination.style.display = 'flex';
+                elements.paginationInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredTrades.length.toLocaleString()}`;
+                renderPagination(totalPages);
+            } else {
+                elements.pagination.style.display = 'none';
+            }
+        }
+
+        function renderPagination(totalPages) {
+            const maxButtons = 7;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+
+            let html = `<button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Prev</button>`;
+            
+            if (startPage > 1) {
+                html += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) html += `<span style="padding: 0 5px; color: #9ca3af;">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span style="padding: 0 5px; color: #9ca3af;">...</span>`;
+                html += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>`;
+            
+            elements.paginationControls.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const rowsPerPage = elements.rowsPerPage.value === 'all' ? filteredTrades.length : parseInt(elements.rowsPerPage.value);
+            const totalPages = Math.ceil(filteredTrades.length / rowsPerPage);
+            
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderTable();
+        }
+
+        async function sortTable(column, th) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            document.querySelectorAll('.report-table th').forEach(t => {
+                t.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+            filteredTrades.sort((a, b) => {
+                let valA = a[column];
+                let valB = b[column];
+
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderTable();
+        }
+
+        async function sortTableByStrategy(stratName, field, th) {
+            const columnKey = `${stratName}_${field}`;
+            
+            if (sortColumn === columnKey) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = columnKey;
+                sortDirection = 'asc';
+            }
+
+            document.querySelectorAll('.report-table th').forEach(t => {
+                t.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+            filteredTrades.sort((a, b) => {
+                const valA = a.strategyDetails?.[stratName]?.[field] || 0;
+                const valB = b.strategyDetails?.[stratName]?.[field] || 0;
+
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderTable();
+        }
+
+        async function loadSampleData() {
+            showLoading('Generating sample data...', 'Creating 500 trades');
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                allTrades = [];
+                const strategiesArr = ['PRO 1', 'PRO 2', 'PRO 3', 'PRO 4', 'PRO 5'];
+                const symbols = ['NIFTY', 'BANKNIFTY', 'FINNIFTY', 'SENSEX', 'ECLERX', 'TANLA', 'CHALET'];
+                const trades = ['LONG', 'SHORT'];
+                
+                for (let i = 0; i < 500; i++) {
+                    if (i % 100 === 0 && i > 0) {
+                        elements.loadingSubtext.textContent = `Created ${i} of 500...`;
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
+                    
+                    const strategy = strategiesArr[Math.floor(Math.random() * strategiesArr.length)];
+                    const profit = (Math.random() - 0.45) * 5000;
+                    
+                    const strategyDetails = {};
+                    
+                    ['B1PRO2', 'B1PRO3', 'B2PRO4', 'B2PRO5'].forEach((stratName, idx) => {
+                        const isActive = strategy === strategiesArr[idx % strategiesArr.length];
+                        const pnl = isActive ? profit : 0;
+                        const buyPrice = 18000 + Math.random() * 2000;
+                        const sellPrice = buyPrice + (pnl / (Math.floor(Math.random() * 100) + 25));
+                        
+                        strategyDetails[stratName] = {
+                            buy: isActive ? buyPrice : 0,
+                            qty: isActive ? Math.floor(Math.random() * 100) + 25 : 0,
+                            sell: isActive ? sellPrice : 0,
+                            dbuy: isActive ? buyPrice + (Math.random() - 0.5) * 100 : 0,
+                            dsell: isActive ? sellPrice + (Math.random() - 0.5) * 100 : 0,
+                            pnl: pnl,
+                            dpnl: pnl * 0.05
+                        };
+                    });
+                    
+                    allTrades.push({
+                        sno: i + 1,
+                        date: `${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}/01/25`,
+                        strategy: strategy,
+                        trade: trades[Math.floor(Math.random() * trades.length)],
+                        symbol: symbols[Math.floor(Math.random() * symbols.length)],
+                        qty: Math.floor(Math.random() * 100) + 25,
+                        entry: 18000 + Math.random() * 2000,
+                        exit: 18000 + Math.random() * 2000,
+                        profit: profit,
+                        strategyDetails: strategyDetails
+                    });
+                }
+                
+                filteredTrades = [...allTrades];
+                extractBrokerStrategies();
+                buildDateStructure();
+                updateDateFilterList();
+                cleanupSavedFilters();
+                await applyFilters();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function exportToCSV() {
+            if (filteredTrades.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const visibleBrokerStrategies = brokerStrategies.filter(s => !hiddenBrokerStrategies.has(s));
+            const displayStrategies = visibleBrokerStrategies.length === brokerStrategies.length ? 
+                brokerStrategies : visibleBrokerStrategies;
+
+            const headers = ['S.No', 'Date', 'Strategy', 'Trade', 'Symbol', 'Qty', 'Entry', 'Exit', 'Profit'];
+            displayStrategies.forEach(stratName => {
+                const displayName = formatStrategyName(stratName);
+                headers.push(`${displayName} PNL`, `${displayName} DPNL`);
+                headers.push(`${displayName} DBUY`, `${displayName} DSELL`);
+                if (showBuySellColumns) {
+                    headers.push(`${displayName} BUY`, `${displayName} SELL`, `${displayName} QTY`);
+                }
+            });
+            
+            const rows = filteredTrades.map(trade => {
+                const row = [
+                    trade.sno || '', trade.date || '', trade.strategy || '', trade.trade || '',
+                    trade.symbol || '', trade.qty || '', trade.entry?.toFixed(2) || '',
+                    trade.exit?.toFixed(2) || '', trade.profit || ''
+                ];
+                
+                displayStrategies.forEach(stratName => {
+                    const details = trade.strategyDetails?.[stratName] || {};
+                    row.push(details.pnl || '', details.dpnl || '');
+                    row.push(details.dbuy || '', details.dsell || '');
+                    if (showBuySellColumns) {
+                        row.push(details.buy || '', details.sell || '', details.qty || '');
+                    }
+                });
+                
+                return row;
+            });
+
+            const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `trade_report_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function toggleBuySellColumns() {
+            showBuySellColumns = !showBuySellColumns;
+            document.getElementById('buySellBtnText').textContent = showBuySellColumns ? 'Hide Buy/Sell/Qty' : 'Show Buy/Sell/Qty';
+            const visibleBrokerStrategies = brokerStrategies.filter(s => !hiddenBrokerStrategies.has(s));
+            const showAll = !brokerStrategies.length || visibleBrokerStrategies.length === brokerStrategies.length;
+            buildTableHeaders(showAll ? 'all' : visibleBrokerStrategies);
+            renderTable();
+        }
+
+        window.addEventListener('DOMContentLoaded', initEventListeners);
+
+        window.addEventListener('message', async (event) => {
+            const { type, data } = event.data;
+            if (type === 'TRADES_DATA') {
+                showLoading('Loading data...', `Processing ${data?.length || 0} trades`);
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    allTrades = data || [];
+                    filteredTrades = [...allTrades];
+                    extractBrokerStrategies();
+                    buildDateStructure();
+                    updateDateFilterList();
+                    cleanupSavedFilters();
+                    await applyFilters();
+                } finally {
+                    hideLoading();
+                }
+            } else if (type === 'LOAD_SAMPLE_DATA') {
+                await loadSampleData();
+            }
+        });
+    </script>
+</body>
+</html>
