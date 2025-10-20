@@ -323,9 +323,9 @@
             font-size: 13px;
         }
         
-        .strategy-bg-apro { background: #f9fefb; }  /* extremely light green for A.PRO */
-        .strategy-bg-b1 { background: #fefbfc; }    /* extremely light pink for B1 */
-        .strategy-bg-b2 { background: #f9fcfe; }    /* extremely light blue for B2 */
+        .strategy-bg-apro { background: #f9fefb; }
+        .strategy-bg-b1 { background: #fefbfc; }
+        .strategy-bg-b2 { background: #f9fcfe; }
         
         .no-data { text-align: center; color: #cbd5e1; padding: 40px; font-size: 14px; }
         
@@ -956,7 +956,7 @@
             runningMargin = 0;
             totalNetPnl = 0;
             
-            const totals = { strategies: {}, grandTotal: 0, grandNet: 0, totalCount: 0, netCount: 0, amibrokerTotal: 0, amibrokerCount: 0, marginTotal: 0, marginCount: 0, latestDayPnlTaxTotal: 0, latestDayPnlTaxCount: 0, totalMarginTotal: 0, totalMarginCount: 0 };
+            const totals = { strategies: {}, grandTotal: 0, grandNet: 0, totalCount: 0, netCount: 0, amibrokerTotal: 0, filteredAmibrokerTotal: 0, amibrokerCount: 0, filteredAmibrokerCount: 0, marginTotal: 0, marginCount: 0, latestDayPnlTaxTotal: 0, latestDayPnlTaxCount: 0, totalMarginTotal: 0, totalMarginCount: 0 };
             
             aproStrategies.forEach(strat => {
                 totals.strategies[strat] = { pnl: 0, count: 0 };
@@ -1029,6 +1029,7 @@
                 if (monthNet !== 0) totals.netCount += 1;
                 
                 let amibrokerTotal = 0;
+                let filteredAmibrokerTotal = 0;
                 
                 const monthTrades = allTrades.filter(trade => {
                     const tradeParts = trade.date.split('/');
@@ -1043,7 +1044,8 @@
                     }
                     
                     if (trade.strategyDetails) {
-                        brokerStrategies.forEach(brokerStrat => {
+                        const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+                        allBrokerStrategies.forEach(brokerStrat => {
                             const lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
                             if (lotSize > 0) {
                                 if (!dailyMaxLots[dateKey][brokerStrat] || lotSize > dailyMaxLots[dateKey][brokerStrat]) {
@@ -1064,7 +1066,8 @@
                                 if (proMatch) {
                                     const proNum = proMatch[1];
                                     
-                                    brokerStrategies.forEach(brokerStrat => {
+                                    const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+                                    allBrokerStrategies.forEach(brokerStrat => {
                                         const brokerProMatch = brokerStrat.match(/PRO\s*(\d+)/i);
                                         if (brokerProMatch && brokerProMatch[1] === proNum) {
                                             let lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
@@ -1073,7 +1076,12 @@
                                                 lotSize = dailyMaxLots[trade.date][brokerStrat];
                                             }
                                             
-                                            amibrokerTotal += (aproPnl * lotSize);
+                                            const contribution = aproPnl * lotSize;
+                                            amibrokerTotal += contribution;
+                                            
+                                            if (!hiddenStrategies.has(brokerStrat)) {
+                                                filteredAmibrokerTotal += contribution;
+                                            }
                                         }
                                     });
                                 }
@@ -1082,8 +1090,12 @@
                     }
                 });
                 
+                const displayAmibrokerTotal = showFilteredTotals ? filteredAmibrokerTotal : amibrokerTotal;
+                
                 totals.amibrokerTotal += amibrokerTotal;
+                totals.filteredAmibrokerTotal += filteredAmibrokerTotal;
                 if (amibrokerTotal !== 0) totals.amibrokerCount += 1;
+                if (filteredAmibrokerTotal !== 0) totals.filteredAmibrokerCount += 1;
                 
                 let monthMargin = 0;
                 let filteredMonthMargin = 0;
@@ -1293,7 +1305,7 @@
                 
                 runningMargin = totalMargin;
                 
-                bodyHtml += `<td class="number-col total-net-col ${amibrokerTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(amibrokerTotal)}</td>`;
+                bodyHtml += `<td class="number-col total-net-col ${displayAmibrokerTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(displayAmibrokerTotal)}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${monthNet >= 0 ? 'positive' : 'negative'}">${formatNumber(monthNet)}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${netPnlPercent >= 0 ? 'positive' : 'negative'}">${netPnlPercent !== 0 ? netPnlPercent.toFixed(2) + '%' : ''}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${totalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMargin)}</td>`;
@@ -1341,7 +1353,9 @@
             const validPercentages = netPnlPercentages.filter(p => p !== 0);
             const netPnlPercentAvg = validPercentages.length > 0 ? validPercentages.reduce((sum, p) => sum + p, 0) / validPercentages.length : 0;
             
-            const amibrokerAvg = totals.amibrokerCount > 0 ? totals.amibrokerTotal / totals.amibrokerCount : 0;
+            const amibrokerAvg = showFilteredTotals 
+                ? (totals.filteredAmibrokerCount > 0 ? totals.filteredAmibrokerTotal / totals.filteredAmibrokerCount : 0)
+                : (totals.amibrokerCount > 0 ? totals.amibrokerTotal / totals.amibrokerCount : 0);
             bodyHtml += `<td class="number-col total-net-col ${amibrokerAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(amibrokerAvg)}</td>`;
             
             bodyHtml += `<td class="number-col total-net-col ${netAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(netAvg)}</td>`;
@@ -1377,7 +1391,8 @@
                 });
             });
             
-            bodyHtml += `<td class="number-col total-net-col ${totals.amibrokerTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.amibrokerTotal)}</td>`;
+            const displayAmibrokerTotal = showFilteredTotals ? totals.filteredAmibrokerTotal : totals.amibrokerTotal;
+            bodyHtml += `<td class="number-col total-net-col ${displayAmibrokerTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(displayAmibrokerTotal)}</td>`;
             
             const netPnlPercentTotal = totals.totalMarginTotal !== 0 ? (totals.grandNet / totals.totalMarginTotal) * 100 : 0;
             
@@ -1388,7 +1403,6 @@
 
             elements.tableBody.innerHTML = bodyHtml;
             
-            // Update total net PNL
             totalNetPnl = totals.grandNet;
             
             updateStatsGrid();
