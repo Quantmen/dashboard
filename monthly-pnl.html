@@ -323,9 +323,9 @@
             font-size: 13px;
         }
         
-        .strategy-bg-apro { background: #f9fefb; }
-        .strategy-bg-b1 { background: #fefbfc; }
-        .strategy-bg-b2 { background: #f9fcfe; }
+        .strategy-bg-apro { background: #f0fdf4; }
+        .strategy-bg-dpnl { background: #fdf2f8; }
+        .strategy-bg-pnl { background: #fff7ed; }
         
         .no-data { text-align: center; color: #cbd5e1; padding: 40px; font-size: 14px; }
         
@@ -932,16 +932,14 @@
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const displayName = formatStrategyName(strategy).replace(/^B\d+\s*/, '');
-                    const bgClass = getStrategyBgClass(strategy);
-                    headerRow2 += `<th class="number-col ${bgClass}">${displayName}</th>`;
+                    headerRow2 += `<th class="number-col strategy-bg-dpnl">${displayName}</th>`;
                 });
             });
             
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const displayName = formatStrategyName(strategy).replace(/^B\d+\s*/, '');
-                    const bgClass = getStrategyBgClass(strategy);
-                    headerRow2 += `<th class="number-col ${bgClass}">${displayName}</th>`;
+                    headerRow2 += `<th class="number-col strategy-bg-pnl">${displayName}</th>`;
                 });
             });
             
@@ -1002,10 +1000,8 @@
                         totals.strategies[strategy].pnl += pnl;
                         if (dpnl !== 0) totals.strategies[strategy].dpnlCount += 1;
                         if (pnl !== 0) totals.strategies[strategy].pnlCount += 1;
-
-                        const bgClass = getStrategyBgClass(strategy);
                         
-                        bodyHtml += `<td class="number-col ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnl)}</td>`;
+                        bodyHtml += `<td class="number-col strategy-bg-dpnl ${dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnl)}</td>`;
                     });
                 });
 
@@ -1013,10 +1009,8 @@
                     brokerGroups[brokerCode].forEach(strategy => {
                         const stratData = monthlyData[month][strategy] || { pnl: 0, dpnl: 0 };
                         const pnl = stratData.pnl;
-
-                        const bgClass = getStrategyBgClass(strategy);
                         
-                        bodyHtml += `<td class="number-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
+                        bodyHtml += `<td class="number-col strategy-bg-pnl ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
                     });
                 });
 
@@ -1328,9 +1322,8 @@
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
                     const dpnlAvg = stratTotal.dpnlCount > 0 ? stratTotal.dpnl / stratTotal.dpnlCount : 0;
-                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${dpnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnlAvg)}</td>`;
+                    bodyHtml += `<td class="number-col strategy-bg-dpnl ${dpnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnlAvg)}</td>`;
                 });
             });
 
@@ -1338,9 +1331,8 @@
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
                     const pnlAvg = stratTotal.pnlCount > 0 ? stratTotal.pnl / stratTotal.pnlCount : 0;
-                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${pnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(pnlAvg)}</td>`;
+                    bodyHtml += `<td class="number-col strategy-bg-pnl ${pnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(pnlAvg)}</td>`;
                 });
             });
             
@@ -1376,18 +1368,16 @@
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
-                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.dpnl)}</td>`;
+                    bodyHtml += `<td class="number-col strategy-bg-dpnl ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.dpnl)}</td>`;
                 });
             });
 
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
-                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
+                    bodyHtml += `<td class="number-col strategy-bg-pnl ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
                 });
             });
             
