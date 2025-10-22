@@ -48,6 +48,15 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             min-width: 140px;
         }
+        .stat-box.net-profit-box {
+            background: #f0fdf4;
+        }
+        .stat-box.total-expense-box {
+            background: #fdf2f8;
+        }
+        .stat-box.running-margin-box {
+            background: #fffbeb;
+        }
         .stat-label {
             color: #6b7280;
             font-weight: 500;
@@ -235,25 +244,25 @@
         .monthly-table th.total-net-col {
             min-width: 100px;
             max-width: none;
-            background: #fef9c3 !important;
+            background: #f3f4f6 !important;
             font-weight: 550;
-            color: #854d0e;
+            color: #6b7280;
             font-size: 11px;
         }
         .monthly-table th.net-pnl-percent-col {
             min-width: 70px;
             max-width: 70px;
-            background: #fef9c3 !important;
+            background: #f3f4f6 !important;
             font-weight: 550;
-            color: #854d0e;
+            color: #6b7280;
             font-size: 11px;
         }
         .monthly-table th.expenses-col {
-            min-width: 100px;
-            max-width: 100px;
-            background: #fef9c3 !important;
+            min-width: 85px;
+            max-width: none;
+            background: #f3f4f6 !important;
             font-weight: 550;
-            color: #854d0e;
+            color: #6b7280;
             font-size: 11px;
         }
         .monthly-table td.number-col.total-net-col {
@@ -271,8 +280,8 @@
             font-size: 13px;
         }
         .monthly-table td.number-col.expenses-col {
-            min-width: 100px;
-            max-width: 100px;
+            min-width: 85px;
+            max-width: none;
             font-weight: 550;
             background: #fefce8 !important;
             font-size: 13px;
@@ -404,7 +413,7 @@
                 left: auto !important;
                 margin: 0 0 16px 0;
                 display: grid !important;
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(5, 1fr);
                 gap: 10px;
                 width: 100%;
                 order: 0;
@@ -455,12 +464,20 @@
                 <div class="stat-value" id="totalNetPnl">-</div>
             </div>
             <div class="stat-box">
+                <div class="stat-label">Running Profit</div>
+                <div class="stat-value" id="runningProfit">-</div>
+            </div>
+            <div class="stat-box running-margin-box">
                 <div class="stat-label">Running Margin</div>
                 <div class="stat-value" id="runningMargin">-</div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Running Profit</div>
-                <div class="stat-value" id="runningProfit">-</div>
+            <div class="stat-box total-expense-box">
+                <div class="stat-label">Total Expense</div>
+                <div class="stat-value" id="totalExpense">-</div>
+            </div>
+            <div class="stat-box net-profit-box">
+                <div class="stat-label">Total Net Profit</div>
+                <div class="stat-value" id="netProfit">-</div>
             </div>
         </div>
 
@@ -545,23 +562,26 @@
         let startingCapital = 0;
         let runningMargin = 0;
         let totalNetPnl = 0;
+        let totalExpenses = 0;
 
         function updateStatsGrid() {
             const startingCapitalEl = document.getElementById('startingCapital');
             const totalNetPnlEl = document.getElementById('totalNetPnl');
             const runningMarginEl = document.getElementById('runningMargin');
             const runningProfitEl = document.getElementById('runningProfit');
+            const totalExpenseEl = document.getElementById('totalExpense');
+            const netProfitEl = document.getElementById('netProfit');
             
             if (startingCapitalEl) {
-                startingCapitalEl.textContent = startingCapital > 0 ? formatNumber(startingCapital) : '-';
+                startingCapitalEl.textContent = startingCapital > 0 ? '₹' + formatNumber(startingCapital) : '-';
                 startingCapitalEl.className = 'stat-value';
             }
             if (totalNetPnlEl) {
-                totalNetPnlEl.textContent = totalNetPnl !== 0 ? formatNumber(totalNetPnl) : '-';
+                totalNetPnlEl.textContent = totalNetPnl !== 0 ? '₹' + formatNumber(totalNetPnl) : '-';
                 totalNetPnlEl.className = 'stat-value ' + (totalNetPnl >= 0 ? 'positive' : 'negative');
             }
             if (runningMarginEl) {
-                runningMarginEl.textContent = runningMargin > 0 ? formatNumber(runningMargin) : '-';
+                runningMarginEl.textContent = runningMargin > 0 ? '₹' + formatNumber(runningMargin) : '-';
                 runningMarginEl.className = 'stat-value ' + (runningMargin >= 0 ? 'positive' : 'negative');
             }
             if (runningProfitEl) {
@@ -573,6 +593,15 @@
                     runningProfitEl.textContent = '-';
                     runningProfitEl.className = 'stat-value';
                 }
+            }
+            if (totalExpenseEl) {
+                totalExpenseEl.textContent = totalExpenses !== 0 ? '₹' + formatNumber(totalExpenses) : '-';
+                totalExpenseEl.className = 'stat-value ' + (totalExpenses >= 0 ? 'positive' : 'negative');
+            }
+            if (netProfitEl) {
+                const netProfit = totalNetPnl + totalExpenses;
+                netProfitEl.textContent = (totalNetPnl !== 0 || totalExpenses !== 0) ? '₹' + formatNumber(netProfit) : '-';
+                netProfitEl.className = 'stat-value ' + (netProfit >= 0 ? 'positive' : 'negative');
             }
         }
 
@@ -1619,6 +1648,7 @@
             elements.tableBody.innerHTML = bodyHtml;
             
             totalNetPnl = totals.grandNet;
+            totalExpenses = totals.chargesWithdrawnTotal;
             
             updateStatsGrid();
         }
