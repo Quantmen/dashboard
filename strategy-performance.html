@@ -485,6 +485,28 @@
         .summary-card-value.positive { color: #059669; }
         .summary-card-value.negative { color: #f43f5e; }
         
+        /* Tablet Layout - Dynamic columns based on card count */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            /* Default: 4 columns (changed to fix 4-box layout) */
+            .summary-cards {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 12px;
+                flex-wrap: wrap;
+                overflow-x: visible;
+            }
+            
+            /* 3 columns when 5+ boxes */
+            .summary-cards.grid-3-cols {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .summary-card {
+                min-width: auto;
+                flex: none;
+            }
+        }
+        
         /* Comprehensive Mobile Responsive Styles */
         @media screen and (max-width: 768px) {
             .main-content {
@@ -1831,6 +1853,22 @@
             } else {
                 elements.currentDrawdown.textContent = '₹0';
                 elements.currentDrawdown.className = 'summary-card-value positive';
+            }
+            
+            // Adjust grid layout based on number of cards
+            adjustSummaryCardsGrid();
+        }
+
+        function adjustSummaryCardsGrid() {
+            const summaryCardsContainer = document.getElementById('summaryCards');
+            const cardCount = summaryCardsContainer.querySelectorAll('.summary-card').length;
+            
+            // Remove existing grid class
+            summaryCardsContainer.classList.remove('grid-3-cols');
+            
+            // Apply 3-column grid only when 5+ cards (default is 4 columns)
+            if (cardCount >= 5) {
+                summaryCardsContainer.classList.add('grid-3-cols');
             }
         }
 
