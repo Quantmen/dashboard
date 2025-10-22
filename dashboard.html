@@ -259,7 +259,16 @@
         @media (max-width: 1400px) {
             .bottom-grid { grid-template-columns: 1fr; }
         }
-        @media (max-width: 1024px) and (min-width: 769px) {
+        @media (max-width: 1024px) {
+            /* Top section - stack Today P&L and Strategy Performance vertically */
+            .top-section { 
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                grid-template-rows: auto auto !important;
+                gap: 16px !important;
+                margin-bottom: 16px !important;
+            }
+            
             /* Same layout as mobile: 3 cards in one row */
             .second-row { 
                 display: grid !important;
@@ -290,38 +299,23 @@
         }
         @media (max-width: 768px) {
             .main-content { padding: 12px; }
-            .top-section { grid-template-columns: 1fr; }
-            .bottom-grid { grid-template-columns: 1fr; }
             
-            /* Restructure second-row for mobile: 3 columns for cards, then chart full width */
-            .second-row { 
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                grid-template-rows: auto auto !important;
+            /* Top section already stacked from 1024px breakpoint */
+            .top-section { 
                 gap: 12px !important;
                 margin-bottom: 12px !important;
             }
             
-            /* Total Trades - first column */
-            .second-row .trades-card { 
-                grid-column: 1 !important;
-                grid-row: 1 !important;
-            }
+            .bottom-grid { grid-template-columns: 1fr; }
             
-            /* Middle column wrapper - spans 2 columns */
-            .second-row .middle-column { 
-                grid-column: 2 / 4 !important;
-                grid-row: 1 !important;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                grid-template-rows: auto !important;
+            /* Adjust spacing for mobile */
+            .second-row { 
                 gap: 12px !important;
+                margin-bottom: 12px !important;
             }
             
-            /* Chart - full width on second row */
-            .second-row .chart-card {
-                grid-column: 1 / -1 !important;
-                grid-row: 2 !important;
+            .second-row .middle-column { 
+                gap: 12px !important;
             }
             
             /* Reduce card padding and font sizes for mobile */
