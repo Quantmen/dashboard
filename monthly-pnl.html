@@ -323,9 +323,9 @@
             font-size: 13px;
         }
         
-        .strategy-bg-apro { background: #f0fdf4; }
-        .strategy-bg-dpnl { background: #fdf2f8; }
-        .strategy-bg-pnl { background: #fff7ed; }
+        .strategy-bg-apro { background: #f9fefb; }
+        .strategy-bg-b1 { background: #fefbfc; }
+        .strategy-bg-b2 { background: #f9fcfe; }
         
         .no-data { text-align: center; color: #cbd5e1; padding: 40px; font-size: 14px; }
         
@@ -572,7 +572,7 @@
             const html = allMonths.map(month => {
                 const isChecked = !hiddenMonths.has(month);
                 const monthIndex = parseInt(month) - 1;
-                const displayName = monthNames[monthIndex];
+                const displayName = (monthIndex >= 0 && monthIndex < 12) ? monthNames[monthIndex] : month;
                 return `<div class="strategy-filter-item" onclick="toggleMonthRow('${month}')">
                     <input type="checkbox" class="strategy-filter-checkbox" id="check_month_${month}" 
                            ${isChecked ? 'checked' : ''}>
@@ -715,8 +715,32 @@
 
         function formatNumber(num) {
             if (num === 0) return '';
-            const formatted = Math.abs(num).toLocaleString('en-IN', { maximumFractionDigits: 0 });
-            return num >= 0 ? formatted : `-${formatted}`;
+            const absNum = Math.abs(num);
+            const numStr = Math.round(absNum).toString();
+            
+            let result = '';
+            let len = numStr.length;
+            
+            if (len <= 3) {
+                result = numStr;
+            } else {
+                // Last 3 digits
+                result = numStr.slice(-3);
+                let remaining = numStr.slice(0, -3);
+                
+                // Add commas every 2 digits for the remaining part
+                while (remaining.length > 0) {
+                    if (remaining.length <= 2) {
+                        result = remaining + ',' + result;
+                        remaining = '';
+                    } else {
+                        result = remaining.slice(-2) + ',' + result;
+                        remaining = remaining.slice(0, -2);
+                    }
+                }
+            }
+            
+            return num >= 0 ? result : `-${result}`;
         }
 
         function loadSampleData() {
@@ -803,6 +827,10 @@
                 const dateParts = trade.date.split('/');
                 const monthKey = dateParts[1];
                 
+                if (!monthKey || monthKey === 'undefined' || monthKey === 'null') {
+                    return;
+                }
+                
                 if (!monthlyData[monthKey]) monthlyData[monthKey] = {};
 
                 Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
@@ -840,7 +868,7 @@
             
             const monthlyTotals = {};
             const filteredMonthlyTotals = {};
-            Object.keys(monthlyData).forEach(monthKey => {
+            Object.keys(monthlyData).filter(m => m && m !== 'undefined' && m !== 'null').forEach(monthKey => {
                 let totalPnl = 0;
                 let netPnl = 0;
                 let filteredTotalPnl = 0;
@@ -917,6 +945,7 @@
             headerRow1 += '<th rowspan="2" class="number-col total-net-col">AMI PNL</th>';
             headerRow1 += '<th rowspan="2" class="number-col total-net-col">NET PNL</th>';
             headerRow1 += '<th rowspan="2" class="number-col total-net-col">NET PNL %</th>';
+            headerRow1 += '<th rowspan="2" class="number-col total-net-col">Expenses</th>';
             headerRow1 += '<th rowspan="2" class="number-col total-net-col">TOTAL MARGIN</th>';
             
             headerRow1 += '</tr>';
@@ -932,14 +961,16 @@
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const displayName = formatStrategyName(strategy).replace(/^B\d+\s*/, '');
-                    headerRow2 += `<th class="number-col strategy-bg-dpnl">${displayName}</th>`;
+                    const bgClass = getStrategyBgClass(strategy);
+                    headerRow2 += `<th class="number-col ${bgClass}">${displayName}</th>`;
                 });
             });
             
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const displayName = formatStrategyName(strategy).replace(/^B\d+\s*/, '');
-                    headerRow2 += `<th class="number-col strategy-bg-pnl">${displayName}</th>`;
+                    const bgClass = getStrategyBgClass(strategy);
+                    headerRow2 += `<th class="number-col ${bgClass}">${displayName}</th>`;
                 });
             });
             
@@ -947,14 +978,16 @@
             
             elements.tableHeaders.innerHTML = headerRow1 + headerRow2;
 
-            const sortedMonths = Object.keys(monthlyData).sort();
+            const sortedMonths = Object.keys(monthlyData).filter(m => m && m !== 'undefined' && m !== 'null').sort();
             const visibleMonths = sortedMonths.filter(m => !hiddenMonths.has(m));
             
             startingCapital = 0;
             runningMargin = 0;
             totalNetPnl = 0;
+            let cumulativeNetPnl = 0;
+            let cumulativeCharges = 0;
             
-            const totals = { strategies: {}, grandTotal: 0, grandNet: 0, totalCount: 0, netCount: 0, amibrokerTotal: 0, filteredAmibrokerTotal: 0, amibrokerCount: 0, filteredAmibrokerCount: 0, marginTotal: 0, marginCount: 0, latestDayPnlTaxTotal: 0, latestDayPnlTaxCount: 0, totalMarginTotal: 0, totalMarginCount: 0 };
+            const totals = { strategies: {}, grandTotal: 0, grandNet: 0, totalCount: 0, netCount: 0, amibrokerTotal: 0, filteredAmibrokerTotal: 0, amibrokerCount: 0, filteredAmibrokerCount: 0, marginTotal: 0, marginCount: 0, latestDayPnlTaxTotal: 0, latestDayPnlTaxCount: 0, totalMarginTotal: 0, totalMarginCount: 0, chargesWithdrawnTotal: 0, chargesWithdrawnCount: 0, runningCapitalTotal: 0, runningCapitalCount: 0 };
             
             aproStrategies.forEach(strat => {
                 totals.strategies[strat] = { pnl: 0, count: 0 };
@@ -973,7 +1006,7 @@
             
             visibleMonths.forEach((month, monthIdx) => {
                 const monthIndex = parseInt(month) - 1;
-                const displayMonth = `${monthNames[monthIndex]}-25`;
+                const displayMonth = (monthIndex >= 0 && monthIndex < 12) ? `${monthNames[monthIndex]}-25` : (month && month !== 'undefined' ? month : '');
                 
                 bodyHtml += '<tr>';
                 bodyHtml += `<td class="month-col">${displayMonth}</td>`;
@@ -1000,8 +1033,10 @@
                         totals.strategies[strategy].pnl += pnl;
                         if (dpnl !== 0) totals.strategies[strategy].dpnlCount += 1;
                         if (pnl !== 0) totals.strategies[strategy].pnlCount += 1;
+
+                        const bgClass = getStrategyBgClass(strategy);
                         
-                        bodyHtml += `<td class="number-col strategy-bg-dpnl ${dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnl)}</td>`;
+                        bodyHtml += `<td class="number-col ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnl)}</td>`;
                     });
                 });
 
@@ -1009,8 +1044,10 @@
                     brokerGroups[brokerCode].forEach(strategy => {
                         const stratData = monthlyData[month][strategy] || { pnl: 0, dpnl: 0 };
                         const pnl = stratData.pnl;
+
+                        const bgClass = getStrategyBgClass(strategy);
                         
-                        bodyHtml += `<td class="number-col strategy-bg-pnl ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
+                        bodyHtml += `<td class="number-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
                     });
                 });
 
@@ -1097,106 +1134,180 @@
                 let filteredLatestDayPnlTax = 0;
                 
                 if (monthTrades.length > 0) {
-                    const brokerLatestMargins = {};
-                    const filteredBrokerLatestMargins = {};
-                    
+                    // Build history of margins by broker and date
+                    const brokerMarginsByDate = {};
                     const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
                     
                     monthTrades.forEach(trade => {
+                        const tradeDate = trade.date;
+                        if (!brokerMarginsByDate[tradeDate]) {
+                            brokerMarginsByDate[tradeDate] = {};
+                        }
+                        
                         if (trade.strategyDetails) {
                             allBrokerStrategies.forEach(brokerStrat => {
                                 const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
-                                const isHidden = hiddenStrategies.has(brokerStrat);
-                                
                                 const brokerMatch = brokerStrat.match(/^(B\d+)/);
+                                
                                 if (brokerMatch) {
                                     const brokerCode = brokerMatch[1];
-                                    
-                                    if (!brokerLatestMargins[brokerCode]) {
-                                        brokerLatestMargins[brokerCode] = {};
+                                    if (!brokerMarginsByDate[tradeDate][brokerCode]) {
+                                        brokerMarginsByDate[tradeDate][brokerCode] = {};
                                     }
-                                    if (!isHidden && !filteredBrokerLatestMargins[brokerCode]) {
-                                        filteredBrokerLatestMargins[brokerCode] = {};
-                                    }
-                                    
-                                    if (margin > 0) {
-                                        brokerLatestMargins[brokerCode][brokerStrat] = margin;
-                                        if (!isHidden) {
-                                            filteredBrokerLatestMargins[brokerCode][brokerStrat] = margin;
-                                        }
+                                    // Store MAX margin for each strategy on each date
+                                    if (!brokerMarginsByDate[tradeDate][brokerCode][brokerStrat] || margin > brokerMarginsByDate[tradeDate][brokerCode][brokerStrat]) {
+                                        brokerMarginsByDate[tradeDate][brokerCode][brokerStrat] = margin;
                                     }
                                 }
                             });
                         }
                     });
                     
-                    const brokerMaxMargins = {};
-                    Object.keys(brokerLatestMargins).forEach(brokerCode => {
-                        const strategyMargins = Object.values(brokerLatestMargins[brokerCode]);
-                        if (strategyMargins.length > 0) {
-                            brokerMaxMargins[brokerCode] = Math.max(...strategyMargins);
-                        }
+                    // Get sorted dates
+                    const sortedDates = Object.keys(brokerMarginsByDate).sort((a, b) => {
+                        const dayA = parseInt(a.split('/')[0]);
+                        const dayB = parseInt(b.split('/')[0]);
+                        return dayB - dayA; // Descending order (latest first)
                     });
                     
+                    // Get all unique brokers from the entire month
+                    const allBrokersInMonth = new Set();
+                    Object.values(brokerMarginsByDate).forEach(dateMargins => {
+                        Object.keys(dateMargins).forEach(broker => allBrokersInMonth.add(broker));
+                    });
+                    
+                    console.log(`Month ${monthIdx + 1}: Found ${allBrokersInMonth.size} brokers:`, Array.from(allBrokersInMonth));
+                    console.log(`Available dates (sorted):`, sortedDates);
+                    
+                    // For each broker, find the most recent day with non-zero margin (carry-forward logic)
+                    const brokerMaxMargins = {};
                     const filteredBrokerMaxMargins = {};
-                    Object.keys(filteredBrokerLatestMargins).forEach(brokerCode => {
-                        const strategyMargins = Object.values(filteredBrokerLatestMargins[brokerCode]);
-                        if (strategyMargins.length > 0) {
-                            filteredBrokerMaxMargins[brokerCode] = Math.max(...strategyMargins);
+                    
+                    allBrokersInMonth.forEach(brokerCode => {
+                        let brokerMargin = 0;
+                        let usedDate = null;
+                        
+                        // Start from latest date and work backwards
+                        for (let i = 0; i < sortedDates.length; i++) {
+                            const checkDate = sortedDates[i];
+                            
+                            if (brokerMarginsByDate[checkDate] && brokerMarginsByDate[checkDate][brokerCode]) {
+                                const strategyMargins = Object.entries(brokerMarginsByDate[checkDate][brokerCode]);
+                                const margins = strategyMargins.map(([strat, margin]) => margin);
+                                const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
+                                
+                                // If we find a non-zero margin, use it and stop looking
+                                if (maxMargin > 0) {
+                                    brokerMargin = maxMargin;
+                                    brokerMaxMargins[brokerCode] = maxMargin;
+                                    usedDate = checkDate;
+                                    console.log(`  ${brokerCode}: Using ${checkDate} → Margin: ₹${maxMargin.toLocaleString('en-US')}`);
+                                    
+                                    // Calculate filtered margin (excluding hidden strategies)
+                                    const filteredMargins = strategyMargins
+                                        .filter(([strat, margin]) => !hiddenStrategies.has(strat))
+                                        .map(([strat, margin]) => margin);
+                                    const maxFilteredMargin = filteredMargins.length > 0 ? Math.max(...filteredMargins) : 0;
+                                    if (maxFilteredMargin > 0) {
+                                        filteredBrokerMaxMargins[brokerCode] = maxFilteredMargin;
+                                    }
+                                    break;
+                                } else {
+                                    console.log(`  ${brokerCode}: ${checkDate} has zero margin, checking earlier...`);
+                                }
+                            }
+                        }
+                        
+                        if (!usedDate) {
+                            console.log(`  ${brokerCode}: No non-zero margin found in month`);
                         }
                     });
                     
                     monthMargin = Object.values(brokerMaxMargins).reduce((sum, val) => sum + val, 0);
                     filteredMonthMargin = Object.values(filteredBrokerMaxMargins).reduce((sum, val) => sum + val, 0);
                     
-                    const tradesByDate = {};
+                    console.log(`  Total Margin from all brokers: ₹${monthMargin.toLocaleString('en-US')}`);
+                    console.log(`  Broker margins:`, brokerMaxMargins);
+                    
+                    // PnL Tax calculation with carry-forward logic
+                    const brokerPnlTaxByDate = {};
                     monthTrades.forEach(trade => {
-                        const dateKey = trade.date;
-                        if (!tradesByDate[dateKey]) {
-                            tradesByDate[dateKey] = [];
+                        const tradeDate = trade.date;
+                        if (!brokerPnlTaxByDate[tradeDate]) {
+                            brokerPnlTaxByDate[tradeDate] = {};
                         }
-                        tradesByDate[dateKey].push(trade);
-                    });
-                    
-                    const sortedDates = Object.keys(tradesByDate).sort((a, b) => {
-                        const dayA = parseInt(a.split('/')[0]);
-                        const dayB = parseInt(b.split('/')[0]);
-                        return dayB - dayA;
-                    });
-                    
-                    if (sortedDates.length > 0) {
-                        const latestDate = sortedDates[0];
-                        const latestDateTrades = tradesByDate[latestDate];
                         
-                        const strategyPnlTaxMap = {};
-                        const filteredStrategyPnlTaxMap = {};
-                        latestDateTrades.forEach(trade => {
-                            if (trade && trade.strategyPnlTax) {
-                                Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
-                                    if (stratName.startsWith('A.PRO')) {
-                                        return;
-                                    }
-                                    
-                                    const isHidden = hiddenStrategies.has(stratName);
-                                    
-                                    if (!strategyPnlTaxMap[stratName]) {
-                                        strategyPnlTaxMap[stratName] = 0;
-                                    }
-                                    strategyPnlTaxMap[stratName] += pnlTax;
-                                    
-                                    if (!isHidden) {
-                                        if (!filteredStrategyPnlTaxMap[stratName]) {
-                                            filteredStrategyPnlTaxMap[stratName] = 0;
+                        if (trade && trade.strategyPnlTax) {
+                            Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                                if (!stratName.startsWith('A.PRO')) {
+                                    const brokerMatch = stratName.match(/^(B\d+)/);
+                                    if (brokerMatch) {
+                                        const brokerCode = brokerMatch[1];
+                                        if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
+                                            brokerPnlTaxByDate[tradeDate][brokerCode] = {};
                                         }
-                                        filteredStrategyPnlTaxMap[stratName] += pnlTax;
+                                        if (!brokerPnlTaxByDate[tradeDate][brokerCode][stratName]) {
+                                            brokerPnlTaxByDate[tradeDate][brokerCode][stratName] = 0;
+                                        }
+                                        brokerPnlTaxByDate[tradeDate][brokerCode][stratName] += pnlTax;
                                     }
-                                });
+                                }
+                            });
+                        }
+                    });
+                    
+                    // For each broker, use PnL Tax from the margin date FORWARD to end of month
+                    const strategyPnlTaxMap = {};
+                    const filteredStrategyPnlTaxMap = {};
+                    
+                    allBrokersInMonth.forEach(brokerCode => {
+                        // Find which date we used for this broker's margin
+                        for (let i = 0; i < sortedDates.length; i++) {
+                            const checkDate = sortedDates[i];
+                            
+                            if (brokerMarginsByDate[checkDate] && brokerMarginsByDate[checkDate][brokerCode]) {
+                                const strategyMargins = Object.entries(brokerMarginsByDate[checkDate][brokerCode]);
+                                const margins = strategyMargins.map(([strat, margin]) => margin);
+                                const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
+                                
+                                if (maxMargin > 0) {
+                                    console.log(`  ${brokerCode}: Found margin on ${checkDate}, accumulating PNL TAX from ${checkDate} to month end`);
+                                    
+                                    // Accumulate PnL Tax from this date FORWARD to end of month
+                                    // sortedDates is descending (latest first), so we go from i down to 0
+                                    for (let j = i; j >= 0; j--) {
+                                        const dateToCheck = sortedDates[j];
+                                        
+                                        if (brokerPnlTaxByDate[dateToCheck] && brokerPnlTaxByDate[dateToCheck][brokerCode]) {
+                                            Object.entries(brokerPnlTaxByDate[dateToCheck][brokerCode]).forEach(([stratName, pnlTax]) => {
+                                                const isHidden = hiddenStrategies.has(stratName);
+                                                
+                                                if (!strategyPnlTaxMap[stratName]) {
+                                                    strategyPnlTaxMap[stratName] = 0;
+                                                }
+                                                strategyPnlTaxMap[stratName] += pnlTax;
+                                                
+                                                if (!isHidden) {
+                                                    if (!filteredStrategyPnlTaxMap[stratName]) {
+                                                        filteredStrategyPnlTaxMap[stratName] = 0;
+                                                    }
+                                                    filteredStrategyPnlTaxMap[stratName] += pnlTax;
+                                                }
+                                            });
+                                            console.log(`    + PNL TAX from ${dateToCheck}`);
+                                        }
+                                    }
+                                    break;
+                                }
                             }
-                        });
-                        
-                        latestDayPnlTax = Object.values(strategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
-                        filteredLatestDayPnlTax = Object.values(filteredStrategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
-                    }
+                        }
+                    });
+                    
+                    latestDayPnlTax = Object.values(strategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
+                    filteredLatestDayPnlTax = Object.values(filteredStrategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
+                    
+                    console.log(`  Total PNL Tax: ₹${latestDayPnlTax.toLocaleString('en-US')}`);
+                    console.log(`  Final Total Margin = ₹${monthMargin.toLocaleString('en-US')} + ₹${latestDayPnlTax.toLocaleString('en-US')} = ₹${(monthMargin + latestDayPnlTax).toLocaleString('en-US')}`);
                 }
                 
                 const displayMargin = showFilteredTotals ? filteredMonthMargin : monthMargin;
@@ -1299,9 +1410,23 @@
                 
                 runningMargin = totalMargin;
                 
+                cumulativeNetPnl += monthNet;
+                
+                const runningCapital = startingCapital + cumulativeNetPnl;
+                const chargesWithdrawn = totalMargin - runningCapital - cumulativeCharges;
+                
+                cumulativeCharges += chargesWithdrawn;
+                
+                totals.chargesWithdrawnTotal += chargesWithdrawn;
+                if (chargesWithdrawn !== 0) totals.chargesWithdrawnCount += 1;
+                
+                totals.runningCapitalTotal += runningCapital;
+                if (runningCapital !== 0) totals.runningCapitalCount += 1;
+                
                 bodyHtml += `<td class="number-col total-net-col ${displayAmibrokerTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(displayAmibrokerTotal)}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${monthNet >= 0 ? 'positive' : 'negative'}">${formatNumber(monthNet)}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${netPnlPercent >= 0 ? 'positive' : 'negative'}">${netPnlPercent !== 0 ? netPnlPercent.toFixed(2) + '%' : ''}</td>`;
+                bodyHtml += `<td class="number-col total-net-col ${chargesWithdrawn >= 0 ? 'positive' : 'negative'}">${formatNumber(chargesWithdrawn)}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${totalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMargin)}</td>`;
 
                 bodyHtml += '</tr>';
@@ -1322,8 +1447,9 @@
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
                     const dpnlAvg = stratTotal.dpnlCount > 0 ? stratTotal.dpnl / stratTotal.dpnlCount : 0;
+                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col strategy-bg-dpnl ${dpnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnlAvg)}</td>`;
+                    bodyHtml += `<td class="number-col ${bgClass} ${dpnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnlAvg)}</td>`;
                 });
             });
 
@@ -1331,8 +1457,9 @@
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
                     const pnlAvg = stratTotal.pnlCount > 0 ? stratTotal.pnl / stratTotal.pnlCount : 0;
+                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col strategy-bg-pnl ${pnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(pnlAvg)}</td>`;
+                    bodyHtml += `<td class="number-col ${bgClass} ${pnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(pnlAvg)}</td>`;
                 });
             });
             
@@ -1341,6 +1468,8 @@
             const marginAvg = totals.marginCount > 0 ? totals.marginTotal / totals.marginCount : 0;
             const latestDayPnlTaxAvg = totals.latestDayPnlTaxCount > 0 ? totals.latestDayPnlTaxTotal / totals.latestDayPnlTaxCount : 0;
             const totalMarginAvg = totals.totalMarginCount > 0 ? totals.totalMarginTotal / totals.totalMarginCount : 0;
+            const chargesWithdrawnAvg = totals.chargesWithdrawnCount > 0 ? totals.chargesWithdrawnTotal / totals.chargesWithdrawnCount : 0;
+            const runningCapitalAvg = totals.runningCapitalCount > 0 ? totals.runningCapitalTotal / totals.runningCapitalCount : 0;
             
             const validPercentages = netPnlPercentages.filter(p => p !== 0);
             const netPnlPercentAvg = validPercentages.length > 0 ? validPercentages.reduce((sum, p) => sum + p, 0) / validPercentages.length : 0;
@@ -1352,6 +1481,7 @@
             
             bodyHtml += `<td class="number-col total-net-col ${netAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(netAvg)}</td>`;
             bodyHtml += `<td class="number-col total-net-col ${netPnlPercentAvg >= 0 ? 'positive' : 'negative'}">${netPnlPercentAvg !== 0 ? netPnlPercentAvg.toFixed(2) + '%' : ''}</td>`;
+            bodyHtml += `<td class="number-col total-net-col ${chargesWithdrawnAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(chargesWithdrawnAvg)}</td>`;
             bodyHtml += `<td class="number-col total-net-col ${totalMarginAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMarginAvg)}</td>`;
             bodyHtml += '</tr>';
 
@@ -1368,16 +1498,18 @@
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
+                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col strategy-bg-dpnl ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.dpnl)}</td>`;
+                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.dpnl)}</td>`;
                 });
             });
 
             sortedBrokers.forEach(brokerCode => {
                 brokerGroups[brokerCode].forEach(strategy => {
                     const stratTotal = totals.strategies[strategy];
+                    const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col strategy-bg-pnl ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
+                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
                 });
             });
             
@@ -1388,6 +1520,7 @@
             
             bodyHtml += `<td class="number-col total-net-col ${totals.grandNet >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.grandNet)}</td>`;
             bodyHtml += `<td class="number-col total-net-col ${netPnlPercentTotal >= 0 ? 'positive' : 'negative'}">${netPnlPercentTotal !== 0 ? netPnlPercentTotal.toFixed(2) + '%' : ''}</td>`;
+            bodyHtml += `<td class="number-col total-net-col ${totals.chargesWithdrawnTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.chargesWithdrawnTotal)}</td>`;
             bodyHtml += `<td class="number-col total-net-col ${totals.totalMarginTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalMarginTotal)}</td>`;
             bodyHtml += '</tr>';
 
