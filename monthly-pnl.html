@@ -240,6 +240,22 @@
             color: #854d0e;
             font-size: 11px;
         }
+        .monthly-table th.net-pnl-percent-col {
+            min-width: 70px;
+            max-width: 70px;
+            background: #fef9c3 !important;
+            font-weight: 550;
+            color: #854d0e;
+            font-size: 11px;
+        }
+        .monthly-table th.expenses-col {
+            min-width: 100px;
+            max-width: 100px;
+            background: #fef9c3 !important;
+            font-weight: 550;
+            color: #854d0e;
+            font-size: 11px;
+        }
         .monthly-table td.number-col.total-net-col {
             min-width: 100px;
             max-width: none;
@@ -247,13 +263,45 @@
             background: #fefce8 !important;
             font-size: 13px;
         }
+        .monthly-table td.number-col.net-pnl-percent-col {
+            min-width: 70px;
+            max-width: 70px;
+            font-weight: 550;
+            background: #fefce8 !important;
+            font-size: 13px;
+        }
+        .monthly-table td.number-col.expenses-col {
+            min-width: 100px;
+            max-width: 100px;
+            font-weight: 550;
+            background: #fefce8 !important;
+            font-size: 13px;
+        }
         .monthly-table tbody tr.month-row td.number-col.total-net-col { 
+            background: #fef9c3 !important; 
+        }
+        .monthly-table tbody tr.month-row td.number-col.net-pnl-percent-col { 
+            background: #fef9c3 !important; 
+        }
+        .monthly-table tbody tr.month-row td.number-col.expenses-col { 
             background: #fef9c3 !important; 
         }
         .monthly-table tbody tr.total-row td.number-col.total-net-col { 
             background: #fef9c3 !important; 
         }
+        .monthly-table tbody tr.total-row td.number-col.net-pnl-percent-col { 
+            background: #fef9c3 !important; 
+        }
+        .monthly-table tbody tr.total-row td.number-col.expenses-col { 
+            background: #fef9c3 !important; 
+        }
         .monthly-table tbody tr.avg-row td.number-col.total-net-col { 
+            background: #fef9c3 !important; 
+        }
+        .monthly-table tbody tr.avg-row td.number-col.net-pnl-percent-col { 
+            background: #fef9c3 !important; 
+        }
+        .monthly-table tbody tr.avg-row td.number-col.expenses-col { 
             background: #fef9c3 !important; 
         }
         
@@ -323,25 +371,69 @@
             font-size: 13px;
         }
         
-        .strategy-bg-apro { background: #f9fefb; }
-        .strategy-bg-b1 { background: #fefbfc; }
-        .strategy-bg-b2 { background: #f9fcfe; }
+        .strategy-bg-apro { background: #f4fbf7; }
+        .strategy-bg-b1 { background: #fce8f3; }
+        .strategy-bg-b2 { background: #e0f2fe; }
+        
+        .dpnl-section { background: #fef6fb !important; }
+        .pnl-section { background: #fff5eb !important; }
         
         .no-data { text-align: center; color: #cbd5e1; padding: 40px; font-size: 14px; }
         
-        @media (max-width: 768px) {
-            .main-content { padding: 12px; }
-            .controls-section { flex-direction: column; align-items: stretch; }
-            .control-group { flex-direction: column; align-items: stretch; }
-            select, button { width: 100%; }
-            .stats-container {
-                position: static;
+        @media (max-width: 1400px) {
+            .main-content { 
+                padding: 12px; 
+            }
+            .page-header { 
+                margin-bottom: 16px; 
+                position: relative;
+                z-index: 1;
+            }
+            .controls-section { 
+                flex-wrap: wrap;
                 margin-bottom: 16px;
+                margin-top: 16px;
+            }
+            .control-group { 
                 flex-wrap: wrap;
             }
+            .stats-container {
+                position: static !important;
+                top: auto !important;
+                right: auto !important;
+                left: auto !important;
+                margin: 0 0 16px 0;
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                width: 100%;
+                order: 0;
+            }
             .stat-box {
-                flex: 1;
-                min-width: 120px;
+                min-width: auto;
+                width: 100%;
+            }
+        }
+        @media (max-width: 568px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            .controls-section { 
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .control-group {
+                width: 100%;
+            }
+            .strategy-filter-container,
+            select, button { 
+                width: 100%; 
+            }
+        }
+        @media (max-width: 380px) {
+            .stats-container {
+                grid-template-columns: 1fr !important;
             }
         }
     </style>
@@ -944,8 +1036,8 @@
             
             headerRow1 += '<th rowspan="2" class="number-col total-net-col">AMI PNL</th>';
             headerRow1 += '<th rowspan="2" class="number-col total-net-col">NET PNL</th>';
-            headerRow1 += '<th rowspan="2" class="number-col total-net-col">NET PNL %</th>';
-            headerRow1 += '<th rowspan="2" class="number-col total-net-col">Expenses</th>';
+            headerRow1 += '<th rowspan="2" class="number-col net-pnl-percent-col">NET PNL %</th>';
+            headerRow1 += '<th rowspan="2" class="number-col expenses-col">Expenses</th>';
             headerRow1 += '<th rowspan="2" class="number-col total-net-col">TOTAL MARGIN</th>';
             
             headerRow1 += '</tr>';
@@ -1036,7 +1128,7 @@
 
                         const bgClass = getStrategyBgClass(strategy);
                         
-                        bodyHtml += `<td class="number-col ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnl)}</td>`;
+                        bodyHtml += `<td class="number-col dpnl-section ${dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnl)}</td>`;
                     });
                 });
 
@@ -1047,7 +1139,7 @@
 
                         const bgClass = getStrategyBgClass(strategy);
                         
-                        bodyHtml += `<td class="number-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
+                        bodyHtml += `<td class="number-col pnl-section ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
                     });
                 });
 
@@ -1425,8 +1517,8 @@
                 
                 bodyHtml += `<td class="number-col total-net-col ${displayAmibrokerTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(displayAmibrokerTotal)}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${monthNet >= 0 ? 'positive' : 'negative'}">${formatNumber(monthNet)}</td>`;
-                bodyHtml += `<td class="number-col total-net-col ${netPnlPercent >= 0 ? 'positive' : 'negative'}">${netPnlPercent !== 0 ? netPnlPercent.toFixed(2) + '%' : ''}</td>`;
-                bodyHtml += `<td class="number-col total-net-col ${chargesWithdrawn >= 0 ? 'positive' : 'negative'}">${formatNumber(chargesWithdrawn)}</td>`;
+                bodyHtml += `<td class="number-col net-pnl-percent-col ${netPnlPercent >= 0 ? 'positive' : 'negative'}">${netPnlPercent !== 0 ? netPnlPercent.toFixed(2) + '%' : ''}</td>`;
+                bodyHtml += `<td class="number-col expenses-col ${chargesWithdrawn >= 0 ? 'positive' : 'negative'}">${formatNumber(chargesWithdrawn)}</td>`;
                 bodyHtml += `<td class="number-col total-net-col ${totalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMargin)}</td>`;
 
                 bodyHtml += '</tr>';
@@ -1449,7 +1541,7 @@
                     const dpnlAvg = stratTotal.dpnlCount > 0 ? stratTotal.dpnl / stratTotal.dpnlCount : 0;
                     const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${dpnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnlAvg)}</td>`;
+                    bodyHtml += `<td class="number-col dpnl-section ${dpnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(dpnlAvg)}</td>`;
                 });
             });
 
@@ -1459,7 +1551,7 @@
                     const pnlAvg = stratTotal.pnlCount > 0 ? stratTotal.pnl / stratTotal.pnlCount : 0;
                     const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${pnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(pnlAvg)}</td>`;
+                    bodyHtml += `<td class="number-col pnl-section ${pnlAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(pnlAvg)}</td>`;
                 });
             });
             
@@ -1480,8 +1572,8 @@
             bodyHtml += `<td class="number-col total-net-col ${amibrokerAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(amibrokerAvg)}</td>`;
             
             bodyHtml += `<td class="number-col total-net-col ${netAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(netAvg)}</td>`;
-            bodyHtml += `<td class="number-col total-net-col ${netPnlPercentAvg >= 0 ? 'positive' : 'negative'}">${netPnlPercentAvg !== 0 ? netPnlPercentAvg.toFixed(2) + '%' : ''}</td>`;
-            bodyHtml += `<td class="number-col total-net-col ${chargesWithdrawnAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(chargesWithdrawnAvg)}</td>`;
+            bodyHtml += `<td class="number-col net-pnl-percent-col ${netPnlPercentAvg >= 0 ? 'positive' : 'negative'}">${netPnlPercentAvg !== 0 ? netPnlPercentAvg.toFixed(2) + '%' : ''}</td>`;
+            bodyHtml += `<td class="number-col expenses-col ${chargesWithdrawnAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(chargesWithdrawnAvg)}</td>`;
             bodyHtml += `<td class="number-col total-net-col ${totalMarginAvg >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMarginAvg)}</td>`;
             bodyHtml += '</tr>';
 
@@ -1500,7 +1592,7 @@
                     const stratTotal = totals.strategies[strategy];
                     const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.dpnl)}</td>`;
+                    bodyHtml += `<td class="number-col dpnl-section ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.dpnl)}</td>`;
                 });
             });
 
@@ -1509,7 +1601,7 @@
                     const stratTotal = totals.strategies[strategy];
                     const bgClass = getStrategyBgClass(strategy);
                     
-                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
+                    bodyHtml += `<td class="number-col pnl-section ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
                 });
             });
             
@@ -1519,9 +1611,9 @@
             const netPnlPercentTotal = totals.totalMarginTotal !== 0 ? (totals.grandNet / totals.totalMarginTotal) * 100 : 0;
             
             bodyHtml += `<td class="number-col total-net-col ${totals.grandNet >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.grandNet)}</td>`;
-            bodyHtml += `<td class="number-col total-net-col ${netPnlPercentTotal >= 0 ? 'positive' : 'negative'}">${netPnlPercentTotal !== 0 ? netPnlPercentTotal.toFixed(2) + '%' : ''}</td>`;
-            bodyHtml += `<td class="number-col total-net-col ${totals.chargesWithdrawnTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.chargesWithdrawnTotal)}</td>`;
-            bodyHtml += `<td class="number-col total-net-col ${totals.totalMarginTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalMarginTotal)}</td>`;
+            bodyHtml += `<td class="number-col net-pnl-percent-col ${netPnlPercentTotal >= 0 ? 'positive' : 'negative'}">${netPnlPercentTotal !== 0 ? netPnlPercentTotal.toFixed(2) + '%' : ''}</td>`;
+            bodyHtml += `<td class="number-col expenses-col ${totals.chargesWithdrawnTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.chargesWithdrawnTotal)}</td>`;
+            bodyHtml += `<td class="number-col total-net-col"></td>`;
             bodyHtml += '</tr>';
 
             elements.tableBody.innerHTML = bodyHtml;
