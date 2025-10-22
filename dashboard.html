@@ -259,22 +259,79 @@
         @media (max-width: 1400px) {
             .bottom-grid { grid-template-columns: 1fr; }
         }
-        @media (max-width: 1024px) {
-            .second-row { grid-template-columns: 1fr; }
-            .middle-column { 
-                grid-template-rows: auto;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
+        @media (max-width: 1024px) and (min-width: 769px) {
+            /* Same layout as mobile: 3 cards in one row */
+            .second-row { 
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                grid-template-rows: auto auto !important;
+                gap: 16px !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .second-row .trades-card { 
+                grid-column: 1 !important;
+                grid-row: 1 !important;
+            }
+            
+            .second-row .middle-column { 
+                grid-column: 2 / 4 !important;
+                grid-row: 1 !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-rows: auto !important;
+                gap: 16px !important;
+            }
+            
+            .second-row .chart-card {
+                grid-column: 1 / -1 !important;
+                grid-row: 2 !important;
             }
         }
         @media (max-width: 768px) {
             .main-content { padding: 12px; }
-            .top-section, .second-row, .bottom-grid { grid-template-columns: 1fr; }
-            .middle-column { 
-                grid-template-rows: auto;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
+            .top-section { grid-template-columns: 1fr; }
+            .bottom-grid { grid-template-columns: 1fr; }
+            
+            /* Restructure second-row for mobile: 3 columns for cards, then chart full width */
+            .second-row { 
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                grid-template-rows: auto auto !important;
+                gap: 12px !important;
+                margin-bottom: 12px !important;
             }
+            
+            /* Total Trades - first column */
+            .second-row .trades-card { 
+                grid-column: 1 !important;
+                grid-row: 1 !important;
+            }
+            
+            /* Middle column wrapper - spans 2 columns */
+            .second-row .middle-column { 
+                grid-column: 2 / 4 !important;
+                grid-row: 1 !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-rows: auto !important;
+                gap: 12px !important;
+            }
+            
+            /* Chart - full width on second row */
+            .second-row .chart-card {
+                grid-column: 1 / -1 !important;
+                grid-row: 2 !important;
+            }
+            
+            /* Reduce card padding and font sizes for mobile */
+            .card { padding: 12px; }
+            .card-title { font-size: 11px; margin-bottom: 8px; }
+            .card-value { font-size: 20px; margin-bottom: 4px; }
+            .trades-card .card-value { font-size: 22px; }
+            .profit-loss-card .card-value { font-size: 20px; }
+            .earnings-card .card-value { font-size: 20px; }
+            
             .strategy-grid-inline { gap: 10px; }
             .strategy-card-inline { padding: 12px; }
             .strategy-label { font-size: 11px; }
@@ -576,6 +633,7 @@
             return yesterdayTrades;
         }
 
+
         function updateBrokerCodeMap(todayTrades) {
             const len = todayTrades.length;
             for (let i = 0; i < len; i++) {
@@ -730,84 +788,10 @@
             const brokerMargins = {};
             const len = todayTrades.length;
             
-            // If there are no trades today, use yesterday's data
-            if (len === 0) {
-                const yesterdayTrades = getYesterdayTrades();
-                const yesterdayLen = yesterdayTrades.length;
-                
-                // Get yesterday's margin
-                for (let i = 0; i < yesterdayLen; i++) {
-                    const trade = yesterdayTrades[i];
-                    if (trade.brokerCodes) {
-                        const entries = Object.entries(trade.strategyDetails);
-                        for (let j = 0; j < entries.length; j++) {
-                            const [strategyName, details] = entries[j];
-                            if (!strategyName.startsWith('A.PRO')) {
-                                const margin = details.margin || 0;
-                                const brokerCode = trade.brokerCodes[strategyName];
-                                if (brokerCode && margin > 0) {
-                                    brokerMargins[brokerCode] = Math.max(brokerMargins[brokerCode] || 0, margin);
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                const totalYesterdayMargin = Object.values(brokerMargins).reduce((sum, m) => sum + m, 0);
-                
-                // Get yesterday's PNL TAX
-                let yesterdayNetPnl = 0;
-                for (let i = 0; i < yesterdayLen; i++) {
-                    const trade = yesterdayTrades[i];
-                    const entries = Object.entries(trade.strategyPnlTax);
-                    for (let j = 0; j < entries.length; j++) {
-                        const [stratName, pnl] = entries[j];
-                        if (!stratName.startsWith('A.PRO')) {
-                            yesterdayNetPnl += pnl || 0;
-                        }
-                    }
-                }
-                
-                // Today's PNL TAX would be 0 since there are no trades
-                const totalMarginWithPnl = totalYesterdayMargin + yesterdayNetPnl;
-                
-                elements.totalMargin.textContent = `₹${Math.abs(totalMarginWithPnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-                elements.totalMargin.className = 'card-value';
-                elements.totalMargin.style.color = '#1e40af';
-
-                const allBrokerCodes = new Set();
-                for (let i = 0; i < yesterdayLen; i++) {
-                    const trade = yesterdayTrades[i];
-                    if (trade.brokerCodes) {
-                        const entries = Object.entries(trade.brokerCodes);
-                        for (let j = 0; j < entries.length; j++) {
-                            const [strategyName, code] = entries[j];
-                            if (code && !strategyName.startsWith('A.PRO')) {
-                                allBrokerCodes.add(code);
-                            }
-                        }
-                    }
-                }
-
-                const htmlParts = [];
-                const brokerArray = Array.from(allBrokerCodes).sort();
-                for (let i = 0; i < brokerArray.length; i++) {
-                    const brokerCode = brokerArray[i];
-                    const margin = brokerMargins[brokerCode] || 0;
-                    htmlParts.push(`<div style="display: flex; justify-content: space-between;">
-                        <span>${brokerCode} Margin:</span>
-                        <span style="font-weight: 600; color: #1e40af;">₹${Math.abs(margin).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>
-                    </div>`);
-                }
-
-                elements.brokerMarginList.innerHTML = htmlParts.join('');
-                return;
-            }
-            
-            // Original logic for when there are trades today
+            // Only use today's margin data
             for (let i = 0; i < len; i++) {
                 const trade = todayTrades[i];
-                if (trade.brokerCodes) {
+                if (trade.brokerCodes && trade.strategyDetails) {
                     const entries = Object.entries(trade.strategyDetails);
                     for (let j = 0; j < entries.length; j++) {
                         const [strategyName, details] = entries[j];
@@ -824,14 +808,17 @@
             
             const totalMargin = Object.values(brokerMargins).reduce((sum, m) => sum + m, 0);
             
+            // Calculate today's PNL TAX
             let todayNetPnl = 0;
             for (let i = 0; i < len; i++) {
                 const trade = todayTrades[i];
-                const entries = Object.entries(trade.strategyPnlTax);
-                for (let j = 0; j < entries.length; j++) {
-                    const [stratName, pnl] = entries[j];
-                    if (!stratName.startsWith('A.PRO')) {
-                        todayNetPnl += pnl || 0;
+                if (trade.strategyPnlTax) {
+                    const entries = Object.entries(trade.strategyPnlTax);
+                    for (let j = 0; j < entries.length; j++) {
+                        const [stratName, pnl] = entries[j];
+                        if (!stratName.startsWith('A.PRO')) {
+                            todayNetPnl += pnl || 0;
+                        }
                     }
                 }
             }
@@ -841,6 +828,7 @@
             elements.totalMargin.className = 'card-value';
             elements.totalMargin.style.color = '#1e40af';
 
+            // Get all broker codes from today's trades
             const allBrokerCodes = new Set();
             for (let i = 0; i < len; i++) {
                 const trade = todayTrades[i];
