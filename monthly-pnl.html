@@ -356,25 +356,25 @@
         .monthly-table tr:hover td.month-col { background: #fafbfc; }
         
         .monthly-table tbody tr.total-row {
-            background: #f9fafb;
+            background: #e0e7ff;
             font-weight: 700;
-            border-top: 2px solid #d1d5db;
+            border-top: 1px solid #d1d5db;
         }
-        .monthly-table tbody tr.total-row:hover { background: #f3f4f6; }
+        .monthly-table tbody tr.total-row:hover { background: #c7d2fe; }
         .monthly-table tbody tr.total-row td {
-            border-top: 2px solid #d1d5db;
+            border-top: 1px solid #d1d5db;
             padding: 14px 8px;
             font-weight: 600;
             font-size: 13px;
         }
         .monthly-table tbody tr.avg-row {
-            background: #f9fafb;
+            background: #dbeafe;
             font-weight: 600;
-            border-top: 1px solid #e5e7eb;
+            border-top: 2px solid #e5e7eb;
         }
-        .monthly-table tbody tr.avg-row:hover { background: #f3f4f6; }
+        .monthly-table tbody tr.avg-row:hover { background: #bfdbfe; }
         .monthly-table tbody tr.avg-row td {
-            border-top: 1px solid #e5e7eb;
+            border-top: 2px solid #e5e7eb;
             padding: 12px 8px;
             font-weight: 600;
             font-size: 13px;
@@ -386,6 +386,16 @@
         
         .dpnl-section { background: #fef6fb !important; }
         .pnl-section { background: #fff5eb !important; }
+        
+        /* Increased background colors for AVG row */
+        .monthly-table tbody tr.avg-row td.strategy-bg-apro { background: #fef3c7 !important; }
+        .monthly-table tbody tr.avg-row td.dpnl-section { background: #fef9c3 !important; }
+        .monthly-table tbody tr.avg-row td.pnl-section { background: #fef3c7 !important; }
+        
+        /* Increased background colors for TOTAL row (same as AVG) */
+        .monthly-table tbody tr.total-row td.strategy-bg-apro { background: #fef3c7 !important; }
+        .monthly-table tbody tr.total-row td.dpnl-section { background: #fef9c3 !important; }
+        .monthly-table tbody tr.total-row td.pnl-section { background: #fef3c7 !important; }
         
         .no-data { text-align: center; color: #cbd5e1; padding: 40px; font-size: 14px; }
         
