@@ -215,17 +215,17 @@
             max-width: 90px;
             vertical-align: middle;
         }
-        .performance-table th.strategy-group-end { border-right: 2px solid #cbd5e1; }
-        .performance-table td.strategy-group-end { border-right: 2px solid #cbd5e1; }
-        .performance-table th.apro-boundary { border-right: 2px solid #cbd5e1 !important; }
-        .performance-table td.apro-boundary { border-right: 2px solid #cbd5e1 !important; }
-        .performance-table th.broker-boundary { border-right: 2px solid #cbd5e1 !important; }
-        .performance-table td.broker-boundary { border-right: 2px solid #cbd5e1 !important; }
-        .performance-table th.strategy-bg-0, .performance-table td.strategy-bg-0 { background: #f8f9fb; }
-        .performance-table th.strategy-bg-1, .performance-table td.strategy-bg-1 { background: #f0f4ff; }
-        .performance-table th.strategy-bg-2, .performance-table td.strategy-bg-2 { background: #fff5f5; }
-        .performance-table th.strategy-bg-3, .performance-table td.strategy-bg-3 { background: #f0fdf7; }
-        .performance-table th.strategy-bg-4, .performance-table td.strategy-bg-4 { background: #fdf2f8; }
+        .performance-table th.strategy-group-end { border-right: 1px solid #cbd5e1; }
+        .performance-table td.strategy-group-end { border-right: 1px solid #cbd5e1; }
+        .performance-table th.apro-boundary { border-right: 1px solid #cbd5e1 !important; }
+        .performance-table td.apro-boundary { border-right: 1px solid #cbd5e1 !important; }
+        .performance-table th.broker-boundary { border-right: 1px solid #cbd5e1 !important; }
+        .performance-table td.broker-boundary { border-right: 1px solid #cbd5e1 !important; }
+        .performance-table th.strategy-bg-0, .performance-table td.strategy-bg-0 { background: #f8fcf9; }
+        .performance-table th.strategy-bg-1, .performance-table td.strategy-bg-1 { background: #f8fcf9; }
+        .performance-table th.strategy-bg-2, .performance-table td.strategy-bg-2 { background: #f8fcf9; }
+        .performance-table th.strategy-bg-3, .performance-table td.strategy-bg-3 { background: #fefafd; }
+        .performance-table th.strategy-bg-4, .performance-table td.strategy-bg-4 { background: #fffaf5; }
         .performance-table td.lot-col.strategy-bg-0,
         .performance-table td.lot-col.strategy-bg-1,
         .performance-table td.lot-col.strategy-bg-2,
@@ -234,6 +234,7 @@
             width: 65px;
             min-width: 65px;
             max-width: 65px;
+            background: #eff8fe !important;
         }
         .performance-table tr:hover td.strategy-bg-0,
         .performance-table tr:hover td.strategy-bg-1,
@@ -282,11 +283,16 @@
             max-width: 90px;
             width: 85px;
         }
-        .performance-table td.apro-pnl-col.strategy-bg-0 { background: #f8f9fb; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table td.apro-pnl-col.strategy-bg-1 { background: #f0f4ff; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table td.apro-pnl-col.strategy-bg-2 { background: #fff5f5; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table td.apro-pnl-col.strategy-bg-3 { background: #f0fdf7; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table td.apro-pnl-col.strategy-bg-4 { background: #fdf2f8; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-0 { background: #f8fcf9; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-1 { background: #f8fcf9; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-2 { background: #f8fcf9; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-3 { background: #f8fcf9; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table td.apro-pnl-col.strategy-bg-4 { background: #f8fcf9; width: 85px; min-width: 75px; max-width: 90px; }
+        
+        /* Section-based color overrides */
+        .performance-table td.dpnl-section { background: #fefafd !important; }
+        .performance-table td.pnl-section { background: #fffaf5 !important; }
+        
         .performance-table td {
             padding: 11px 8px;
             border-bottom: 1px solid #f3f4f6;
@@ -327,14 +333,28 @@
         }
         .performance-table th.number-col { text-align: center; max-width: 90px; }
         .performance-table td.number-col.total-net-col {
-            min-width: 100px;
+            min-width: 80px;
             max-width: none;
             font-weight: 600;
             background: #fefce8 !important;
         }
         .performance-table tbody tr.month-row td.number-col.total-net-col { background: #fef9c3 !important; }
         .performance-table tbody tr.total-row td.number-col.total-net-col { background: #fef9c3 !important; }
-        .performance-table th.total-net-col { min-width: 100px; max-width: none; }
+        .performance-table th.total-net-col { min-width: 80px; max-width: none; }
+        .performance-table th.total-col-border,
+        .performance-table td.total-col-border {
+            border-right: 1px solid #cbd5e1 !important;
+        }
+        .performance-table td.number-col.net-pnl-percent-col {
+            min-width: 60px;
+            max-width: 60px;
+            font-weight: 550;
+            background: #fefce8 !important;
+            font-size: 13px;
+        }
+        .performance-table tbody tr.month-row td.number-col.net-pnl-percent-col { background: #fef9c3 !important; }
+        .performance-table tbody tr.total-row td.number-col.net-pnl-percent-col { background: #fef9c3 !important; }
+        .performance-table th.net-pnl-percent-col { min-width: 60px; max-width: 60px; }
         .performance-table td.number-col.drawdown-col {
             min-width: 90px;
             max-width: none;
@@ -343,6 +363,14 @@
         .performance-table tbody tr.month-row td.number-col.drawdown-col { background: #fee2e2 !important; }
         .performance-table tbody tr.total-row td.number-col.drawdown-col { background: #fee2e2 !important; }
         .performance-table th.drawdown-col { min-width: 90px; max-width: none; }
+        .performance-table td.number-col.expenses-col {
+            font-weight: 600;
+            background: #fef2f2;
+            border-left: 1px solid #cbd5e1;
+        }
+        .performance-table tbody tr.month-row td.number-col.expenses-col { background: #fef2f2 !important; }
+        .performance-table tbody tr.total-row td.number-col.expenses-col { background: #fef2f2 !important; }
+        .performance-table th.expenses-col { min-width: 80px; max-width: none; }
         .performance-table td.positive { color: #059669; }
         .performance-table td.negative { color: #f43f5e; }
         .performance-table tr:hover { background: #fafbfc; }
@@ -361,18 +389,20 @@
         }
         .performance-table tbody tr.total-row td:first-child { background: #f9fafb; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
         .performance-table tbody tr.total-row:hover td:first-child { background: #f3f4f6; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
-        .performance-table tbody tr.total-row:hover td.strategy-bg-0 { background: #f0f2f5; }
-        .performance-table tbody tr.total-row:hover td.strategy-bg-1 { background: #e5edfd; }
-        .performance-table tbody tr.total-row:hover td.strategy-bg-2 { background: #fde6e3; }
-        .performance-table tbody tr.total-row:hover td.strategy-bg-3 { background: #e4f4ea; }
-        .performance-table tbody tr.total-row:hover td.strategy-bg-4 { background: #fce7f3; }
-        .performance-table tbody tr.total-row:hover td.lot-col { width: 65px; min-width: 65px; max-width: 65px; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-0 { background: #ecf7f1; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-1 { background: #ecf7f1; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-2 { background: #ecf7f1; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-3 { background: #fef0f6; }
+        .performance-table tbody tr.total-row:hover td.strategy-bg-4 { background: #fff1e1; }
+        .performance-table tbody tr.total-row:hover td.lot-col { width: 65px; min-width: 65px; max-width: 65px; background: #dff0fc !important; }
+        .performance-table tbody tr.total-row:hover td.dpnl-section { background: #fef0f6 !important; }
+        .performance-table tbody tr.total-row:hover td.pnl-section { background: #fff1e1 !important; }
         .performance-table tbody tr.total-row:hover td.apro-pnl-col { width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-0 { background: #f0f2f5; }
-        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-1 { background: #e5edfd; }
-        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-2 { background: #fde6e3; }
-        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-3 { background: #e4f4ea; }
-        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-4 { background: #fce7f3; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-0 { background: #ecf7f1; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-1 { background: #ecf7f1; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-2 { background: #ecf7f1; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-3 { background: #ecf7f1; }
+        .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-4 { background: #ecf7f1; }
         .performance-table tbody tr.total-row td.apro-pnl-col { width: 85px; min-width: 75px; max-width: 90px; }
         .performance-table tbody tr.month-row {
             background: #f9fafb;
@@ -397,28 +427,33 @@
             border-right: 2px solid #cbd5e1;
         }
         .performance-table tbody tr.month-row:hover td:first-child { background: #f3f4f6; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
-        .performance-table tbody tr.month-row:hover td.strategy-bg-0 { background: #e5e8eb; }
-        .performance-table tbody tr.month-row:hover td.strategy-bg-1 { background: #d9e2f7; }
-        .performance-table tbody tr.month-row:hover td.strategy-bg-2 { background: #f7dad6; }
-        .performance-table tbody tr.month-row:hover td.strategy-bg-3 { background: #d7e7de; }
-        .performance-table tbody tr.month-row:hover td.strategy-bg-4 { background: #fce7f3; }
-        .performance-table tbody tr.month-row:hover td.lot-col { width: 65px; min-width: 65px; max-width: 65px; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-0 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-1 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-2 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-3 { background: #fde9f3; }
+        .performance-table tbody tr.month-row:hover td.strategy-bg-4 { background: #ffecd6; }
+        .performance-table tbody tr.month-row:hover td.lot-col { width: 65px; min-width: 65px; max-width: 65px; background: #d5ebfa !important; }
+        .performance-table tbody tr.month-row:hover td.dpnl-section { background: #fde9f3 !important; }
+        .performance-table tbody tr.month-row:hover td.pnl-section { background: #ffecd6 !important; }
         .performance-table tbody tr.month-row:hover td.apro-pnl-col { width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-0 { background: #e5e8eb; }
-        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-1 { background: #d9e2f7; }
-        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-2 { background: #f7dad6; }
-        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-3 { background: #d7e7de; }
-        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-4 { background: #fce7f3; }
-        .performance-table tbody tr.month-row td.strategy-bg-0 { background: #edf0f2; }
-        .performance-table tbody tr.month-row td.strategy-bg-1 { background: #e2e9fa; }
-        .performance-table tbody tr.month-row td.strategy-bg-2 { background: #fce4e1; }
-        .performance-table tbody tr.month-row td.strategy-bg-3 { background: #e1f0e8; }
-        .performance-table tbody tr.month-row td.strategy-bg-4 { background: #fce7f3; }
-        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-0 { background: #edf0f2; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-1 { background: #e2e9fa; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-2 { background: #fce4e1; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-3 { background: #e1f0e8; width: 85px; min-width: 75px; max-width: 90px; }
-        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-4 { background: #fce7f3; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-0 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-1 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-2 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-3 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-4 { background: #e3f3ea; }
+        .performance-table tbody tr.month-row td.strategy-bg-0 { background: #f0f9f3; }
+        .performance-table tbody tr.month-row td.strategy-bg-1 { background: #f0f9f3; }
+        .performance-table tbody tr.month-row td.strategy-bg-2 { background: #f0f9f3; }
+        .performance-table tbody tr.month-row td.strategy-bg-3 { background: #fef2f8; }
+        .performance-table tbody tr.month-row td.strategy-bg-4 { background: #fff3e8; }
+        .performance-table tbody tr.month-row td.lot-col { background: #e8f4fc !important; }
+        .performance-table tbody tr.month-row td.dpnl-section { background: #fef2f8 !important; }
+        .performance-table tbody tr.month-row td.pnl-section { background: #fff3e8 !important; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-0 { background: #f0f9f3; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-1 { background: #f0f9f3; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-2 { background: #f0f9f3; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-3 { background: #f0f9f3; width: 85px; min-width: 75px; max-width: 90px; }
+        .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-4 { background: #f0f9f3; width: 85px; min-width: 75px; max-width: 90px; }
         .performance-table tbody tr.day-row { display: none; }
         .performance-table tbody tr.day-row.expanded { display: table-row; }
         .performance-table tbody tr.day-row td { padding: 7px 8px; font-size: 12px; }
@@ -459,31 +494,38 @@
         .summary-card {
             background: white;
             border-radius: 8px;
-            padding: 12px 14px;
+            padding: 10px 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
             border: 1px solid #e5e7eb;
             flex: 1 1 0;
-            min-width: 160px;
-        }
-        #brokerCardsContainer {
-            display: contents;
+            min-width: 140px;
         }
         .summary-card-title {
-            font-size: 11px;
+            font-size: 10px;
             color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             font-weight: 700;
         }
         .summary-card-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             line-height: 1.2;
             font-variant-numeric: tabular-nums;
         }
         .summary-card-value.positive { color: #059669; }
         .summary-card-value.negative { color: #f43f5e; }
+        .percentage-text { font-weight: 700; font-size: 14px; }
+        .summary-card.net-profit-box {
+            background: #f0fdf4;
+        }
+        .summary-card.total-expense-box {
+            background: #fdf2f8;
+        }
+        .summary-card.running-margin-box {
+            background: #fffbeb;
+        }
         
         /* Tablet Layout - Dynamic columns based on card count */
         @media screen and (min-width: 769px) and (max-width: 1024px) {
@@ -857,24 +899,28 @@
 
         <div class="summary-cards" id="summaryCards">
             <div class="summary-card">
-                <div class="summary-card-title">Total Profit</div>
-                <div class="summary-card-value positive" id="totalProfit">₹0</div>
-                <div class="summary-card-subtitle" id="totalProfitFiltered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
+                <div class="summary-card-title">Starting Capital</div>
+                <div class="summary-card-value" id="startingCapital">₹0</div>
             </div>
             <div class="summary-card">
                 <div class="summary-card-title">Net Broker Profit</div>
                 <div class="summary-card-value" id="netBrProfit">₹0</div>
-                <div class="summary-card-subtitle" id="netBrProfitFiltered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
             </div>
             <div class="summary-card">
                 <div class="summary-card-title">Charges</div>
                 <div class="summary-card-value negative" id="charges">₹0</div>
-                <div class="summary-card-subtitle" id="chargesFiltered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
             </div>
-            <div id="brokerCardsContainer"></div>
-            <div class="summary-card" style="order: 100;">
-                <div class="summary-card-title">Current Drawdown</div>
-                <div class="summary-card-value negative" id="currentDrawdown">-</div>
+            <div class="summary-card running-margin-box">
+                <div class="summary-card-title">Running Margin</div>
+                <div class="summary-card-value" id="runningMargin">-</div>
+            </div>
+            <div class="summary-card total-expense-box">
+                <div class="summary-card-title">Total Expense</div>
+                <div class="summary-card-value" id="totalExpense">-</div>
+            </div>
+            <div class="summary-card net-profit-box">
+                <div class="summary-card-title">Total Net Profit</div>
+                <div class="summary-card-value" id="netProfit">-</div>
             </div>
         </div>
 
@@ -915,6 +961,10 @@
                 <input type="checkbox" id="showDrawdown" onchange="toggleDrawdownMode()" style="margin-right: 6px; cursor: pointer;">
                 <label for="showDrawdown" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Drawdown</label>
             </div>
+            <div class="control-group">
+                <input type="checkbox" id="showLot" onchange="toggleLotMode()" style="margin-right: 6px; cursor: pointer;">
+                <label for="showLot" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show LOT</label>
+            </div>
             <button class="primary" onclick="refreshData()">Refresh</button>
             <button onclick="expandAll()">Expand All</button>
             <button onclick="collapseAll()">Collapse All</button>
@@ -936,14 +986,12 @@
 
     <script>
         const elements = {
-            totalProfit: document.getElementById('totalProfit'),
-            totalProfitFiltered: document.getElementById('totalProfitFiltered'),
+            startingCapital: document.getElementById('startingCapital'),
             netBrProfit: document.getElementById('netBrProfit'),
-            netBrProfitFiltered: document.getElementById('netBrProfitFiltered'),
             charges: document.getElementById('charges'),
-            chargesFiltered: document.getElementById('chargesFiltered'),
-            currentDrawdown: document.getElementById('currentDrawdown'),
-            brokerCardsContainer: document.getElementById('brokerCardsContainer'),
+            runningMargin: document.getElementById('runningMargin'),
+            totalExpense: document.getElementById('totalExpense'),
+            netProfit: document.getElementById('netProfit'),
             monthFilter: document.getElementById('monthFilter'),
             strategyFilterDropdown: document.getElementById('strategyFilterDropdown'),
             strategyFilterList: document.getElementById('strategyFilterList'),
@@ -952,15 +1000,17 @@
             tableBody: document.getElementById('tableBody')
         };
 
-        let brokerCards = {};
-
         let allTrades = [];
         let hiddenStrategies = new Set();
         let allStrategies = [];
+        let globalTotalExpenses = 0;
+        let globalLastTotalMargin = 0;
+        let globalStartingCapital = 0;
         let updateTimeout;
         let showFilteredTotals = false;
         let showTradeCount = false;
         let showDrawdown = false;
+        let showLot = false;
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1015,6 +1065,12 @@
                     const checkbox = document.getElementById('showDrawdown');
                     if (checkbox) checkbox.checked = showDrawdown;
                 }
+                const savedLotMode = localStorage.getItem('showLot');
+                if (savedLotMode !== null) {
+                    showLot = savedLotMode === 'true';
+                    const checkbox = document.getElementById('showLot');
+                    if (checkbox) checkbox.checked = showLot;
+                }
             } catch (e) {
                 hiddenStrategies = new Set();
             }
@@ -1043,6 +1099,15 @@
             showDrawdown = checkbox.checked;
             try {
                 localStorage.setItem('showDrawdown', showDrawdown);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleLotMode() {
+            const checkbox = document.getElementById('showLot');
+            showLot = checkbox.checked;
+            try {
+                localStorage.setItem('showLot', showLot);
             } catch (e) {}
             processAndDisplayData();
         }
@@ -1324,12 +1389,12 @@
                 if (!monthlyData[monthKey]) monthlyData[monthKey] = {};
                 if (!dailyData[monthKey]) dailyData[monthKey] = {};
                 if (!dailyData[monthKey][dateKey]) dailyData[monthKey][dateKey] = {};
-                if (!monthlyTotals[monthKey]) monthlyTotals[monthKey] = { total: 0, net: 0 };
+                if (!monthlyTotals[monthKey]) monthlyTotals[monthKey] = { total: 0, net: 0, amiPnl: 0, margin: 0, pnlTax: 0 };
                 if (!dailyTotals[monthKey]) dailyTotals[monthKey] = {};
-                if (!dailyTotals[monthKey][dateKey]) dailyTotals[monthKey][dateKey] = { total: 0, net: 0 };
-                if (!monthlyFilteredTotals[monthKey]) monthlyFilteredTotals[monthKey] = { total: 0, net: 0 };
+                if (!dailyTotals[monthKey][dateKey]) dailyTotals[monthKey][dateKey] = { total: 0, net: 0, amiPnl: 0, margin: 0, pnlTax: 0 };
+                if (!monthlyFilteredTotals[monthKey]) monthlyFilteredTotals[monthKey] = { total: 0, net: 0, amiPnl: 0, margin: 0, pnlTax: 0 };
                 if (!dailyFilteredTotals[monthKey]) dailyFilteredTotals[monthKey] = {};
-                if (!dailyFilteredTotals[monthKey][dateKey]) dailyFilteredTotals[monthKey][dateKey] = { total: 0, net: 0 };
+                if (!dailyFilteredTotals[monthKey][dateKey]) dailyFilteredTotals[monthKey][dateKey] = { total: 0, net: 0, amiPnl: 0, margin: 0, pnlTax: 0 };
 
                 Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
                     strategies.add(stratName);
@@ -1367,14 +1432,24 @@
                         
                         monthlyTotals[monthKey].total += details.pnl;
                         monthlyTotals[monthKey].net += netPnl;
+                        monthlyTotals[monthKey].margin += (trade.strategyMargins?.[stratName] || 0);
+                        monthlyTotals[monthKey].pnlTax += netPnl;
+                        
                         dailyTotals[monthKey][dateKey].total += details.pnl;
                         dailyTotals[monthKey][dateKey].net += netPnl;
+                        dailyTotals[monthKey][dateKey].margin += (trade.strategyMargins?.[stratName] || 0);
+                        dailyTotals[monthKey][dateKey].pnlTax += netPnl;
                         
                         if (!hiddenStrategies.has(stratName)) {
                             monthlyFilteredTotals[monthKey].total += details.pnl;
                             monthlyFilteredTotals[monthKey].net += netPnl;
+                            monthlyFilteredTotals[monthKey].margin += (trade.strategyMargins?.[stratName] || 0);
+                            monthlyFilteredTotals[monthKey].pnlTax += netPnl;
+                            
                             dailyFilteredTotals[monthKey][dateKey].total += details.pnl;
                             dailyFilteredTotals[monthKey][dateKey].net += netPnl;
+                            dailyFilteredTotals[monthKey][dateKey].margin += (trade.strategyMargins?.[stratName] || 0);
+                            dailyFilteredTotals[monthKey][dateKey].pnlTax += netPnl;
                         }
                     }
                     
@@ -1406,6 +1481,123 @@
                 }
             });
 
+            // Calculate AMI PNL (A.PRO PNL * Broker Lot Size)
+            const aproStrategies = Array.from(strategies).filter(s => s.startsWith('A.PRO'));
+            
+            Object.keys(monthlyTotals).forEach(monthKey => {
+                let amiPnlTotal = 0;
+                let amiPnlFiltered = 0;
+                
+                const monthTrades = trades.filter(trade => {
+                    const tradeParts = trade.date.split('/');
+                    return tradeParts[1] === monthKey;
+                });
+                
+                // Build daily max lots
+                const dailyMaxLots = {};
+                monthTrades.forEach(trade => {
+                    const dateKey = trade.date;
+                    if (!dailyMaxLots[dateKey]) {
+                        dailyMaxLots[dateKey] = {};
+                    }
+                    
+                    if (trade.strategyDetails) {
+                        const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
+                        allBrokerStrategies.forEach(brokerStrat => {
+                            const lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
+                            if (lotSize > 0) {
+                                if (!dailyMaxLots[dateKey][brokerStrat] || lotSize > dailyMaxLots[dateKey][brokerStrat]) {
+                                    dailyMaxLots[dateKey][brokerStrat] = lotSize;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                // Calculate AMI PNL contribution
+                monthTrades.forEach(trade => {
+                    if (trade.strategyDetails) {
+                        aproStrategies.forEach(aproStrat => {
+                            const aproPnl = trade.strategyDetails[aproStrat]?.pnl || 0;
+                            
+                            if (aproPnl !== 0) {
+                                const proMatch = aproStrat.match(/PRO\s*(\d+)/i);
+                                if (proMatch) {
+                                    const proNum = proMatch[1];
+                                    
+                                    const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
+                                    allBrokerStrategies.forEach(brokerStrat => {
+                                        const brokerProMatch = brokerStrat.match(/PRO\s*(\d+)/i);
+                                        if (brokerProMatch && brokerProMatch[1] === proNum) {
+                                            let lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
+                                            
+                                            if (lotSize === 0 && dailyMaxLots[trade.date]?.[brokerStrat]) {
+                                                lotSize = dailyMaxLots[trade.date][brokerStrat];
+                                            }
+                                            
+                                            const contribution = aproPnl * lotSize;
+                                            amiPnlTotal += contribution;
+                                            
+                                            if (!hiddenStrategies.has(brokerStrat)) {
+                                                amiPnlFiltered += contribution;
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                monthlyTotals[monthKey].amiPnl = amiPnlTotal;
+                monthlyFilteredTotals[monthKey].amiPnl = amiPnlFiltered;
+                
+                // Also calculate daily AMI PNL
+                Object.keys(dailyData[monthKey] || {}).forEach(dateKey => {
+                    let dailyAmiPnl = 0;
+                    let dailyAmiPnlFiltered = 0;
+                    
+                    const dayTrades = monthTrades.filter(t => t.date === dateKey);
+                    
+                    dayTrades.forEach(trade => {
+                        if (trade.strategyDetails) {
+                            aproStrategies.forEach(aproStrat => {
+                                const aproPnl = trade.strategyDetails[aproStrat]?.pnl || 0;
+                                
+                                if (aproPnl !== 0) {
+                                    const proMatch = aproStrat.match(/PRO\s*(\d+)/i);
+                                    if (proMatch) {
+                                        const proNum = proMatch[1];
+                                        
+                                        const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
+                                        allBrokerStrategies.forEach(brokerStrat => {
+                                            const brokerProMatch = brokerStrat.match(/PRO\s*(\d+)/i);
+                                            if (brokerProMatch && brokerProMatch[1] === proNum) {
+                                                let lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
+                                                
+                                                if (lotSize === 0 && dailyMaxLots[dateKey]?.[brokerStrat]) {
+                                                    lotSize = dailyMaxLots[dateKey][brokerStrat];
+                                                }
+                                                
+                                                const contribution = aproPnl * lotSize;
+                                                dailyAmiPnl += contribution;
+                                                
+                                                if (!hiddenStrategies.has(brokerStrat)) {
+                                                    dailyAmiPnlFiltered += contribution;
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    dailyTotals[monthKey][dateKey].amiPnl = dailyAmiPnl;
+                    dailyFilteredTotals[monthKey][dateKey].amiPnl = dailyAmiPnlFiltered;
+                });
+            });
+
             allStrategies = Array.from(strategies).sort((a, b) => {
                 const aIsAPro = a.startsWith('A.PRO');
                 const bIsAPro = b.startsWith('A.PRO');
@@ -1423,10 +1615,513 @@
             });
             
             const visibleStrategies = allStrategies.filter(s => !hiddenStrategies.has(s));
-            renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData);
+            
+            // Calculate Expenses and TOTAL MARGIN using ALL trades (not filtered by month)
+            // because we need cumulative calculations across all months
+            const sortedAllTrades = [...allTrades].sort((a, b) => {
+                const dateA = a.date.split('/').reverse().join('');
+                const dateB = b.date.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+            const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedAllTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals);
+            
+            // Calculate daily total margins
+            const dailyTotalMargins = calculateDailyTotalMargins(sortedAllTrades, Array.from(strategies));
+            
+            // Calculate daily expenses
+            const dailyExpenses = calculateDailyExpenses(sortedAllTrades, Array.from(strategies), dailyTotalMargins);
+            
+            renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses);
+        }
+        
+        function calculateExpensesAndMargins(sortedTrades, hiddenStrategies, allStrategiesParam, useFilteredTotals) {
+            const result = {};
+            let startingCapital = 0;
+            let cumulativeNetPnl = 0;
+            let cumulativeCharges = 0;
+            let previousMonthTotalMargin = 0;
+            
+            // Group trades by month
+            const tradesByMonth = {};
+            sortedTrades.forEach(trade => {
+                const monthKey = trade.date.split('/')[1];
+                if (!tradesByMonth[monthKey]) {
+                    tradesByMonth[monthKey] = [];
+                }
+                tradesByMonth[monthKey].push(trade);
+            });
+            
+            // Use provided strategies
+            const allStrategies = allStrategiesParam;
+            
+            const sortedMonths = Object.keys(tradesByMonth).sort();
+            
+            sortedMonths.forEach((monthKey, monthIdx) => {
+                const monthTrades = tradesByMonth[monthKey];
+                
+                let monthMargin = 0;
+                let filteredMonthMargin = 0;
+                let latestDayPnlTax = 0;
+                let filteredLatestDayPnlTax = 0;
+                
+                if (monthTrades.length > 0) {
+                    const brokerMarginsByDate = {};
+                    const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+                    
+                    // Collect margins by date and broker
+                    monthTrades.forEach(trade => {
+                        const tradeDate = trade.date;
+                        if (!brokerMarginsByDate[tradeDate]) {
+                            brokerMarginsByDate[tradeDate] = {};
+                        }
+                        
+                        if (trade.strategyDetails) {
+                            allBrokerStrategies.forEach(brokerStrat => {
+                                const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+                                const brokerMatch = brokerStrat.match(/^(B\d+)/);
+                                
+                                if (brokerMatch) {
+                                    const brokerCode = brokerMatch[1];
+                                    if (!brokerMarginsByDate[tradeDate][brokerCode]) {
+                                        brokerMarginsByDate[tradeDate][brokerCode] = {};
+                                    }
+                                    // Store MAX margin for each strategy on each date
+                                    if (!brokerMarginsByDate[tradeDate][brokerCode][brokerStrat] || margin > brokerMarginsByDate[tradeDate][brokerCode][brokerStrat]) {
+                                        brokerMarginsByDate[tradeDate][brokerCode][brokerStrat] = margin;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Get sorted dates (latest first)
+                    const sortedDates = Object.keys(brokerMarginsByDate).sort((a, b) => {
+                        const dayA = parseInt(a.split('/')[0]);
+                        const dayB = parseInt(b.split('/')[0]);
+                        return dayB - dayA;
+                    });
+                    
+                    // Get all unique brokers
+                    const allBrokersInMonth = new Set();
+                    Object.values(brokerMarginsByDate).forEach(dateMargins => {
+                        Object.keys(dateMargins).forEach(broker => allBrokersInMonth.add(broker));
+                    });
+                    
+                    // For each broker, find the most recent day with non-zero margin
+                    const brokerMaxMargins = {};
+                    const filteredBrokerMaxMargins = {};
+                    
+                    allBrokersInMonth.forEach(brokerCode => {
+                        for (let i = 0; i < sortedDates.length; i++) {
+                            const checkDate = sortedDates[i];
+                            
+                            if (brokerMarginsByDate[checkDate] && brokerMarginsByDate[checkDate][brokerCode]) {
+                                const strategyMargins = Object.entries(brokerMarginsByDate[checkDate][brokerCode]);
+                                const margins = strategyMargins.map(([strat, margin]) => margin);
+                                const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
+                                
+                                if (maxMargin > 0) {
+                                    brokerMaxMargins[brokerCode] = maxMargin;
+                                    
+                                    // Calculate filtered margin
+                                    const filteredMargins = strategyMargins
+                                        .filter(([strat, margin]) => !hiddenStrategies.has(strat))
+                                        .map(([strat, margin]) => margin);
+                                    const maxFilteredMargin = filteredMargins.length > 0 ? Math.max(...filteredMargins) : 0;
+                                    if (maxFilteredMargin > 0) {
+                                        filteredBrokerMaxMargins[brokerCode] = maxFilteredMargin;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    
+                    monthMargin = Object.values(brokerMaxMargins).reduce((sum, val) => sum + val, 0);
+                    filteredMonthMargin = Object.values(filteredBrokerMaxMargins).reduce((sum, val) => sum + val, 0);
+                    
+                    // PnL Tax calculation with carry-forward logic
+                    const brokerPnlTaxByDate = {};
+                    monthTrades.forEach(trade => {
+                        const tradeDate = trade.date;
+                        if (!brokerPnlTaxByDate[tradeDate]) {
+                            brokerPnlTaxByDate[tradeDate] = {};
+                        }
+                        
+                        if (trade && trade.strategyPnlTax) {
+                            Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                                if (!stratName.startsWith('A.PRO')) {
+                                    const brokerMatch = stratName.match(/^(B\d+)/);
+                                    if (brokerMatch) {
+                                        const brokerCode = brokerMatch[1];
+                                        if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
+                                            brokerPnlTaxByDate[tradeDate][brokerCode] = {};
+                                        }
+                                        if (!brokerPnlTaxByDate[tradeDate][brokerCode][stratName]) {
+                                            brokerPnlTaxByDate[tradeDate][brokerCode][stratName] = 0;
+                                        }
+                                        brokerPnlTaxByDate[tradeDate][brokerCode][stratName] += pnlTax;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    // For each broker, use PnL Tax from the margin date FORWARD to end of month
+                    const strategyPnlTaxMap = {};
+                    const filteredStrategyPnlTaxMap = {};
+                    
+                    allBrokersInMonth.forEach(brokerCode => {
+                        // Find which date we used for this broker's margin
+                        for (let i = 0; i < sortedDates.length; i++) {
+                            const checkDate = sortedDates[i];
+                            
+                            if (brokerMarginsByDate[checkDate] && brokerMarginsByDate[checkDate][brokerCode]) {
+                                const strategyMargins = Object.entries(brokerMarginsByDate[checkDate][brokerCode]);
+                                const margins = strategyMargins.map(([strat, margin]) => margin);
+                                const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
+                                
+                                if (maxMargin > 0) {
+                                    // Accumulate PnL Tax from this date FORWARD to end of month
+                                    for (let j = i; j >= 0; j--) {
+                                        const dateToCheck = sortedDates[j];
+                                        
+                                        if (brokerPnlTaxByDate[dateToCheck] && brokerPnlTaxByDate[dateToCheck][brokerCode]) {
+                                            Object.entries(brokerPnlTaxByDate[dateToCheck][brokerCode]).forEach(([stratName, pnlTax]) => {
+                                                const isHidden = hiddenStrategies.has(stratName);
+                                                
+                                                if (!strategyPnlTaxMap[stratName]) {
+                                                    strategyPnlTaxMap[stratName] = 0;
+                                                }
+                                                strategyPnlTaxMap[stratName] += pnlTax;
+                                                
+                                                if (!isHidden) {
+                                                    if (!filteredStrategyPnlTaxMap[stratName]) {
+                                                        filteredStrategyPnlTaxMap[stratName] = 0;
+                                                    }
+                                                    filteredStrategyPnlTaxMap[stratName] += pnlTax;
+                                                }
+                                            });
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    
+                    latestDayPnlTax = Object.values(strategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
+                    filteredLatestDayPnlTax = Object.values(filteredStrategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
+                }
+                
+                const displayMargin = useFilteredTotals ? filteredMonthMargin : monthMargin;
+                const displayLatestDayPnlTax = useFilteredTotals ? filteredLatestDayPnlTax : latestDayPnlTax;
+                const totalMargin = displayMargin + displayLatestDayPnlTax;
+                
+                // Calculate starting capital for first month
+                if (monthIdx === 0 && monthTrades.length > 0) {
+                    const tradesByDate = {};
+                    monthTrades.forEach(trade => {
+                        const dateKey = trade.date;
+                        if (!tradesByDate[dateKey]) {
+                            tradesByDate[dateKey] = [];
+                        }
+                        tradesByDate[dateKey].push(trade);
+                    });
+                    
+                    const sortedDatesInMonth = Object.keys(tradesByDate).sort((a, b) => {
+                        const dayA = parseInt(a.split('/')[0]);
+                        const dayB = parseInt(b.split('/')[0]);
+                        return dayA - dayB;
+                    });
+                    
+                    if (sortedDatesInMonth.length > 0) {
+                        const firstDate = sortedDatesInMonth[0];
+                        const firstDateTrades = tradesByDate[firstDate];
+                        
+                        const firstDateBrokerMargins = {};
+                        const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+                        
+                        firstDateTrades.forEach(trade => {
+                            if (trade.strategyDetails) {
+                                allBrokerStrategies.forEach(brokerStrat => {
+                                    const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+                                    const brokerMatch = brokerStrat.match(/^(B\d+)/);
+                                    if (brokerMatch && margin > 0) {
+                                        const brokerCode = brokerMatch[1];
+                                        if (!firstDateBrokerMargins[brokerCode]) {
+                                            firstDateBrokerMargins[brokerCode] = {};
+                                        }
+                                        firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+                                    }
+                                });
+                            }
+                        });
+                        
+                        let firstDateMargin = 0;
+                        Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
+                            const margins = Object.values(firstDateBrokerMargins[brokerCode]);
+                            if (margins.length > 0) {
+                                firstDateMargin += Math.max(...margins);
+                            }
+                        });
+                        
+                        startingCapital = firstDateMargin;
+                    }
+                }
+                
+                // Calculate month net PnL
+                let monthNet = 0;
+                monthTrades.forEach(trade => {
+                    if (trade && trade.strategyPnlTax) {
+                        Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                            if (!stratName.startsWith('A.PRO')) {
+                                // If useFilteredTotals is true, only include non-hidden strategies
+                                // If useFilteredTotals is false, include all strategies
+                                if (!useFilteredTotals || !hiddenStrategies.has(stratName)) {
+                                    monthNet += pnlTax;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                cumulativeNetPnl += monthNet;
+                const runningCapital = startingCapital + cumulativeNetPnl;
+                const chargesWithdrawn = totalMargin - runningCapital - cumulativeCharges;
+                
+                cumulativeCharges += chargesWithdrawn;
+                previousMonthTotalMargin = totalMargin;
+                
+                result[monthKey] = {
+                    totalMargin: totalMargin,
+                    expenses: chargesWithdrawn
+                };
+            });
+            
+            return result;
         }
 
-        function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData) {
+        function calculateDailyExpenses(sortedTrades, allStrategiesParam, dailyTotalMargins) {
+            const result = {};
+            
+            // Group trades by date
+            const tradesByDate = {};
+            sortedTrades.forEach(trade => {
+                const dateKey = trade.date;
+                if (!tradesByDate[dateKey]) {
+                    tradesByDate[dateKey] = [];
+                }
+                tradesByDate[dateKey].push(trade);
+            });
+            
+            // Sort dates chronologically
+            const sortedDates = Object.keys(tradesByDate).sort((a, b) => {
+                const dateA = a.split('/').reverse().join('');
+                const dateB = b.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+            
+            // Calculate starting capital from first date
+            let startingCapital = 0;
+            if (sortedDates.length > 0) {
+                const firstDate = sortedDates[0];
+                const firstDateTrades = tradesByDate[firstDate];
+                const firstDateBrokerMargins = {};
+                const allBrokerStrategies = allStrategiesParam.filter(s => !s.startsWith('A.PRO'));
+                
+                firstDateTrades.forEach(trade => {
+                    if (trade.strategyDetails) {
+                        allBrokerStrategies.forEach(brokerStrat => {
+                            const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+                            const brokerMatch = brokerStrat.match(/^(B\d+)/);
+                            if (brokerMatch && margin > 0) {
+                                const brokerCode = brokerMatch[1];
+                                if (!firstDateBrokerMargins[brokerCode]) {
+                                    firstDateBrokerMargins[brokerCode] = {};
+                                }
+                                firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+                            }
+                        });
+                    }
+                });
+                
+                Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
+                    const margins = Object.values(firstDateBrokerMargins[brokerCode]);
+                    if (margins.length > 0) {
+                        startingCapital += Math.max(...margins);
+                    }
+                });
+            }
+            
+            let cumulativeNetPnl = 0;
+            let cumulativeCharges = 0;
+            
+            // Calculate expenses for each day
+            sortedDates.forEach(dateKey => {
+                const dayTrades = tradesByDate[dateKey];
+                
+                // Calculate day net PnL
+                let dayNet = 0;
+                dayTrades.forEach(trade => {
+                    if (trade && trade.strategyPnlTax) {
+                        Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                            if (!stratName.startsWith('A.PRO')) {
+                                dayNet += pnlTax;
+                            }
+                        });
+                    }
+                });
+                
+                cumulativeNetPnl += dayNet;
+                const runningCapital = startingCapital + cumulativeNetPnl;
+                const totalMargin = dailyTotalMargins[dateKey] || 0;
+                const chargesWithdrawn = totalMargin - runningCapital - cumulativeCharges;
+                
+                cumulativeCharges += chargesWithdrawn;
+                
+                result[dateKey] = chargesWithdrawn;
+            });
+            
+            return result;
+        }
+
+        function calculateDailyTotalMargins(sortedTrades, allStrategiesParam) {
+            const result = {};
+            
+            // Group trades by date
+            const tradesByDate = {};
+            sortedTrades.forEach(trade => {
+                const dateKey = trade.date;
+                if (!tradesByDate[dateKey]) {
+                    tradesByDate[dateKey] = [];
+                }
+                tradesByDate[dateKey].push(trade);
+            });
+            
+            // Sort dates chronologically
+            const sortedDates = Object.keys(tradesByDate).sort((a, b) => {
+                const dateA = a.split('/').reverse().join('');
+                const dateB = b.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+            
+            // Build PnL Tax by date and broker
+            const brokerPnlTaxByDate = {};
+            sortedTrades.forEach(trade => {
+                const tradeDate = trade.date;
+                if (!brokerPnlTaxByDate[tradeDate]) {
+                    brokerPnlTaxByDate[tradeDate] = {};
+                }
+                
+                if (trade && trade.strategyPnlTax) {
+                    Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                        if (!stratName.startsWith('A.PRO')) {
+                            const brokerMatch = stratName.match(/^(B\d+)/);
+                            if (brokerMatch) {
+                                const brokerCode = brokerMatch[1];
+                                if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
+                                    brokerPnlTaxByDate[tradeDate][brokerCode] = {};
+                                }
+                                if (!brokerPnlTaxByDate[tradeDate][brokerCode][stratName]) {
+                                    brokerPnlTaxByDate[tradeDate][brokerCode][stratName] = 0;
+                                }
+                                brokerPnlTaxByDate[tradeDate][brokerCode][stratName] += pnlTax;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Track previous day's broker-wise max margins and margin dates
+            let previousDayBrokerMaxMargins = {};
+            let brokerMarginDates = {}; // Track which date each broker's margin comes from
+            
+            // Calculate margin for each date
+            sortedDates.forEach((dateKey, dateIndex) => {
+                const dayTrades = tradesByDate[dateKey];
+                const dayBrokerMargins = {};
+                
+                dayTrades.forEach(trade => {
+                    if (trade.strategyDetails) {
+                        Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
+                            if (!stratName.startsWith('A.PRO')) {
+                                const margin = details.margin || 0;
+                                const brokerMatch = stratName.match(/^(B\d+)/);
+                                if (brokerMatch) {
+                                    const brokerCode = brokerMatch[1];
+                                    if (!dayBrokerMargins[brokerCode]) {
+                                        dayBrokerMargins[brokerCode] = {};
+                                    }
+                                    // Store max margin for each strategy
+                                    if (!dayBrokerMargins[brokerCode][stratName] || margin > dayBrokerMargins[brokerCode][stratName]) {
+                                        dayBrokerMargins[brokerCode][stratName] = margin;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                // Calculate max margin per broker and track margin date
+                const currentDayBrokerMaxMargins = {};
+                let dayTotalMargin = 0;
+                
+                // Get all brokers (from today and yesterday)
+                const allBrokers = new Set([...Object.keys(dayBrokerMargins), ...Object.keys(previousDayBrokerMaxMargins)]);
+                
+                allBrokers.forEach(brokerCode => {
+                    let brokerMaxMargin = 0;
+                    let marginDate = dateKey;
+                    
+                    // Calculate today's max margin for this broker
+                    if (dayBrokerMargins[brokerCode]) {
+                        const margins = Object.values(dayBrokerMargins[brokerCode]);
+                        if (margins.length > 0) {
+                            brokerMaxMargin = Math.max(...margins);
+                        }
+                    }
+                    
+                    // If broker's margin is 0 and we have yesterday's data, use yesterday's margin and date
+                    if (brokerMaxMargin === 0 && previousDayBrokerMaxMargins[brokerCode]) {
+                        brokerMaxMargin = previousDayBrokerMaxMargins[brokerCode];
+                        marginDate = brokerMarginDates[brokerCode] || dateKey;
+                    }
+                    
+                    currentDayBrokerMaxMargins[brokerCode] = brokerMaxMargin;
+                    brokerMarginDates[brokerCode] = marginDate;
+                    dayTotalMargin += brokerMaxMargin;
+                });
+                
+                // Calculate PnL Tax from margin date forward to current date
+                let dayPnlTax = 0;
+                
+                allBrokers.forEach(brokerCode => {
+                    const marginDate = brokerMarginDates[brokerCode];
+                    const marginDateIndex = sortedDates.indexOf(marginDate);
+                    
+                    // Accumulate PnL Tax from margin date forward to current date
+                    for (let i = marginDateIndex; i <= dateIndex; i++) {
+                        const checkDate = sortedDates[i];
+                        if (brokerPnlTaxByDate[checkDate] && brokerPnlTaxByDate[checkDate][brokerCode]) {
+                            Object.values(brokerPnlTaxByDate[checkDate][brokerCode]).forEach(pnlTax => {
+                                dayPnlTax += pnlTax;
+                            });
+                        }
+                    }
+                });
+                
+                // Total Margin = Margin + PnL Tax from margin date forward
+                result[dateKey] = dayTotalMargin + dayPnlTax;
+                
+                // Store today's broker max margins for next iteration
+                previousDayBrokerMaxMargins = { ...currentDayBrokerMaxMargins };
+            });
+            
+            return result;
+        }
+
+        function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses) {
             if (strategies.length === 0) {
                 const drawdownHeader = showDrawdown ? '<th class="number-col">DRAWDOWN</th>' : '';
                 const colspan = showDrawdown ? '4' : '3';
@@ -1435,59 +2130,120 @@
                 return;
             }
 
-            let headerRow1 = '<tr class="header-row-1"><th rowspan="2">Period</th>';
-            strategies.forEach((strategy) => {
-                const displayName = formatStrategyName(strategy);
-                const isAPro = strategy.startsWith('A.PRO');
-                const colspan = isAPro ? '1' : '3';
-                
-                const stratIndexInVisible = strategies.indexOf(strategy);
-                const nextStrategy = strategies[stratIndexInVisible + 1];
-                const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
-                let isBrokerBoundary = false;
-                if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
-                    const currentBroker = strategy.match(/^(B\d+)/)?.[1];
-                    const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
-                    isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
+            // Separate A.PRO and broker strategies
+            const aproStrategies = strategies.filter(s => s.startsWith('A.PRO'));
+            const brokerStrategies = strategies.filter(s => !s.startsWith('A.PRO'));
+            
+            // Group broker strategies by broker code
+            const brokerGroups = {};
+            brokerStrategies.forEach(strat => {
+                const brokerMatch = strat.match(/^(B\d+)/);
+                if (brokerMatch) {
+                    const brokerCode = brokerMatch[1];
+                    if (!brokerGroups[brokerCode]) {
+                        brokerGroups[brokerCode] = [];
+                    }
+                    brokerGroups[brokerCode].push(strat);
                 }
-                const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : '');
-                headerRow1 += `<th class="number-col${boundaryClass}" colspan="${colspan}">${displayName}</th>`;
             });
-            headerRow1 += '<th class="number-col total-net-col" rowspan="2">TOTAL</th>';
+            const sortedBrokers = Object.keys(brokerGroups).sort();
+
+            let headerRow1 = '<tr class="header-row-1">';
+            headerRow1 += '<th rowspan="2">Period</th>';
+            
+            // A.PRO section
+            if (aproStrategies.length > 0) {
+                headerRow1 += `<th colspan="${aproStrategies.length}" class="number-col apro-boundary">Amibroker PNL</th>`;
+            }
+            
+            // LOT section by broker
+            if (showLot) {
+                sortedBrokers.forEach(brokerCode => {
+                    const count = brokerGroups[brokerCode].length;
+                    headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} LOT</th>`;
+                });
+            }
+            
+            // DPNL section by broker
+            sortedBrokers.forEach(brokerCode => {
+                const count = brokerGroups[brokerCode].length;
+                headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} DPNL</th>`;
+            });
+            
+            // PNL section by broker
+            sortedBrokers.forEach(brokerCode => {
+                const count = brokerGroups[brokerCode].length;
+                headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} PNL</th>`;
+            });
+            
+            headerRow1 += '<th class="number-col total-net-col" rowspan="2">AMI PNL</th>';
+            headerRow1 += '<th class="number-col total-net-col total-col-border" rowspan="2">TOTAL</th>';
             headerRow1 += '<th class="number-col total-net-col" rowspan="2">NET</th>';
+            headerRow1 += '<th class="number-col net-pnl-percent-col" rowspan="2">NET PNL %</th>';
+            headerRow1 += '<th class="number-col expenses-col" rowspan="2">Expenses</th>';
+            headerRow1 += '<th class="number-col total-net-col" rowspan="2">TOTAL MARGIN</th>';
             if (showDrawdown) {
                 headerRow1 += '<th class="number-col drawdown-col" rowspan="2">DRAWDOWN</th>';
             }
             headerRow1 += '</tr>';
 
             let headerRow2 = '<tr class="header-row-2">';
-            strategies.forEach((strategy) => {
-                const isAPro = strategy.startsWith('A.PRO');
-                const stratIndexInVisible = strategies.indexOf(strategy);
-                const nextStrategy = strategies[stratIndexInVisible + 1];
-                const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
-                let isBrokerBoundary = false;
-                if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
-                    const currentBroker = strategy.match(/^(B\d+)/)?.[1];
-                    const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
-                    isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
-                }
-                const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : '');
-                
-                if (isAPro) {
-                    headerRow2 += `<th class="number-col apro-pnl-col${boundaryClass}">PNL</th>`;
-                } else {
-                    const lotOrTradeLabel = showTradeCount ? 'TRADE' : 'LOT';
-                    headerRow2 += `<th class="number-col lot-col">${lotOrTradeLabel}</th>`;
-                    headerRow2 += `<th class="number-col">PNL</th>`;
-                    headerRow2 += `<th class="number-col${boundaryClass}">DPNL</th>`;
-                }
+            
+            // A.PRO strategy names
+            aproStrategies.forEach((strategy, idx) => {
+                const displayName = formatStrategyName(strategy);
+                const stratIndex = allStrategies.indexOf(strategy);
+                const bgClass = `strategy-bg-${stratIndex % 5}`;
+                const boundaryClass = idx === aproStrategies.length - 1 ? ' apro-boundary' : '';
+                headerRow2 += `<th class="number-col apro-pnl-col ${bgClass}${boundaryClass}">${displayName}</th>`;
             });
+            
+            // LOT column strategy names
+            if (showLot) {
+                sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                    brokerGroups[brokerCode].forEach((strategy, idx) => {
+                        const displayName = formatStrategyName(strategy).replace(/^B\d+\s*/, '');
+                        const stratIndex = allStrategies.indexOf(strategy);
+                        const bgClass = `strategy-bg-${stratIndex % 5}`;
+                        const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                        const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                        const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                        headerRow2 += `<th class="number-col lot-col ${bgClass}${boundaryClass}">${displayName}</th>`;
+                    });
+                });
+            }
+            
+            // DPNL column strategy names
+            sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                brokerGroups[brokerCode].forEach((strategy, idx) => {
+                    const displayName = formatStrategyName(strategy).replace(/^B\d+\s*/, '');
+                    const stratIndex = allStrategies.indexOf(strategy);
+                    const bgClass = `strategy-bg-${stratIndex % 5}`;
+                    const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                    const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                    const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                    headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
+                });
+            });
+            
+            // PNL column strategy names
+            sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                brokerGroups[brokerCode].forEach((strategy, idx) => {
+                    const displayName = formatStrategyName(strategy).replace(/^B\d+\s*/, '');
+                    const stratIndex = allStrategies.indexOf(strategy);
+                    const bgClass = `strategy-bg-${stratIndex % 5}`;
+                    const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                    const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                    const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                    headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
+                });
+            });
+            
             headerRow2 += '</tr>';
             elements.tableHeaders.innerHTML = headerRow1 + headerRow2;
 
             const sortedMonths = Object.keys(monthlyData).sort();
-            const totals = { strategies: {}, totalProfits: 0, netBrProfits: 0 };
+            const totals = { strategies: {}, totalProfits: 0, netBrProfits: 0, totalAmiPnl: 0, totalExpenses: 0, totalMarginSum: 0 };
             strategies.forEach(strat => {
                 totals.strategies[strat] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
             });
@@ -1496,9 +2252,11 @@
             Object.values(totalsToUse).forEach(monthTotal => {
                 totals.totalProfits += monthTotal.total;
                 totals.netBrProfits += monthTotal.net;
+                totals.totalAmiPnl += (monthTotal.amiPnl || 0);
             });
 
             let bodyHtml = '';
+            let previousMonthTotalMargin = 0;
             sortedMonths.forEach(month => {
                 const displayMonth = monthNames[parseInt(month) - 1];
                 bodyHtml += `<tr class="month-row" onclick="toggleMonth('${month}')">`;
@@ -1508,10 +2266,10 @@
                 const monthTotal = totalsToUse[month]?.total || 0;
                 const monthNetTotal = totalsToUse[month]?.net || 0;
 
+                // First accumulate strategy data
                 strategies.forEach((strategy) => {
                     const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
                     const { pnl, dpnl, net, tradeCount, lotSum, lotCount } = stratData;
-                    const lot = lotCount > 0 ? lotSum / lotCount : 0;
 
                     totals.strategies[strategy].lotSum += lotSum;
                     totals.strategies[strategy].lotCount += lotCount;
@@ -1519,39 +2277,105 @@
                     totals.strategies[strategy].dpnl += dpnl;
                     totals.strategies[strategy].net += net;
                     totals.strategies[strategy].tradeCount += tradeCount;
-
-                    const stratIndex = allStrategies.indexOf(strategy);
-                    const stratIndexInVisible = strategies.indexOf(strategy);
-                    const isLast = stratIndexInVisible === strategies.length - 1;
-                    const bgClass = `strategy-bg-${stratIndex % 5}`;
-                    const nextStrategy = strategies[stratIndexInVisible + 1];
-                    const isAPro = strategy.startsWith('A.PRO');
-                    const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
-                    let isBrokerBoundary = false;
-                    if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
-                        const currentBroker = strategy.match(/^(B\d+)/)?.[1];
-                        const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
-                        isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
-                    }
-                    const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : (isLast ? ' strategy-group-end' : ''));
-                    
-                    if (isAPro) {
-                        bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
-                    } else {
-                        const displayValue = showTradeCount ? (tradeCount > 0 ? tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
-                        bodyHtml += `<td class="number-col lot-col ${bgClass}">${displayValue}</td>`;
-                        bodyHtml += `<td class="number-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
-                        bodyHtml += `<td class="number-col ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
-                    }
                 });
 
-                bodyHtml += `<td class="number-col total-net-col ${monthTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(monthTotal)}</td>`;
+                // Output A.PRO PNL columns
+                aproStrategies.forEach((strategy, idx) => {
+                    const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                    const pnl = stratData.pnl;
+                    const stratIndex = allStrategies.indexOf(strategy);
+                    const bgClass = `strategy-bg-${stratIndex % 5}`;
+                    const boundaryClass = idx === aproStrategies.length - 1 ? ' apro-boundary' : '';
+                    bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+                });
+                
+                // Output LOT columns grouped by broker
+                if (showLot) {
+                    sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                        brokerGroups[brokerCode].forEach((strategy, idx) => {
+                            const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                            const { tradeCount, lotSum, lotCount } = stratData;
+                            const lot = lotCount > 0 ? lotSum / lotCount : 0;
+                            const stratIndex = allStrategies.indexOf(strategy);
+                            const bgClass = `strategy-bg-${stratIndex % 5}`;
+                            const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                            const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                            const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                            const displayValue = showTradeCount ? (tradeCount > 0 ? tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
+                            bodyHtml += `<td class="number-col lot-col ${bgClass}${boundaryClass}">${displayValue}</td>`;
+                        });
+                    });
+                }
+                
+                // Output DPNL columns grouped by broker
+                sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                    brokerGroups[brokerCode].forEach((strategy, idx) => {
+                        const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                        const dpnl = stratData.dpnl;
+                        const stratIndex = allStrategies.indexOf(strategy);
+                        const bgClass = `strategy-bg-${stratIndex % 5}`;
+                        const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                        const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                        const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                        bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
+                    });
+                });
+                
+                // Output PNL columns grouped by broker
+                sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                    brokerGroups[brokerCode].forEach((strategy, idx) => {
+                        const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                        const pnl = stratData.pnl;
+                        const stratIndex = allStrategies.indexOf(strategy);
+                        const bgClass = `strategy-bg-${stratIndex % 5}`;
+                        const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                        const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                        const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                        bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+                    });
+                });
+
+                // AMI PNL
+                const monthAmiPnl = totalsToUse[month]?.amiPnl || 0;
+                bodyHtml += `<td class="number-col total-net-col ${monthAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(monthAmiPnl)}</td>`;
+
+                bodyHtml += `<td class="number-col total-net-col total-col-border ${monthTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(monthTotal)}</td>`;
+                
+                // NET PNL
                 bodyHtml += `<td class="number-col total-net-col ${monthNetTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(monthNetTotal)}</td>`;
+                
+                // NET PNL % calculation
+                let netPnlPercent = 0;
+                if (previousMonthTotalMargin !== 0) {
+                    netPnlPercent = (monthNetTotal / previousMonthTotalMargin) * 100;
+                }
+                bodyHtml += `<td class="number-col net-pnl-percent-col ${netPnlPercent >= 0 ? 'positive' : 'negative'}">${netPnlPercent !== 0 ? netPnlPercent.toFixed(2) + '%' : ''}</td>`;
+                
+                // Expenses and TOTAL MARGIN - use calculated values
+                const monthExpensesData = monthlyExpensesAndMargins[month] || { expenses: 0, totalMargin: 0 };
+                const expenses = monthExpensesData.expenses;
+                const totalMargin = monthExpensesData.totalMargin;
+                
+                // Accumulate total expenses
+                totals.totalExpenses += expenses;
+                
+                // Accumulate total margin sum
+                totals.totalMarginSum += totalMargin;
+                
+                // Store the last total margin globally
+                globalLastTotalMargin = totalMargin;
+                
+                bodyHtml += `<td class="number-col expenses-col ${expenses >= 0 ? 'positive' : 'negative'}">${formatNumber(expenses)}</td>`;
+                bodyHtml += `<td class="number-col total-net-col ${totalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMargin)}</td>`;
+                
                 if (showDrawdown) {
                     const monthDrawdown = totalsToUse[month]?.drawdown || 0;
                     bodyHtml += `<td class="number-col drawdown-col negative">${formatNumber(monthDrawdown)}</td>`;
                 }
                 bodyHtml += '</tr>';
+                
+                // Update previous month total margin for next iteration
+                previousMonthTotalMargin = totalMargin;
 
                 if (dailyData[month]) {
                     const sortedDays = Object.keys(dailyData[month]).sort((a, b) => {
@@ -1569,38 +2393,84 @@
                         const dayTotal = totalsToUse[month][date]?.total || 0;
                         const dayNetTotal = totalsToUse[month][date]?.net || 0;
 
-                        strategies.forEach((strategy) => {
+                        // Output A.PRO PNL columns
+                        aproStrategies.forEach((strategy, idx) => {
                             const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
-                            const { pnl, dpnl, net, tradeCount, lotSum, lotCount } = stratData;
-                            const lot = lotCount > 0 ? lotSum / lotCount : 0;
-
+                            const pnl = stratData.pnl;
                             const stratIndex = allStrategies.indexOf(strategy);
-                            const stratIndexInVisible = strategies.indexOf(strategy);
-                            const isLast = stratIndexInVisible === strategies.length - 1;
                             const bgClass = `strategy-bg-${stratIndex % 5}`;
-                            const nextStrategy = strategies[stratIndexInVisible + 1];
-                            const isAPro = strategy.startsWith('A.PRO');
-                            const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
-                            let isBrokerBoundary = false;
-                            if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
-                                const currentBroker = strategy.match(/^(B\d+)/)?.[1];
-                                const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
-                                isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
-                            }
-                            const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : (isLast ? ' strategy-group-end' : ''));
-                            
-                            if (isAPro) {
-                                bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
-                            } else {
-                                const displayValue = showTradeCount ? (tradeCount > 0 ? tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
-                                bodyHtml += `<td class="number-col lot-col ${bgClass}">${displayValue}</td>`;
-                                bodyHtml += `<td class="number-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(pnl)}</td>`;
-                                bodyHtml += `<td class="number-col ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
-                            }
+                            const boundaryClass = idx === aproStrategies.length - 1 ? ' apro-boundary' : '';
+                            bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+                        });
+                        
+                        // Output LOT columns grouped by broker
+                        if (showLot) {
+                            sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                                brokerGroups[brokerCode].forEach((strategy, idx) => {
+                                    const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                                    const { tradeCount, lotSum, lotCount } = stratData;
+                                    const lot = lotCount > 0 ? lotSum / lotCount : 0;
+                                    const stratIndex = allStrategies.indexOf(strategy);
+                                    const bgClass = `strategy-bg-${stratIndex % 5}`;
+                                    const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                                    const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                                    const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                                    const displayValue = showTradeCount ? (tradeCount > 0 ? tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
+                                    bodyHtml += `<td class="number-col lot-col ${bgClass}${boundaryClass}">${displayValue}</td>`;
+                                });
+                            });
+                        }
+                        
+                        // Output DPNL columns grouped by broker
+                        sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                            brokerGroups[brokerCode].forEach((strategy, idx) => {
+                                const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                                const dpnl = stratData.dpnl;
+                                const stratIndex = allStrategies.indexOf(strategy);
+                                const bgClass = `strategy-bg-${stratIndex % 5}`;
+                                const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                                const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                                const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                                bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
+                            });
+                        });
+                        
+                        // Output PNL columns grouped by broker
+                        sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                            brokerGroups[brokerCode].forEach((strategy, idx) => {
+                                const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+                                const pnl = stratData.pnl;
+                                const stratIndex = allStrategies.indexOf(strategy);
+                                const bgClass = `strategy-bg-${stratIndex % 5}`;
+                                const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                                const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                                const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                                bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+                            });
                         });
 
-                        bodyHtml += `<td class="number-col total-net-col ${dayTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(dayTotal)}</td>`;
+                        // AMI PNL
+                        const dayAmiPnl = totalsToUse[month][date]?.amiPnl || 0;
+                        bodyHtml += `<td class="number-col total-net-col ${dayAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dayAmiPnl)}</td>`;
+
+                        bodyHtml += `<td class="number-col total-net-col total-col-border ${dayTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(dayTotal)}</td>`;
+                        
+                        // NET PNL
                         bodyHtml += `<td class="number-col total-net-col ${dayNetTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(dayNetTotal)}</td>`;
+                        
+                        // NET PNL % calculation for day rows
+                        let dayNetPnlPercent = 0;
+                        if (previousMonthTotalMargin !== 0) {
+                            dayNetPnlPercent = (dayNetTotal / previousMonthTotalMargin) * 100;
+                        }
+                        bodyHtml += `<td class="number-col net-pnl-percent-col ${dayNetPnlPercent >= 0 ? 'positive' : 'negative'}">${dayNetPnlPercent !== 0 ? dayNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
+                        
+                        // Expenses and TOTAL MARGIN (from pre-calculated data)
+                        const dayExpense = dailyExpenses[date] || 0;
+                        const dayTotalMargin = dailyTotalMargins[date] || 0;
+                        bodyHtml += `<td class="number-col expenses-col ${dayExpense >= 0 ? 'positive' : 'negative'}">${formatNumber(dayExpense)}</td>`;
+                        bodyHtml += `<td class="number-col total-net-col ${dayTotalMargin >= 0 ? 'positive' : 'negative'}">${dayTotalMargin > 0 ? formatNumber(dayTotalMargin) : ''}</td>`;
+                        
                         if (showDrawdown) {
                             const dayDrawdown = (cumulativeData[month] && cumulativeData[month][date]) ? cumulativeData[month][date].drawdown : 0;
                             bodyHtml += `<td class="number-col drawdown-col negative">${formatNumber(dayDrawdown)}</td>`;
@@ -1611,35 +2481,74 @@
             });
 
             bodyHtml += '<tr class="total-row"><td>Grand Total</td>';
-            strategies.forEach((strategy) => {
+            
+            // Output A.PRO PNL totals
+            aproStrategies.forEach((strategy, idx) => {
                 const stratTotal = totals.strategies[strategy];
-                const lot = stratTotal.lotCount > 0 ? stratTotal.lotSum / stratTotal.lotCount : 0;
                 const stratIndex = allStrategies.indexOf(strategy);
-                const stratIndexInVisible = strategies.indexOf(strategy);
-                const isLast = stratIndexInVisible === strategies.length - 1;
                 const bgClass = `strategy-bg-${stratIndex % 5}`;
-                const isAPro = strategy.startsWith('A.PRO');
-                const nextStrategy = strategies[stratIndexInVisible + 1];
-                const isAProBoundary = isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO');
-                let isBrokerBoundary = false;
-                if (!isAPro && nextStrategy && !nextStrategy.startsWith('A.PRO')) {
-                    const currentBroker = strategy.match(/^(B\d+)/)?.[1];
-                    const nextBroker = nextStrategy.match(/^(B\d+)/)?.[1];
-                    isBrokerBoundary = currentBroker && nextBroker && currentBroker !== nextBroker;
-                }
-                const boundaryClass = isAProBoundary ? ' apro-boundary' : (isBrokerBoundary ? ' broker-boundary' : (isLast ? ' strategy-group-end' : ''));
-                
-                if (isAPro) {
-                    bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.pnl)}</td>`;
-                } else {
-                    const displayValue = showTradeCount ? (stratTotal.tradeCount > 0 ? stratTotal.tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
-                    bodyHtml += `<td class="number-col lot-col ${bgClass}">${displayValue}</td>`;
-                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}">${formatNumber(stratTotal.pnl)}</td>`;
-                    bodyHtml += `<td class="number-col ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.dpnl)}</td>`;
-                }
+                const boundaryClass = idx === aproStrategies.length - 1 ? ' apro-boundary' : '';
+                bodyHtml += `<td class="number-col apro-pnl-col ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.pnl)}</td>`;
             });
-            bodyHtml += `<td class="number-col total-net-col ${totals.totalProfits >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalProfits)}</td>`;
+            
+            // Output LOT totals grouped by broker
+            if (showLot) {
+                sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                    brokerGroups[brokerCode].forEach((strategy, idx) => {
+                        const stratTotal = totals.strategies[strategy];
+                        const lot = stratTotal.lotCount > 0 ? stratTotal.lotSum / stratTotal.lotCount : 0;
+                        const stratIndex = allStrategies.indexOf(strategy);
+                        const bgClass = `strategy-bg-${stratIndex % 5}`;
+                        const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                        const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                        const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                        const displayValue = showTradeCount ? (stratTotal.tradeCount > 0 ? stratTotal.tradeCount : '') : (lot > 0 ? lot.toFixed(2) : '');
+                        bodyHtml += `<td class="number-col lot-col ${bgClass}${boundaryClass}">${displayValue}</td>`;
+                    });
+                });
+            }
+            
+            // Output DPNL totals grouped by broker
+            sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                brokerGroups[brokerCode].forEach((strategy, idx) => {
+                    const stratTotal = totals.strategies[strategy];
+                    const stratIndex = allStrategies.indexOf(strategy);
+                    const bgClass = `strategy-bg-${stratIndex % 5}`;
+                    const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                    const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                    const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                    bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.dpnl)}</td>`;
+                });
+            });
+            
+            // Output PNL totals grouped by broker
+            sortedBrokers.forEach((brokerCode, brokerIdx) => {
+                brokerGroups[brokerCode].forEach((strategy, idx) => {
+                    const stratTotal = totals.strategies[strategy];
+                    const stratIndex = allStrategies.indexOf(strategy);
+                    const bgClass = `strategy-bg-${stratIndex % 5}`;
+                    const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+                    const isLastBroker = brokerIdx === sortedBrokers.length - 1;
+                    const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
+                    bodyHtml += `<td class="number-col pnl-section ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.pnl)}</td>`;
+                });
+            });
+            
+            // AMI PNL total
+            bodyHtml += `<td class="number-col total-net-col ${totals.totalAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalAmiPnl)}</td>`;
+            
+            bodyHtml += `<td class="number-col total-net-col total-col-border ${totals.totalProfits >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalProfits)}</td>`;
+            
+            // NET total
             bodyHtml += `<td class="number-col total-net-col ${totals.netBrProfits >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.netBrProfits)}</td>`;
+            
+            // NET PNL % total
+            const totalNetPnlPercent = totals.totalMarginSum !== 0 ? (totals.netBrProfits / totals.totalMarginSum) * 100 : 0;
+            bodyHtml += `<td class="number-col net-pnl-percent-col ${totalNetPnlPercent >= 0 ? 'positive' : 'negative'}">${totalNetPnlPercent !== 0 ? totalNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
+            
+            // Expenses total and TOTAL MARGIN (empty)
+            bodyHtml += `<td class="number-col expenses-col ${totals.totalExpenses >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalExpenses)}</td>`;
+            bodyHtml += `<td class="number-col total-net-col"></td>`;
             
             if (showDrawdown) {
                 let maxDrawdown = 0;
@@ -1653,6 +2562,9 @@
             bodyHtml += '</tr>';
 
             elements.tableBody.innerHTML = bodyHtml;
+            
+            // Store total expenses globally for summary cards
+            globalTotalExpenses = totals.totalExpenses;
         }
 
         function toggleMonth(month) {
@@ -1686,6 +2598,73 @@
                 return dateA.localeCompare(dateB);
             });
             
+            // Calculate starting capital from first date of FIRST MONTH only
+            globalStartingCapital = 0;
+            if (sortedAllTrades.length > 0) {
+                // Group trades by month
+                const tradesByMonth = {};
+                sortedAllTrades.forEach(trade => {
+                    const monthKey = trade.date.split('/')[1];
+                    if (!tradesByMonth[monthKey]) {
+                        tradesByMonth[monthKey] = [];
+                    }
+                    tradesByMonth[monthKey].push(trade);
+                });
+                
+                const sortedMonths = Object.keys(tradesByMonth).sort();
+                if (sortedMonths.length > 0) {
+                    const firstMonth = sortedMonths[0];
+                    const firstMonthTrades = tradesByMonth[firstMonth];
+                    
+                    // Get first date in first month
+                    const tradesByDate = {};
+                    firstMonthTrades.forEach(trade => {
+                        const dateKey = trade.date;
+                        if (!tradesByDate[dateKey]) {
+                            tradesByDate[dateKey] = [];
+                        }
+                        tradesByDate[dateKey].push(trade);
+                    });
+                    
+                    const sortedDatesInMonth = Object.keys(tradesByDate).sort((a, b) => {
+                        const dayA = parseInt(a.split('/')[0]);
+                        const dayB = parseInt(b.split('/')[0]);
+                        return dayA - dayB;
+                    });
+                    
+                    if (sortedDatesInMonth.length > 0) {
+                        const firstDate = sortedDatesInMonth[0];
+                        const firstDateTrades = tradesByDate[firstDate];
+                        
+                        const firstDateBrokerMargins = {};
+                        const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+                        
+                        firstDateTrades.forEach(trade => {
+                            if (trade.strategyDetails) {
+                                allBrokerStrategies.forEach(brokerStrat => {
+                                    const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+                                    const brokerMatch = brokerStrat.match(/^(B\d+)/);
+                                    if (brokerMatch && margin > 0) {
+                                        const brokerCode = brokerMatch[1];
+                                        if (!firstDateBrokerMargins[brokerCode]) {
+                                            firstDateBrokerMargins[brokerCode] = {};
+                                        }
+                                        firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+                                    }
+                                });
+                            }
+                        });
+                        
+                        Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
+                            const margins = Object.values(firstDateBrokerMargins[brokerCode]);
+                            if (margins.length > 0) {
+                                globalStartingCapital += Math.max(...margins);
+                            }
+                        });
+                    }
+                }
+            }
+            
             sortedAllTrades.forEach(trade => {
                 const monthKey = trade.date.split('/')[1];
                 if (!allMonthlyProfits[monthKey]) allMonthlyProfits[monthKey] = 0;
@@ -1716,159 +2695,48 @@
 
             const totalProfitAll = Object.values(allMonthlyProfits).reduce((sum, val) => sum + val, 0);
             const netBrProfitAll = Object.values(allMonthlyNetProfits).reduce((sum, val) => sum + val, 0);
-            
-            const monthlyProfits = {};
-            const monthlyNetProfits = {};
-            
-            trades.forEach(trade => {
-                const monthKey = trade.date.split('/')[1];
-                if (!monthlyProfits[monthKey]) monthlyProfits[monthKey] = 0;
-                if (!monthlyNetProfits[monthKey]) monthlyNetProfits[monthKey] = 0;
-                
-                Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
-                    if (!stratName.startsWith('A.PRO') && !hiddenStrategies.has(stratName)) {
-                        monthlyProfits[monthKey] += (trade.strategyPnls[stratName] || 0);
-                        monthlyNetProfits[monthKey] += (trade.strategyPnlTax[stratName] || 0);
-                    }
-                });
-            });
-            
-            const totalProfitFiltered = Object.values(monthlyProfits).reduce((sum, val) => sum + val, 0);
-            const netBrProfitFiltered = Object.values(monthlyNetProfits).reduce((sum, val) => sum + val, 0);
 
-            const isMonthFiltered = elements.monthFilter.value !== 'all';
-            const isStrategyFiltered = hiddenStrategies.size > 0;
-            const isFiltered = isMonthFiltered || isStrategyFiltered;
-
-            elements.totalProfit.textContent = `₹${totalProfitAll >= 0 ? '' : '-'}${Math.abs(totalProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-            elements.totalProfit.className = `summary-card-value ${totalProfitAll >= 0 ? 'positive' : 'negative'}`;
-            
-            if (isFiltered) {
-                const filtered = `₹${totalProfitFiltered >= 0 ? '' : '-'}${Math.abs(totalProfitFiltered).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-                elements.totalProfitFiltered.innerHTML = `Filtered: <span style="font-weight: 600; color: ${totalProfitFiltered >= 0 ? '#059669' : '#dc2626'};">${filtered}</span>`;
-            } else {
-                elements.totalProfitFiltered.innerHTML = '';
+            // Update Starting Capital
+            if (elements.startingCapital) {
+                elements.startingCapital.textContent = globalStartingCapital > 0 ? '₹' + globalStartingCapital.toLocaleString('en-IN', {maximumFractionDigits: 0}) : '-';
+                elements.startingCapital.className = 'summary-card-value';
             }
 
-            elements.netBrProfit.textContent = `₹${netBrProfitAll >= 0 ? '' : '-'}${Math.abs(netBrProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-            elements.netBrProfit.className = `summary-card-value ${netBrProfitAll >= 0 ? 'positive' : 'negative'}`;
-            
-            if (isFiltered) {
-                const filtered = `₹${netBrProfitFiltered >= 0 ? '' : '-'}${Math.abs(netBrProfitFiltered).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-                elements.netBrProfitFiltered.innerHTML = `Filtered: <span style="font-weight: 600; color: ${netBrProfitFiltered >= 0 ? '#059669' : '#dc2626'};">${filtered}</span>`;
+            // Update Net Broker Profit with percentage
+            if (globalStartingCapital > 0 && netBrProfitAll !== 0) {
+                const profitPercent = (netBrProfitAll / globalStartingCapital) * 100;
+                elements.netBrProfit.innerHTML = `₹${netBrProfitAll >= 0 ? '' : '-'}${Math.abs(netBrProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})} <span class="percentage-text">[${profitPercent.toFixed(2)}% ]</span>`;
+                elements.netBrProfit.className = `summary-card-value ${netBrProfitAll >= 0 ? 'positive' : 'negative'}`;
             } else {
-                elements.netBrProfitFiltered.innerHTML = '';
+                elements.netBrProfit.textContent = `₹${netBrProfitAll >= 0 ? '' : '-'}${Math.abs(netBrProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                elements.netBrProfit.className = `summary-card-value ${netBrProfitAll >= 0 ? 'positive' : 'negative'}`;
             }
 
             const chargesAll = totalProfitAll - netBrProfitAll;
-            const chargesFiltered = totalProfitFiltered - netBrProfitFiltered;
             elements.charges.textContent = `₹-${Math.abs(chargesAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-            
-            if (isFiltered) {
-                const filtered = `₹-${Math.abs(chargesFiltered).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-                elements.chargesFiltered.innerHTML = `Filtered: <span style="font-weight: 600; color: #dc2626;">${filtered}</span>`;
-            } else {
-                elements.chargesFiltered.innerHTML = '';
-            }
 
-            const brokerDrawdownsAll = {};
-            const brokerDrawdownsFiltered = {};
-            
-            for (const stratName in strategyTracking) {
-                if (!stratName.startsWith('A.PRO')) {
-                    const brokerMatch = stratName.match(/^(B\d+)/);
-                    if (brokerMatch) {
-                        const brokerCode = brokerMatch[1];
-                        brokerDrawdownsAll[brokerCode] = (brokerDrawdownsAll[brokerCode] || 0) + strategyTracking[stratName].drawdown;
-                    }
-                }
-            }
-            
-            for (const stratName in strategyTracking) {
-                if (!stratName.startsWith('A.PRO') && !hiddenStrategies.has(stratName)) {
-                    const brokerMatch = stratName.match(/^(B\d+)/);
-                    if (brokerMatch) {
-                        const brokerCode = brokerMatch[1];
-                        brokerDrawdownsFiltered[brokerCode] = (brokerDrawdownsFiltered[brokerCode] || 0) + strategyTracking[stratName].drawdown;
-                    }
-                }
-            }
-
-            const brokerCodes = Object.keys(brokerDrawdownsAll).sort();
-            
-            // Create broker cards dynamically if they don't exist
-            brokerCodes.forEach((brokerCode, idx) => {
-                if (!brokerCards[brokerCode]) {
-                    const card = document.createElement('div');
-                    card.className = 'summary-card';
-                    card.style.order = 10 + idx;
-                    card.id = `broker-${brokerCode}-card`;
-                    
-                    card.innerHTML = `
-                        <div class="summary-card-title">${brokerCode} Drawdown</div>
-                        <div class="summary-card-value negative" id="broker-${brokerCode}-value">₹0</div>
-                        <div class="summary-card-subtitle" id="broker-${brokerCode}-filtered" style="margin-top: 6px; font-size: 12px; color: #64748b;"></div>
-                    `;
-                    
-                    elements.brokerCardsContainer.appendChild(card);
-                    
-                    brokerCards[brokerCode] = {
-                        card: card,
-                        value: document.getElementById(`broker-${brokerCode}-value`),
-                        filtered: document.getElementById(`broker-${brokerCode}-filtered`)
-                    };
-                }
-            });
-
-            // Update broker card values
-            brokerCodes.forEach((brokerCode) => {
-                const elem = brokerCards[brokerCode];
-                if (!elem) return;
-                
-                const allDrawdown = brokerDrawdownsAll[brokerCode];
-                const filteredDrawdown = brokerDrawdownsFiltered[brokerCode] || 0;
-                
-                if (allDrawdown > 0) {
-                    elem.value.textContent = `-₹${Math.abs(allDrawdown).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-                    elem.value.className = 'summary-card-value negative';
+            // Update Running Margin stat - use the last month's total margin
+            if (elements.runningMargin) {
+                if (globalLastTotalMargin > 0) {
+                    elements.runningMargin.textContent = `₹${globalLastTotalMargin.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                    elements.runningMargin.className = 'summary-card-value ' + (globalLastTotalMargin >= 0 ? 'positive' : 'negative');
                 } else {
-                    elem.value.textContent = '₹0';
-                    elem.value.className = 'summary-card-value positive';
+                    elements.runningMargin.textContent = '-';
+                    elements.runningMargin.className = 'summary-card-value';
                 }
-                
-                if (isStrategyFiltered && filteredDrawdown !== allDrawdown) {
-                    if (filteredDrawdown > 0) {
-                        elem.filtered.innerHTML = `Filtered: <span style="font-weight: 600; color: #dc2626;">-₹${Math.abs(filteredDrawdown).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>`;
-                    } else {
-                        elem.filtered.innerHTML = `Filtered: <span style="font-weight: 600; color: #059669;">₹0</span>`;
-                    }
-                } else {
-                    elem.filtered.innerHTML = '';
-                }
-            });
-
-            if (currentDrawdown > 0) {
-                elements.currentDrawdown.textContent = `-₹${Math.abs(currentDrawdown).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-                elements.currentDrawdown.className = 'summary-card-value negative';
-            } else {
-                elements.currentDrawdown.textContent = '₹0';
-                elements.currentDrawdown.className = 'summary-card-value positive';
             }
             
-            // Adjust grid layout based on number of cards
-            adjustSummaryCardsGrid();
-        }
-
-        function adjustSummaryCardsGrid() {
-            const summaryCardsContainer = document.getElementById('summaryCards');
-            const cardCount = summaryCardsContainer.querySelectorAll('.summary-card').length;
+            // Update Total Expense stat - use accumulated expenses from table
+            if (elements.totalExpense) {
+                elements.totalExpense.textContent = `₹${globalTotalExpenses >= 0 ? '' : '-'}${Math.abs(globalTotalExpenses).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                elements.totalExpense.className = 'summary-card-value ' + (globalTotalExpenses >= 0 ? 'positive' : 'negative');
+            }
             
-            // Remove existing grid class
-            summaryCardsContainer.classList.remove('grid-3-cols');
-            
-            // Apply 3-column grid only when 5+ cards (default is 4 columns)
-            if (cardCount >= 5) {
-                summaryCardsContainer.classList.add('grid-3-cols');
+            // Update Total Net Profit stat (Net Broker Profit + Total Expense)
+            const netProfitValue = netBrProfitAll + globalTotalExpenses;
+            if (elements.netProfit) {
+                elements.netProfit.textContent = `₹${netProfitValue >= 0 ? '' : '-'}${Math.abs(netProfitValue).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                elements.netProfit.className = 'summary-card-value ' + (netProfitValue >= 0 ? 'positive' : 'negative');
             }
         }
 
