@@ -516,7 +516,6 @@
         }
         .summary-card-value.positive { color: #059669; }
         .summary-card-value.negative { color: #f43f5e; }
-        .percentage-text { font-weight: 700; font-size: 14px; }
         .summary-card.net-profit-box {
             background: #f0fdf4;
         }
@@ -903,6 +902,10 @@
                 <div class="summary-card-value" id="startingCapital">₹0</div>
             </div>
             <div class="summary-card">
+                <div class="summary-card-title">Running Profit</div>
+                <div class="summary-card-value" id="runningProfit">₹0</div>
+            </div>
+            <div class="summary-card">
                 <div class="summary-card-title">Net Broker Profit</div>
                 <div class="summary-card-value" id="netBrProfit">₹0</div>
             </div>
@@ -987,6 +990,7 @@
     <script>
         const elements = {
             startingCapital: document.getElementById('startingCapital'),
+            runningProfit: document.getElementById('runningProfit'),
             netBrProfit: document.getElementById('netBrProfit'),
             charges: document.getElementById('charges'),
             runningMargin: document.getElementById('runningMargin'),
@@ -2702,15 +2706,22 @@
                 elements.startingCapital.className = 'summary-card-value';
             }
 
-            // Update Net Broker Profit with percentage
-            if (globalStartingCapital > 0 && netBrProfitAll !== 0) {
-                const profitPercent = (netBrProfitAll / globalStartingCapital) * 100;
-                elements.netBrProfit.innerHTML = `₹${netBrProfitAll >= 0 ? '' : '-'}${Math.abs(netBrProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})} <span class="percentage-text">[${profitPercent.toFixed(2)}% ]</span>`;
-                elements.netBrProfit.className = `summary-card-value ${netBrProfitAll >= 0 ? 'positive' : 'negative'}`;
-            } else {
-                elements.netBrProfit.textContent = `₹${netBrProfitAll >= 0 ? '' : '-'}${Math.abs(netBrProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-                elements.netBrProfit.className = `summary-card-value ${netBrProfitAll >= 0 ? 'positive' : 'negative'}`;
+            // Update Running Profit as PERCENTAGE
+            if (elements.runningProfit) {
+                if (globalStartingCapital > 0 && netBrProfitAll !== 0) {
+                    const profitPercent = (netBrProfitAll / globalStartingCapital) * 100;
+                    elements.runningProfit.textContent = profitPercent.toFixed(2) + '%';
+                    elements.runningProfit.className = `summary-card-value ${profitPercent >= 0 ? 'positive' : 'negative'}`;
+                } else {
+                    elements.runningProfit.textContent = '-';
+                    elements.runningProfit.className = 'summary-card-value';
+                }
             }
+
+            // Update Net Broker Profit without percentage
+            elements.netBrProfit.textContent = `₹${netBrProfitAll >= 0 ? '' : '-'}${Math.abs(netBrProfitAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            elements.netBrProfit.className = `summary-card-value ${netBrProfitAll >= 0 ? 'positive' : 'negative'}`;
+
 
             const chargesAll = totalProfitAll - netBrProfitAll;
             elements.charges.textContent = `₹-${Math.abs(chargesAll).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
