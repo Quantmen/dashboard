@@ -146,8 +146,8 @@
     <div class="main-content-container" id="mainContentContainer">
         <iframe id="dashboardFrame" class="main-content-frame active" src="dashboard.html"></iframe>
         <iframe id="strategyFrame" class="main-content-frame" src="strategy-performance.html"></iframe>
+        <iframe id="drawdownFrame" class="main-content-frame" src="drawdown.html"></iframe>
         <iframe id="reportFrame" class="main-content-frame" src="report.html"></iframe>
-        <iframe id="monthlyPnlFrame" class="main-content-frame" src="monthly-pnl.html"></iframe>
     </div>
 
     <script>
@@ -156,8 +156,8 @@
         const mainContainer = document.getElementById('mainContentContainer');
         const dashboardFrame = document.getElementById('dashboardFrame');
         const strategyFrame = document.getElementById('strategyFrame');
+        const drawdownFrame = document.getElementById('drawdownFrame');
         const reportFrame = document.getElementById('reportFrame');
-        const monthlyPnlFrame = document.getElementById('monthlyPnlFrame');
         
         // Loading overlay elements
         const loadingOverlay = document.getElementById('mainLoadingOverlay');
@@ -253,17 +253,17 @@
         function handleNavigation(page) {
             dashboardFrame.classList.remove('active');
             strategyFrame.classList.remove('active');
+            drawdownFrame.classList.remove('active');
             reportFrame.classList.remove('active');
-            monthlyPnlFrame.classList.remove('active');
             
             if (page === 'dashboard.html') {
                 dashboardFrame.classList.add('active');
             } else if (page === 'strategy-performance.html') {
                 strategyFrame.classList.add('active');
+            } else if (page === 'drawdown.html') {
+                drawdownFrame.classList.add('active');
             } else if (page === 'report.html') {
                 reportFrame.classList.add('active');
-            } else if (page === 'monthly-pnl.html') {
-                monthlyPnlFrame.classList.add('active');
             }
             
             currentPage = page;
@@ -283,8 +283,8 @@
         function broadcastMessage(message) {
             dashboardFrame.contentWindow.postMessage(message, '*');
             strategyFrame.contentWindow.postMessage(message, '*');
+            drawdownFrame.contentWindow.postMessage(message, '*');
             reportFrame.contentWindow.postMessage(message, '*');
-            monthlyPnlFrame.contentWindow.postMessage(message, '*');
         }
 
         // Show toast notification at bottom center of screen
