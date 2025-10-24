@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawdown Analysis</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .container {
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 32px 32px 32px;
+            background: #f8fafc;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .summary-card-label {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .summary-card-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        /* UPDATED: Changed from red (#dc2626) to amber/orange */
+        .summary-card-value.negative {
+            color: #d97706;
+        }
+
+        .summary-card-value.positive {
+            color: #059669;
+        }
+
+        /* Controls */
+        .controls {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .control-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #374151;
+            background: white;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .control-group input:hover,
+        .control-group select:hover {
+            border-color: #9ca3af;
+            background: #f9fafb;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            padding: 7px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            align-self: flex-end;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: 1px solid #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            overflow: visible;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+            background: white;
+            border-radius: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            min-width: 800px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        thead {
+            background: #f3f4f6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 12px 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: #1f2937;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #d1d5db;
+            border-right: 1px solid #e5e7eb;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+            background: #f3f4f6;
+            line-height: 1.2;
+            vertical-align: middle;
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        th.sortable:hover {
+            background: #e5e7eb;
+        }
+
+        th.sorted-asc::after {
+            content: ' ▲';
+            font-size: 9px;
+            color: #3b82f6;
+        }
+
+        th.sorted-desc::after {
+            content: ' ▼';
+            font-size: 9px;
+            color: #3b82f6;
+        }
+
+        /* UPDATED: Changed from red (#dc2626) to amber/orange */
+        .negative {
+            color: #d97706;
+            font-weight: 600;
+        }
+
+        .positive {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .neutral {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 12px 12px;
+            border-right: 1px solid #f3f4f6;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        /* Broker row styling */
+        .broker-row {
+            background: linear-gradient(to right, #eff6ff 0%, #dbeafe 100%);
+            font-weight: 700;
+        }
+
+        .broker-row:hover {
+            background: linear-gradient(to right, #dbeafe 0%, #bfdbfe 100%) !important;
+        }
+
+        .broker-row td {
+            border-right: 1px solid #93c5fd;
+            color: #1e3a8a;
+            font-size: 13.5px;
+        }
+
+        .broker-name {
+            font-size: 14px !important;
+            font-weight: 800 !important;
+            color: #1e40af !important;
+            letter-spacing: 0.3px;
+        }
+
+        /* Group (Account) row styling */
+        .group-row {
+            background: linear-gradient(to right, #f0fdf4 0%, #dcfce7 100%);
+            font-weight: 600;
+        }
+
+        .group-row:hover {
+            background: linear-gradient(to right, #dcfce7 0%, #bbf7d0 100%) !important;
+        }
+
+        .group-row td {
+            border-right: 1px solid #86efac;
+            color: #14532d;
+            font-size: 13px;
+        }
+
+        .group-name {
+            font-size: 13.5px !important;
+            font-weight: 700 !important;
+            color: #15803d !important;
+            padding-left: 20px !important;
+        }
+
+        /* Child (Strategy) row styling */
+        .child-row {
+            background: white;
+        }
+
+        .child-row:hover {
+            background: #fafafa !important;
+        }
+
+        .child-row td {
+            color: #4b5563;
+            font-weight: 500;
+            font-size: 12.5px;
+        }
+
+        .child-name {
+            padding-left: 48px !important;
+            font-weight: 600 !important;
+            color: #374151 !important;
+            font-size: 13px !important;
+        }
+
+        /* Specific child row colors by parent account */
+        .child-row-b1 {
+            background: #fffbeb;
+        }
+
+        .child-row-b1:hover {
+            background: #fef3c7 !important;
+        }
+
+        .child-row-b2 {
+            background: #fdf4f8;
+        }
+
+        .child-row-b2:hover {
+            background: #fce7f3 !important;
+        }
+
+        .child-row-c1 {
+            background: #f0f4ff;
+        }
+
+        .child-row-c1:hover {
+            background: #e0e7ff !important;
+        }
+
+        .child-row-c2 {
+            background: #f3f0ff;
+        }
+
+        .child-row-c2:hover {
+            background: #ddd6fe !important;
+        }
+
+        .child-row-d1 {
+            background: #ecfeff;
+        }
+
+        .child-row-d1:hover {
+            background: #ccfbf1 !important;
+        }
+
+        .child-row-d2 {
+            background: #fdf4f8;
+        }
+
+        .child-row-d2:hover {
+            background: #fce7f3 !important;
+        }
+
+        /* Strategy name column */
+        .strategy-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Scrollbar Styling */
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Strategy Selector Dropdown */
+        .strategy-selector {
+            position: relative;
+            width: 100%;
+        }
+
+        .strategy-dropdown-btn {
+            width: 100%;
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #374151;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .strategy-dropdown-btn:hover {
+            border-color: #9ca3af;
+            background: #f9fafb;
+        }
+
+        .strategy-dropdown-btn.active {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .dropdown-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dropdown-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-arrow {
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .strategy-dropdown-btn.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .strategy-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 320px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .strategy-dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-header {
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .dropdown-action-btn {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .dropdown-action-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .dropdown-options {
+            padding: 4px 0;
+        }
+
+        .dropdown-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .dropdown-option:hover {
+            background: #f9fafb;
+        }
+
+        .dropdown-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+        }
+
+        .dropdown-option label {
+            flex: 1;
+            font-size: 12px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .strategy-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .strategy-dropdown-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .strategy-dropdown-menu::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .strategy-dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px 16px 24px 16px;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 8px;
+            }
+
+            .summary-card {
+                padding: 12px;
+            }
+
+            .summary-card-value {
+                font-size: 16px;
+            }
+
+            .controls {
+                padding: 12px;
+            }
+
+            .control-group {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Drawdown Analysis Dashboard</h1>
+            <p>Strategy-wise maximum and current drawdown metrics</p>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-card-label">Portfolio Max DD</div>
+                <div class="summary-card-value negative" id="portfolioMaxDD">-</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-label">Worst Strategy</div>
+                <div class="summary-card-value" id="worstStrategy">-</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-label">Avg Drawdown</div>
+                <div class="summary-card-value negative" id="avgDrawdown">-</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-label">Avg Recovery</div>
+                <div class="summary-card-value" id="avgRecovery">-</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-label">Total DD Periods</div>
+                <div class="summary-card-value" id="totalPeriods">-</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Hide Strategies</label>
+                <div class="strategy-selector">
+                    <button class="strategy-dropdown-btn" id="strategyDropdownBtn" onclick="toggleStrategyDropdown()">
+                        <span class="dropdown-label">
+                            <span>Select Strategies</span>
+                            <span class="dropdown-badge" id="selectedCount">0</span>
+                        </span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="strategy-dropdown-menu" id="strategyDropdownMenu">
+                        <div class="dropdown-header">
+                            <button class="dropdown-action-btn" onclick="selectAllStrategies()">All</button>
+                            <button class="dropdown-action-btn" onclick="selectNoneStrategies()">None</button>
+                            <button class="dropdown-action-btn" onclick="resetStrategySelection()">Reset</button>
+                        </div>
+                        <div class="dropdown-options" id="strategyOptions">
+                            <!-- Options will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Min DD % Filter</label>
+                <input type="number" id="minDrawdownFilter" placeholder="e.g., -10" step="0.1" oninput="applyFilters()">
+            </div>
+            <div class="control-group">
+                <label>View Type</label>
+                <select id="viewTypeFilter" onchange="applyFilters()">
+                    <option value="all">All Levels</option>
+                    <option value="broker">Broker Only</option>
+                    <option value="account">Account Only</option>
+                    <option value="strategy">Strategy Only</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Sort By</label>
+                <select id="sortSelect" onchange="handleSortSelect()">
+                    <option value="maxDDPercent">Max DD %</option>
+                    <option value="currentDDPercent">Current DD %</option>
+                    <option value="ddDuration">DD Duration</option>
+                    <option value="recoveryTime">Recovery Time</option>
+                    <option value="recoveryFactor">Recovery Factor</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="strategy" onclick="sortTable('strategy')">Strategy</th>
+                            <th class="sortable" data-sort="lotSize" onclick="sortTable('lotSize')">Lot Size</th>
+                            <th class="sortable" data-sort="maxDD" onclick="sortTable('maxDD')">Max DD (₹)</th>
+                            <th class="sortable" data-sort="maxDDPercent" onclick="sortTable('maxDDPercent')">Max DD %</th>
+                            <th class="sortable" data-sort="currentDD" onclick="sortTable('currentDD')">Current DD (₹)</th>
+                            <th class="sortable" data-sort="currentDDPercent" onclick="sortTable('currentDDPercent')">Current DD %</th>
+                            <th class="sortable" data-sort="ddDuration" onclick="sortTable('ddDuration')">DD Duration</th>
+                            <th class="sortable" data-sort="recoveryTime" onclick="sortTable('recoveryTime')">Recovery Time</th>
+                            <th class="sortable" data-sort="ddStartDate" onclick="sortTable('ddStartDate')">DD Start</th>
+                            <th class="sortable" data-sort="ddEndDate" onclick="sortTable('ddEndDate')">DD End</th>
+                            <th class="sortable" data-sort="ddCount" onclick="sortTable('ddCount')">DD Count</th>
+                            <th class="sortable" data-sort="recoveryFactor" onclick="sortTable('recoveryFactor')">Recovery Factor</th>
+                            <th class="sortable" data-sort="underwaterPeriod" onclick="sortTable('underwaterPeriod')">Underwater</th>
+                        </tr>
+                    </thead>
+                    <tbody id="drawdownTableBody">
+                        <tr>
+                            <td colspan="13">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📊</div>
+                                    <div class="empty-state-title">No Drawdown Data Available</div>
+                                    <div class="empty-state-text">Upload trade data to view strategy-wise drawdown analysis</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let drawdownData = [];
+        let filteredData = [];
+        let sortColumn = 'maxDDPercent';
+        let sortDirection = 'desc';
+        let hiddenStrategies = new Set();
+        let allStrategyNames = [];
+
+        // Sample data structure
+        const sampleData = [
+            {
+                strategy: 'B',
+                isBroker: true,
+                isGroup: false,
+                isChild: false,
+                lotSize: '-',
+                maxDD: -50000,
+                maxDDPercent: -15.50,
+                currentDD: -25000,
+                currentDDPercent: -7.75,
+                ddDuration: 45,
+                recoveryTime: 30,
+                ddStartDate: '05-Jan',
+                ddEndDate: '15-Feb',
+                ddCount: 12,
+                recoveryFactor: 1.25,
+                underwaterPeriod: 180
+            },
+            {
+                strategy: 'B1',
+                parentBroker: 'B',
+                isGroup: true,
+                isBroker: false,
+                isChild: false,
+                lotSize: '-',
+                maxDD: -30000,
+                maxDDPercent: -12.00,
+                currentDD: -15000,
+                currentDDPercent: -6.00,
+                ddDuration: 35,
+                recoveryTime: 25,
+                ddStartDate: '08-Jan',
+                ddEndDate: '12-Feb',
+                ddCount: 8,
+                recoveryFactor: 1.10,
+                underwaterPeriod: 150
+            },
+            {
+                strategy: 'Option Straddle',
+                parentAccount: 'B1',
+                parentBroker: 'B',
+                isChild: true,
+                isBroker: false,
+                isGroup: false,
+                lotSize: 25,
+                maxDD: -15000,
+                maxDDPercent: -18.50,
+                currentDD: -8000,
+                currentDDPercent: -9.88,
+                ddDuration: 28,
+                recoveryTime: 18,
+                ddStartDate: '10-Jan',
+                ddEndDate: '07-Feb',
+                ddCount: 5,
+                recoveryFactor: 0.95,
+                underwaterPeriod: 120
+            }
+        ];
+
+        // Initialize and request data from parent
+        window.addEventListener('DOMContentLoaded', () => {
+            drawdownData = sampleData;
+            applyFilters();
+            
+            // Request data from parent if this page is in an iframe
+            console.log('📊 Drawdown: Page loaded, requesting data from parent...');
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
+            }
+        });
+
+        // Listen for data from parent window
+        window.addEventListener('message', (event) => {
+            const { type, data } = event.data;
+            
+            console.log('📊 Drawdown received message:', type, data ? `with ${data.length} trades` : 'no data');
+            
+            if (type === 'TRADES_DATA') {
+                if (!data || !Array.isArray(data) || data.length === 0) {
+                    console.warn('⚠️ Drawdown: No data received, keeping sample data');
+                    return;
+                }
+                
+                console.log('✅ Drawdown: Processing', data.length, 'trades');
+                // Just use sample data for now until you provide proper drawdown calculation
+                // You can replace this with actual drawdown calculation logic
+                processTradesForDrawdown(data);
+                populateStrategyOptions();
+                applyFilters();
+            } else if (type === 'LOAD_SAMPLE_DATA') {
+                console.log('🎲 Drawdown: Loading sample data');
+                drawdownData = sampleData;
+                populateStrategyOptions();
+                applyFilters();
+            }
+        });
+
+        function processTradesForDrawdown(trades) {
+            console.log('📊 Processing', trades.length, 'trades for drawdown analysis');
+            
+            // Group strategies by broker and account
+            const brokerMap = {};
+            const accountMap = {};
+            const strategyMap = {};
+            
+            // Sort trades by date
+            const sortedTrades = [...trades].sort((a, b) => {
+                const dateA = a.date.split('/').reverse().join('');
+                const dateB = b.date.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+            
+            sortedTrades.forEach(trade => {
+                if (trade.strategyPnlTax) {
+                    Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                        // Skip A.PRO strategies
+                        if (stratName.startsWith('A.PRO')) return;
+                        
+                        // Extract broker code (B1, B2, C1, etc.)
+                        const brokerMatch = stratName.match(/^([A-Z]\d+)/);
+                        if (!brokerMatch) return;
+                        
+                        const accountCode = brokerMatch[1]; // e.g., B1, B2
+                        const brokerCode = accountCode.charAt(0); // e.g., B, C
+                        
+                        // Initialize strategy
+                        if (!strategyMap[stratName]) {
+                            strategyMap[stratName] = {
+                                name: stratName,
+                                pnls: [],
+                                dates: [],
+                                broker: brokerCode,
+                                account: accountCode,
+                                startingCapital: 0,
+                                lotSize: '-'
+                            };
+                        }
+                        
+                        // Update starting capital and lot size from EVERY trade's strategyDetails
+                        if (trade.strategyDetails && trade.strategyDetails[stratName]) {
+                            const details = trade.strategyDetails[stratName];
+                            
+                            // Update starting capital if this trade has a higher margin
+                            if (details.margin && details.margin > strategyMap[stratName].startingCapital) {
+                                strategyMap[stratName].startingCapital = details.margin;
+                            }
+                            
+                            // Update lot size only if it's a valid positive number (prevents 0 from overwriting)
+                            if (details.lot && details.lot > 0) {
+                                strategyMap[stratName].lotSize = details.lot;
+                            }
+                        }
+                        
+                        strategyMap[stratName].pnls.push(pnlTax || 0);
+                        strategyMap[stratName].dates.push(trade.date);
+                        
+                        // Initialize account
+                        if (!accountMap[accountCode]) {
+                            accountMap[accountCode] = {
+                                name: accountCode,
+                                pnls: [],
+                                dates: [],
+                                broker: brokerCode,
+                                startingCapital: 0
+                            };
+                        }
+                        accountMap[accountCode].pnls.push(pnlTax || 0);
+                        accountMap[accountCode].dates.push(trade.date);
+                        
+                        // Update account starting capital (use max margin)
+                        if (trade.strategyDetails && trade.strategyDetails[stratName]) {
+                            const margin = trade.strategyDetails[stratName].margin || 0;
+                            if (margin > accountMap[accountCode].startingCapital) {
+                                accountMap[accountCode].startingCapital = margin;
+                            }
+                        }
+                        
+                        // Initialize broker
+                        if (!brokerMap[brokerCode]) {
+                            brokerMap[brokerCode] = {
+                                name: brokerCode,
+                                pnls: [],
+                                dates: [],
+                                startingCapital: 0
+                            };
+                        }
+                        brokerMap[brokerCode].pnls.push(pnlTax || 0);
+                        brokerMap[brokerCode].dates.push(trade.date);
+                        
+                        // Update broker starting capital
+                        if (trade.strategyDetails && trade.strategyDetails[stratName]) {
+                            const margin = trade.strategyDetails[stratName].margin || 0;
+                            if (margin > brokerMap[brokerCode].startingCapital) {
+                                brokerMap[brokerCode].startingCapital = margin;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Calculate drawdown metrics with detailed tracking
+            function calculateDrawdown(pnls, dates, startingCapital = 10000) {
+                let cumPnl = 0;
+                let equity = startingCapital;
+                let peak = startingCapital;
+                let maxDD = 0;
+                let maxDDPercent = 0;
+                let maxDDStartDate = '-';
+                let maxDDEndDate = '-';
+                let currentDD = 0;
+                let currentDDPercent = 0;
+                let ddCount = 0;
+                let inDrawdown = false;
+                let ddStartDate = null;
+                let ddDays = 0;
+                let maxDDDays = 0;
+                let totalRecoveryDays = 0;
+                let recoveryCount = 0;
+                let totalUnderwaterDays = 0;
+                let underwaterStartDate = null;
+                
+                pnls.forEach((pnl, index) => {
+                    cumPnl += pnl;
+                    equity = startingCapital + cumPnl;
+                    
+                    if (equity > peak) {
+                        // Recovered from drawdown
+                        if (inDrawdown && ddStartDate) {
+                            const recoveryDays = calculateDateDiff(ddStartDate, dates[index]);
+                            totalRecoveryDays += recoveryDays;
+                            recoveryCount++;
+                        }
+                        
+                        // Calculate underwater period for this drawdown cycle
+                        if (underwaterStartDate) {
+                            totalUnderwaterDays += calculateDateDiff(underwaterStartDate, dates[index]);
+                            underwaterStartDate = null;
+                        }
+                        
+                        peak = equity;
+                        inDrawdown = false;
+                        ddStartDate = null;
+                        ddDays = 0;
+                    } else if (equity < peak) {
+                        // In drawdown
+                        if (!inDrawdown) {
+                            ddCount++;
+                            inDrawdown = true;
+                            ddStartDate = dates[index];
+                            underwaterStartDate = dates[index];
+                        }
+                        
+                        if (ddStartDate) {
+                            ddDays = calculateDateDiff(ddStartDate, dates[index]);
+                        }
+                        
+                        const dd = equity - peak;
+                        if (dd < maxDD) {
+                            maxDD = dd;
+                            maxDDPercent = peak > 0 ? (dd / peak) * 100 : 0;
+                            maxDDStartDate = ddStartDate || dates[index];
+                            maxDDEndDate = dates[index];
+                            maxDDDays = ddDays;
+                        }
+                    }
+                });
+                
+                // If still underwater at the end, add the remaining period
+                if (underwaterStartDate && dates.length > 0) {
+                    totalUnderwaterDays += calculateDateDiff(underwaterStartDate, dates[dates.length - 1]);
+                }
+                
+                currentDD = equity - peak;
+                currentDDPercent = peak > 0 ? (currentDD / peak) * 100 : 0;
+                
+                const avgRecoveryTime = recoveryCount > 0 ? Math.round(totalRecoveryDays / recoveryCount) : 0;
+                
+                return {
+                    maxDD,
+                    maxDDPercent,
+                    currentDD,
+                    currentDDPercent,
+                    ddCount,
+                    ddDuration: maxDDDays,
+                    recoveryTime: avgRecoveryTime,
+                    ddStartDate: formatDate(maxDDStartDate),
+                    ddEndDate: formatDate(maxDDEndDate),
+                    finalPnl: cumPnl,
+                    finalEquity: equity,
+                    peak,
+                    underwaterPeriod: totalUnderwaterDays
+                };
+            }
+            
+            // Helper function to calculate date difference
+            function calculateDateDiff(date1Str, date2Str) {
+                if (!date1Str || !date2Str || date1Str === '-' || date2Str === '-') return 0;
+                
+                try {
+                    // Parse DD/MM/YYYY format
+                    const [d1, m1, y1] = date1Str.split('/').map(Number);
+                    const [d2, m2, y2] = date2Str.split('/').map(Number);
+                    
+                    const date1 = new Date(y1, m1 - 1, d1);
+                    const date2 = new Date(y2, m2 - 1, d2);
+                    
+                    const diffTime = Math.abs(date2 - date1);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    return diffDays;
+                } catch (e) {
+                    return 0;
+                }
+            }
+            
+            // Helper function to calculate total lot size from strategies
+            function calculateTotalLotSize(strategies) {
+                let totalLots = 0;
+                let hasValidLots = false;
+                
+                strategies.forEach(strat => {
+                    const lot = strat.lotSize;
+                    if (lot && lot !== '-') {
+                        const numLot = typeof lot === 'number' ? lot : parseFloat(lot);
+                        if (!isNaN(numLot)) {
+                            totalLots += numLot;
+                            hasValidLots = true;
+                        }
+                    }
+                });
+                
+                return hasValidLots ? totalLots : '-';
+            }
+            
+            // Build drawdown data array
+            drawdownData = [];
+            
+            // Add broker-level data
+            Object.entries(brokerMap).forEach(([brokerCode, brokerData]) => {
+                const metrics = calculateDrawdown(brokerData.pnls, brokerData.dates, brokerData.startingCapital);
+                
+                // Calculate total lot size from all strategies in this broker
+                const brokerStrategies = Object.values(strategyMap).filter(s => s.broker === brokerCode);
+                const totalLotSize = calculateTotalLotSize(brokerStrategies);
+                
+                drawdownData.push({
+                    strategy: brokerCode,
+                    isBroker: true,
+                    isGroup: false,
+                    isChild: false,
+                    lotSize: totalLotSize,
+                    maxDD: metrics.maxDD,
+                    maxDDPercent: metrics.maxDDPercent,
+                    currentDD: metrics.currentDD,
+                    currentDDPercent: metrics.currentDDPercent,
+                    ddDuration: metrics.ddDuration,
+                    recoveryTime: metrics.recoveryTime,
+                    ddStartDate: metrics.ddStartDate,
+                    ddEndDate: metrics.ddEndDate,
+                    ddCount: metrics.ddCount,
+                    recoveryFactor: metrics.maxDD !== 0 ? Math.abs(metrics.finalPnl / metrics.maxDD) : 1.0,
+                    underwaterPeriod: metrics.underwaterPeriod
+                });
+            });
+            
+            // Add account-level data
+            Object.entries(accountMap).forEach(([accountCode, accountData]) => {
+                const metrics = calculateDrawdown(accountData.pnls, accountData.dates, accountData.startingCapital);
+                
+                // Calculate total lot size from all strategies in this account
+                const accountStrategies = Object.values(strategyMap).filter(s => s.account === accountCode);
+                const totalLotSize = calculateTotalLotSize(accountStrategies);
+                
+                drawdownData.push({
+                    strategy: accountCode,
+                    parentBroker: accountData.broker,
+                    isGroup: true,
+                    isBroker: false,
+                    isChild: false,
+                    lotSize: totalLotSize,
+                    maxDD: metrics.maxDD,
+                    maxDDPercent: metrics.maxDDPercent,
+                    currentDD: metrics.currentDD,
+                    currentDDPercent: metrics.currentDDPercent,
+                    ddDuration: metrics.ddDuration,
+                    recoveryTime: metrics.recoveryTime,
+                    ddStartDate: metrics.ddStartDate,
+                    ddEndDate: metrics.ddEndDate,
+                    ddCount: metrics.ddCount,
+                    recoveryFactor: metrics.maxDD !== 0 ? Math.abs(metrics.finalPnl / metrics.maxDD) : 1.0,
+                    underwaterPeriod: metrics.underwaterPeriod
+                });
+            });
+            
+            // Add strategy-level data
+            Object.entries(strategyMap).forEach(([stratName, stratData]) => {
+                const metrics = calculateDrawdown(stratData.pnls, stratData.dates, stratData.startingCapital);
+                
+                drawdownData.push({
+                    strategy: stratName,
+                    parentAccount: stratData.account,
+                    parentBroker: stratData.broker,
+                    isChild: true,
+                    isBroker: false,
+                    isGroup: false,
+                    lotSize: stratData.lotSize,
+                    maxDD: metrics.maxDD,
+                    maxDDPercent: metrics.maxDDPercent,
+                    currentDD: metrics.currentDD,
+                    currentDDPercent: metrics.currentDDPercent,
+                    ddDuration: metrics.ddDuration,
+                    recoveryTime: metrics.recoveryTime,
+                    ddStartDate: metrics.ddStartDate,
+                    ddEndDate: metrics.ddEndDate,
+                    ddCount: metrics.ddCount,
+                    recoveryFactor: metrics.maxDD !== 0 ? Math.abs(metrics.finalPnl / metrics.maxDD) : 1.0,
+                    underwaterPeriod: metrics.underwaterPeriod
+                });
+            });
+            
+            console.log('✅ Created drawdown data:', {
+                brokers: Object.keys(brokerMap).length,
+                accounts: Object.keys(accountMap).length,
+                strategies: Object.keys(strategyMap).length,
+                total: drawdownData.length
+            });
+        }
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'desc';
+            }
+            
+            document.getElementById('sortSelect').value = column;
+            applyFilters();
+        }
+
+        function handleSortSelect() {
+            const select = document.getElementById('sortSelect');
+            sortColumn = select.value;
+            sortDirection = 'desc';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const minDrawdown = parseFloat(document.getElementById('minDrawdownFilter').value) || -Infinity;
+            const viewType = document.getElementById('viewTypeFilter').value;
+
+            filteredData = drawdownData.filter(row => {
+                // Hide strategies that are unchecked (in hiddenStrategies set)
+                const matchesStrategyFilter = !row.isChild || !hiddenStrategies.has(row.strategy);
+                const matchesMinDD = row.maxDDPercent >= minDrawdown;
+                
+                let matchesViewType = true;
+                if (viewType === 'broker') {
+                    matchesViewType = row.isBroker;
+                } else if (viewType === 'account') {
+                    matchesViewType = row.isGroup;
+                } else if (viewType === 'strategy') {
+                    matchesViewType = row.isChild;
+                }
+                
+                return matchesStrategyFilter && matchesMinDD && matchesViewType;
+            });
+
+            filteredData.sort((a, b) => {
+                let aVal = a[sortColumn];
+                let bVal = b[sortColumn];
+                
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (sortDirection === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+
+            if (viewType === 'all') {
+                maintainHierarchy();
+            }
+
+            renderTable();
+            updateSummaryCards();
+        }
+
+        function maintainHierarchy() {
+            const brokers = filteredData.filter(d => d.isBroker);
+            const accounts = filteredData.filter(d => d.isGroup);
+            const strategies = filteredData.filter(d => d.isChild);
+            
+            filteredData = [];
+            
+            brokers.forEach(broker => {
+                filteredData.push(broker);
+                
+                const brokerAccounts = accounts.filter(a => a.parentBroker === broker.strategy);
+                brokerAccounts.forEach(account => {
+                    filteredData.push(account);
+                    
+                    const accountStrategies = strategies.filter(s => s.parentAccount === account.strategy);
+                    filteredData.push(...accountStrategies);
+                });
+            });
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.sort === sortColumn) {
+                    th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('drawdownTableBody');
+            
+            if (filteredData.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            tbody.innerHTML = filteredData.map(row => {
+                const isBroker = row.isBroker;
+                const isGroup = row.isGroup;
+                const isChild = row.isChild;
+                
+                let rowClass = '';
+                let strategyClass = 'strategy-name';
+                let strategyPrefix = '';
+                let displayName = row.strategy;
+                
+                if (isBroker) {
+                    rowClass = 'broker-row';
+                    strategyClass = 'strategy-name broker-name';
+                    strategyPrefix = '🏦 ';
+                    // Format broker name: B -> All Broker DD
+                    displayName = 'All Broker DD';
+                } else if (isGroup) {
+                    rowClass = 'group-row';
+                    strategyClass = 'strategy-name group-name';
+                    strategyPrefix = '├─ ';
+                    // Format account name: B1 -> Broker : 1, B2 -> Broker : 2
+                    if (row.strategy.match(/^[A-Z]\d+$/)) {
+                        const brokerLetter = row.strategy.charAt(0);
+                        const brokerNumber = row.strategy.substring(1);
+                        displayName = `Broker : ${brokerNumber}`;
+                    }
+                } else if (isChild) {
+                    rowClass = 'child-row';
+                    strategyClass = 'strategy-name child-name';
+                    strategyPrefix = '';
+                    
+                    // Add broker-specific class based on parent account (B1, B2, C1, etc.)
+                    if (row.parentAccount) {
+                        const accountLower = row.parentAccount.toLowerCase();
+                        rowClass += ` child-row-${accountLower}`;
+                    }
+                }
+                
+                return `
+                <tr class="${rowClass}">
+                    <td class="${strategyClass}">${strategyPrefix}${escapeHtml(displayName)}</td>
+                    <td>${formatLotSize(row.lotSize)}</td>
+                    <td class="negative">${formatCurrencyTable(row.maxDD)}</td>
+                    <td class="negative">${formatPercent(row.maxDDPercent)}</td>
+                    <td class="${row.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrencyTable(row.currentDD)}</td>
+                    <td class="${row.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(row.currentDDPercent)}</td>
+                    <td>${row.ddDuration} days</td>
+                    <td>${row.recoveryTime > 0 ? row.recoveryTime + ' days' : '-'}</td>
+                    <td>${row.ddStartDate}</td>
+                    <td>${row.ddEndDate}</td>
+                    <td>${row.ddCount}</td>
+                    <td class="${row.recoveryFactor >= 1 ? 'positive' : 'negative'}">${row.recoveryFactor.toFixed(2)}</td>
+                    <td>${row.underwaterPeriod} days</td>
+                </tr>
+            `;
+            }).join('');
+
+            updateSortIndicators();
+        }
+
+        function updateSummaryCards() {
+            if (drawdownData.length === 0) return;
+
+            const brokers = drawdownData.filter(d => d.isBroker);
+            const accounts = drawdownData.filter(d => d.isGroup);
+            const strategies = drawdownData.filter(d => d.isChild);
+
+            // Portfolio max drawdown (worst across all levels)
+            const worstDD = Math.min(...drawdownData.map(d => d.maxDDPercent));
+            document.getElementById('portfolioMaxDD').textContent = formatPercent(worstDD);
+
+            // Worst strategy (including all levels)
+            const worstItem = drawdownData.reduce((worst, current) => 
+                current.maxDDPercent < worst.maxDDPercent ? current : worst
+            );
+            let worstLabel = worstItem.strategy;
+            if (worstItem.isBroker) {
+                worstLabel = `Broker ${worstItem.strategy}`;
+            } else if (worstItem.isGroup) {
+                worstLabel = `${worstItem.strategy} (Account)`;
+            }
+            document.getElementById('worstStrategy').textContent = worstLabel;
+
+            // Average drawdown (all items)
+            const avgDD = drawdownData.reduce((sum, d) => sum + d.maxDDPercent, 0) / drawdownData.length;
+            document.getElementById('avgDrawdown').textContent = formatPercent(avgDD);
+
+            // Average recovery time
+            const recoveryTimes = drawdownData.filter(d => d.recoveryTime > 0);
+            const avgRecovery = recoveryTimes.length > 0 ? 
+                recoveryTimes.reduce((sum, d) => sum + d.recoveryTime, 0) / recoveryTimes.length : 0;
+            document.getElementById('avgRecovery').textContent = avgRecovery > 0 ? 
+                Math.round(avgRecovery) + ' days' : '-';
+
+            // Total drawdown periods
+            const totalPeriods = drawdownData.reduce((sum, d) => sum + d.ddCount, 0);
+            document.getElementById('totalPeriods').textContent = totalPeriods;
+        }
+
+        function showEmptyState() {
+            const tbody = document.getElementById('drawdownTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="13">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📊</div>
+                            <div class="empty-state-title">No Drawdown Data Available</div>
+                            <div class="empty-state-text">Upload trade data to view strategy-wise drawdown analysis</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function resetFilters() {
+            hiddenStrategies.clear();
+            document.getElementById('minDrawdownFilter').value = '';
+            document.getElementById('viewTypeFilter').value = 'all';
+            document.getElementById('sortSelect').value = 'maxDDPercent';
+            sortColumn = 'maxDDPercent';
+            sortDirection = 'desc';
+            updateStrategyCheckboxes();
+            updateSelectedCount();
+            applyFilters();
+        }
+
+        // Strategy Dropdown Functions
+        function populateStrategyOptions() {
+            allStrategyNames = drawdownData
+                .filter(d => d.isChild)
+                .map(d => d.strategy)
+                .sort();
+            
+            const optionsContainer = document.getElementById('strategyOptions');
+            optionsContainer.innerHTML = allStrategyNames.map(strategy => `
+                <div class="dropdown-option">
+                    <input type="checkbox" id="strategy-${strategy}" 
+                           value="${strategy}" 
+                           ${!hiddenStrategies.has(strategy) ? 'checked' : ''}
+                           onchange="toggleStrategy('${strategy}')">
+                    <label for="strategy-${strategy}">${escapeHtml(strategy)}</label>
+                </div>
+            `).join('');
+            
+            updateSelectedCount();
+        }
+
+        function toggleStrategyDropdown() {
+            const btn = document.getElementById('strategyDropdownBtn');
+            const menu = document.getElementById('strategyDropdownMenu');
+            
+            btn.classList.toggle('active');
+            menu.classList.toggle('show');
+        }
+
+        function toggleStrategy(strategy) {
+            if (hiddenStrategies.has(strategy)) {
+                hiddenStrategies.delete(strategy);
+            } else {
+                hiddenStrategies.add(strategy);
+            }
+            updateSelectedCount();
+            applyFilters();
+        }
+
+        function selectAllStrategies() {
+            hiddenStrategies.clear();
+            updateStrategyCheckboxes();
+            updateSelectedCount();
+            applyFilters();
+        }
+
+        function selectNoneStrategies() {
+            allStrategyNames.forEach(strategy => {
+                hiddenStrategies.add(strategy);
+            });
+            updateStrategyCheckboxes();
+            updateSelectedCount();
+            applyFilters();
+        }
+
+        function resetStrategySelection() {
+            hiddenStrategies.clear();
+            updateStrategyCheckboxes();
+            updateSelectedCount();
+            applyFilters();
+        }
+
+        function updateStrategyCheckboxes() {
+            allStrategyNames.forEach(strategy => {
+                const checkbox = document.getElementById(`strategy-${strategy}`);
+                if (checkbox) {
+                    checkbox.checked = !hiddenStrategies.has(strategy);
+                }
+            });
+        }
+
+        function updateSelectedCount() {
+            const total = allStrategyNames.length;
+            const hidden = hiddenStrategies.size;
+            const selected = total - hidden;
+            document.getElementById('selectedCount').textContent = selected;
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.strategy-selector');
+            const btn = document.getElementById('strategyDropdownBtn');
+            const menu = document.getElementById('strategyDropdownMenu');
+            
+            if (dropdown && !dropdown.contains(event.target)) {
+                btn.classList.remove('active');
+                menu.classList.remove('show');
+            }
+        });
+
+        // Utility functions
+        function formatCurrency(value) {
+            if (value === 0 || value === null || value === undefined) return '-';
+            
+            // Convert to absolute value for formatting
+            const absValue = Math.abs(value);
+            const sign = value < 0 ? '-' : '';
+            
+            // Format in Indian numbering system
+            let formattedValue = Math.round(absValue).toString();
+            
+            // Indian format: last 3 digits, then groups of 2
+            if (formattedValue.length > 3) {
+                const lastThree = formattedValue.substring(formattedValue.length - 3);
+                const otherNumbers = formattedValue.substring(0, formattedValue.length - 3);
+                const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+                formattedValue = formatted;
+            }
+            
+            return sign + '₹' + formattedValue;
+        }
+
+        function formatCurrencyTable(value) {
+            if (value === 0 || value === null || value === undefined) return '-';
+            
+            // Convert to absolute value for formatting
+            const absValue = Math.abs(value);
+            const sign = value < 0 ? '-' : '';
+            
+            // Format in Indian numbering system
+            let formattedValue = Math.round(absValue).toString();
+            
+            // Indian format: last 3 digits, then groups of 2
+            if (formattedValue.length > 3) {
+                const lastThree = formattedValue.substring(formattedValue.length - 3);
+                const otherNumbers = formattedValue.substring(0, formattedValue.length - 3);
+                const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+                formattedValue = formatted;
+            }
+            
+            return sign + formattedValue;
+        }
+
+        function formatLotSize(value) {
+            if (value === '-' || value === null || value === undefined) return '-';
+            
+            // Handle numeric values
+            if (typeof value === 'number') {
+                // Round to 1 decimal place to avoid floating point precision issues
+                return Math.round(value * 10) / 10;
+            }
+            
+            // If it's already a string, try to parse and format it
+            const numValue = parseFloat(value);
+            if (!isNaN(numValue)) {
+                return Math.round(numValue * 10) / 10;
+            }
+            
+            return value;
+        }
+
+        function formatPercent(value) {
+            if (value === 0 || value === null || value === undefined) return '0.00%';
+            return value.toFixed(2) + '%';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString || dateString === '-') return '-';
+            
+            let date;
+            
+            // Check if already in DD/MM/YYYY format
+            if (dateString.includes('/')) {
+                const parts = dateString.split('/');
+                if (parts.length === 3) {
+                    // Convert DD/MM/YYYY to Date object
+                    date = new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+            } else {
+                date = new Date(dateString);
+            }
+            
+            // Format as DD-MMM (e.g., 05-Jan)
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = date.toLocaleString('en-US', { month: 'short' });
+            
+            return `${day}-${month}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
