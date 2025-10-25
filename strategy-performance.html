@@ -372,7 +372,7 @@
         .performance-table tbody tr.total-row td.number-col.expenses-col { background: #fef2f2 !important; }
         .performance-table th.expenses-col { min-width: 80px; max-width: none; }
         .performance-table td.positive { color: #059669; }
-        .performance-table td.negative { color: #f43f5e; }
+        .performance-table td.negative { color: #b96060; }
         .performance-table tr:hover { background: #fafbfc; }
         .performance-table tr:hover td:first-child { background: #fafbfc; min-width: 100px; max-width: 100px; border-right: 2px solid #cbd5e1; }
         .performance-table tbody tr.total-row {
@@ -515,7 +515,7 @@
             font-variant-numeric: tabular-nums;
         }
         .summary-card-value.positive { color: #059669; }
-        .summary-card-value.negative { color: #f43f5e; }
+        .summary-card-value.negative { color: #b96060; }
         .summary-card.net-profit-box {
             background: #f0fdf4;
         }
@@ -1092,6 +1092,27 @@
         function toggleLotTradeMode() {
             const checkbox = document.getElementById('showTradeCount');
             showTradeCount = checkbox.checked;
+            
+            // Automatically enable LOT column when showing Trade Count
+            if (showTradeCount && !showLot) {
+                showLot = true;
+                const lotCheckbox = document.getElementById('showLot');
+                if (lotCheckbox) lotCheckbox.checked = true;
+                try {
+                    localStorage.setItem('showLot', showLot);
+                } catch (e) {}
+            }
+            
+            // Automatically disable LOT column when hiding Trade Count
+            if (!showTradeCount && showLot) {
+                showLot = false;
+                const lotCheckbox = document.getElementById('showLot');
+                if (lotCheckbox) lotCheckbox.checked = false;
+                try {
+                    localStorage.setItem('showLot', showLot);
+                } catch (e) {}
+            }
+            
             try {
                 localStorage.setItem('showTradeCount', showTradeCount);
             } catch (e) {}
@@ -2162,9 +2183,10 @@
             
             // LOT section by broker
             if (showLot) {
+                const columnLabel = showTradeCount ? 'TRADE COUNT' : 'LOT';
                 sortedBrokers.forEach(brokerCode => {
                     const count = brokerGroups[brokerCode].length;
-                    headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} LOT</th>`;
+                    headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} ${columnLabel}</th>`;
                 });
             }
             
