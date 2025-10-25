@@ -9,182 +9,181 @@
         html, body { width: 100%; height: 100%; overflow: hidden; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f8fafc;
             color: #1e293b;
         }
 
         .container {
             overflow-y: auto;
-            overflow-x: hidden;
-            padding: 16px 32px 32px 32px;
-            background: #f8fafc;
+            padding: 16px 32px 32px;
             height: 100vh;
-            width: 100%;
         }
 
-        .header {
-            margin-bottom: 16px;
-        }
-
-        .header h1 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
-        }
-
-        .header p {
-            font-size: 12px;
-            color: #6b7280;
-            font-weight: 400;
-        }
+        .header { margin-bottom: 16px; }
+        .header h1 { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
+        .header p { font-size: 12px; color: #6b7280; }
 
         /* Summary Cards */
         .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            display: flex;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            overflow-x: auto;
         }
 
         .summary-card {
             background: white;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             border: 1px solid #e5e7eb;
+            flex: 1 1 0;
+            min-width: 140px;
         }
 
         .summary-card-label {
-            font-size: 11px;
+            font-size: 10px;
             color: #6b7280;
-            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
+            font-weight: 700;
         }
 
         .summary-card-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: #111827;
-        }
-
-        /* UPDATED: Changed from red (#dc2626) to amber/orange */
-        .summary-card-value.negative {
-            color: #d97706;
-        }
-
-        .summary-card-value.positive {
-            color: #059669;
+            line-height: 1.2;
         }
 
         /* Controls */
         .controls {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e5e7eb;
-            margin-bottom: 20px;
             display: flex;
             gap: 12px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
             align-items: center;
         }
 
         .control-group {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex: 1;
-            min-width: 180px;
+            align-items: center;
+            gap: 8px;
         }
 
-        .control-group label {
-            font-size: 11px;
-            font-weight: 600;
+        .control-label {
+            font-size: 12px;
             color: #374151;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
-        .control-group input,
-        .control-group select {
+        select, input[type="number"], .btn {
             padding: 7px 12px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
             font-size: 12px;
             font-weight: 500;
-            color: #374151;
             background: white;
-            transition: all 0.15s ease;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s;
             font-family: inherit;
         }
 
-        .control-group input:hover,
-        .control-group select:hover {
-            border-color: #9ca3af;
-            background: #f9fafb;
+        select:hover, input:hover, .btn:hover { 
+            border-color: #9ca3af; 
+            background: #f9fafb; 
         }
 
-        .control-group input:focus,
-        .control-group select:focus {
+        select:focus, input:focus {
             outline: none;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
         }
 
-        .btn {
-            padding: 7px 16px;
-            border: none;
+        /* Strategy Dropdown */
+        .strategy-selector { position: relative; }
+        
+        .strategy-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
             border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
+            background: white;
             cursor: pointer;
-            transition: all 0.15s ease;
-            align-self: flex-end;
-            font-family: inherit;
+            font-size: 12px;
         }
 
-        .btn-primary {
+        .strategy-dropdown-btn:hover { border-color: #9ca3af; background: #f9fafb; }
+
+        .dropdown-badge {
             background: #3b82f6;
             color: white;
-            border: 1px solid #3b82f6;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
         }
 
-        .btn-primary:hover {
-            background: #2563eb;
-            border-color: #2563eb;
-        }
-
-        .btn-secondary {
+        .strategy-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 6px;
             background: white;
-            color: #374151;
             border: 1px solid #d1d5db;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            min-width: 280px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
         }
 
-        .btn-secondary:hover {
-            background: #f9fafb;
-            border-color: #9ca3af;
+        .strategy-dropdown-menu.show { display: block; }
+
+        .dropdown-header {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
         }
 
-        /* Table Styles */
+        .dropdown-action-btn {
+            font-size: 11px;
+            color: #1e40af;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: none;
+            border: none;
+        }
+
+        .dropdown-action-btn:hover { background: #eff6ff; }
+
+        .dropdown-options { padding: 8px 0; }
+
+        .dropdown-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .dropdown-option:hover { background: #f8fafc; }
+        .dropdown-option input { margin-right: 10px; cursor: pointer; }
+        .dropdown-option label { font-size: 13px; color: #475569; cursor: pointer; }
+
+        /* Table */
         .table-container {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             border: 1px solid #e5e7eb;
-            overflow: visible;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            overflow-y: visible;
-            background: white;
-            border-radius: 0;
         }
 
         table {
@@ -192,8 +191,6 @@
             border-collapse: separate;
             border-spacing: 0;
             font-size: 13px;
-            min-width: 800px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
         }
 
         thead {
@@ -204,7 +201,7 @@
         }
 
         th {
-            padding: 12px 12px;
+            padding: 12px;
             text-align: left;
             font-size: 11px;
             font-weight: 700;
@@ -213,449 +210,125 @@
             letter-spacing: 0.5px;
             border-bottom: 2px solid #d1d5db;
             border-right: 1px solid #e5e7eb;
-            white-space: nowrap;
             cursor: pointer;
-            user-select: none;
-            position: sticky;
-            top: 0;
-            background: #f3f4f6;
-            line-height: 1.2;
-            vertical-align: middle;
         }
 
-        th:last-child {
-            border-right: none;
-        }
-
-        th.sortable:hover {
-            background: #e5e7eb;
-        }
-
-        th.sorted-asc::after {
-            content: ' ▲';
-            font-size: 9px;
-            color: #3b82f6;
-        }
-
-        th.sorted-desc::after {
-            content: ' ▼';
-            font-size: 9px;
-            color: #3b82f6;
-        }
-
-        /* UPDATED: Changed from red (#dc2626) to amber/orange */
-        .negative {
-            color: #d97706;
-            font-weight: 600;
-        }
-
-        .positive {
-            color: #059669;
-            font-weight: 600;
-        }
-
-        .neutral {
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid #f3f4f6;
-            transition: background-color 0.15s ease;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        tbody tr:last-child {
-            border-bottom: none;
-        }
+        th:last-child { border-right: none; }
 
         td {
-            padding: 12px 12px;
+            padding: 12px;
             border-right: 1px solid #f3f4f6;
             color: #374151;
-            font-weight: 500;
         }
 
-        td:last-child {
-            border-right: none;
+        td:last-child { border-right: none; }
+
+        tbody tr {
+            background: white;
+            border-bottom: 1px solid #f3f4f6;
+            transition: opacity 0.15s;
         }
 
-        /* Broker row styling */
+        tbody tr:hover { opacity: 0.9; }
+
+        /* Value Colors */
+        .negative { color: #b91c1c; }
+        .positive { color: #0d7c66; }
+        .neutral { color: #6b7280; }
+
+        /* Broker Row - Light Yellow */
         .broker-row {
-            background: linear-gradient(to right, #eff6ff 0%, #dbeafe 100%);
+            background: #fefce8 !important;
             font-weight: 700;
         }
 
-        .broker-row:hover {
-            background: linear-gradient(to right, #dbeafe 0%, #bfdbfe 100%) !important;
-        }
+        .broker-row:hover { background: #fef9c3 !important; }
 
         .broker-row td {
-            border-right: 1px solid #93c5fd;
-            color: #1e3a8a;
-            font-size: 13.5px;
+            border-right: 1px solid #fde047;
+            color: #713f12;
+            font-size: 14px;
         }
 
         .broker-name {
-            font-size: 14px !important;
+            font-size: 15px !important;
             font-weight: 800 !important;
             color: #1e40af !important;
-            letter-spacing: 0.3px;
         }
 
-        /* Group (Account) row styling */
-        .group-row {
-            background: linear-gradient(to right, #f0fdf4 0%, #dcfce7 100%);
-            font-weight: 600;
+        /* Broker 1 (B1) - Pink */
+        .group-b1 {
+            background: #fce7f3 !important;
+            font-weight: 700;
         }
 
-        .group-row:hover {
-            background: linear-gradient(to right, #dcfce7 0%, #bbf7d0 100%) !important;
+        .group-b1:hover { background: #fbcfe8 !important; }
+
+        .group-b1 td {
+            border-right: 1px solid #f9a8d4;
+            color: #831843;
+            font-size: 13.5px;
         }
 
-        .group-row td {
-            border-right: 1px solid #86efac;
-            color: #14532d;
-            font-size: 13px;
-        }
-
-        .group-name {
-            font-size: 13.5px !important;
-            font-weight: 700 !important;
-            color: #15803d !important;
+        .group-b1 .group-name {
+            font-size: 14px !important;
+            font-weight: 800 !important;
+            color: #9f1239 !important;
             padding-left: 20px !important;
         }
 
-        /* Child (Strategy) row styling */
-        .child-row {
-            background: white;
-        }
+        .child-row-b1 { background: #fef2f2 !important; }
+        .child-row-b1:hover { background: #fce7f3 !important; }
+        .child-row-b1 td { border-right: 1px solid #fecdd3; color: #7f1d1d; }
 
-        .child-row:hover {
-            background: #fafafa !important;
-        }
-
-        .child-row td {
-            color: #4b5563;
-            font-weight: 500;
-            font-size: 12.5px;
-        }
-
-        .child-name {
-            padding-left: 48px !important;
-            font-weight: 600 !important;
-            color: #374151 !important;
-            font-size: 13px !important;
-        }
-
-        /* Specific child row colors by parent account */
-        .child-row-b1 {
-            background: #fffbeb;
-        }
-
-        .child-row-b1:hover {
-            background: #fef3c7 !important;
-        }
-
-        .child-row-b2 {
-            background: #fdf4f8;
-        }
-
-        .child-row-b2:hover {
-            background: #fce7f3 !important;
-        }
-
-        .child-row-c1 {
-            background: #f0f4ff;
-        }
-
-        .child-row-c1:hover {
-            background: #e0e7ff !important;
-        }
-
-        .child-row-c2 {
-            background: #f3f0ff;
-        }
-
-        .child-row-c2:hover {
-            background: #ddd6fe !important;
-        }
-
-        .child-row-d1 {
-            background: #ecfeff;
-        }
-
-        .child-row-d1:hover {
-            background: #ccfbf1 !important;
-        }
-
-        .child-row-d2 {
-            background: #fdf4f8;
-        }
-
-        .child-row-d2:hover {
-            background: #fce7f3 !important;
-        }
-
-        /* Strategy name column */
-        .strategy-name {
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .empty-state-title {
-            font-size: 18px;
+        /* Broker 2 (B2) - Light Orange */
+        .group-b2 {
+            background: #ffedd5 !important;
             font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 8px;
         }
 
-        .empty-state-text {
-            font-size: 14px;
-            color: #6b7280;
+        .group-b2:hover { background: #fed7aa !important; }
+
+        .group-b2 td {
+            border-right: 1px solid #fdba74;
+            color: #7c2d12;
+            font-size: 13.5px;
         }
 
-        /* Scrollbar Styling */
-        .table-wrapper::-webkit-scrollbar {
-            height: 8px;
+        .group-b2 .group-name {
+            font-size: 14px !important;
+            font-weight: 800 !important;
+            color: #9a3412 !important;
+            padding-left: 20px !important;
         }
 
-        .table-wrapper::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
+        .child-row-b2 { background: #fffbf5 !important; }
+        .child-row-b2:hover { background: #ffedd5 !important; }
+        .child-row-b2 td { border-right: 1px solid #fed7aa; color: #7c2d12; }
 
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Strategy Selector Dropdown */
-        .strategy-selector {
-            position: relative;
-            width: 100%;
-        }
-
-        .strategy-dropdown-btn {
-            width: 100%;
-            padding: 7px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #374151;
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.15s ease;
-            font-family: inherit;
-        }
-
-        .strategy-dropdown-btn:hover {
-            border-color: #9ca3af;
-            background: #f9fafb;
-        }
-
-        .strategy-dropdown-btn.active {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .dropdown-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .dropdown-badge {
-            background: #3b82f6;
-            color: white;
-            padding: 1px 6px;
-            border-radius: 10px;
-            font-size: 10px;
+        /* Generic group/child fallback */
+        .group-row {
+            background: #f8fafc;
             font-weight: 600;
-            min-width: 16px;
-            text-align: center;
         }
 
-        .dropdown-arrow {
-            font-size: 10px;
-            transition: transform 0.2s;
+        .group-name {
+            font-weight: 700;
+            color: #475569;
+            padding-left: 20px;
         }
 
-        .strategy-dropdown-btn.active .dropdown-arrow {
-            transform: rotate(180deg);
-        }
-
-        .strategy-dropdown-menu {
-            position: absolute;
-            top: calc(100% + 4px);
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-height: 320px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .strategy-dropdown-menu.show {
-            display: block;
-        }
-
-        .dropdown-header {
-            display: flex;
-            gap: 8px;
-            padding: 10px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .dropdown-action-btn {
-            flex: 1;
-            padding: 4px 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            background: white;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .dropdown-action-btn:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
-
-        .dropdown-options {
-            padding: 4px 0;
-        }
-
-        .dropdown-option {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: background 0.15s ease;
-        }
-
-        .dropdown-option:hover {
-            background: #f9fafb;
-        }
-
-        .dropdown-option input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            margin-right: 10px;
-            cursor: pointer;
-            accent-color: #3b82f6;
-        }
-
-        .dropdown-option label {
-            flex: 1;
-            font-size: 12px;
-            font-weight: 500;
-            color: #374151;
-            cursor: pointer;
-            margin: 0;
-        }
-
-        .strategy-dropdown-menu::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .strategy-dropdown-menu::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .strategy-dropdown-menu::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .strategy-dropdown-menu::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        .child-row { background: white; }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 12px 16px 24px 16px;
-            }
-
-            .summary-cards {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 8px;
-            }
-
-            .summary-card {
-                padding: 12px;
-            }
-
-            .summary-card-value {
-                font-size: 16px;
-            }
-
-            .controls {
-                padding: 12px;
-            }
-
-            .control-group {
-                min-width: 100%;
-            }
-
-            table {
-                font-size: 11px;
-            }
-
-            th, td {
-                padding: 8px 6px;
-            }
+            .container { padding: 12px 16px 24px; }
+            .summary-cards { gap: 8px; }
+            .summary-card { padding: 8px 10px; min-width: 120px; }
+            .summary-card-value { font-size: 16px; }
+            .controls { gap: 8px; }
+            table { font-size: 11px; }
+            th, td { padding: 8px 6px; }
         }
     </style>
 </head>
@@ -691,14 +364,12 @@
 
         <div class="controls">
             <div class="control-group">
-                <label>Hide Strategies</label>
+                <label class="control-label">Hide Strategies:</label>
                 <div class="strategy-selector">
-                    <button class="strategy-dropdown-btn" id="strategyDropdownBtn" onclick="toggleStrategyDropdown()">
-                        <span class="dropdown-label">
-                            <span>Select Strategies</span>
-                            <span class="dropdown-badge" id="selectedCount">0</span>
-                        </span>
-                        <span class="dropdown-arrow">▼</span>
+                    <button class="strategy-dropdown-btn" onclick="toggleStrategyDropdown()">
+                        <span>Select Strategies</span>
+                        <span class="dropdown-badge" id="selectedCount">0</span>
+                        <span>▼</span>
                     </button>
                     <div class="strategy-dropdown-menu" id="strategyDropdownMenu">
                         <div class="dropdown-header">
@@ -706,18 +377,16 @@
                             <button class="dropdown-action-btn" onclick="selectNoneStrategies()">None</button>
                             <button class="dropdown-action-btn" onclick="resetStrategySelection()">Reset</button>
                         </div>
-                        <div class="dropdown-options" id="strategyOptions">
-                            <!-- Options will be populated dynamically -->
-                        </div>
+                        <div class="dropdown-options" id="strategyOptions"></div>
                     </div>
                 </div>
             </div>
             <div class="control-group">
-                <label>Min DD % Filter</label>
+                <label class="control-label">Min DD % Filter:</label>
                 <input type="number" id="minDrawdownFilter" placeholder="e.g., -10" step="0.1" oninput="applyFilters()">
             </div>
             <div class="control-group">
-                <label>View Type</label>
+                <label class="control-label">View Type:</label>
                 <select id="viewTypeFilter" onchange="applyFilters()">
                     <option value="all">All Levels</option>
                     <option value="broker">Broker Only</option>
@@ -726,7 +395,7 @@
                 </select>
             </div>
             <div class="control-group">
-                <label>Sort By</label>
+                <label class="control-label">Sort By:</label>
                 <select id="sortSelect" onchange="handleSortSelect()">
                     <option value="maxDDPercent">Max DD %</option>
                     <option value="currentDDPercent">Current DD %</option>
@@ -735,149 +404,67 @@
                     <option value="recoveryFactor">Recovery Factor</option>
                 </select>
             </div>
-            <button class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
+            <button class="btn" onclick="expandAll()">Expand All</button>
+            <button class="btn" onclick="collapseAll()">Collapse All</button>
+            <button class="btn" onclick="resetFilters()">Reset Filters</button>
         </div>
 
         <div class="table-container">
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-sort="strategy" onclick="sortTable('strategy')">Strategy</th>
-                            <th class="sortable" data-sort="lotSize" onclick="sortTable('lotSize')">Lot Size</th>
-                            <th class="sortable" data-sort="maxDD" onclick="sortTable('maxDD')">Max DD (₹)</th>
-                            <th class="sortable" data-sort="maxDDPercent" onclick="sortTable('maxDDPercent')">Max DD %</th>
-                            <th class="sortable" data-sort="currentDD" onclick="sortTable('currentDD')">Current DD (₹)</th>
-                            <th class="sortable" data-sort="currentDDPercent" onclick="sortTable('currentDDPercent')">Current DD %</th>
-                            <th class="sortable" data-sort="ddDuration" onclick="sortTable('ddDuration')">DD Duration</th>
-                            <th class="sortable" data-sort="recoveryTime" onclick="sortTable('recoveryTime')">Recovery Time</th>
-                            <th class="sortable" data-sort="ddStartDate" onclick="sortTable('ddStartDate')">DD Start</th>
-                            <th class="sortable" data-sort="ddEndDate" onclick="sortTable('ddEndDate')">DD End</th>
-                            <th class="sortable" data-sort="ddCount" onclick="sortTable('ddCount')">DD Count</th>
-                            <th class="sortable" data-sort="recoveryFactor" onclick="sortTable('recoveryFactor')">Recovery Factor</th>
-                            <th class="sortable" data-sort="underwaterPeriod" onclick="sortTable('underwaterPeriod')">Underwater</th>
-                        </tr>
-                    </thead>
-                    <tbody id="drawdownTableBody">
-                        <tr>
-                            <td colspan="13">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">📊</div>
-                                    <div class="empty-state-title">No Drawdown Data Available</div>
-                                    <div class="empty-state-text">Upload trade data to view strategy-wise drawdown analysis</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('strategy')">Strategy</th>
+                        <th onclick="sortTable('lotSize')">Lot Size</th>
+                        <th onclick="sortTable('maxDD')">Max DD (₹)</th>
+                        <th onclick="sortTable('maxDDPercent')">Max DD %</th>
+                        <th onclick="sortTable('currentDD')">Current DD (₹)</th>
+                        <th onclick="sortTable('currentDDPercent')">Current DD %</th>
+                        <th onclick="sortTable('ddDuration')">DD Duration</th>
+                        <th onclick="sortTable('recoveryTime')">Recovery Time</th>
+                        <th onclick="sortTable('ddStartDate')">DD Start</th>
+                        <th onclick="sortTable('ddEndDate')">DD End</th>
+                        <th onclick="sortTable('ddCount')">DD Count</th>
+                        <th onclick="sortTable('recoveryFactor')">Recovery Factor</th>
+                        <th onclick="sortTable('underwaterPeriod')">Underwater</th>
+                    </tr>
+                </thead>
+                <tbody id="drawdownTableBody"></tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // Global variables
         let drawdownData = [];
         let filteredData = [];
-        let sortColumn = 'maxDDPercent';
-        let sortDirection = 'desc';
         let hiddenStrategies = new Set();
         let allStrategyNames = [];
+        let sortColumn = 'maxDDPercent';
+        let sortDirection = 'desc';
+        let globalStrategyMap = {};
+        let globalAccountMap = {};
+        let globalBrokerMap = {};
 
         // Sample data structure
         const sampleData = [
-            {
-                strategy: 'B',
-                isBroker: true,
-                isGroup: false,
-                isChild: false,
-                lotSize: '-',
-                maxDD: -50000,
-                maxDDPercent: -15.50,
-                currentDD: -25000,
-                currentDDPercent: -7.75,
-                ddDuration: 45,
-                recoveryTime: 30,
-                ddStartDate: '05-Jan',
-                ddEndDate: '15-Feb',
-                ddCount: 12,
-                recoveryFactor: 1.25,
-                underwaterPeriod: 180
-            },
-            {
-                strategy: 'B1',
-                parentBroker: 'B',
-                isGroup: true,
-                isBroker: false,
-                isChild: false,
-                lotSize: '-',
-                maxDD: -30000,
-                maxDDPercent: -12.00,
-                currentDD: -15000,
-                currentDDPercent: -6.00,
-                ddDuration: 35,
-                recoveryTime: 25,
-                ddStartDate: '08-Jan',
-                ddEndDate: '12-Feb',
-                ddCount: 8,
-                recoveryFactor: 1.10,
-                underwaterPeriod: 150
-            },
-            {
-                strategy: 'Option Straddle',
-                parentAccount: 'B1',
-                parentBroker: 'B',
-                isChild: true,
-                isBroker: false,
-                isGroup: false,
-                lotSize: 25,
-                maxDD: -15000,
-                maxDDPercent: -18.50,
-                currentDD: -8000,
-                currentDDPercent: -9.88,
-                ddDuration: 28,
-                recoveryTime: 18,
-                ddStartDate: '10-Jan',
-                ddEndDate: '07-Feb',
-                ddCount: 5,
-                recoveryFactor: 0.95,
-                underwaterPeriod: 120
-            }
+            {strategy: "B", isBroker: true, isGroup: false, isChild: false, lotSize: 14.90, maxDD: -584670, maxDDPercent: -7.34, currentDD: -48871, currentDDPercent: -0.50, ddDuration: 14, recoveryTime: 9, ddStartDate: "08-Sep", ddEndDate: "22-Sep", ddCount: 92, recoveryFactor: 8.83, underwaterPeriod: 809},
+            {strategy: "B1", parentBroker: "B", isBroker: false, isGroup: true, isChild: false, lotSize: 10.40, maxDD: -584670, maxDDPercent: -7.34, currentDD: 0, currentDDPercent: 0.00, ddDuration: 14, recoveryTime: 8, ddStartDate: "08-Sep", ddEndDate: "22-Sep", ddCount: 67, recoveryFactor: 7.96, underwaterPeriod: 538},
+            {strategy: "B1PRO 4", parentAccount: "B1", parentBroker: "B", isBroker: false, isGroup: false, isChild: true, lotSize: 6.20, maxDD: -584670, maxDDPercent: -7.34, currentDD: -267757, currentDDPercent: -3.18, ddDuration: 14, recoveryTime: 3, ddStartDate: "08-Sep", ddEndDate: "22-Sep", ddCount: 54, recoveryFactor: 5.97, underwaterPeriod: 192}
         ];
 
-        // Initialize and request data from parent
-        window.addEventListener('DOMContentLoaded', () => {
-            drawdownData = sampleData;
-            applyFilters();
-            
-            // Request data from parent if this page is in an iframe
-            console.log('📊 Drawdown: Page loaded, requesting data from parent...');
-            if (window.parent !== window) {
-                window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
-            }
-        });
-
-        // Listen for data from parent window
+        // Listen for data from parent
         window.addEventListener('message', (event) => {
             const { type, data } = event.data;
-            
-            console.log('📊 Drawdown received message:', type, data ? `with ${data.length} trades` : 'no data');
-            
             if (type === 'TRADES_DATA') {
-                if (!data || !Array.isArray(data) || data.length === 0) {
-                    console.warn('⚠️ Drawdown: No data received, keeping sample data');
-                    return;
-                }
-                
-                console.log('✅ Drawdown: Processing', data.length, 'trades');
-                // Just use sample data for now until you provide proper drawdown calculation
-                // You can replace this with actual drawdown calculation logic
+                console.log('📊 Drawdown: Received trades data', data?.length || 0, 'trades');
                 processTradesForDrawdown(data);
                 populateStrategyOptions();
+                loadSavedFilters();
                 applyFilters();
             } else if (type === 'LOAD_SAMPLE_DATA') {
                 console.log('🎲 Drawdown: Loading sample data');
                 drawdownData = sampleData;
                 populateStrategyOptions();
+                loadSavedFilters();
                 applyFilters();
             }
         });
@@ -885,12 +472,10 @@
         function processTradesForDrawdown(trades) {
             console.log('📊 Processing', trades.length, 'trades for drawdown analysis');
             
-            // Group strategies by broker and account
             const brokerMap = {};
             const accountMap = {};
             const strategyMap = {};
             
-            // Sort trades by date
             const sortedTrades = [...trades].sort((a, b) => {
                 const dateA = a.date.split('/').reverse().join('');
                 const dateB = b.date.split('/').reverse().join('');
@@ -900,17 +485,14 @@
             sortedTrades.forEach(trade => {
                 if (trade.strategyPnlTax) {
                     Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
-                        // Skip A.PRO strategies
                         if (stratName.startsWith('A.PRO')) return;
                         
-                        // Extract broker code (B1, B2, C1, etc.)
                         const brokerMatch = stratName.match(/^([A-Z]\d+)/);
                         if (!brokerMatch) return;
                         
-                        const accountCode = brokerMatch[1]; // e.g., B1, B2
-                        const brokerCode = accountCode.charAt(0); // e.g., B, C
+                        const accountCode = brokerMatch[1];
+                        const brokerCode = accountCode.charAt(0);
                         
-                        // Initialize strategy
                         if (!strategyMap[stratName]) {
                             strategyMap[stratName] = {
                                 name: stratName,
@@ -923,16 +505,11 @@
                             };
                         }
                         
-                        // Update starting capital and lot size from EVERY trade's strategyDetails
                         if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                             const details = trade.strategyDetails[stratName];
-                            
-                            // Update starting capital if this trade has a higher margin
                             if (details.margin && details.margin > strategyMap[stratName].startingCapital) {
                                 strategyMap[stratName].startingCapital = details.margin;
                             }
-                            
-                            // Update lot size only if it's a valid positive number (prevents 0 from overwriting)
                             if (details.lot && details.lot > 0) {
                                 strategyMap[stratName].lotSize = details.lot;
                             }
@@ -941,7 +518,6 @@
                         strategyMap[stratName].pnls.push(pnlTax || 0);
                         strategyMap[stratName].dates.push(trade.date);
                         
-                        // Initialize account
                         if (!accountMap[accountCode]) {
                             accountMap[accountCode] = {
                                 name: accountCode,
@@ -954,7 +530,6 @@
                         accountMap[accountCode].pnls.push(pnlTax || 0);
                         accountMap[accountCode].dates.push(trade.date);
                         
-                        // Update account starting capital (use max margin)
                         if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                             const margin = trade.strategyDetails[stratName].margin || 0;
                             if (margin > accountMap[accountCode].startingCapital) {
@@ -962,7 +537,6 @@
                             }
                         }
                         
-                        // Initialize broker
                         if (!brokerMap[brokerCode]) {
                             brokerMap[brokerCode] = {
                                 name: brokerCode,
@@ -974,7 +548,6 @@
                         brokerMap[brokerCode].pnls.push(pnlTax || 0);
                         brokerMap[brokerCode].dates.push(trade.date);
                         
-                        // Update broker starting capital
                         if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                             const margin = trade.strategyDetails[stratName].margin || 0;
                             if (margin > brokerMap[brokerCode].startingCapital) {
@@ -985,7 +558,6 @@
                 }
             });
             
-            // Calculate drawdown metrics with detailed tracking
             function calculateDrawdown(pnls, dates, startingCapital = 10000) {
                 let cumPnl = 0;
                 let equity = startingCapital;
@@ -1011,14 +583,12 @@
                     equity = startingCapital + cumPnl;
                     
                     if (equity > peak) {
-                        // Recovered from drawdown
                         if (inDrawdown && ddStartDate) {
                             const recoveryDays = calculateDateDiff(ddStartDate, dates[index]);
                             totalRecoveryDays += recoveryDays;
                             recoveryCount++;
                         }
                         
-                        // Calculate underwater period for this drawdown cycle
                         if (underwaterStartDate) {
                             totalUnderwaterDays += calculateDateDiff(underwaterStartDate, dates[index]);
                             underwaterStartDate = null;
@@ -1029,7 +599,6 @@
                         ddStartDate = null;
                         ddDays = 0;
                     } else if (equity < peak) {
-                        // In drawdown
                         if (!inDrawdown) {
                             ddCount++;
                             inDrawdown = true;
@@ -1052,7 +621,6 @@
                     }
                 });
                 
-                // If still underwater at the end, add the remaining period
                 if (underwaterStartDate && dates.length > 0) {
                     totalUnderwaterDays += calculateDateDiff(underwaterStartDate, dates[dates.length - 1]);
                 }
@@ -1079,12 +647,10 @@
                 };
             }
             
-            // Helper function to calculate date difference
             function calculateDateDiff(date1Str, date2Str) {
                 if (!date1Str || !date2Str || date1Str === '-' || date2Str === '-') return 0;
                 
                 try {
-                    // Parse DD/MM/YYYY format
                     const [d1, m1, y1] = date1Str.split('/').map(Number);
                     const [d2, m2, y2] = date2Str.split('/').map(Number);
                     
@@ -1100,7 +666,6 @@
                 }
             }
             
-            // Helper function to calculate total lot size from strategies
             function calculateTotalLotSize(strategies) {
                 let totalLots = 0;
                 let hasValidLots = false;
@@ -1119,14 +684,15 @@
                 return hasValidLots ? totalLots : '-';
             }
             
-            // Build drawdown data array
             drawdownData = [];
             
-            // Add broker-level data
+            globalStrategyMap = strategyMap;
+            globalAccountMap = accountMap;
+            globalBrokerMap = brokerMap;
+            
             Object.entries(brokerMap).forEach(([brokerCode, brokerData]) => {
                 const metrics = calculateDrawdown(brokerData.pnls, brokerData.dates, brokerData.startingCapital);
                 
-                // Calculate total lot size from all strategies in this broker
                 const brokerStrategies = Object.values(strategyMap).filter(s => s.broker === brokerCode);
                 const totalLotSize = calculateTotalLotSize(brokerStrategies);
                 
@@ -1150,11 +716,9 @@
                 });
             });
             
-            // Add account-level data
             Object.entries(accountMap).forEach(([accountCode, accountData]) => {
                 const metrics = calculateDrawdown(accountData.pnls, accountData.dates, accountData.startingCapital);
                 
-                // Calculate total lot size from all strategies in this account
                 const accountStrategies = Object.values(strategyMap).filter(s => s.account === accountCode);
                 const totalLotSize = calculateTotalLotSize(accountStrategies);
                 
@@ -1179,7 +743,6 @@
                 });
             });
             
-            // Add strategy-level data
             Object.entries(strategyMap).forEach(([stratName, stratData]) => {
                 const metrics = calculateDrawdown(stratData.pnls, stratData.dates, stratData.startingCapital);
                 
@@ -1213,6 +776,223 @@
             });
         }
 
+        function applyFilters() {
+            const minDD = parseFloat(document.getElementById('minDrawdownFilter').value) || -Infinity;
+            const viewType = document.getElementById('viewTypeFilter').value;
+
+            // First, filter strategies
+            const filteredStrategies = drawdownData.filter(row => {
+                if (!row.isChild) return false;
+                const matchesStrategy = !hiddenStrategies.has(row.strategy);
+                const matchesDD = row.maxDDPercent >= minDD;
+                return matchesStrategy && matchesDD;
+            });
+
+            // Recalculate account metrics based on filtered strategies
+            const accountMetrics = {};
+            filteredStrategies.forEach(strat => {
+                if (!accountMetrics[strat.parentAccount]) {
+                    accountMetrics[strat.parentAccount] = {
+                        strategies: [],
+                        broker: strat.parentBroker
+                    };
+                }
+                accountMetrics[strat.parentAccount].strategies.push(strat);
+            });
+
+            const recalculatedAccounts = Object.entries(accountMetrics).map(([accountCode, data]) => {
+                const strategies = data.strategies;
+                return {
+                    strategy: accountCode,
+                    parentBroker: data.broker,
+                    isGroup: true,
+                    isBroker: false,
+                    isChild: false,
+                    lotSize: strategies.reduce((sum, s) => sum + (typeof s.lotSize === 'number' ? s.lotSize : 0), 0),
+                    maxDD: Math.min(...strategies.map(s => s.maxDD)),
+                    maxDDPercent: Math.min(...strategies.map(s => s.maxDDPercent)),
+                    currentDD: strategies.reduce((sum, s) => sum + s.currentDD, 0),
+                    currentDDPercent: strategies.reduce((sum, s) => sum + s.currentDDPercent, 0) / strategies.length,
+                    ddDuration: Math.max(...strategies.map(s => s.ddDuration)),
+                    recoveryTime: Math.round(strategies.reduce((sum, s) => sum + s.recoveryTime, 0) / strategies.length),
+                    ddStartDate: strategies[0].ddStartDate,
+                    ddEndDate: strategies[0].ddEndDate,
+                    ddCount: strategies.reduce((sum, s) => sum + s.ddCount, 0),
+                    recoveryFactor: strategies.reduce((sum, s) => sum + s.recoveryFactor, 0) / strategies.length,
+                    underwaterPeriod: Math.max(...strategies.map(s => s.underwaterPeriod))
+                };
+            });
+
+            // Recalculate broker metrics based on filtered accounts
+            const brokerMetrics = {};
+            recalculatedAccounts.forEach(acc => {
+                if (!brokerMetrics[acc.parentBroker]) {
+                    brokerMetrics[acc.parentBroker] = {
+                        accounts: []
+                    };
+                }
+                brokerMetrics[acc.parentBroker].accounts.push(acc);
+            });
+
+            const recalculatedBrokers = Object.entries(brokerMetrics).map(([brokerCode, data]) => {
+                const accounts = data.accounts;
+                return {
+                    strategy: brokerCode,
+                    isBroker: true,
+                    isGroup: false,
+                    isChild: false,
+                    lotSize: accounts.reduce((sum, a) => sum + (typeof a.lotSize === 'number' ? a.lotSize : 0), 0),
+                    maxDD: Math.min(...accounts.map(a => a.maxDD)),
+                    maxDDPercent: Math.min(...accounts.map(a => a.maxDDPercent)),
+                    currentDD: accounts.reduce((sum, a) => sum + a.currentDD, 0),
+                    currentDDPercent: accounts.reduce((sum, a) => sum + a.currentDDPercent, 0) / accounts.length,
+                    ddDuration: Math.max(...accounts.map(a => a.ddDuration)),
+                    recoveryTime: Math.round(accounts.reduce((sum, a) => sum + a.recoveryTime, 0) / accounts.length),
+                    ddStartDate: accounts[0].ddStartDate,
+                    ddEndDate: accounts[0].ddEndDate,
+                    ddCount: accounts.reduce((sum, a) => sum + a.ddCount, 0),
+                    recoveryFactor: accounts.reduce((sum, a) => sum + a.recoveryFactor, 0) / accounts.length,
+                    underwaterPeriod: Math.max(...accounts.map(a => a.underwaterPeriod))
+                };
+            });
+
+            // Combine all filtered data
+            filteredData = [];
+            
+            if (viewType === 'all') {
+                filteredData = [...recalculatedBrokers, ...recalculatedAccounts, ...filteredStrategies];
+            } else if (viewType === 'broker') {
+                filteredData = recalculatedBrokers;
+            } else if (viewType === 'account') {
+                filteredData = recalculatedAccounts;
+            } else if (viewType === 'strategy') {
+                filteredData = filteredStrategies;
+            }
+
+            // Sort
+            if (viewType === 'all') {
+                filteredData.sort((a, b) => {
+                    if (a.isBroker !== b.isBroker) return a.isBroker ? -1 : 1;
+                    if (a.isGroup !== b.isGroup) return a.isGroup ? -1 : 1;
+                    const aVal = a[sortColumn];
+                    const bVal = b[sortColumn];
+                    return sortDirection === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
+                });
+            } else {
+                filteredData.sort((a, b) => {
+                    const aVal = a[sortColumn];
+                    const bVal = b[sortColumn];
+                    return sortDirection === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
+                });
+            }
+
+            console.log('Filtered data:', filteredData.length, 'rows');
+            renderTable();
+            updateSummaryCards();
+            saveFilters();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('drawdownTableBody');
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:40px;">No data available</td></tr>';
+                return;
+            }
+
+            // Group data hierarchically
+            const brokers = filteredData.filter(d => d.isBroker);
+            const accounts = filteredData.filter(d => d.isGroup);
+            const strategies = filteredData.filter(d => d.isChild);
+            
+            let html = '';
+            
+            brokers.forEach(broker => {
+                // Render broker row
+                html += `<tr class="broker-row">
+                    <td class="broker-name">🏦 ${broker.strategy}</td>
+                    <td>${formatNum(broker.lotSize, 2)}</td>
+                    <td class="negative">${formatCurrency(broker.maxDD)}</td>
+                    <td class="negative">${formatPercent(broker.maxDDPercent)}</td>
+                    <td class="${broker.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(broker.currentDD)}</td>
+                    <td class="${broker.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(broker.currentDDPercent)}</td>
+                    <td>${broker.ddDuration} days</td>
+                    <td>${broker.recoveryTime > 0 ? broker.recoveryTime + ' days' : '-'}</td>
+                    <td>${broker.ddStartDate}</td>
+                    <td>${broker.ddEndDate}</td>
+                    <td>${broker.ddCount}</td>
+                    <td class="${broker.recoveryFactor >= 1 ? 'positive' : 'negative'}">${broker.recoveryFactor.toFixed(2)}</td>
+                    <td>${broker.underwaterPeriod} days</td>
+                </tr>`;
+                
+                // Find accounts under this broker
+                const brokerAccounts = accounts.filter(a => a.parentBroker === broker.strategy);
+                
+                brokerAccounts.forEach(account => {
+                    const accountCode = account.strategy.toLowerCase();
+                    html += `<tr class="group-row group-${accountCode}">
+                        <td class="group-name">├─ ${account.strategy}</td>
+                        <td>${formatNum(account.lotSize, 2)}</td>
+                        <td class="negative">${formatCurrency(account.maxDD)}</td>
+                        <td class="negative">${formatPercent(account.maxDDPercent)}</td>
+                        <td class="${account.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(account.currentDD)}</td>
+                        <td class="${account.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(account.currentDDPercent)}</td>
+                        <td>${account.ddDuration} days</td>
+                        <td>${account.recoveryTime > 0 ? account.recoveryTime + ' days' : '-'}</td>
+                        <td>${account.ddStartDate}</td>
+                        <td>${account.ddEndDate}</td>
+                        <td>${account.ddCount}</td>
+                        <td class="${account.recoveryFactor >= 1 ? 'positive' : 'negative'}">${account.recoveryFactor.toFixed(2)}</td>
+                        <td>${account.underwaterPeriod} days</td>
+                    </tr>`;
+                    
+                    // Find strategies under this account
+                    const accountStrategies = strategies.filter(s => s.parentAccount === account.strategy);
+                    
+                    accountStrategies.forEach(strategy => {
+                        const parentAccountCode = strategy.parentAccount.toLowerCase();
+                        html += `<tr class="child-row child-row-${parentAccountCode}">
+                            <td style="padding-left: 40px;">${strategy.strategy}</td>
+                            <td>${formatNum(strategy.lotSize, 2)}</td>
+                            <td class="negative">${formatCurrency(strategy.maxDD)}</td>
+                            <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
+                            <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
+                            <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
+                            <td>${strategy.ddDuration} days</td>
+                            <td>${strategy.recoveryTime > 0 ? strategy.recoveryTime + ' days' : '-'}</td>
+                            <td>${strategy.ddStartDate}</td>
+                            <td>${strategy.ddEndDate}</td>
+                            <td>${strategy.ddCount}</td>
+                            <td class="${strategy.recoveryFactor >= 1 ? 'positive' : 'negative'}">${strategy.recoveryFactor.toFixed(2)}</td>
+                            <td>${strategy.underwaterPeriod} days</td>
+                        </tr>`;
+                    });
+                });
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        function updateSummaryCards() {
+            if (filteredData.length === 0) return;
+
+            const broker = filteredData.find(d => d.isBroker);
+            if (broker) {
+                document.getElementById('portfolioMaxDD').textContent = formatPercent(broker.maxDDPercent);
+            }
+
+            const worst = filteredData.reduce((w, c) => c.maxDDPercent < w.maxDDPercent ? c : w);
+            document.getElementById('worstStrategy').textContent = worst.strategy;
+
+            const avgDD = filteredData.reduce((sum, d) => sum + d.maxDDPercent, 0) / filteredData.length;
+            document.getElementById('avgDrawdown').textContent = formatPercent(avgDD);
+
+            const recoveries = filteredData.filter(d => d.recoveryTime > 0);
+            const avgRecovery = recoveries.length ? recoveries.reduce((sum, d) => sum + d.recoveryTime, 0) / recoveries.length : 0;
+            document.getElementById('avgRecovery').textContent = avgRecovery > 0 ? Math.round(avgRecovery) + ' days' : '-';
+
+            document.getElementById('totalPeriods').textContent = filteredData.reduce((sum, d) => sum + d.ddCount, 0);
+        }
+
         function sortTable(column) {
             if (sortColumn === column) {
                 sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -1220,212 +1000,13 @@
                 sortColumn = column;
                 sortDirection = 'desc';
             }
-            
-            document.getElementById('sortSelect').value = column;
             applyFilters();
         }
 
         function handleSortSelect() {
-            const select = document.getElementById('sortSelect');
-            sortColumn = select.value;
+            sortColumn = document.getElementById('sortSelect').value;
             sortDirection = 'desc';
             applyFilters();
-        }
-
-        function applyFilters() {
-            const minDrawdown = parseFloat(document.getElementById('minDrawdownFilter').value) || -Infinity;
-            const viewType = document.getElementById('viewTypeFilter').value;
-
-            filteredData = drawdownData.filter(row => {
-                // Hide strategies that are unchecked (in hiddenStrategies set)
-                const matchesStrategyFilter = !row.isChild || !hiddenStrategies.has(row.strategy);
-                const matchesMinDD = row.maxDDPercent >= minDrawdown;
-                
-                let matchesViewType = true;
-                if (viewType === 'broker') {
-                    matchesViewType = row.isBroker;
-                } else if (viewType === 'account') {
-                    matchesViewType = row.isGroup;
-                } else if (viewType === 'strategy') {
-                    matchesViewType = row.isChild;
-                }
-                
-                return matchesStrategyFilter && matchesMinDD && matchesViewType;
-            });
-
-            filteredData.sort((a, b) => {
-                let aVal = a[sortColumn];
-                let bVal = b[sortColumn];
-                
-                if (typeof aVal === 'string') {
-                    aVal = aVal.toLowerCase();
-                    bVal = bVal.toLowerCase();
-                }
-                
-                if (sortDirection === 'asc') {
-                    return aVal > bVal ? 1 : -1;
-                } else {
-                    return aVal < bVal ? 1 : -1;
-                }
-            });
-
-            if (viewType === 'all') {
-                maintainHierarchy();
-            }
-
-            renderTable();
-            updateSummaryCards();
-        }
-
-        function maintainHierarchy() {
-            const brokers = filteredData.filter(d => d.isBroker);
-            const accounts = filteredData.filter(d => d.isGroup);
-            const strategies = filteredData.filter(d => d.isChild);
-            
-            filteredData = [];
-            
-            brokers.forEach(broker => {
-                filteredData.push(broker);
-                
-                const brokerAccounts = accounts.filter(a => a.parentBroker === broker.strategy);
-                brokerAccounts.forEach(account => {
-                    filteredData.push(account);
-                    
-                    const accountStrategies = strategies.filter(s => s.parentAccount === account.strategy);
-                    filteredData.push(...accountStrategies);
-                });
-            });
-        }
-
-        function updateSortIndicators() {
-            document.querySelectorAll('th.sortable').forEach(th => {
-                th.classList.remove('sorted-asc', 'sorted-desc');
-                if (th.dataset.sort === sortColumn) {
-                    th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
-                }
-            });
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('drawdownTableBody');
-            
-            if (filteredData.length === 0) {
-                showEmptyState();
-                return;
-            }
-
-            tbody.innerHTML = filteredData.map(row => {
-                const isBroker = row.isBroker;
-                const isGroup = row.isGroup;
-                const isChild = row.isChild;
-                
-                let rowClass = '';
-                let strategyClass = 'strategy-name';
-                let strategyPrefix = '';
-                let displayName = row.strategy;
-                
-                if (isBroker) {
-                    rowClass = 'broker-row';
-                    strategyClass = 'strategy-name broker-name';
-                    strategyPrefix = '🏦 ';
-                    // Format broker name: B -> All Broker DD
-                    displayName = 'All Broker DD';
-                } else if (isGroup) {
-                    rowClass = 'group-row';
-                    strategyClass = 'strategy-name group-name';
-                    strategyPrefix = '├─ ';
-                    // Format account name: B1 -> Broker : 1, B2 -> Broker : 2
-                    if (row.strategy.match(/^[A-Z]\d+$/)) {
-                        const brokerLetter = row.strategy.charAt(0);
-                        const brokerNumber = row.strategy.substring(1);
-                        displayName = `Broker : ${brokerNumber}`;
-                    }
-                } else if (isChild) {
-                    rowClass = 'child-row';
-                    strategyClass = 'strategy-name child-name';
-                    strategyPrefix = '';
-                    
-                    // Add broker-specific class based on parent account (B1, B2, C1, etc.)
-                    if (row.parentAccount) {
-                        const accountLower = row.parentAccount.toLowerCase();
-                        rowClass += ` child-row-${accountLower}`;
-                    }
-                }
-                
-                return `
-                <tr class="${rowClass}">
-                    <td class="${strategyClass}">${strategyPrefix}${escapeHtml(displayName)}</td>
-                    <td>${formatLotSize(row.lotSize)}</td>
-                    <td class="negative">${formatCurrencyTable(row.maxDD)}</td>
-                    <td class="negative">${formatPercent(row.maxDDPercent)}</td>
-                    <td class="${row.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrencyTable(row.currentDD)}</td>
-                    <td class="${row.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(row.currentDDPercent)}</td>
-                    <td>${row.ddDuration} days</td>
-                    <td>${row.recoveryTime > 0 ? row.recoveryTime + ' days' : '-'}</td>
-                    <td>${row.ddStartDate}</td>
-                    <td>${row.ddEndDate}</td>
-                    <td>${row.ddCount}</td>
-                    <td class="${row.recoveryFactor >= 1 ? 'positive' : 'negative'}">${row.recoveryFactor.toFixed(2)}</td>
-                    <td>${row.underwaterPeriod} days</td>
-                </tr>
-            `;
-            }).join('');
-
-            updateSortIndicators();
-        }
-
-        function updateSummaryCards() {
-            if (drawdownData.length === 0) return;
-
-            const brokers = drawdownData.filter(d => d.isBroker);
-            const accounts = drawdownData.filter(d => d.isGroup);
-            const strategies = drawdownData.filter(d => d.isChild);
-
-            // Portfolio max drawdown (worst across all levels)
-            const worstDD = Math.min(...drawdownData.map(d => d.maxDDPercent));
-            document.getElementById('portfolioMaxDD').textContent = formatPercent(worstDD);
-
-            // Worst strategy (including all levels)
-            const worstItem = drawdownData.reduce((worst, current) => 
-                current.maxDDPercent < worst.maxDDPercent ? current : worst
-            );
-            let worstLabel = worstItem.strategy;
-            if (worstItem.isBroker) {
-                worstLabel = `Broker ${worstItem.strategy}`;
-            } else if (worstItem.isGroup) {
-                worstLabel = `${worstItem.strategy} (Account)`;
-            }
-            document.getElementById('worstStrategy').textContent = worstLabel;
-
-            // Average drawdown (all items)
-            const avgDD = drawdownData.reduce((sum, d) => sum + d.maxDDPercent, 0) / drawdownData.length;
-            document.getElementById('avgDrawdown').textContent = formatPercent(avgDD);
-
-            // Average recovery time
-            const recoveryTimes = drawdownData.filter(d => d.recoveryTime > 0);
-            const avgRecovery = recoveryTimes.length > 0 ? 
-                recoveryTimes.reduce((sum, d) => sum + d.recoveryTime, 0) / recoveryTimes.length : 0;
-            document.getElementById('avgRecovery').textContent = avgRecovery > 0 ? 
-                Math.round(avgRecovery) + ' days' : '-';
-
-            // Total drawdown periods
-            const totalPeriods = drawdownData.reduce((sum, d) => sum + d.ddCount, 0);
-            document.getElementById('totalPeriods').textContent = totalPeriods;
-        }
-
-        function showEmptyState() {
-            const tbody = document.getElementById('drawdownTableBody');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="13">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📊</div>
-                            <div class="empty-state-title">No Drawdown Data Available</div>
-                            <div class="empty-state-text">Upload trade data to view strategy-wise drawdown analysis</div>
-                        </div>
-                    </td>
-                </tr>
-            `;
         }
 
         function resetFilters() {
@@ -1437,44 +1018,28 @@
             sortDirection = 'desc';
             updateStrategyCheckboxes();
             updateSelectedCount();
+            clearSavedFilters();
             applyFilters();
         }
 
-        // Strategy Dropdown Functions
         function populateStrategyOptions() {
-            allStrategyNames = drawdownData
-                .filter(d => d.isChild)
-                .map(d => d.strategy)
-                .sort();
-            
-            const optionsContainer = document.getElementById('strategyOptions');
-            optionsContainer.innerHTML = allStrategyNames.map(strategy => `
+            allStrategyNames = drawdownData.filter(d => d.isChild).map(d => d.strategy).sort();
+            const container = document.getElementById('strategyOptions');
+            container.innerHTML = allStrategyNames.map(s => `
                 <div class="dropdown-option">
-                    <input type="checkbox" id="strategy-${strategy}" 
-                           value="${strategy}" 
-                           ${!hiddenStrategies.has(strategy) ? 'checked' : ''}
-                           onchange="toggleStrategy('${strategy}')">
-                    <label for="strategy-${strategy}">${escapeHtml(strategy)}</label>
+                    <input type="checkbox" id="strategy-${CSS.escape(s)}" value="${s}" ${!hiddenStrategies.has(s) ? 'checked' : ''} onchange="toggleStrategy('${s.replace(/'/g, "\\'")}')">
+                    <label for="strategy-${CSS.escape(s)}">${s}</label>
                 </div>
             `).join('');
-            
             updateSelectedCount();
         }
 
         function toggleStrategyDropdown() {
-            const btn = document.getElementById('strategyDropdownBtn');
-            const menu = document.getElementById('strategyDropdownMenu');
-            
-            btn.classList.toggle('active');
-            menu.classList.toggle('show');
+            document.getElementById('strategyDropdownMenu').classList.toggle('show');
         }
 
         function toggleStrategy(strategy) {
-            if (hiddenStrategies.has(strategy)) {
-                hiddenStrategies.delete(strategy);
-            } else {
-                hiddenStrategies.add(strategy);
-            }
+            hiddenStrategies.has(strategy) ? hiddenStrategies.delete(strategy) : hiddenStrategies.add(strategy);
             updateSelectedCount();
             applyFilters();
         }
@@ -1487,9 +1052,7 @@
         }
 
         function selectNoneStrategies() {
-            allStrategyNames.forEach(strategy => {
-                hiddenStrategies.add(strategy);
-            });
+            allStrategyNames.forEach(s => hiddenStrategies.add(s));
             updateStrategyCheckboxes();
             updateSelectedCount();
             applyFilters();
@@ -1503,127 +1066,99 @@
         }
 
         function updateStrategyCheckboxes() {
-            allStrategyNames.forEach(strategy => {
-                const checkbox = document.getElementById(`strategy-${strategy}`);
-                if (checkbox) {
-                    checkbox.checked = !hiddenStrategies.has(strategy);
-                }
+            allStrategyNames.forEach(s => {
+                const cb = document.getElementById(`strategy-${CSS.escape(s)}`);
+                if (cb) cb.checked = !hiddenStrategies.has(s);
             });
         }
 
         function updateSelectedCount() {
-            const total = allStrategyNames.length;
-            const hidden = hiddenStrategies.size;
-            const selected = total - hidden;
-            document.getElementById('selectedCount').textContent = selected;
+            document.getElementById('selectedCount').textContent = allStrategyNames.length - hiddenStrategies.size;
         }
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.querySelector('.strategy-selector');
-            const btn = document.getElementById('strategyDropdownBtn');
-            const menu = document.getElementById('strategyDropdownMenu');
-            
-            if (dropdown && !dropdown.contains(event.target)) {
-                btn.classList.remove('active');
-                menu.classList.remove('show');
+        function expandAll() {
+            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('tbody tr').forEach(row => {
+                if (row.classList.contains('child-row') || row.classList.contains('group-row')) {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function loadSavedFilters() {
+            try {
+                const saved = localStorage.getItem('drawdownFilters');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    hiddenStrategies = new Set(data.hiddenStrategies || []);
+                    document.getElementById('minDrawdownFilter').value = data.minDD || '';
+                    document.getElementById('viewTypeFilter').value = data.viewType || 'all';
+                    document.getElementById('sortSelect').value = data.sortBy || 'maxDDPercent';
+                    sortColumn = data.sortBy || 'maxDDPercent';
+                }
+            } catch (e) {}
+        }
+
+        function saveFilters() {
+            try {
+                localStorage.setItem('drawdownFilters', JSON.stringify({
+                    hiddenStrategies: Array.from(hiddenStrategies),
+                    minDD: document.getElementById('minDrawdownFilter').value,
+                    viewType: document.getElementById('viewTypeFilter').value,
+                    sortBy: sortColumn
+                }));
+            } catch (e) {}
+        }
+
+        function clearSavedFilters() {
+            try {
+                localStorage.removeItem('drawdownFilters');
+            } catch (e) {}
+        }
+
+        function formatCurrency(val) {
+            if (!val) return '-';
+            const abs = Math.abs(val);
+            const sign = val < 0 ? '-' : '';
+            let str = Math.round(abs).toString();
+            if (str.length > 3) {
+                const last3 = str.slice(-3);
+                const rest = str.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+                str = rest + ',' + last3;
+            }
+            return sign + str;
+        }
+
+        function formatPercent(val) {
+            return val ? val.toFixed(2) + '%' : '0.00%';
+        }
+
+        function formatNum(val, decimals = 2) {
+            return val && val !== '-' ? val.toFixed(decimals) : '-';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === '-') return '-';
+            try {
+                const [d, m, y] = dateStr.split('/');
+                const date = new Date(y, m - 1, d);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = date.toLocaleString('en-US', { month: 'short' });
+                return `${day}-${month}`;
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const selector = document.querySelector('.strategy-selector');
+            if (selector && !selector.contains(e.target)) {
+                document.getElementById('strategyDropdownMenu').classList.remove('show');
             }
         });
-
-        // Utility functions
-        function formatCurrency(value) {
-            if (value === 0 || value === null || value === undefined) return '-';
-            
-            // Convert to absolute value for formatting
-            const absValue = Math.abs(value);
-            const sign = value < 0 ? '-' : '';
-            
-            // Format in Indian numbering system
-            let formattedValue = Math.round(absValue).toString();
-            
-            // Indian format: last 3 digits, then groups of 2
-            if (formattedValue.length > 3) {
-                const lastThree = formattedValue.substring(formattedValue.length - 3);
-                const otherNumbers = formattedValue.substring(0, formattedValue.length - 3);
-                const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
-                formattedValue = formatted;
-            }
-            
-            return sign + '₹' + formattedValue;
-        }
-
-        function formatCurrencyTable(value) {
-            if (value === 0 || value === null || value === undefined) return '-';
-            
-            // Convert to absolute value for formatting
-            const absValue = Math.abs(value);
-            const sign = value < 0 ? '-' : '';
-            
-            // Format in Indian numbering system
-            let formattedValue = Math.round(absValue).toString();
-            
-            // Indian format: last 3 digits, then groups of 2
-            if (formattedValue.length > 3) {
-                const lastThree = formattedValue.substring(formattedValue.length - 3);
-                const otherNumbers = formattedValue.substring(0, formattedValue.length - 3);
-                const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
-                formattedValue = formatted;
-            }
-            
-            return sign + formattedValue;
-        }
-
-        function formatLotSize(value) {
-            if (value === '-' || value === null || value === undefined) return '-';
-            
-            // Handle numeric values
-            if (typeof value === 'number') {
-                // Round to 1 decimal place to avoid floating point precision issues
-                return Math.round(value * 10) / 10;
-            }
-            
-            // If it's already a string, try to parse and format it
-            const numValue = parseFloat(value);
-            if (!isNaN(numValue)) {
-                return Math.round(numValue * 10) / 10;
-            }
-            
-            return value;
-        }
-
-        function formatPercent(value) {
-            if (value === 0 || value === null || value === undefined) return '0.00%';
-            return value.toFixed(2) + '%';
-        }
-
-        function formatDate(dateString) {
-            if (!dateString || dateString === '-') return '-';
-            
-            let date;
-            
-            // Check if already in DD/MM/YYYY format
-            if (dateString.includes('/')) {
-                const parts = dateString.split('/');
-                if (parts.length === 3) {
-                    // Convert DD/MM/YYYY to Date object
-                    date = new Date(parts[2], parts[1] - 1, parts[0]);
-                }
-            } else {
-                date = new Date(dateString);
-            }
-            
-            // Format as DD-MMM (e.g., 05-Jan)
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = date.toLocaleString('en-US', { month: 'short' });
-            
-            return `${day}-${month}`;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
     </script>
 </body>
 </html>
