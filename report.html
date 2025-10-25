@@ -230,7 +230,7 @@
         select:focus, input:focus, button:focus {
             outline: none;
             border-color: #0284c7;
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+            box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.1);
         }
         button.primary { 
             background: #1e40af;
@@ -286,7 +286,7 @@
             text-align: center;
             font-weight: 600;
             color: #1e40af;
-            border-bottom: 2px solid #3b82f6;
+            border-bottom: 1px solid #3b82f6;
             border-right: 1px solid #93c5fd;
             white-space: nowrap;
             letter-spacing: 0.2px;
@@ -295,7 +295,7 @@
             text-align: right;
         }
         .report-table thead tr.totals-row th.positive { color: #15803d; }
-        .report-table thead tr.totals-row th.negative { color: #b91c1c; }
+        .report-table thead tr.totals-row th.negative { color: #b96060; }
         .report-table thead tr.header-row-1 th {
             padding: 10px 6px 10px 6px;
             position: sticky;
@@ -526,11 +526,11 @@
             vertical-align: middle;
             box-sizing: border-box;
         }
-        .report-table td:nth-child(1) { min-width: 35px; max-width: 45px; text-align: center; color: #6b7280; font-weight: 500; }
-        .report-table td:nth-child(2) { min-width: 65px; max-width: 75px; font-weight: 500; color: #1f2937; }
-        .report-table td:nth-child(3) { min-width: 55px; max-width: 70px; font-weight: 500; color: #374151; }
+        .report-table td:nth-child(1) { min-width: 35px; max-width: 45px; text-align: center; color: #6b7280; font-weight: 400; }
+        .report-table td:nth-child(2) { min-width: 65px; max-width: 75px; font-weight: 400; color: #1f2937; }
+        .report-table td:nth-child(3) { min-width: 55px; max-width: 70px; font-weight: 400; color: #374151; }
         .report-table td:nth-child(4) { min-width: 48px; max-width: 58px; }
-        .report-table td:nth-child(5) { min-width: 70px; max-width: 90px; font-weight: 500; color: #1f2937; }
+        .report-table td:nth-child(5) { min-width: 70px; max-width: 90px; font-weight: 400; color: #1f2937; }
         .report-table td:nth-child(6) { min-width: 42px; max-width: 52px; }
         .report-table td:nth-child(7), .report-table td:nth-child(8) { min-width: 52px; max-width: 67px; }
         .report-table td:nth-child(9) { 
@@ -543,10 +543,10 @@
             font-variant-numeric: tabular-nums;
             min-width: 48px;
             max-width: 63px;
-            font-weight: 500;
+            font-weight: 400;
         }
-        .report-table td.positive { color: #15803d; font-weight: 600; }
-        .report-table td.negative { color: #b91c1c; font-weight: 600; }
+        .report-table td.positive { color: #15803d; font-weight: 400; }
+        .report-table td.negative { color: #b96060; font-weight: 400; }
         .buy-sell-column { display: none; }
         .buy-sell-column.visible { display: table-cell; }
         .no-data { 
@@ -1860,7 +1860,7 @@
                 <th class="number-col" style="border-right: none;"></th>
                 <th class="number-col" style="border-right: none;"></th>
                 <th class="number-col" style="border-right: none;"></th>
-                <th class="number-col ${totals.profit >= 0 ? 'positive' : 'negative'}">₹${Math.abs(totals.profit).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                <th class="number-col ${totals.profit >= 0 ? 'positive' : 'negative'}">₹${totals.profit.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
             
             displayStrategies.forEach((stratName, index) => {
                 const bt = brokerTotals[stratName];
@@ -1868,10 +1868,10 @@
                 const groupStyle = `style="background: linear-gradient(to bottom, ${adjustColor(bgColor, -10)} 0%, ${adjustColor(bgColor, -15)} 100%);"`;
                 const lastColStyle = `style="background: linear-gradient(to bottom, ${adjustColor(bgColor, -10)} 0%, ${adjustColor(bgColor, -15)} 100%); border-right: 2px solid #bae6fd;"`;
                 
-                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
-                totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.dpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
-                totalsRow += `<th class="number-col ${bt.dbuy >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.dbuy).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
-                totalsRow += `<th class="number-col ${bt.dsell >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${Math.abs(bt.dsell).toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.dbuy >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.dsell >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dsell.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColStyle}></th>`;
@@ -1955,7 +1955,7 @@
                 <td class="number-col">${trade.qty || ''}</td>
                 <td class="number-col">${trade.entry ? trade.entry.toFixed(2) : ''}</td>
                 <td class="number-col">${trade.exit ? trade.exit.toFixed(2) : ''}</td>
-                <td class="number-col ${profitClass}">${profit !== 0 ? `₹${Math.abs(profit).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : ''}</td>`;
+                <td class="number-col ${profitClass}">${profit !== 0 ? `₹${profit.toLocaleString('en-IN', {maximumFractionDigits: 0})}` : ''}</td>`;
             
             displayStrategies.forEach((stratName, index) => {
                 const details = trade.strategyDetails?.[stratName] || {};
@@ -1975,10 +1975,10 @@
                 const groupBorder = 'style="background-color: ' + bgColor + ';"';
                 const lastColBorder = 'style="background-color: ' + bgColor + '; border-right: 2px solid #d1d5db;"';
                 
-                row += `<td class="number-col ${pnlClass}" ${groupBorder}>${pnl !== 0 ? Math.abs(pnl).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dpnlClass}" ${groupBorder}>${dpnl !== 0 ? Math.abs(dpnl).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dbuyClass}" ${groupBorder}>${dbuy !== 0 ? Math.abs(dbuy).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dsellClass}" ${groupBorder}>${dsell !== 0 ? Math.abs(dsell).toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${pnlClass}" ${groupBorder}>${pnl !== 0 ? pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dpnlClass}" ${groupBorder}>${dpnl !== 0 ? dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dbuyClass}" ${groupBorder}>${dbuy !== 0 ? dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dsellClass}" ${groupBorder}>${dsell !== 0 ? dsell.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
                 row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorder}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
                 row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorder}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
                 row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${qty !== 0 ? qty : ''}</td>`;
