@@ -221,6 +221,11 @@
 
         th:last-child { border-right: none; }
 
+        /* Set minimum width for Strategy column */
+        th:nth-child(1), td:nth-child(1) { /* Strategy */
+            min-width: 150px;
+        }
+
         /* Set common width for specific columns */
         th:nth-child(3), td:nth-child(3),  /* STG Margin */
         th:nth-child(4), td:nth-child(4),  /* Broker Margin */
@@ -356,12 +361,48 @@
             font-size: 13px;
         }
 
+        /* Tablet Layout - Dynamic columns based on card count */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            .summary-cards {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                flex-wrap: wrap;
+                overflow-x: visible;
+            }
+            
+            .summary-card {
+                min-width: auto;
+                flex: none;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container { padding: 12px 16px 24px; }
-            .summary-cards { gap: 8px; }
-            .summary-card { padding: 8px 10px; min-width: 120px; }
-            .summary-card-value { font-size: 16px; }
+            
+            .summary-cards {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                flex-wrap: wrap;
+                overflow-x: visible;
+            }
+            
+            .summary-card {
+                min-width: auto;
+                flex: none;
+                padding: 14px 16px;
+            }
+            
+            .summary-card-label {
+                font-size: 11px;
+            }
+            
+            .summary-card-value {
+                font-size: 20px;
+            }
+            
             .controls { gap: 8px; }
             table { font-size: 11px; }
             th, td { padding: 8px 6px; }
@@ -371,7 +412,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Drawdown Analysis Dashboard</h1>
+            <h1>Drawdown Analysis</h1>
             <p>Strategy-wise maximum and current drawdown metrics</p>
         </div>
 
