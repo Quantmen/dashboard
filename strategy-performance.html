@@ -968,6 +968,10 @@
                 <input type="checkbox" id="showLot" onchange="toggleLotMode()" style="margin-right: 6px; cursor: pointer;">
                 <label for="showLot" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show LOT</label>
             </div>
+            <div class="control-group">
+                <input type="checkbox" id="showPnlTax" onchange="togglePnlTaxMode()" style="margin-right: 6px; cursor: pointer;">
+                <label for="showPnlTax" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show PNL TAX</label>
+            </div>
             <button class="primary" onclick="refreshData()">Refresh</button>
             <button onclick="expandAll()">Expand All</button>
             <button onclick="collapseAll()">Collapse All</button>
@@ -1015,6 +1019,7 @@
         let showTradeCount = false;
         let showDrawdown = false;
         let showLot = false;
+        let showPnlTax = false;
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1075,6 +1080,12 @@
                     const checkbox = document.getElementById('showLot');
                     if (checkbox) checkbox.checked = showLot;
                 }
+                const savedPnlTaxMode = localStorage.getItem('showPnlTax');
+                if (savedPnlTaxMode !== null) {
+                    showPnlTax = savedPnlTaxMode === 'true';
+                    const checkbox = document.getElementById('showPnlTax');
+                    if (checkbox) checkbox.checked = showPnlTax;
+                }
             } catch (e) {
                 hiddenStrategies = new Set();
             }
@@ -1133,6 +1144,15 @@
             showLot = checkbox.checked;
             try {
                 localStorage.setItem('showLot', showLot);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function togglePnlTaxMode() {
+            const checkbox = document.getElementById('showPnlTax');
+            showPnlTax = checkbox.checked;
+            try {
+                localStorage.setItem('showPnlTax', showPnlTax);
             } catch (e) {}
             processAndDisplayData();
         }
@@ -2351,7 +2371,7 @@
                 sortedBrokers.forEach((brokerCode, brokerIdx) => {
                     brokerGroups[brokerCode].forEach((strategy, idx) => {
                         const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
-                        const pnl = stratData.pnl;
+                        const pnl = showPnlTax ? stratData.net : stratData.pnl;
                         const stratIndex = allStrategies.indexOf(strategy);
                         const bgClass = `strategy-bg-${stratIndex % 5}`;
                         const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
@@ -2465,7 +2485,7 @@
                         sortedBrokers.forEach((brokerCode, brokerIdx) => {
                             brokerGroups[brokerCode].forEach((strategy, idx) => {
                                 const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
-                                const pnl = stratData.pnl;
+                                const pnl = showPnlTax ? stratData.net : stratData.pnl;
                                 const stratIndex = allStrategies.indexOf(strategy);
                                 const bgClass = `strategy-bg-${stratIndex % 5}`;
                                 const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
@@ -2551,12 +2571,13 @@
             sortedBrokers.forEach((brokerCode, brokerIdx) => {
                 brokerGroups[brokerCode].forEach((strategy, idx) => {
                     const stratTotal = totals.strategies[strategy];
+                    const pnlValue = showPnlTax ? stratTotal.net : stratTotal.pnl;
                     const stratIndex = allStrategies.indexOf(strategy);
                     const bgClass = `strategy-bg-${stratIndex % 5}`;
                     const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
                     const isLastBroker = brokerIdx === sortedBrokers.length - 1;
                     const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-                    bodyHtml += `<td class="number-col pnl-section ${bgClass} ${stratTotal.pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.pnl)}</td>`;
+                    bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnlValue >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnlValue)}</td>`;
                 });
             });
             
