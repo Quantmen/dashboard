@@ -279,14 +279,14 @@
             padding: 6px 6px;
             position: sticky;
             top: 0;
-            background: linear-gradient(to bottom, #eff6ff 0%, #dbeafe 100%);
+            background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
             z-index: 11;
             font-size: 12px;
             text-align: center;
             font-weight: 600;
             color: #1e40af;
-            border-bottom: 1px solid #3b82f6;
-            border-right: 1px solid #93c5fd;
+            border-bottom: 1px solid #94a3b8;
+            border-right: 1px solid #d1d5db;
             white-space: nowrap;
             letter-spacing: 0.2px;
         }
@@ -305,7 +305,7 @@
             text-align: center;
             font-weight: 600;
             color: #0f172a;
-            border-bottom: 2px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
             border-right: 1px solid #e2e8f0;
             white-space: nowrap;
             text-transform: uppercase;
@@ -319,7 +319,7 @@
             padding: 4px 6px 4px 6px;
         }
         .report-table thead tr.header-row-1 th[rowspan="2"] {
-            border-bottom: 2px solid #94a3b8;
+            border-bottom: 1px solid #94a3b8;
             cursor: pointer;
             user-select: none;
             box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
@@ -338,7 +338,7 @@
             font-weight: 500;
             color: #475569;
             text-align: center;
-            border-bottom: 2px solid #94a3b8;
+            border-bottom: 1px solid #94a3b8;
             border-right: 1px solid #e2e8f0;
             white-space: nowrap;
             text-transform: uppercase;
@@ -529,17 +529,17 @@
             vertical-align: middle;
             box-sizing: border-box;
         }
-        .report-table td:nth-child(1) { min-width: 35px; max-width: 45px; text-align: center; color: #4b5563; font-weight: 400; }
-        .report-table td:nth-child(2) { min-width: 65px; max-width: 75px; font-weight: 400; color: #1f2937; }
-        .report-table td:nth-child(3) { min-width: 55px; max-width: 70px; font-weight: 400; color: #1f2937; }
-        .report-table td:nth-child(4) { min-width: 48px; max-width: 58px; }
-        .report-table td:nth-child(5) { min-width: 70px; max-width: 90px; font-weight: 400; color: #1f2937; }
-        .report-table td:nth-child(6) { min-width: 42px; max-width: 52px; }
-        .report-table td:nth-child(7), .report-table td:nth-child(8) { min-width: 52px; max-width: 67px; }
+        .report-table td:nth-child(1) { min-width: 35px; max-width: 45px; text-align: center; color: #4b5563; font-weight: 400; font-size: 12px; }
+        .report-table td:nth-child(2) { min-width: 65px; max-width: 75px; font-weight: 400; color: #1f2937; font-size: 12px; }
+        .report-table td:nth-child(3) { min-width: 55px; max-width: 70px; font-weight: 400; color: #1f2937; font-size: 12px; }
+        .report-table td:nth-child(4) { min-width: 48px; max-width: 58px; font-size: 12px; }
+        .report-table td:nth-child(5) { min-width: 70px; max-width: 90px; font-weight: 400; color: #1f2937; font-size: 12px; }
+        .report-table td:nth-child(6) { min-width: 42px; max-width: 52px; font-size: 12px; }
+        .report-table td:nth-child(7), .report-table td:nth-child(8) { min-width: 52px; max-width: 67px; font-size: 12px; }
         .report-table td:nth-child(9) { 
             min-width: 58px; 
             max-width: 73px;
-            border-right: 2px solid #d1d5db;
+            border-right: 1px solid #d1d5db;
         }
         .report-table td.number-col {
             text-align: right;
@@ -796,7 +796,7 @@
 
         // Initialize with one sample strategy
         function initializeSampleStrategy() {
-            brokerStrategies = ['STRATEGY1'];
+            brokerStrategies = ['STRATEGY1', 'STRATEGY2', 'STRATEGY3', 'STRATEGY4'];
             strategies = ['Strategy Name'];
             
             // No trade data - headers will show with 0 values
@@ -1881,7 +1881,7 @@
             });
             
             let totalsRow = `<tr class="totals-row">
-                <th colspan="5" style="text-align: left; font-weight: 600;">FILTERED TOTALS</th>
+                <th colspan="5" style="text-align: left; font-weight: 600; border-right: none;">FILTERED TOTALS</th>
                 <th class="number-col" style="border-right: none;"></th>
                 <th class="number-col" style="border-right: none;"></th>
                 <th class="number-col" style="border-right: none;"></th>
@@ -1889,9 +1889,8 @@
             
             displayStrategies.forEach((stratName, index) => {
                 const bt = brokerTotals[stratName];
-                const bgColor = colors[index % colors.length];
-                const groupStyle = `style="background: linear-gradient(to bottom, ${adjustColor(bgColor, -10)} 0%, ${adjustColor(bgColor, -15)} 100%);"`;
-                const lastColStyle = `style="background: linear-gradient(to bottom, ${adjustColor(bgColor, -10)} 0%, ${adjustColor(bgColor, -15)} 100%); border-right: 2px solid #bae6fd;"`;
+                const groupStyle = `style=""`;
+                const lastColStyle = `style="border-right: 1px solid #d1d5db;"`;
                 
                 totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
@@ -1920,7 +1919,7 @@
             displayStrategies.forEach((stratName, index) => {
                 const displayName = formatStrategyName(stratName);
                 const bgColor = colors[index % colors.length];
-                const borderStyle = 'border-right: 2px solid #d1d5db; border-left: ' + (index === 0 ? '2px solid #d1d5db;' : '0;');
+                const borderStyle = 'border-right: 1px solid #d1d5db; border-left: ' + (index === 0 ? '1px solid #d1d5db;' : '0;');
                 headerRow1 += `<th colspan="${colsPerStrategy}" class="number-col" style="background: linear-gradient(to bottom, ${bgColor} 0%, ${adjustColor(bgColor, -3)} 100%); ${borderStyle}">${displayName}</th>`;
             });
             headerRow1 += '</tr>';
@@ -1929,8 +1928,8 @@
             displayStrategies.forEach((stratName, index) => {
                 const bgColor = colors[index % colors.length];
                 const baseBg = `background: linear-gradient(to bottom, ${adjustColor(bgColor, -3)} 0%, ${adjustColor(bgColor, -6)} 100%);`;
-                const firstColBorder = index === 0 ? 'border-left: 2px solid #d1d5db;' : '';
-                const lastColBorder = 'border-right: 2px solid #d1d5db;';
+                const firstColBorder = index === 0 ? 'border-left: 1px solid #d1d5db;' : '';
+                const lastColBorder = 'border-right: 1px solid #d1d5db;';
                 
                 const fields = ['pnl', 'dpnl', 'dbuy', 'dsell', 'buy', 'sell', 'qty'];
                 const fieldLabels = { pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', buy: 'BUY', sell: 'SELL', qty: 'QTY' };
@@ -1975,7 +1974,7 @@
                 <td>${trade.sno || ''}</td>
                 <td>${convertDateToShortFormat(trade.date)}</td>
                 <td>${trade.strategy || ''}</td>
-                <td>${trade.trade || ''}</td>
+                <td>${(trade.trade || '').toUpperCase()}</td>
                 <td>${trade.symbol || ''}</td>
                 <td class="number-col">${trade.qty || ''}</td>
                 <td class="number-col">${trade.entry ? trade.entry.toFixed(2) : ''}</td>
@@ -1998,7 +1997,7 @@
                 const dbuyClass = dbuy > 0 ? 'positive' : dbuy < 0 ? 'negative' : '';
                 const dsellClass = dsell > 0 ? 'positive' : dsell < 0 ? 'negative' : '';
                 const groupBorder = 'style="background-color: ' + bgColor + ';"';
-                const lastColBorder = 'style="background-color: ' + bgColor + '; border-right: 2px solid #d1d5db;"';
+                const lastColBorder = 'style="background-color: ' + bgColor + '; border-right: 1px solid #d1d5db;"';
                 
                 row += `<td class="number-col ${pnlClass}" ${groupBorder}>${pnl !== 0 ? pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
                 row += `<td class="number-col ${dpnlClass}" ${groupBorder}>${dpnl !== 0 ? dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
