@@ -1962,6 +1962,33 @@
                 }
             });
             
+            // Build PnL Tax by date and broker
+            const brokerPnlTaxByDate = {};
+            tradesData.forEach(trade => {
+                const tradeDate = trade.date;
+                if (!brokerPnlTaxByDate[tradeDate]) {
+                    brokerPnlTaxByDate[tradeDate] = {};
+                }
+                
+                if (trade && trade.strategyPnlTax) {
+                    Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                        if (!stratName.startsWith('A.PRO')) {
+                            const brokerMatch = stratName.match(/^(B\d+|C\d+|D\d+|E\d+)/);
+                            if (brokerMatch) {
+                                const brokerCode = brokerMatch[1];
+                                if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
+                                    brokerPnlTaxByDate[tradeDate][brokerCode] = {};
+                                }
+                                if (!brokerPnlTaxByDate[tradeDate][brokerCode][stratName]) {
+                                    brokerPnlTaxByDate[tradeDate][brokerCode][stratName] = 0;
+                                }
+                                brokerPnlTaxByDate[tradeDate][brokerCode][stratName] += pnlTax;
+                            }
+                        }
+                    });
+                }
+            });
+            
             // Get sorted dates (latest first) - proper full date comparison
             const sortedDates = Object.keys(brokerMarginsByDate).sort((a, b) => {
                 const parseDate = (dateStr) => {
@@ -1979,7 +2006,7 @@
                 Object.keys(dateMargins).forEach(broker => allBrokersInData.add(broker));
             });
             
-            // For each broker, find the most recent day with non-zero margin
+            // For each broker, find the most recent day with non-zero margin and calculate total margin with PnL tax
             const brokerMaxMargins = {};
             
             allBrokersInData.forEach(brokerCode => {
@@ -1992,11 +2019,25 @@
                         const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
                         
                         if (maxMargin > 0) {
-                            brokerMaxMargins[brokerCode] = maxMargin;
-                            console.log(`  ${brokerCode}: ₹${maxMargin.toLocaleString()} from date ${checkDate} (strategies: ${strategyMargins.map(([s,m]) => `${s}:${m}`).join(', ')})`);
+                            // Accumulate PnL Tax from this date FORWARD to the most recent date
+                            let accumulatedPnlTax = 0;
+                            for (let j = i; j >= 0; j--) {
+                                const dateToCheck = sortedDates[j];
+                                
+                                if (brokerPnlTaxByDate[dateToCheck] && brokerPnlTaxByDate[dateToCheck][brokerCode]) {
+                                    Object.values(brokerPnlTaxByDate[dateToCheck][brokerCode]).forEach(pnlTax => {
+                                        accumulatedPnlTax += pnlTax;
+                                    });
+                                }
+                            }
+                            
+                            // Total margin = base margin + accumulated PnL tax
+                            const totalMargin = maxMargin + accumulatedPnlTax;
+                            brokerMaxMargins[brokerCode] = totalMargin;
+                            console.log(`  ${brokerCode}: ₹${maxMargin.toLocaleString()} (margin) + ₹${accumulatedPnlTax.toLocaleString()} (PnL tax) = ₹${totalMargin.toLocaleString()} from date ${checkDate}`);
                             
                             // Store margin for each account (B1, B2, etc.)
-                            calculatedBrokerMargins[brokerCode] = maxMargin;
+                            calculatedBrokerMargins[brokerCode] = totalMargin;
                             break;
                         }
                     }
@@ -2019,7 +2060,7 @@
                 calculatedBrokerMargins[letter] = total;
             });
             
-            console.log('✅ Calculated Broker Margins:', calculatedBrokerMargins);
+            console.log('✅ Calculated Broker Margins (with PnL tax):', calculatedBrokerMargins);
             console.log('📊 Individual account margins:', Object.entries(calculatedBrokerMargins).filter(([k,v]) => k.length > 1).reduce((acc, [k,v]) => ({...acc, [k]: v}), {}));
             console.log('📊 Total broker margins:', Object.entries(calculatedBrokerMargins).filter(([k,v]) => k.length === 1).reduce((acc, [k,v]) => ({...acc, [k]: v}), {}));
         }
