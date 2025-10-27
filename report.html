@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f8fafc;
             color: #1a1a1a;
         }
@@ -274,10 +274,9 @@
             z-index: 10; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
-        .report-table thead tr { height: 0; }
         .report-table thead tr.header-row-1, .report-table thead tr.header-row-2, .report-table thead tr.totals-row { height: auto; }
         .report-table thead tr.totals-row th {
-            padding: 10px 6px;
+            padding: 6px 6px;
             position: sticky;
             top: 0;
             background: linear-gradient(to bottom, #eff6ff 0%, #dbeafe 100%);
@@ -299,7 +298,7 @@
         .report-table thead tr.header-row-1 th {
             padding: 10px 6px 10px 6px;
             position: sticky;
-            top: 36px;
+            top: 28px;
             background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
             z-index: 10;
             font-size: 11px;
@@ -315,6 +314,10 @@
             max-width: 68px;
             transition: background 0.2s ease;
         }
+        /* Slightly reduced height for broker strategy group headers */
+        .report-table thead tr.header-row-1 th[colspan] {
+            padding: 4px 6px 4px 6px;
+        }
         .report-table thead tr.header-row-1 th[rowspan="2"] {
             border-bottom: 2px solid #94a3b8;
             cursor: pointer;
@@ -326,10 +329,10 @@
             color: #1e40af;
         }
         .report-table thead tr.header-row-2 th {
-            padding: 6px 6px 10px 6px;
+            padding: 6px 6px 6px 6px;
             font-size: 10px;
             position: sticky;
-            top: 58px;
+            top: 50px;
             background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
             z-index: 10;
             font-weight: 500;
@@ -507,16 +510,16 @@
             border-bottom: 1px solid #f3f4f6;
         }
         .report-table tbody tr:hover { 
-            background: #fafbfc;
+            background: #f0f4f8;
             box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         }
-        .report-table tbody tr:nth-child(even) { background: #f8fafc; }
-        .report-table tbody tr:nth-child(even):hover { background: #fafbfc; }
+        .report-table tbody tr:nth-child(even) { background: #f9fafb; }
+        .report-table tbody tr:nth-child(even):hover { background: #f0f4f8; }
         .report-table td {
             padding: 10px 6px;
             border-bottom: 1px solid #f3f4f6;
             border-right: 1px solid #f0f0f0;
-            color: #374151;
+            color: #1f2937;
             white-space: nowrap;
             font-size: 13px;
             font-weight: 400;
@@ -526,9 +529,9 @@
             vertical-align: middle;
             box-sizing: border-box;
         }
-        .report-table td:nth-child(1) { min-width: 35px; max-width: 45px; text-align: center; color: #6b7280; font-weight: 400; }
+        .report-table td:nth-child(1) { min-width: 35px; max-width: 45px; text-align: center; color: #4b5563; font-weight: 400; }
         .report-table td:nth-child(2) { min-width: 65px; max-width: 75px; font-weight: 400; color: #1f2937; }
-        .report-table td:nth-child(3) { min-width: 55px; max-width: 70px; font-weight: 400; color: #374151; }
+        .report-table td:nth-child(3) { min-width: 55px; max-width: 70px; font-weight: 400; color: #1f2937; }
         .report-table td:nth-child(4) { min-width: 48px; max-width: 58px; }
         .report-table td:nth-child(5) { min-width: 70px; max-width: 90px; font-weight: 400; color: #1f2937; }
         .report-table td:nth-child(6) { min-width: 42px; max-width: 52px; }
@@ -545,8 +548,8 @@
             max-width: 63px;
             font-weight: 400;
         }
-        .report-table td.positive { color: #15803d; font-weight: 400; }
-        .report-table td.negative { color: #b96060; font-weight: 400; }
+        .report-table td.positive { color: #15803d; font-weight: 500; }
+        .report-table td.negative { color: #b96060; font-weight: 500; }
         .buy-sell-column { display: none; }
         .buy-sell-column.visible { display: table-cell; }
         .no-data { 
@@ -740,7 +743,6 @@
             </div>
             <button class="primary" id="applyFiltersBtn">Apply</button>
             <button id="resetFiltersBtn">Reset</button>
-            <button id="loadSampleDataBtn">Load Sample (500)</button>
             <button id="exportCSVBtn">Export CSV</button>
         </div>
 
@@ -763,7 +765,7 @@
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td colspan="100" class="no-data">Click "Load Sample" to view data</td>
+                            <td colspan="100" class="no-data">No data available</td>
                         </tr>
                     </tbody>
                 </table>
@@ -792,6 +794,24 @@
         let columnFilters = {};
         let currentFilterColumn = null;
 
+        // Initialize with one sample strategy
+        function initializeSampleStrategy() {
+            brokerStrategies = ['STRATEGY1'];
+            strategies = ['Strategy Name'];
+            
+            // No trade data - headers will show with 0 values
+            allTrades = [];
+            filteredTrades = [];
+            
+            // Build date structure (empty)
+            dateStructure = {};
+            
+            // Update filter lists
+            updateBrokerStrategyFilterList();
+            updateStrategyFilterList();
+            updateDateFilterList();
+        }
+
         const elements = {
             loadingOverlay: document.getElementById('loadingOverlay'),
             loadingText: document.getElementById('loadingText'),
@@ -818,7 +838,6 @@
             rowsPerPage: document.getElementById('rowsPerPage'),
             applyFiltersBtn: document.getElementById('applyFiltersBtn'),
             resetFiltersBtn: document.getElementById('resetFiltersBtn'),
-            loadSampleDataBtn: document.getElementById('loadSampleDataBtn'),
             exportCSVBtn: document.getElementById('exportCSVBtn'),
             tableHeaders: document.getElementById('tableHeaders'),
             tableBody: document.getElementById('tableBody'),
@@ -1204,7 +1223,6 @@
             
             elements.applyFiltersBtn.addEventListener('click', applyFilters);
             elements.resetFiltersBtn.addEventListener('click', resetFilters);
-            elements.loadSampleDataBtn.addEventListener('click', loadSampleData);
             elements.exportCSVBtn.addEventListener('click', exportToCSV);
             
             elements.symbolFilter.addEventListener('input', debounce(applyFilters, 300));
@@ -1243,6 +1261,13 @@
                     await sortTableByStrategy(th.dataset.stratname, th.dataset.field, th);
                 }
             });
+            
+            // Initialize sample strategy and data
+            initializeSampleStrategy();
+            
+            // Initialize table headers with sample data
+            buildTableHeaders('all');
+            renderTable();
         }
 
         function closeOtherDropdowns(keepOpen) {
@@ -2121,69 +2146,6 @@
             renderTable();
         }
 
-        async function loadSampleData() {
-            showLoading('Generating sample data...', 'Creating 500 trades');
-            
-            try {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                allTrades = [];
-                const strategiesArr = ['PRO 1', 'PRO 2', 'PRO 3', 'PRO 4', 'PRO 5'];
-                const symbols = ['NIFTY', 'BANKNIFTY', 'FINNIFTY', 'SENSEX', 'ECLERX', 'TANLA', 'CHALET'];
-                const trades = ['LONG', 'SHORT'];
-                
-                for (let i = 0; i < 500; i++) {
-                    if (i % 100 === 0 && i > 0) {
-                        elements.loadingSubtext.textContent = `Created ${i} of 500...`;
-                        await new Promise(resolve => setTimeout(resolve, 0));
-                    }
-                    
-                    const strategy = strategiesArr[Math.floor(Math.random() * strategiesArr.length)];
-                    const profit = (Math.random() - 0.45) * 5000;
-                    
-                    const strategyDetails = {};
-                    
-                    ['B1PRO2', 'B1PRO3', 'B2PRO4', 'B2PRO5'].forEach((stratName, idx) => {
-                        const isActive = strategy === strategiesArr[idx % strategiesArr.length];
-                        const pnl = isActive ? profit : 0;
-                        const buyPrice = 18000 + Math.random() * 2000;
-                        const sellPrice = buyPrice + (pnl / (Math.floor(Math.random() * 100) + 25));
-                        
-                        strategyDetails[stratName] = {
-                            buy: isActive ? buyPrice : 0,
-                            qty: isActive ? Math.floor(Math.random() * 100) + 25 : 0,
-                            sell: isActive ? sellPrice : 0,
-                            dbuy: isActive ? buyPrice + (Math.random() - 0.5) * 100 : 0,
-                            dsell: isActive ? sellPrice + (Math.random() - 0.5) * 100 : 0,
-                            pnl: pnl,
-                            dpnl: pnl * 0.05
-                        };
-                    });
-                    
-                    allTrades.push({
-                        sno: i + 1,
-                        date: `${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}/01/25`,
-                        strategy: strategy,
-                        trade: trades[Math.floor(Math.random() * trades.length)],
-                        symbol: symbols[Math.floor(Math.random() * symbols.length)],
-                        qty: Math.floor(Math.random() * 100) + 25,
-                        entry: 18000 + Math.random() * 2000,
-                        exit: 18000 + Math.random() * 2000,
-                        profit: profit,
-                        strategyDetails: strategyDetails
-                    });
-                }
-                
-                filteredTrades = [...allTrades];
-                extractBrokerStrategies();
-                buildDateStructure();
-                updateDateFilterList();
-                cleanupSavedFilters();
-                await applyFilters();
-            } finally {
-                hideLoading();
-            }
-        }
 
         async function exportToCSV() {
             if (filteredTrades.length === 0) {
@@ -2259,8 +2221,6 @@
                 } finally {
                     hideLoading();
                 }
-            } else if (type === 'LOAD_SAMPLE_DATA') {
-                await loadSampleData();
             }
         });
     </script>
