@@ -239,7 +239,7 @@
 
         /* Set minimum width for Strategy column */
         th:nth-child(1), td:nth-child(1) { /* Strategy */
-            min-width: 150px;
+            min-width: 145px;
         }
 
         /* Set common width for specific columns */
@@ -247,28 +247,33 @@
         th:nth-child(4), td:nth-child(4),  /* Broker Margin */
         th:nth-child(5), td:nth-child(5),  /* Extra Margin */
         th:nth-child(13), td:nth-child(13) { /* Recovery Time */
-            width: 120px;
-            min-width: 120px;
-            max-width: 120px;
+            width: 115px;
+            min-width: 115px;
+            max-width: 115px;
         }
         
         /* Narrower columns for DD-related fields */
         th:nth-child(6), td:nth-child(6),  /* Current DD (₹) */
-        th:nth-child(7), td:nth-child(7),  /* Current DD % */
+        th:nth-child(7), td:nth-child(7) { /* Current DD % */
+            width: 110px;
+            min-width: 110px;
+            max-width: 110px;
+        }
+        
         th:nth-child(9), td:nth-child(9),  /* stg dd(%) */
         th:nth-child(10), td:nth-child(10), /* DD Duration */
         th:nth-child(11), td:nth-child(11), /* STG DD Start */
         th:nth-child(12), td:nth-child(12) { /* STG DD End */
-            width: 95px;
-            min-width: 95px;
-            max-width: 95px;
+            width: 100px;
+            min-width: 100px;
+            max-width: 100px;
         }
         
         /* Special width for stg dd(₹) */
         th:nth-child(8), td:nth-child(8) { /* stg dd(₹) */
-            width: 110px;
-            min-width: 110px;
-            max-width: 110px;
+            width: 115px;
+            min-width: 115px;
+            max-width: 115px;
         }
 
         td {
