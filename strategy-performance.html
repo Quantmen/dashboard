@@ -1024,6 +1024,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadSavedFilters();
+            initializeHeadersOnly(); // Initialize headers only on page load
             
             elements.monthFilter.addEventListener('change', function() {
                 try {
@@ -1289,6 +1290,29 @@
             if (num === 0) return '';
             const formatted = Math.abs(num).toLocaleString('en-IN', { maximumFractionDigits: 0 });
             return num >= 0 ? formatted : `-${formatted}`;
+        }
+
+        function initializeHeadersOnly() {
+            // Initialize with empty trades
+            allTrades = [];
+            
+            // Define the strategies to display in headers
+            const aProStrategies = ['A.PRO 2', 'A.PRO 3'];
+            const brokerStrategies = ['B1PRO2', 'B1PRO3', 
+                                     'B2PRO2', 'B2PRO3'];
+            
+            // Combine all strategies
+            const strategies = [...aProStrategies, ...brokerStrategies];
+            allStrategies = strategies;
+            
+            // Call renderPivotTable with empty data but with strategies
+            renderPivotTable({}, {}, strategies, {}, {}, {}, {}, {}, {}, {}, {});
+            
+            // Clear the table body to show no data
+            elements.tableBody.innerHTML = '<tr><td colspan="100%" class="no-data">No data loaded yet.</td></tr>';
+            
+            // Update strategy filter list
+            updateStrategyFilterList();
         }
 
         function loadSampleData() {
