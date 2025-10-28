@@ -692,6 +692,18 @@
                 </div>
             </div>
             <div class="strategy-filter-container">
+                <button class="strategy-filter-button" id="strategyNumberBtn">
+                    <span id="strategyNumberText">All Strategies</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="strategyNumberDropdown">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Switch Strategy</span>
+                    </div>
+                    <div class="strategy-filter-list" id="strategyNumberList"></div>
+                </div>
+            </div>
+            <div class="strategy-filter-container">
                 <button class="strategy-filter-button" id="strategyFilterBtn">
                     <span>Hide Strategies</span>
                     <span class="filter-badge" id="strategyFilterBadge" style="display: none;">0</span>
@@ -726,18 +738,6 @@
                     <div class="filter-info-note">
                         ℹ️ Only hides columns, not rows
                     </div>
-                </div>
-            </div>
-            <div class="strategy-filter-container">
-                <button class="strategy-filter-button" id="strategyNumberBtn">
-                    <span id="strategyNumberText">All Strategies</span>
-                    <span>▼</span>
-                </button>
-                <div class="strategy-filter-dropdown" id="strategyNumberDropdown">
-                    <div class="strategy-filter-header">
-                        <span class="strategy-filter-title">Switch Strategy</span>
-                    </div>
-                    <div class="strategy-filter-list" id="strategyNumberList"></div>
                 </div>
             </div>
             <button id="toggleBuySellBtn" onclick="toggleBuySellColumns()">
