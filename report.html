@@ -171,8 +171,10 @@
             margin-right: 10px; 
             width: 16px; 
             height: 16px; 
-            cursor: pointer; 
-            pointer-events: none;
+            cursor: pointer;
+            pointer-events: auto !important;
+            position: relative;
+            z-index: 10;
         }
         .strategy-filter-label { 
             font-size: 13px; 
@@ -195,7 +197,9 @@
             line-height: 18px;
             transition: transform 0.2s ease;
             cursor: pointer;
-            pointer-events: none;
+            pointer-events: auto;
+            position: relative;
+            z-index: 10;
         }
         .expand-icon.expanded { transform: rotate(90deg); }
         .month-children { display: none; }
@@ -724,6 +728,18 @@
                     </div>
                 </div>
             </div>
+            <div class="strategy-filter-container">
+                <button class="strategy-filter-button" id="strategyNumberBtn">
+                    <span id="strategyNumberText">All Strategies</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="strategyNumberDropdown">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Switch Strategy</span>
+                    </div>
+                    <div class="strategy-filter-list" id="strategyNumberList"></div>
+                </div>
+            </div>
             <button id="toggleBuySellBtn" onclick="toggleBuySellColumns()">
                 <span id="buySellBtnText">Show Buy/Sell/Qty</span>
             </button>
@@ -793,6 +809,7 @@
         let showBuySellColumns = false;
         let columnFilters = {};
         let currentFilterColumn = null;
+        let selectedStrategyNumber = null; // null means "All Strategies"
 
         // Initialize with one sample strategy
         function initializeSampleStrategy() {
@@ -809,6 +826,7 @@
             // Update filter lists
             updateBrokerStrategyFilterList();
             updateStrategyFilterList();
+            updateStrategyNumberList();
             updateDateFilterList();
         }
 
@@ -834,6 +852,10 @@
             brokerFilterBadge: document.getElementById('brokerFilterBadge'),
             selectAllBrokerStrategiesBtn: document.getElementById('selectAllBrokerStrategiesBtn'),
             deselectAllBrokerStrategiesBtn: document.getElementById('deselectAllBrokerStrategiesBtn'),
+            strategyNumberBtn: document.getElementById('strategyNumberBtn'),
+            strategyNumberDropdown: document.getElementById('strategyNumberDropdown'),
+            strategyNumberList: document.getElementById('strategyNumberList'),
+            strategyNumberText: document.getElementById('strategyNumberText'),
             symbolFilter: document.getElementById('symbolFilter'),
             rowsPerPage: document.getElementById('rowsPerPage'),
             applyFiltersBtn: document.getElementById('applyFiltersBtn'),
@@ -1206,6 +1228,12 @@
                 elements.brokerStrategyFilterDropdown.classList.toggle('active');
             });
             
+            elements.strategyNumberBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeOtherDropdowns('strategyNumber');
+                elements.strategyNumberDropdown.classList.toggle('active');
+            });
+            
             elements.selectAllDatesBtn.addEventListener('click', selectAllDates);
             elements.deselectAllDatesBtn.addEventListener('click', deselectAllDates);
             
@@ -1230,6 +1258,7 @@
             elements.dateFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
             elements.strategyFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
             elements.brokerStrategyFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
+            elements.strategyNumberDropdown.addEventListener('click', (e) => e.stopPropagation());
             
             elements.filterPopupOverlay.addEventListener('click', (e) => {
                 if (e.target === elements.filterPopupOverlay) {
@@ -1274,12 +1303,14 @@
             if (keepOpen !== 'date') elements.dateFilterDropdown.classList.remove('active');
             if (keepOpen !== 'strategy') elements.strategyFilterDropdown.classList.remove('active');
             if (keepOpen !== 'broker') elements.brokerStrategyFilterDropdown.classList.remove('active');
+            if (keepOpen !== 'strategyNumber') elements.strategyNumberDropdown.classList.remove('active');
         }
 
         function closeAllDropdowns() {
             elements.dateFilterDropdown.classList.remove('active');
             elements.strategyFilterDropdown.classList.remove('active');
             elements.brokerStrategyFilterDropdown.classList.remove('active');
+            elements.strategyNumberDropdown.classList.remove('active');
         }
 
         function showLoading(text = 'Processing...', subtext = 'Please wait') {
@@ -1463,6 +1494,10 @@
                 const expandIcon = document.createElement('span');
                 expandIcon.className = 'expand-icon' + (isExpanded ? ' expanded' : '');
                 expandIcon.textContent = '▶';
+                expandIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleMonth(month);
+                };
                 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -1490,13 +1525,23 @@
                 dates.forEach((date) => {
                     const dateItem = document.createElement('div');
                     dateItem.className = 'strategy-filter-item date-day-item';
-                    dateItem.onclick = () => toggleDateRow(date);
+                    dateItem.onclick = () => {
+                        const checkbox = document.getElementById(`date_${date.replace(/\//g, '_')}`);
+                        if (checkbox) {
+                            checkbox.checked = !checkbox.checked;
+                            toggleDateRow(date);
+                        }
+                    };
                     
                     const dateCheckbox = document.createElement('input');
                     dateCheckbox.type = 'checkbox';
                     dateCheckbox.className = 'strategy-filter-checkbox';
                     dateCheckbox.id = `date_${date.replace(/\//g, '_')}`;
                     dateCheckbox.checked = !hiddenDates.has(date);
+                    dateCheckbox.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleDateRow(date);
+                    };
                     
                     const dateLabel = document.createElement('label');
                     dateLabel.className = 'strategy-filter-label';
@@ -1527,7 +1572,8 @@
             const checkbox = document.getElementById(`month_${month}`);
             if (!checkbox) return;
             
-            checkbox.checked = !checkbox.checked;
+            // Don't manually toggle - browser already did it when checkbox was clicked
+            // checkbox.checked = !checkbox.checked;
             
             const dates = dateStructure[month];
             if (!dates) return;
@@ -1547,7 +1593,8 @@
             const checkbox = document.getElementById(`date_${date.replace(/\//g, '_')}`);
             if (!checkbox) return;
             
-            checkbox.checked = !checkbox.checked;
+            // Don't manually toggle - browser already did it when checkbox was clicked
+            // checkbox.checked = !checkbox.checked;
             
             if (checkbox.checked) {
                 hiddenDates.delete(date);
@@ -1604,13 +1651,23 @@
             strategies.forEach((strategy) => {
                 const item = document.createElement('div');
                 item.className = 'strategy-filter-item';
-                item.onclick = () => toggleStrategyRow(strategy);
+                item.onclick = () => {
+                    const checkbox = document.getElementById(`strat_${strategy}`);
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        toggleStrategyRow(strategy);
+                    }
+                };
                 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'strategy-filter-checkbox';
                 checkbox.id = `strat_${strategy}`;
                 checkbox.checked = !hiddenStrategies.has(strategy);
+                checkbox.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleStrategyRow(strategy);
+                };
                 
                 const label = document.createElement('label');
                 label.className = 'strategy-filter-label';
@@ -1628,7 +1685,8 @@
             const checkbox = document.getElementById(`strat_${strategy}`);
             if (!checkbox) return;
             
-            checkbox.checked = !checkbox.checked;
+            // Don't manually toggle - browser already did it when checkbox was clicked
+            // checkbox.checked = !checkbox.checked;
             
             if (checkbox.checked) {
                 hiddenStrategies.delete(strategy);
@@ -1638,6 +1696,7 @@
             
             saveStrategyFilters();
             updateStrategyFilterBadge();
+            updateStrategyNumberList();
             setTimeout(() => applyFilters(), 10);
         }
 
@@ -1645,6 +1704,7 @@
             hiddenStrategies.clear();
             saveStrategyFilters();
             updateStrategyFilterList();
+            updateStrategyNumberList();
             setTimeout(() => applyFilters(), 10);
         }
 
@@ -1652,6 +1712,7 @@
             strategies.forEach(s => hiddenStrategies.add(s));
             saveStrategyFilters();
             updateStrategyFilterList();
+            updateStrategyNumberList();
             setTimeout(() => applyFilters(), 10);
         }
 
@@ -1663,6 +1724,73 @@
             } else {
                 elements.strategyFilterBadge.style.display = 'none';
             }
+        }
+
+        function updateStrategyNumberList() {
+            // Filter out hidden strategies
+            const visibleStrategies = strategies.filter(s => !hiddenStrategies.has(s));
+            
+            if (!visibleStrategies.length) {
+                elements.strategyNumberList.innerHTML = '<div style="padding: 14px; text-align: center; color: #9ca3af; font-size: 12px;">No visible strategies</div>';
+                // Reset to "All Strategies" if current selection is hidden
+                if (selectedStrategyNumber !== null) {
+                    selectedStrategyNumber = null;
+                    elements.strategyNumberText.textContent = 'All Strategies';
+                }
+                return;
+            }
+            
+            // Reset to "All Strategies" if currently selected strategy is hidden
+            if (selectedStrategyNumber !== null && hiddenStrategies.has(selectedStrategyNumber)) {
+                selectedStrategyNumber = null;
+                elements.strategyNumberText.textContent = 'All Strategies';
+            }
+            
+            elements.strategyNumberList.innerHTML = '';
+            
+            // Add "All Strategies" option
+            const allItem = document.createElement('div');
+            allItem.className = 'strategy-filter-item';
+            allItem.onclick = () => selectStrategyNumber(null);
+            
+            const allLabel = document.createElement('label');
+            allLabel.className = 'strategy-filter-label';
+            allLabel.textContent = 'All Strategies';
+            allLabel.style.fontWeight = selectedStrategyNumber === null ? '600' : '400';
+            allLabel.style.color = selectedStrategyNumber === null ? '#1e40af' : '#475569';
+            
+            allItem.appendChild(allLabel);
+            elements.strategyNumberList.appendChild(allItem);
+            
+            // Add only visible (non-hidden) strategies
+            visibleStrategies.forEach((strategy) => {
+                const item = document.createElement('div');
+                item.className = 'strategy-filter-item';
+                item.onclick = () => selectStrategyNumber(strategy);
+                
+                const label = document.createElement('label');
+                label.className = 'strategy-filter-label';
+                label.textContent = strategy;
+                label.style.fontWeight = selectedStrategyNumber === strategy ? '600' : '400';
+                label.style.color = selectedStrategyNumber === strategy ? '#1e40af' : '#475569';
+                
+                item.appendChild(label);
+                elements.strategyNumberList.appendChild(item);
+            });
+        }
+
+        function selectStrategyNumber(strategy) {
+            selectedStrategyNumber = strategy;
+            
+            if (strategy === null) {
+                elements.strategyNumberText.textContent = 'All Strategies';
+            } else {
+                elements.strategyNumberText.textContent = strategy;
+            }
+            
+            updateStrategyNumberList();
+            closeAllDropdowns();
+            setTimeout(() => applyFilters(), 10);
         }
 
         function updateBrokerStrategyFilterList() {
@@ -1677,13 +1805,23 @@
             brokerStrategies.forEach((strategy) => {
                 const item = document.createElement('div');
                 item.className = 'strategy-filter-item';
-                item.onclick = () => toggleBrokerStrategyRow(strategy);
+                item.onclick = () => {
+                    const checkbox = document.getElementById(`broker_${strategy}`);
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        toggleBrokerStrategyRow(strategy);
+                    }
+                };
                 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'strategy-filter-checkbox';
                 checkbox.id = `broker_${strategy}`;
                 checkbox.checked = !hiddenBrokerStrategies.has(strategy);
+                checkbox.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleBrokerStrategyRow(strategy);
+                };
                 
                 const label = document.createElement('label');
                 label.className = 'strategy-filter-label';
@@ -1701,7 +1839,8 @@
             const checkbox = document.getElementById(`broker_${strategy}`);
             if (!checkbox) return;
             
-            checkbox.checked = !checkbox.checked;
+            // Don't manually toggle - browser already did it when checkbox was clicked
+            // checkbox.checked = !checkbox.checked;
             
             if (checkbox.checked) {
                 hiddenBrokerStrategies.delete(strategy);
@@ -1771,6 +1910,7 @@
             
             updateBrokerStrategyFilterList();
             updateStrategyFilterList();
+            updateStrategyNumberList();
             buildTableHeaders('all');
         }
 
@@ -1785,6 +1925,11 @@
             const visibleStrategies = strategies.filter(s => !hiddenStrategies.has(s));
             if (strategies.length && visibleStrategies.length < strategies.length) {
                 tempTrades = tempTrades.filter(trade => visibleStrategies.includes(trade.strategy));
+            }
+            
+            // Apply strategy number filter
+            if (selectedStrategyNumber !== null) {
+                tempTrades = tempTrades.filter(trade => trade.strategy === selectedStrategyNumber);
             }
             
             if (symbolFilter) {
@@ -1829,6 +1974,8 @@
             Object.keys(dateStructure).forEach(month => collapsedMonths.add(month));
             columnFilters = {};
             currentPage = 1;
+            selectedStrategyNumber = null;
+            elements.strategyNumberText.textContent = 'All Strategies';
             
             try {
                 localStorage.removeItem('reportStrategyFilters');
@@ -1837,8 +1984,14 @@
                 localStorage.removeItem('reportCollapsedMonths');
             } catch (e) {}
             
+            // Save the cleared date filters immediately
+            saveDateFilters();
+            saveStrategyFilters();
+            saveBrokerFilters();
+            
             updateStrategyFilterList();
             updateBrokerStrategyFilterList();
+            updateStrategyNumberList();
             updateDateFilterList();
             sortColumn = null;
             sortDirection = 'asc';
@@ -1846,8 +1999,7 @@
                 th.classList.remove('sorted-asc', 'sorted-desc');
             });
             buildTableHeaders('all');
-            filteredTrades = [...allTrades];
-            renderTable();
+            await applyFilters();
         }
 
         function buildTableHeaders(filterBrokerStrategy = 'all') {
