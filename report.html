@@ -802,11 +802,13 @@
         let brokerStrategies = [];
         let strategies = [];
         let hiddenBrokerStrategies = new Set();
+        let manualHiddenBrokerStrategies = new Set(); // Tracks manual hides from "Hide Broker Columns"
         let hiddenStrategies = new Set();
         let dateStructure = {};
         let hiddenDates = new Set();
         let collapsedMonths = new Set();
         let showBuySellColumns = false;
+        let originalBuySellState = false; // Tracks original Buy/Sell/Qty state before strategy selection
         let columnFilters = {};
         let currentFilterColumn = null;
         let selectedStrategyNumber = null; // null means "All Strategies"
@@ -1127,6 +1129,8 @@
                 const savedBrokerFilters = localStorage.getItem('reportBrokerStrategyFilters');
                 if (savedBrokerFilters) {
                     hiddenBrokerStrategies = new Set(JSON.parse(savedBrokerFilters));
+                    // Initialize manual filters with the same saved data
+                    manualHiddenBrokerStrategies = new Set(JSON.parse(savedBrokerFilters));
                 }
                 
                 const savedDateFilters = localStorage.getItem('reportDateFilters');
@@ -1141,6 +1145,7 @@
             } catch (e) {
                 hiddenStrategies = new Set();
                 hiddenBrokerStrategies = new Set();
+                manualHiddenBrokerStrategies = new Set();
                 hiddenDates = new Set();
                 collapsedMonths = new Set();
             }
@@ -1154,7 +1159,8 @@
 
         function saveBrokerFilters() {
             try {
-                localStorage.setItem('reportBrokerStrategyFilters', JSON.stringify(Array.from(hiddenBrokerStrategies)));
+                // Only save manual filters, not auto-filtered ones from strategy selection
+                localStorage.setItem('reportBrokerStrategyFilters', JSON.stringify(Array.from(manualHiddenBrokerStrategies)));
             } catch (e) {}
         }
 
@@ -1780,14 +1786,44 @@
         }
 
         function selectStrategyNumber(strategy) {
+            // Save original Buy/Sell state when first selecting a specific strategy
+            if (selectedStrategyNumber === null && strategy !== null) {
+                originalBuySellState = showBuySellColumns;
+            }
+            
             selectedStrategyNumber = strategy;
             
             if (strategy === null) {
                 elements.strategyNumberText.textContent = 'All Strategies';
+                // Restore to original manual filter state when "All Strategies" is selected
+                hiddenBrokerStrategies.clear();
+                manualHiddenBrokerStrategies.forEach(s => hiddenBrokerStrategies.add(s));
+                
+                // Restore original Buy/Sell/Qty state
+                showBuySellColumns = originalBuySellState;
+                document.getElementById('buySellBtnText').textContent = showBuySellColumns ? 'Hide Buy/Sell/Qty' : 'Show Buy/Sell/Qty';
             } else {
                 elements.strategyNumberText.textContent = strategy;
+                // Combine manual filter + auto filter based on selected strategy
+                const strategyPattern = strategy.replace(/\s+/g, ''); // Remove spaces for matching
+                hiddenBrokerStrategies.clear();
+                
+                brokerStrategies.forEach(brokerStrat => {
+                    const brokerStratClean = brokerStrat.replace(/\s+/g, '').replace(/_/g, '');
+                    
+                    // Hide if: manually hidden OR doesn't match the selected strategy
+                    if (manualHiddenBrokerStrategies.has(brokerStrat) || !brokerStratClean.includes(strategyPattern)) {
+                        hiddenBrokerStrategies.add(brokerStrat);
+                    }
+                });
+                
+                // Temporarily enable Buy/Sell/Qty columns for specific strategy
+                showBuySellColumns = true;
+                document.getElementById('buySellBtnText').textContent = 'Hide Buy/Sell/Qty';
             }
             
+            saveBrokerFilters();
+            updateBrokerStrategyFilterList();
             updateStrategyNumberList();
             closeAllDropdowns();
             setTimeout(() => applyFilters(), 10);
@@ -1844,8 +1880,10 @@
             
             if (checkbox.checked) {
                 hiddenBrokerStrategies.delete(strategy);
+                manualHiddenBrokerStrategies.delete(strategy); // Remove from manual hide
             } else {
                 hiddenBrokerStrategies.add(strategy);
+                manualHiddenBrokerStrategies.add(strategy); // Add to manual hide
             }
             
             saveBrokerFilters();
@@ -1855,13 +1893,17 @@
 
         function selectAllBrokerStrategies() {
             hiddenBrokerStrategies.clear();
+            manualHiddenBrokerStrategies.clear(); // Clear manual filters too
             saveBrokerFilters();
             updateBrokerStrategyFilterList();
             setTimeout(() => applyFilters(), 10);
         }
 
         function deselectAllBrokerStrategies() {
-            brokerStrategies.forEach(s => hiddenBrokerStrategies.add(s));
+            brokerStrategies.forEach(s => {
+                hiddenBrokerStrategies.add(s);
+                manualHiddenBrokerStrategies.add(s); // Track as manual hide
+            });
             saveBrokerFilters();
             updateBrokerStrategyFilterList();
             setTimeout(() => applyFilters(), 10);
@@ -1969,6 +2011,7 @@
             elements.rowsPerPage.value = '15';
             hiddenStrategies.clear();
             hiddenBrokerStrategies.clear();
+            manualHiddenBrokerStrategies.clear(); // Clear manual broker filters
             hiddenDates.clear();
             collapsedMonths.clear();
             Object.keys(dateStructure).forEach(month => collapsedMonths.add(month));
@@ -2347,6 +2390,12 @@
 
         function toggleBuySellColumns() {
             showBuySellColumns = !showBuySellColumns;
+            
+            // Update original state if we're on "All Strategies"
+            if (selectedStrategyNumber === null) {
+                originalBuySellState = showBuySellColumns;
+            }
+            
             document.getElementById('buySellBtnText').textContent = showBuySellColumns ? 'Hide Buy/Sell/Qty' : 'Show Buy/Sell/Qty';
             const visibleBrokerStrategies = brokerStrategies.filter(s => !hiddenBrokerStrategies.has(s));
             const showAll = !brokerStrategies.length || visibleBrokerStrategies.length === brokerStrategies.length;
