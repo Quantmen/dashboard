@@ -2402,6 +2402,7 @@
 
             let bodyHtml = '';
             let previousMonthTotalMargin = 0;
+            let monthIdx = 0;
             sortedMonths.forEach(month => {
                 const displayMonth = monthNames[parseInt(month) - 1];
                 bodyHtml += `<tr class="month-row" onclick="toggleMonth('${month}')">`;
@@ -2491,7 +2492,86 @@
                 
                 // NET PNL % calculation
                 let netPnlPercent = 0;
-                if (previousMonthTotalMargin !== 0) {
+                if (monthIdx === 0) {
+                    // For first month, use first day's margin + PnL as base
+                    const monthTrades = allTrades.filter(trade => {
+                        const tradeParts = trade.date.split('/');
+                        return tradeParts[1] === month;
+                    });
+                    
+                    if (monthTrades.length > 0) {
+                        const tradesByDate = {};
+                        monthTrades.forEach(trade => {
+                            const dateKey = trade.date;
+                            if (!tradesByDate[dateKey]) {
+                                tradesByDate[dateKey] = [];
+                            }
+                            tradesByDate[dateKey].push(trade);
+                        });
+                        
+                        const sortedDates = Object.keys(tradesByDate).sort((a, b) => {
+                            const dayA = parseInt(a.split('/')[0]);
+                            const dayB = parseInt(b.split('/')[0]);
+                            return dayA - dayB;
+                        });
+                        
+                        if (sortedDates.length > 0) {
+                            const firstDate = sortedDates[0];
+                            const firstDateTrades = tradesByDate[firstDate];
+                            
+                            const firstDateBrokerMargins = {};
+                            const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+                            
+                            firstDateTrades.forEach(trade => {
+                                if (trade.strategyDetails) {
+                                    allBrokerStrategies.forEach(brokerStrat => {
+                                        const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+                                        const brokerMatch = brokerStrat.match(/^(B\d+)/);
+                                        if (brokerMatch && margin > 0) {
+                                            const brokerCode = brokerMatch[1];
+                                            if (!firstDateBrokerMargins[brokerCode]) {
+                                                firstDateBrokerMargins[brokerCode] = {};
+                                            }
+                                            firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+                                        }
+                                    });
+                                }
+                            });
+                            
+                            let firstDateMargin = 0;
+                            Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
+                                const margins = Object.values(firstDateBrokerMargins[brokerCode]);
+                                if (margins.length > 0) {
+                                    firstDateMargin += Math.max(...margins);
+                                }
+                            });
+                            
+                            let firstDatePnlTax = 0;
+                            const firstDatePnlTaxMap = {};
+                            firstDateTrades.forEach(trade => {
+                                if (trade && trade.strategyPnlTax) {
+                                    Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                                        if (!stratName.startsWith('A.PRO')) {
+                                            if (!firstDatePnlTaxMap[stratName]) {
+                                                firstDatePnlTaxMap[stratName] = 0;
+                                            }
+                                            firstDatePnlTaxMap[stratName] += pnlTax;
+                                        }
+                                    });
+                                }
+                            });
+                            firstDatePnlTax = Object.values(firstDatePnlTaxMap).reduce((sum, val) => sum + val, 0);
+                            
+                            const firstDateTotalMargin = firstDateMargin + firstDatePnlTax;
+                            
+                            if (firstDateTotalMargin !== 0) {
+                                netPnlPercent = (monthNetTotal / firstDateTotalMargin) * 100;
+                            }
+                        }
+                    }
+                } else if (previousMonthTotalMargin === 0) {
+                    netPnlPercent = 0;
+                } else {
                     netPnlPercent = (monthNetTotal / previousMonthTotalMargin) * 100;
                 }
                 bodyHtml += `<td class="number-col net-pnl-percent-col ${netPnlPercent >= 0 ? 'positive' : 'negative'}">${netPnlPercent !== 0 ? netPnlPercent.toFixed(2) + '%' : ''}</td>`;
@@ -2623,6 +2703,8 @@
                         bodyHtml += '</tr>';
                     });
                 }
+                
+                monthIdx++;
             });
 
             bodyHtml += '<tr class="total-row"><td>Grand Total</td>';
