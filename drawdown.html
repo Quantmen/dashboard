@@ -245,8 +245,7 @@
         /* Set common width for specific columns */
         th:nth-child(3), td:nth-child(3),  /* STG Margin */
         th:nth-child(4), td:nth-child(4),  /* Broker Margin */
-        th:nth-child(5), td:nth-child(5),  /* Extra Margin */
-        th:nth-child(13), td:nth-child(13) { /* Recovery Time */
+        th:nth-child(5), td:nth-child(5) { /* Extra Margin */
             width: 115px;
             min-width: 115px;
             max-width: 115px;
@@ -261,9 +260,11 @@
         }
         
         th:nth-child(9), td:nth-child(9),  /* stg dd(%) */
-        th:nth-child(10), td:nth-child(10), /* DD Duration */
-        th:nth-child(11), td:nth-child(11), /* STG DD Start */
-        th:nth-child(12), td:nth-child(12) { /* STG DD End */
+        th:nth-child(10), td:nth-child(10), /* A.PRO DD(₹) */
+        th:nth-child(11), td:nth-child(11), /* A.PRO DD(%) */
+        th:nth-child(12), td:nth-child(12), /* DD Duration */
+        th:nth-child(13), td:nth-child(13), /* STG DD Start */
+        th:nth-child(14), td:nth-child(14) { /* STG DD End */
             width: 100px;
             min-width: 100px;
             max-width: 100px;
@@ -762,7 +763,6 @@
                     <option value="currentDDPercent">Current DD %</option>
                     <option value="currentDDDuration">DD Duration</option>
                     <option value="extraMargin">Extra Margin</option>
-                    <option value="recoveryTime">Recovery Time</option>
                 </select>
             </div>
             <button class="btn" onclick="expandAll()">Expand All</button>
@@ -783,13 +783,13 @@
                         <th onclick="sortTable('currentDDPercent')">Current DD %</th>
                         <th onclick="sortTable('stgDD')">stg dd(₹)</th>
                         <th onclick="sortTable('stgDDPercent')">stg dd(%)</th>
+                        <th onclick="sortTable('aproDD')">A.PRO DD (₹)</th>
+                        <th onclick="sortTable('aproDDPercent')">A.PRO DD(%)</th>
                         <th onclick="sortTable('currentDDDuration')">DD Duration</th>
                         <th onclick="sortTable('ddStartDate')">STG DD Start</th>
                         <th onclick="sortTable('ddEndDate')">STG DD End</th>
                         <th onclick="sortTable('maxDD')">Max DD (₹)</th>
                         <th onclick="sortTable('maxDDPercent')">Max DD %</th>
-                        <th onclick="sortTable('recoveryTime')">Recovery Time</th>
-                        <th onclick="sortTable('ddCount')">DD Count</th>
                     </tr>
                 </thead>
                 <tbody id="drawdownTableBody"></tbody>
@@ -859,7 +859,35 @@
             sortedTrades.forEach(trade => {
                 if (trade.strategyPnlTax) {
                     Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
-                        if (stratName.startsWith('A.PRO')) return;
+                        // Process A.PRO strategies separately - store them but don't add to broker/account hierarchy
+                        if (stratName.startsWith('A.PRO')) {
+                            if (!strategyMap[stratName]) {
+                                strategyMap[stratName] = {
+                                    name: stratName,
+                                    pnls: [],
+                                    dates: [],
+                                    broker: 'A',
+                                    account: 'A.PRO',
+                                    startingCapital: 0,
+                                    lotSize: '-',
+                                    isAPro: true
+                                };
+                            }
+                            
+                            if (trade.strategyDetails && trade.strategyDetails[stratName]) {
+                                const details = trade.strategyDetails[stratName];
+                                if (details.margin && details.margin > strategyMap[stratName].startingCapital) {
+                                    strategyMap[stratName].startingCapital = details.margin;
+                                }
+                                if (details.lot && details.lot > 0) {
+                                    strategyMap[stratName].lotSize = details.lot;
+                                }
+                            }
+                            
+                            strategyMap[stratName].pnls.push(pnlTax || 0);
+                            strategyMap[stratName].dates.push(trade.date);
+                            return; // Don't process A.PRO as broker strategies
+                        }
                         
                         const brokerMatch = stratName.match(/^([A-Z]\d+)/);
                         if (!brokerMatch) return;
@@ -1084,7 +1112,7 @@
             Object.entries(brokerMap).forEach(([brokerCode, brokerData]) => {
                 const metrics = calculateDrawdown(brokerData.pnls, brokerData.dates, brokerData.startingCapital);
                 
-                const brokerStrategies = Object.values(strategyMap).filter(s => s.broker === brokerCode);
+                const brokerStrategies = Object.values(strategyMap).filter(s => s.broker === brokerCode && !s.isAPro);
                 const totalLotSize = calculateTotalLotSize(brokerStrategies);
                 
                 drawdownData.push({
@@ -1109,6 +1137,9 @@
             });
             
             Object.entries(strategyMap).forEach(([stratName, stratData]) => {
+                // Skip A.PRO strategies - they're only for lookup, not for display
+                if (stratData.isAPro) return;
+                
                 const metrics = calculateDrawdown(stratData.pnls, stratData.dates, stratData.startingCapital);
                 
                 drawdownData.push({
@@ -1138,7 +1169,7 @@
             Object.entries(accountMap).forEach(([accountCode, accountData]) => {
                 const metrics = calculateDrawdown(accountData.pnls, accountData.dates, accountData.startingCapital);
                 
-                const accountStrategies = Object.values(strategyMap).filter(s => s.account === accountCode);
+                const accountStrategies = Object.values(strategyMap).filter(s => s.account === accountCode && !s.isAPro);
                 const totalLotSize = calculateTotalLotSize(accountStrategies);
                 
                 drawdownData.push({
@@ -1350,6 +1381,58 @@
             saveFilters();
         }
 
+        // Helper function to get A.PRO drawdown for a broker strategy
+        // Example: B1PRO3 -> A.PRO3, then multiply A.PRO3's DD by the broker strategy's lot size
+        function getAProDrawdown(strategyName, lotSize) {
+            if (!strategyName || !globalStrategyMap || !lotSize || lotSize === '-') return 0;
+            
+            // Extract the PRO number from the broker strategy name
+            // Match patterns like B1PRO3, B2PRO4, B1PRO 4, C1PRO5, etc.
+            const proMatch = strategyName.match(/PRO\s*(\d+)/i);
+            if (!proMatch) {
+                return 0;
+            }
+            
+            const proNumber = proMatch[1]; // Just the number, e.g., "3", "4", "5"
+            
+            // Search through all A.PRO strategies and find one with matching number
+            for (const [aproName, aproStrategy] of Object.entries(globalStrategyMap)) {
+                if (!aproName.startsWith('A.PRO')) continue;
+                
+                // Extract number from A.PRO strategy name
+                const aproNumMatch = aproName.match(/PRO\s*(\d+)/i);
+                if (!aproNumMatch) continue;
+                
+                const aproNumber = aproNumMatch[1];
+                
+                // If numbers match, this is our A.PRO strategy
+                if (aproNumber === proNumber) {
+                    // Calculate drawdown using the same logic as other strategies
+                    if (aproStrategy.pnls && aproStrategy.dates && aproStrategy.pnls.length > 0) {
+                        const startingCapital = aproStrategy.startingCapital || 10000;
+                        let cumPnl = 0;
+                        let peak = startingCapital;
+                        
+                        aproStrategy.pnls.forEach(pnl => {
+                            cumPnl += pnl;
+                            const equity = startingCapital + cumPnl;
+                            if (equity > peak) {
+                                peak = equity;
+                            }
+                        });
+                        
+                        const finalEquity = startingCapital + cumPnl;
+                        const currentDD = finalEquity - peak;
+                        
+                        // Multiply A.PRO DD by the broker strategy's lot size
+                        return currentDD * lotSize;
+                    }
+                }
+            }
+            
+            return 0;
+        }
+
         function renderTable() {
             const tbody = document.getElementById('drawdownTableBody');
             if (filteredData.length === 0) {
@@ -1481,6 +1564,14 @@
                 
                 // Render broker row with calculated sums
                 const extraMarginClass = displayData.extraMargin > 0 ? 'positive' : (displayData.extraMargin < 0 ? 'negative' : 'neutral');
+                
+                // Calculate total A.PRO DD for all strategies under this broker
+                const brokerStrategies = strategies.filter(s => s.parentBroker === broker.strategy);
+                const totalAProDD = brokerStrategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
+                
+                // Calculate A.PRO DD %
+                const aproDDPercent = displayData.stgMargin > 0 ? (totalAProDD / displayData.stgMargin) * 100 : 0;
+                
                 html += `<tr class="broker-row">
                     <td class="broker-name">🏦 ${getDisplayName(broker.strategy)}</td>
                     <td>${formatNum(displayData.lotSize, 2)}</td>
@@ -1491,13 +1582,13 @@
                     <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
                     <td class="${displayData.stgDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.stgDD)}</td>
                     <td class="${displayData.stgDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.stgDDPercent)}</td>
+                    <td class="${totalAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDD)}</td>
+                    <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                     <td>${displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
                     <td>${displayData.ddStartDate}</td>
                     <td>${displayData.ddEndDate}</td>
                     <td class="negative">${formatCurrency(displayData.maxDD)}</td>
                     <td class="negative">${formatPercent(displayData.maxDDPercent)}</td>
-                    <td>${displayData.recoveryTime > 0 ? displayData.recoveryTime + ' days' : '-'}</td>
-                    <td>${displayData.ddCount}</td>
                 </tr>`;
                 
                 // Find accounts under this broker
@@ -1522,6 +1613,13 @@
                     
                     // Account row - Broker Margin and Extra Margin are shown ONLY when viewType is 'account'
                     const showBrokerMarginInAccount = viewType === 'account';
+                    
+                    // Calculate total A.PRO DD for all strategies under this account
+                    const totalAProDDAccount = accountStrategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
+                    
+                    // Calculate A.PRO DD %
+                    const aproDDPercentAccount = displayData.stgMargin > 0 ? (totalAProDDAccount / displayData.stgMargin) * 100 : 0;
+                    
                     html += `<tr class="group-row group-${accountCode}">
                         <td class="group-name">├─ ${getDisplayName(account.strategy)}</td>
                         <td>${formatNum(displayData.lotSize, 2)}</td>
@@ -1532,13 +1630,13 @@
                         <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
                         <td class="${displayData.stgDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.stgDD)}</td>
                         <td class="${displayData.stgDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.stgDDPercent)}</td>
+                        <td class="${totalAProDDAccount < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDDAccount)}</td>
+                        <td class="${aproDDPercentAccount < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercentAccount)}</td>
                         <td>${displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
                         <td>${displayData.ddStartDate}</td>
                         <td>${displayData.ddEndDate}</td>
                         <td class="negative">${formatCurrency(displayData.maxDD)}</td>
                         <td class="negative">${formatPercent(displayData.maxDDPercent)}</td>
-                        <td>${displayData.recoveryTime > 0 ? displayData.recoveryTime + ' days' : '-'}</td>
-                        <td>${displayData.ddCount}</td>
                     </tr>`;
                     
                     // Strategy rows - STG Margin individual, Broker Margin and Extra Margin merged
@@ -1546,6 +1644,10 @@
                         const parentAccountCode = strategy.parentAccount.toLowerCase();
                         if (index === 0) {
                             // First strategy row - add merged Broker Margin and Extra Margin cells
+                            const aproDD = getAProDrawdown(strategy.strategy, strategy.lotSize);
+                            const strategyStgMargin = strategy.lotSize * 400000;
+                            const aproDDPercent = strategyStgMargin > 0 ? (aproDD / strategyStgMargin) * 100 : 0;
+                            
                             html += `<tr class="child-row child-row-${parentAccountCode}">
                                 <td style="padding-left: 40px;">${strategy.strategy}</td>
                                 <td>${formatNum(strategy.lotSize, 2)}</td>
@@ -1556,16 +1658,20 @@
                                 <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                                 <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
                                 <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
+                                <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
+                                <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                                 <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
                                 <td>${strategy.ddStartDate}</td>
                                 <td>${strategy.ddEndDate}</td>
                                 <td class="negative">${formatCurrency(strategy.maxDD)}</td>
                                 <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
-                                <td>${strategy.recoveryTime > 0 ? strategy.recoveryTime + ' days' : '-'}</td>
-                                <td>${strategy.ddCount}</td>
                             </tr>`;
                         } else {
                             // Subsequent strategy rows - show individual STG Margin, no Broker Margin or Extra Margin cells (merged from first row)
+                            const aproDD = getAProDrawdown(strategy.strategy, strategy.lotSize);
+                            const strategyStgMargin = strategy.lotSize * 400000;
+                            const aproDDPercent = strategyStgMargin > 0 ? (aproDD / strategyStgMargin) * 100 : 0;
+                            
                             html += `<tr class="child-row child-row-${parentAccountCode}">
                                 <td style="padding-left: 40px;">${strategy.strategy}</td>
                                 <td>${formatNum(strategy.lotSize, 2)}</td>
@@ -1574,13 +1680,13 @@
                                 <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                                 <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
                                 <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
+                                <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
+                                <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                                 <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
                                 <td>${strategy.ddStartDate}</td>
                                 <td>${strategy.ddEndDate}</td>
                                 <td class="negative">${formatCurrency(strategy.maxDD)}</td>
                                 <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
-                                <td>${strategy.recoveryTime > 0 ? strategy.recoveryTime + ' days' : '-'}</td>
-                                <td>${strategy.ddCount}</td>
                             </tr>`;
                         }
                     });
