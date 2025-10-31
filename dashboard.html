@@ -1072,7 +1072,9 @@
             htmlParts.push('</div>');
             
             htmlParts.push('<table class="orders-table"><thead><tr>');
-            htmlParts.push('<th>S.No</th><th>Date</th><th>Trade</th><th>Symbol</th><th style="text-align: right;">Qty</th>');
+            htmlParts.push('<th>S.No</th><th>Date</th><th>Trade</th><th>Symbol</th>');
+            htmlParts.push('<th style="text-align: center;">EN TIME</th><th style="text-align: center;">EX TIME</th>');
+            htmlParts.push('<th style="text-align: right;">Qty</th>');
             htmlParts.push('<th style="text-align: right;">Entry Price</th><th style="text-align: right;">Exit Price</th>');
             htmlParts.push('<th style="text-align: right;">Profit</th><th style="text-align: right;">Lot Size</th>');
             htmlParts.push('</tr></thead><tbody>');
@@ -1082,7 +1084,7 @@
                 .sort((a, b) => (a.symbol || '').toString().toUpperCase().localeCompare((b.symbol || '').toString().toUpperCase()));
             
             if (filteredTrades.length === 0) {
-                htmlParts.push('<tr><td colspan="9" style="text-align: center; padding: 20px; color: #cbd5e1;">No trades for this strategy</td></tr>');
+                htmlParts.push('<tr><td colspan="11" style="text-align: center; padding: 20px; color: #cbd5e1;">No trades for this strategy</td></tr>');
             } else {
                 for (let i = 0; i < filteredTrades.length; i++) {
                     const trade = filteredTrades[i];
@@ -1092,6 +1094,8 @@
                         <td>${trade.date || '-'}</td>
                         <td>${trade.trade ? trade.trade.toString().toUpperCase() : '-'}</td>
                         <td>${trade.symbol || '-'}</td>
+                        <td style="text-align: center;">${trade.a_entime || '-'}</td>
+                        <td style="text-align: center;">${trade.a_extime || '-'}</td>
                         <td style="text-align: right;">${trade.qty && trade.qty > 0 ? trade.qty : '-'}</td>
                         <td style="text-align: right;">${trade.entry && trade.entry > 0 ? trade.entry.toFixed(2) : '-'}</td>
                         <td style="text-align: right;">${trade.exit && trade.exit > 0 ? trade.exit.toFixed(2) : '-'}</td>
