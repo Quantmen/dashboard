@@ -543,7 +543,15 @@
         .report-table td:nth-child(9) { 
             min-width: 58px; 
             max-width: 73px;
-            border-right: 1px solid #d1d5db;
+        }
+        .report-table td:nth-child(11) { 
+            border-right: 1px solid #e5e7eb;
+        }
+        .report-table thead tr.totals-row th:nth-child(11) { 
+            border-right: 1px solid #e5e7eb;
+        }
+        .report-table thead tr.header-row-1 th:nth-child(11) { 
+            border-right: 1px solid #e5e7eb;
         }
         .report-table td.number-col {
             text-align: right;
@@ -556,6 +564,13 @@
         .report-table td.negative { color: #b96060; font-weight: 500; }
         .buy-sell-column { display: none; }
         .buy-sell-column.visible { display: table-cell; }
+        
+        .time-column { display: none; }
+        .time-column.visible { display: table-cell; }
+        .report-table td.time-column, .report-table th.time-column { color: #475569; font-weight: 400; }
+        
+        .report-table td.price-column, .report-table th.price-column { color: #475569; font-weight: 400; }
+        
         .no-data { 
             text-align: center; 
             color: #9ca3af; 
@@ -743,6 +758,9 @@
             <button id="toggleBuySellBtn" onclick="toggleBuySellColumns()">
                 <span id="buySellBtnText">Show Buy/Sell/Qty</span>
             </button>
+            <button id="toggleTimeBtn" onclick="toggleTimeColumns()">
+                <span id="timeBtnText">Show Time</span>
+            </button>
             <div class="control-group">
                 <label class="control-label">Symbol:</label>
                 <input type="text" id="symbolFilter" placeholder="Filter...">
@@ -809,6 +827,8 @@
         let collapsedMonths = new Set();
         let showBuySellColumns = false;
         let originalBuySellState = false; // Tracks original Buy/Sell/Qty state before strategy selection
+        let showTimeColumns = false; // Time columns hidden by default
+        let originalTimeState = false; // Tracks original Time state before strategy selection
         let columnFilters = {};
         let currentFilterColumn = null;
         let selectedStrategyNumber = null; // null means "All Strategies"
@@ -1789,6 +1809,7 @@
             // Save original Buy/Sell state when first selecting a specific strategy
             if (selectedStrategyNumber === null && strategy !== null) {
                 originalBuySellState = showBuySellColumns;
+                originalTimeState = showTimeColumns;
             }
             
             selectedStrategyNumber = strategy;
@@ -1802,6 +1823,10 @@
                 // Restore original Buy/Sell/Qty state
                 showBuySellColumns = originalBuySellState;
                 document.getElementById('buySellBtnText').textContent = showBuySellColumns ? 'Hide Buy/Sell/Qty' : 'Show Buy/Sell/Qty';
+                
+                // Restore original Time state
+                showTimeColumns = originalTimeState;
+                document.getElementById('timeBtnText').textContent = showTimeColumns ? 'Hide Time' : 'Show Time';
             } else {
                 elements.strategyNumberText.textContent = strategy;
                 // Combine manual filter + auto filter based on selected strategy
@@ -1820,6 +1845,10 @@
                 // Temporarily enable Buy/Sell/Qty columns for specific strategy
                 showBuySellColumns = true;
                 document.getElementById('buySellBtnText').textContent = 'Hide Buy/Sell/Qty';
+                
+                // Temporarily enable Time columns for specific strategy
+                showTimeColumns = true;
+                document.getElementById('timeBtnText').textContent = 'Hide Time';
             }
             
             saveBrokerFilters();
@@ -2056,7 +2085,7 @@
             }
             
             const colors = ['#fef5f5', '#fefaf5', '#fefef5', '#f5fef8', '#f5f8fe', '#f8f5fe'];
-            const colsPerStrategy = showBuySellColumns ? 7 : 4;
+            const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
             
             const totals = { profit: 0 };
             const brokerTotals = {};
@@ -2077,6 +2106,8 @@
             
             let totalsRow = `<tr class="totals-row">
                 <th colspan="5" style="text-align: left; font-weight: 600; border-right: none;">FILTERED TOTALS</th>
+                <th class="number-col time-column${showTimeColumns ? ' visible' : ''}" style="border-right: none;"></th>
+                <th class="number-col time-column${showTimeColumns ? ' visible' : ''}" style="border-right: none;"></th>
                 <th class="number-col" style="border-right: none;"></th>
                 <th class="number-col" style="border-right: none;"></th>
                 <th class="number-col" style="border-right: none;"></th>
@@ -2084,28 +2115,35 @@
             
             displayStrategies.forEach((stratName, index) => {
                 const bt = brokerTotals[stratName];
+                const firstColStyle = index === 0 ? `style="border-left: 1px solid #e5e7eb;"` : `style=""`;
                 const groupStyle = `style=""`;
                 const lastColStyle = `style="border-right: 1px solid #d1d5db;"`;
                 
-                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${firstColStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dbuy >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dsell >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dsell.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupStyle}></th>`;
+                totalsRow += `<th class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColStyle}></th>`;
             });
             totalsRow += '</tr>';
             
-            const mainColumns = ['sno', 'date', 'strategy', 'trade', 'symbol', 'qty', 'entry', 'exit', 'profit'];
-            const columnLabels = { sno: 'S.No', date: 'Date', strategy: 'Strategy', trade: 'Trade', symbol: 'Symbol', qty: 'Qty', entry: 'Entry', exit: 'Exit', profit: 'Profit' };
+            const mainColumns = ['sno', 'date', 'strategy', 'trade', 'symbol', 'a_entime', 'a_extime', 'qty', 'entry', 'exit', 'profit'];
+            const columnLabels = { sno: 'S.No', date: 'Date', strategy: 'Strategy', trade: 'Trade', symbol: 'Symbol', a_entime: 'ENTIME', a_extime: 'EXTIME', qty: 'Qty', entry: 'Entry', exit: 'Exit', profit: 'Profit' };
             
             let headerRow1 = '<tr class="header-row-1">';
             mainColumns.forEach(col => {
                 const hasFilter = columnFilters[col];
                 const filterIcon = hasFilter ? ' active' : '';
                 const isNumber = ['qty', 'entry', 'exit', 'profit'].includes(col);
-                headerRow1 += `<th rowspan="2" class="sortable${isNumber ? ' number-col' : ''}" data-column="${col}">
+                const isTime = ['a_entime', 'a_extime'].includes(col);
+                const isPrice = ['qty', 'entry', 'exit'].includes(col);
+                const timeClass = isTime ? ` time-column${showTimeColumns ? ' visible' : ''}` : '';
+                const priceClass = isPrice ? ' price-column' : '';
+                headerRow1 += `<th rowspan="2" class="sortable${isNumber ? ' number-col' : ''}${timeClass}${priceClass}" data-column="${col}">
                     ${columnLabels[col]}
                     <span class="filter-icon${filterIcon}" data-filter-column="${col}">🔽</span>
                 </th>`;
@@ -2114,7 +2152,7 @@
             displayStrategies.forEach((stratName, index) => {
                 const displayName = formatStrategyName(stratName);
                 const bgColor = colors[index % colors.length];
-                const borderStyle = 'border-right: 1px solid #d1d5db; border-left: ' + (index === 0 ? '1px solid #d1d5db;' : '0;');
+                const borderStyle = 'border-right: 1px solid #d1d5db; border-left: ' + (index === 0 ? '1px solid #e5e7eb;' : '0;');
                 headerRow1 += `<th colspan="${colsPerStrategy}" class="number-col" style="background: linear-gradient(to bottom, ${bgColor} 0%, ${adjustColor(bgColor, -3)} 100%); ${borderStyle}">${displayName}</th>`;
             });
             headerRow1 += '</tr>';
@@ -2123,21 +2161,25 @@
             displayStrategies.forEach((stratName, index) => {
                 const bgColor = colors[index % colors.length];
                 const baseBg = `background: linear-gradient(to bottom, ${adjustColor(bgColor, -3)} 0%, ${adjustColor(bgColor, -6)} 100%);`;
-                const firstColBorder = index === 0 ? 'border-left: 1px solid #d1d5db;' : '';
+                const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
                 const lastColBorder = 'border-right: 1px solid #d1d5db;';
                 
-                const fields = ['pnl', 'dpnl', 'dbuy', 'dsell', 'buy', 'sell', 'qty'];
-                const fieldLabels = { pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', buy: 'BUY', sell: 'SELL', qty: 'QTY' };
+                const fields = ['pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'buy', 'sell'];
+                const fieldLabels = { pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', buy: 'BUY', sell: 'SELL' };
                 
                 fields.forEach((field, fIdx) => {
                     const filterKey = `${stratName}_${field}`;
                     const hasFilter = columnFilters[filterKey];
                     const filterIcon = hasFilter ? ' active' : '';
-                    const isBuySell = ['buy', 'sell', 'qty'].includes(field);
+                    const isBuySell = ['qty', 'buy', 'sell'].includes(field);
+                    const isTime = ['entime', 'extime'].includes(field);
+                    const isPrice = ['qty', 'buy', 'sell'].includes(field);
                     const border = fIdx === 0 ? firstColBorder : (fIdx === fields.length - 1 ? lastColBorder : '');
                     const buySellClass = isBuySell ? ` buy-sell-column${showBuySellColumns ? ' visible' : ''}` : '';
+                    const timeClass = isTime ? ` time-column${showTimeColumns ? ' visible' : ''}` : '';
+                    const priceClass = isPrice ? ' price-column' : '';
                     
-                    headerRow2 += `<th class="number-col sortable${buySellClass}" data-stratname="${stratName}" data-field="${field}" style="${baseBg} ${border}">
+                    headerRow2 += `<th class="number-col sortable${buySellClass}${timeClass}${priceClass}" data-stratname="${stratName}" data-field="${field}" style="${baseBg} ${border}">
                         ${fieldLabels[field]}
                         <span class="filter-icon${filterIcon}" data-filter-strat="${stratName}" data-filter-field="${field}">🔽</span>
                     </th>`;
@@ -2171,9 +2213,11 @@
                 <td>${trade.strategy || ''}</td>
                 <td>${(trade.trade || '').toUpperCase()}</td>
                 <td>${trade.symbol || ''}</td>
-                <td class="number-col">${trade.qty || ''}</td>
-                <td class="number-col">${trade.entry ? trade.entry.toFixed(2) : ''}</td>
-                <td class="number-col">${trade.exit ? trade.exit.toFixed(2) : ''}</td>
+		<td class="number-col time-column${showTimeColumns ? ' visible' : ''}">${trade.a_entime || ''}</td>
+		<td class="number-col time-column${showTimeColumns ? ' visible' : ''}">${trade.a_extime || ''}</td>
+                <td class="number-col price-column">${trade.qty || ''}</td>
+                <td class="number-col price-column">${trade.entry ? trade.entry.toFixed(2) : ''}</td>
+                <td class="number-col price-column">${trade.exit ? trade.exit.toFixed(2) : ''}</td>
                 <td class="number-col ${profitClass}">${profit !== 0 ? `₹${profit.toLocaleString('en-IN', {maximumFractionDigits: 0})}` : ''}</td>`;
             
             displayStrategies.forEach((stratName, index) => {
@@ -2184,6 +2228,8 @@
                 const sell = details.sell || 0;
                 const dbuy = details.dbuy || 0;
                 const dsell = details.dsell || 0;
+                const entime = details.entime || '';
+                const extime = details.extime || '';
                 const qty = details.qty || 0;
                 
                 const bgColor = colors[index % colors.length];
@@ -2191,16 +2237,20 @@
                 const dpnlClass = dpnl > 0 ? 'positive' : dpnl < 0 ? 'negative' : '';
                 const dbuyClass = dbuy > 0 ? 'positive' : dbuy < 0 ? 'negative' : '';
                 const dsellClass = dsell > 0 ? 'positive' : dsell < 0 ? 'negative' : '';
-                const groupBorder = 'style="background-color: ' + bgColor + ';"';
+                const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
+                const groupBorder = `style="background-color: ${bgColor}; ${firstColBorder}"`;
+                const groupBorderNoFirst = `style="background-color: ${bgColor};"`;
                 const lastColBorder = 'style="background-color: ' + bgColor + '; border-right: 1px solid #d1d5db;"';
                 
                 row += `<td class="number-col ${pnlClass}" ${groupBorder}>${pnl !== 0 ? pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dpnlClass}" ${groupBorder}>${dpnl !== 0 ? dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dbuyClass}" ${groupBorder}>${dbuy !== 0 ? dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dsellClass}" ${groupBorder}>${dsell !== 0 ? dsell.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorder}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
-                row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorder}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
-                row += `<td class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${qty !== 0 ? qty : ''}</td>`;
+                row += `<td class="number-col ${dpnlClass}" ${groupBorderNoFirst}>${dpnl !== 0 ? dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dbuyClass}" ${groupBorderNoFirst}>${dbuy !== 0 ? dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dsellClass}" ${groupBorderNoFirst}>${dsell !== 0 ? dsell.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${entime}</td>`;
+                row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${extime}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${qty !== 0 ? qty : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
             });
             
             return row + '</tr>';
@@ -2222,8 +2272,8 @@
             const endIndex = Math.min(startIndex + rowsPerPage, filteredTrades.length);
             const pageData = filteredTrades.slice(startIndex, endIndex);
 
-            const colsPerStrategy = showBuySellColumns ? 7 : 4;
-            const totalCols = 9 + (displayStrategies.length * colsPerStrategy);
+            const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
+            const totalCols = 9 + (showTimeColumns ? 2 : 0) + (displayStrategies.length * colsPerStrategy);
 
             if (filteredTrades.length === 0) {
                 elements.tableBody.innerHTML = `<tr><td colspan="${totalCols}" class="no-data">No trades found</td></tr>`;
@@ -2351,20 +2401,22 @@
             const displayStrategies = visibleBrokerStrategies.length === brokerStrategies.length ? 
                 brokerStrategies : visibleBrokerStrategies;
 
-            const headers = ['S.No', 'Date', 'Strategy', 'Trade', 'Symbol', 'Qty', 'Entry', 'Exit', 'Profit'];
+            const headers = ['S.No', 'Date', 'Strategy', 'Trade', 'Symbol', 'EN TIME', 'EX TIME', 'Qty', 'Entry', 'Exit', 'Profit'];
             displayStrategies.forEach(stratName => {
                 const displayName = formatStrategyName(stratName);
                 headers.push(`${displayName} PNL`, `${displayName} DPNL`);
                 headers.push(`${displayName} DBUY`, `${displayName} DSELL`);
+                headers.push(`${displayName} entime`, `${displayName} extime`);
                 if (showBuySellColumns) {
-                    headers.push(`${displayName} BUY`, `${displayName} SELL`, `${displayName} QTY`);
+                    headers.push(`${displayName} QTY`, `${displayName} BUY`, `${displayName} SELL`);
                 }
             });
             
             const rows = filteredTrades.map(trade => {
                 const row = [
                     trade.sno || '', trade.date || '', trade.strategy || '', trade.trade || '',
-                    trade.symbol || '', trade.qty || '', trade.entry?.toFixed(2) || '',
+                    trade.symbol || '', trade.a_entime || '', trade.a_extime || '', 
+                    trade.qty || '', trade.entry?.toFixed(2) || '',
                     trade.exit?.toFixed(2) || '', trade.profit || ''
                 ];
                 
@@ -2372,8 +2424,9 @@
                     const details = trade.strategyDetails?.[stratName] || {};
                     row.push(details.pnl || '', details.dpnl || '');
                     row.push(details.dbuy || '', details.dsell || '');
+                    row.push(details.entime || '', details.extime || '');
                     if (showBuySellColumns) {
-                        row.push(details.buy || '', details.sell || '', details.qty || '');
+                        row.push(details.qty || '', details.buy || '', details.sell || '');
                     }
                 });
                 
@@ -2403,7 +2456,27 @@
             renderTable();
         }
 
+        function toggleTimeColumns() {
+            showTimeColumns = !showTimeColumns;
+            
+            // Update original state if we're on "All Strategies"
+            if (selectedStrategyNumber === null) {
+                originalTimeState = showTimeColumns;
+            }
+            
+            document.getElementById('timeBtnText').textContent = showTimeColumns ? 'Hide Time' : 'Show Time';
+            const visibleBrokerStrategies = brokerStrategies.filter(s => !hiddenBrokerStrategies.has(s));
+            const showAll = !brokerStrategies.length || visibleBrokerStrategies.length === brokerStrategies.length;
+            buildTableHeaders(showAll ? 'all' : visibleBrokerStrategies);
+            renderTable();
+        }
+
         window.addEventListener('DOMContentLoaded', initEventListeners);
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize button text based on default state
+            document.getElementById('timeBtnText').textContent = showTimeColumns ? 'Hide Time' : 'Show Time';
+        });
 
         window.addEventListener('message', async (event) => {
             const { type, data } = event.data;
