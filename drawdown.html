@@ -239,42 +239,57 @@
 
         /* Set minimum width for Strategy column */
         th:nth-child(1), td:nth-child(1) { /* Strategy */
-            min-width: 145px;
+            min-width: 160px;
+            width: 160px;
         }
 
-        /* Set common width for specific columns */
+        /* Lot Size - smaller */
+        th:nth-child(2), td:nth-child(2) { /* Lot Size */
+            width: 85px;
+            min-width: 85px;
+            max-width: 85px;
+        }
+
+        /* Set common width for margin columns */
         th:nth-child(3), td:nth-child(3),  /* STG Margin */
         th:nth-child(4), td:nth-child(4),  /* Broker Margin */
         th:nth-child(5), td:nth-child(5) { /* Extra Margin */
-            width: 115px;
-            min-width: 115px;
-            max-width: 115px;
+            width: 105px;
+            min-width: 105px;
+            max-width: 105px;
         }
         
-        /* Narrower columns for DD-related fields */
+        /* DD-related columns */
         th:nth-child(6), td:nth-child(6),  /* Current DD (₹) */
-        th:nth-child(7), td:nth-child(7) { /* Current DD % */
-            width: 110px;
-            min-width: 110px;
-            max-width: 110px;
+        th:nth-child(7), td:nth-child(7),  /* Current DD % */
+        th:nth-child(8), td:nth-child(8),  /* A.PRO DD(₹) */
+        th:nth-child(9), td:nth-child(9) { /* A.PRO DD(%) */
+            width: 95px;
+            min-width: 95px;
+            max-width: 95px;
         }
-        
-        th:nth-child(9), td:nth-child(9),  /* stg dd(%) */
-        th:nth-child(10), td:nth-child(10), /* A.PRO DD(₹) */
-        th:nth-child(11), td:nth-child(11), /* A.PRO DD(%) */
-        th:nth-child(12), td:nth-child(12), /* DD Duration */
-        th:nth-child(13), td:nth-child(13), /* STG DD Start */
-        th:nth-child(14), td:nth-child(14) { /* STG DD End */
-            width: 100px;
-            min-width: 100px;
-            max-width: 100px;
+
+        /* DD Duration */
+        th:nth-child(10), td:nth-child(10) { /* DD Duration */
+            width: 85px;
+            min-width: 85px;
+            max-width: 85px;
         }
-        
-        /* Special width for stg dd(₹) */
-        th:nth-child(8), td:nth-child(8) { /* stg dd(₹) */
-            width: 115px;
-            min-width: 115px;
-            max-width: 115px;
+
+        /* Date columns */
+        th:nth-child(11), td:nth-child(11), /* STG DD Start */
+        th:nth-child(12), td:nth-child(12) { /* STG DD End */
+            width: 90px;
+            min-width: 90px;
+            max-width: 90px;
+        }
+
+        /* Max DD columns */
+        th:nth-child(13), td:nth-child(13), /* Max DD (₹) */
+        th:nth-child(14), td:nth-child(14) { /* Max DD % */
+            width: 95px;
+            min-width: 95px;
+            max-width: 95px;
         }
 
         td {
@@ -705,22 +720,15 @@
                 <div class="summary-card-label">Total Current DD (₹)</div>
                 <div class="summary-card-value negative" id="totalCurrentDDRupees">-</div>
             </div>
-            <div class="summary-card drawdown-box">
-                <div class="summary-card-label">STG DD (₹)</div>
-                <div class="summary-card-value negative" id="stgDDFromB">-</div>
-            </div>
             <div class="summary-card">
                 <div class="summary-card-label">Total Current DD (%)</div>
                 <div class="summary-card-value negative" id="totalCurrentDDPercent">-</div>
             </div>
-            <div class="summary-card">
-                <div class="summary-card-label">Avg Drawdown</div>
-                <div class="summary-card-value negative" id="avgDrawdown">-</div>
+            <div class="summary-card drawdown-box">
+                <div class="summary-card-label">STG DD (₹)</div>
+                <div class="summary-card-value negative" id="stgDDFromB">-</div>
             </div>
-            <div class="summary-card">
-                <div class="summary-card-label">DD Duration from B</div>
-                <div class="summary-card-value" id="ddDurationFromB">-</div>
-            </div>
+            <!-- Broker-wise DD cards will be dynamically added here -->
         </div>
 
         <div class="controls">
@@ -781,8 +789,6 @@
                         <th onclick="sortTable('extraMargin')">Extra Margin</th>
                         <th onclick="sortTable('currentDD')">Current DD (₹)</th>
                         <th onclick="sortTable('currentDDPercent')">Current DD %</th>
-                        <th onclick="sortTable('stgDD')">stg dd(₹)</th>
-                        <th onclick="sortTable('stgDDPercent')">stg dd(%)</th>
                         <th onclick="sortTable('aproDD')">A.PRO DD (₹)</th>
                         <th onclick="sortTable('aproDDPercent')">A.PRO DD(%)</th>
                         <th onclick="sortTable('currentDDDuration')">DD Duration</th>
@@ -1436,7 +1442,7 @@
         function renderTable() {
             const tbody = document.getElementById('drawdownTableBody');
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;padding:40px;">No data available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:40px;">No data available</td></tr>';
                 return;
             }
 
@@ -1580,8 +1586,6 @@
                     <td class="${extraMarginClass}">${formatCurrency(displayData.extraMargin)}</td>
                     <td class="${displayData.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.currentDD)}</td>
                     <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
-                    <td class="${displayData.stgDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.stgDD)}</td>
-                    <td class="${displayData.stgDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.stgDDPercent)}</td>
                     <td class="${totalAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDD)}</td>
                     <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                     <td>${displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
@@ -1628,8 +1632,6 @@
                         <td${showBrokerMarginInAccount ? ` class="${extraMarginClass}"` : ''}>${showBrokerMarginInAccount ? formatCurrency(accountExtraMargin) : ''}</td>
                         <td class="${displayData.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.currentDD)}</td>
                         <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
-                        <td class="${displayData.stgDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.stgDD)}</td>
-                        <td class="${displayData.stgDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.stgDDPercent)}</td>
                         <td class="${totalAProDDAccount < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDDAccount)}</td>
                         <td class="${aproDDPercentAccount < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercentAccount)}</td>
                         <td>${displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
@@ -1656,8 +1658,6 @@
                                 <td rowspan="${accountStrategies.length}" class="${extraMarginClass}">${formatCurrency(accountExtraMargin)}</td>
                                 <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
                                 <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
-                                <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
-                                <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                                 <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
                                 <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                                 <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
@@ -1676,8 +1676,6 @@
                                 <td style="padding-left: 40px;">${strategy.strategy}</td>
                                 <td>${formatNum(strategy.lotSize, 2)}</td>
                                 <td>${formatCurrency(strategy.lotSize * 400000)}</td>
-                                <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
-                                <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                                 <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
                                 <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                                 <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
@@ -1782,34 +1780,97 @@
                 : 0;
             document.getElementById('totalCurrentDDPercent').textContent = formatPercent(totalCurrentDDPercent);
 
-            // Calculate Avg Drawdown - use all data regardless of view type
-            const allData = [...brokers, ...accounts, ...strategies];
-            const avgDD = allData.length > 0 ? allData.reduce((sum, d) => sum + d.maxDDPercent, 0) / allData.length : 0;
-            document.getElementById('avgDrawdown').textContent = formatPercent(avgDD);
-
-            // Calculate DD Duration from B (broker B)
+            // Calculate STG DD from broker B
             const brokerB = brokers.find(b => b.strategy === 'B');
-            let ddDurationFromB = 0;
             let stgDDFromB = 0;
+            let stgDDFromBPercent = 0;
             if (brokerB) {
-                // Get the maximum ddDuration from all strategies under broker B
-                const strategiesUnderB = strategies.filter(s => s.parentBroker === 'B');
-                if (strategiesUnderB.length > 0) {
-                    ddDurationFromB = Math.max(...strategiesUnderB.map(s => s.ddDuration || 0));
-                }
-                
                 // Get STG DD from broker B - use the currentDD from broker data directly
                 stgDDFromB = brokerB.currentDD || 0;
+                
+                // Calculate percentage based on broker B's STG margin
+                const brokerBSums = calculateBrokerSums(brokerB.strategy);
+                if (brokerBSums && brokerBSums.stgMargin > 0) {
+                    stgDDFromBPercent = (stgDDFromB / brokerBSums.stgMargin) * 100;
+                }
             }
-            document.getElementById('ddDurationFromB').textContent = ddDurationFromB > 0 ? ddDurationFromB + ' days' : '-';
             
-            // Update STG DD (₹) from B
+            // Update STG DD (₹) from B with percentage in brackets
             if (stgDDFromB === 0) {
                 document.getElementById('stgDDFromB').textContent = '-';
             } else {
                 const formatted = formatCurrency(stgDDFromB);
-                document.getElementById('stgDDFromB').textContent = formatted === '-' ? '-' : '₹' + formatted;
+                const percentFormatted = formatPercent(stgDDFromBPercent);
+                document.getElementById('stgDDFromB').innerHTML = formatted === '-' ? '-' : '₹' + formatted + '  <span style="font-size: 14px; color: #6b7280;">[' + percentFormatted + ']</span>';
             }
+            
+            // Update broker-wise DD cards
+            updateBrokerWiseCards(accounts, strategies);
+        }
+
+        function updateBrokerWiseCards(accounts, strategies) {
+            // Find the main summary-cards container
+            const container = document.querySelector('.summary-cards');
+            if (!container) {
+                console.error('summary-cards container not found!');
+                return;
+            }
+            
+            console.log('📊 Updating broker-wise cards. Total accounts:', accounts.length);
+            
+            // Remove any existing broker DD cards (to avoid duplicates on re-render)
+            const existingBrokerCards = container.querySelectorAll('.broker-dd-card');
+            existingBrokerCards.forEach(card => card.remove());
+            
+            // Get all broker accounts (B1, B2, C1, etc.)
+            const brokerAccounts = accounts.filter(acc => 
+                acc.strategy && 
+                acc.isGroup &&
+                acc.strategy.match(/^[A-Z]\d+$/) // Match pattern like B1, B2, C1, etc.
+            );
+            
+            console.log('📊 Broker accounts found:', brokerAccounts.length, brokerAccounts.map(a => a.strategy));
+            
+            // Sort broker accounts
+            const sortedAccounts = brokerAccounts.sort((a, b) => {
+                return a.strategy.localeCompare(b.strategy);
+            });
+            
+            // Helper function to calculate account STG margin
+            function calculateAccountStgMargin(accountStrategy) {
+                const children = strategies.filter(s => s.parentAccount === accountStrategy);
+                if (children.length === 0) return 0;
+                const lotSize = children.reduce((sum, c) => sum + (c.lotSize || 0), 0);
+                return lotSize * 400000;
+            }
+            
+            // Create and append each broker card to the main container
+            sortedAccounts.forEach(account => {
+                const accountName = getDisplayName(account.strategy);
+                // Use currentDD which represents the broker account DD
+                const currentDD = account.currentDD || 0;
+                
+                // Calculate percentage
+                const stgMargin = calculateAccountStgMargin(account.strategy);
+                const ddPercent = stgMargin > 0 ? (currentDD / stgMargin) * 100 : 0;
+                const formattedPercent = formatPercent(ddPercent);
+                
+                // Format combined value with percentage in brackets with smaller font and grey color
+                const formattedDD = currentDD === 0 ? '-' : '₹' + formatCurrency(currentDD) + '  <span style="font-size: 14px; color: #6b7280;">[' + formattedPercent + ']</span>';
+                const valueClass = currentDD < 0 ? 'negative' : currentDD > 0 ? 'positive' : '';
+                
+                console.log(`Creating card for ${account.strategy}: currentDD=${currentDD}, percent=${ddPercent.toFixed(2)}%`);
+                
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'summary-card drawdown-box broker-dd-card';
+                cardDiv.innerHTML = `
+                    <div class="summary-card-label">${accountName} STG DD (₹)</div>
+                    <div class="summary-card-value ${valueClass}">${formattedDD}</div>
+                `;
+                container.appendChild(cardDiv);
+            });
+            
+            console.log('📊 Added broker DD cards. Total cards in row:', container.children.length);
         }
 
         function sortTable(column) {
