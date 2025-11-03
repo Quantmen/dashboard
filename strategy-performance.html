@@ -1760,14 +1760,12 @@
             
             const visibleStrategies = allStrategies.filter(s => !hiddenStrategies.has(s));
             
-            // Calculate Expenses and TOTAL MARGIN using ALL trades (not filtered by month)
-            // because we need cumulative calculations across all months
+            // Calculate daily values first as they are needed for monthly calculations
             const sortedAllTrades = [...allTrades].sort((a, b) => {
                 const dateA = a.date.split('/').reverse().join('');
                 const dateB = b.date.split('/').reverse().join('');
                 return dateA.localeCompare(dateB);
             });
-            const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedAllTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals);
             
             // Calculate daily total margins
             const dailyTotalMargins = calculateDailyTotalMargins(sortedAllTrades, Array.from(strategies));
@@ -1775,15 +1773,15 @@
             // Calculate daily expenses
             const dailyExpenses = calculateDailyExpenses(sortedAllTrades, Array.from(strategies), dailyTotalMargins);
             
+            // Calculate Expenses and TOTAL MARGIN using ALL trades (not filtered by month)
+            // Pass dailyTotalMargins and dailyExpenses to aggregate them monthly
+            const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedAllTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals, dailyTotalMargins, dailyExpenses);
+            
             renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses);
         }
         
-        function calculateExpensesAndMargins(sortedTrades, hiddenStrategies, allStrategiesParam, useFilteredTotals) {
+        function calculateExpensesAndMargins(sortedTrades, hiddenStrategies, allStrategiesParam, useFilteredTotals, dailyTotalMargins, dailyExpenses) {
             const result = {};
-            let startingCapital = 0;
-            let cumulativeNetPnl = 0;
-            let cumulativeCharges = 0;
-            let previousMonthTotalMargin = 0;
             
             // Group trades by month
             const tradesByMonth = {};
@@ -1803,243 +1801,38 @@
             sortedMonths.forEach((monthKey, monthIdx) => {
                 const monthTrades = tradesByMonth[monthKey];
                 
-                let monthMargin = 0;
-                let filteredMonthMargin = 0;
-                let latestDayPnlTax = 0;
-                let filteredLatestDayPnlTax = 0;
-                
-                if (monthTrades.length > 0) {
-                    const brokerMarginsByDate = {};
-                    const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
-                    
-                    // Collect margins by date and broker
-                    monthTrades.forEach(trade => {
-                        const tradeDate = trade.date;
-                        if (!brokerMarginsByDate[tradeDate]) {
-                            brokerMarginsByDate[tradeDate] = {};
-                        }
-                        
-                        if (trade.strategyDetails) {
-                            allBrokerStrategies.forEach(brokerStrat => {
-                                const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
-                                const brokerMatch = brokerStrat.match(/^(B\d+)/);
-                                
-                                if (brokerMatch) {
-                                    const brokerCode = brokerMatch[1];
-                                    if (!brokerMarginsByDate[tradeDate][brokerCode]) {
-                                        brokerMarginsByDate[tradeDate][brokerCode] = {};
-                                    }
-                                    // Store MAX margin for each strategy on each date
-                                    if (!brokerMarginsByDate[tradeDate][brokerCode][brokerStrat] || margin > brokerMarginsByDate[tradeDate][brokerCode][brokerStrat]) {
-                                        brokerMarginsByDate[tradeDate][brokerCode][brokerStrat] = margin;
-                                    }
-                                }
-                            });
-                        }
-                    });
-                    
-                    // Get sorted dates (latest first)
-                    const sortedDates = Object.keys(brokerMarginsByDate).sort((a, b) => {
-                        const dayA = parseInt(a.split('/')[0]);
-                        const dayB = parseInt(b.split('/')[0]);
-                        return dayB - dayA;
-                    });
-                    
-                    // Get all unique brokers
-                    const allBrokersInMonth = new Set();
-                    Object.values(brokerMarginsByDate).forEach(dateMargins => {
-                        Object.keys(dateMargins).forEach(broker => allBrokersInMonth.add(broker));
-                    });
-                    
-                    // For each broker, find the most recent day with non-zero margin
-                    const brokerMaxMargins = {};
-                    const filteredBrokerMaxMargins = {};
-                    
-                    allBrokersInMonth.forEach(brokerCode => {
-                        for (let i = 0; i < sortedDates.length; i++) {
-                            const checkDate = sortedDates[i];
-                            
-                            if (brokerMarginsByDate[checkDate] && brokerMarginsByDate[checkDate][brokerCode]) {
-                                const strategyMargins = Object.entries(brokerMarginsByDate[checkDate][brokerCode]);
-                                const margins = strategyMargins.map(([strat, margin]) => margin);
-                                const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
-                                
-                                if (maxMargin > 0) {
-                                    brokerMaxMargins[brokerCode] = maxMargin;
-                                    
-                                    // Calculate filtered margin
-                                    const filteredMargins = strategyMargins
-                                        .filter(([strat, margin]) => !hiddenStrategies.has(strat))
-                                        .map(([strat, margin]) => margin);
-                                    const maxFilteredMargin = filteredMargins.length > 0 ? Math.max(...filteredMargins) : 0;
-                                    if (maxFilteredMargin > 0) {
-                                        filteredBrokerMaxMargins[brokerCode] = maxFilteredMargin;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    });
-                    
-                    monthMargin = Object.values(brokerMaxMargins).reduce((sum, val) => sum + val, 0);
-                    filteredMonthMargin = Object.values(filteredBrokerMaxMargins).reduce((sum, val) => sum + val, 0);
-                    
-                    // PnL Tax calculation with carry-forward logic
-                    const brokerPnlTaxByDate = {};
-                    monthTrades.forEach(trade => {
-                        const tradeDate = trade.date;
-                        if (!brokerPnlTaxByDate[tradeDate]) {
-                            brokerPnlTaxByDate[tradeDate] = {};
-                        }
-                        
-                        if (trade && trade.strategyPnlTax) {
-                            Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
-                                if (!stratName.startsWith('A.PRO')) {
-                                    const brokerMatch = stratName.match(/^(B\d+)/);
-                                    if (brokerMatch) {
-                                        const brokerCode = brokerMatch[1];
-                                        if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
-                                            brokerPnlTaxByDate[tradeDate][brokerCode] = {};
-                                        }
-                                        if (!brokerPnlTaxByDate[tradeDate][brokerCode][stratName]) {
-                                            brokerPnlTaxByDate[tradeDate][brokerCode][stratName] = 0;
-                                        }
-                                        brokerPnlTaxByDate[tradeDate][brokerCode][stratName] += pnlTax;
-                                    }
-                                }
-                            });
-                        }
-                    });
-                    
-                    // For each broker, use PnL Tax from the margin date FORWARD to end of month
-                    const strategyPnlTaxMap = {};
-                    const filteredStrategyPnlTaxMap = {};
-                    
-                    allBrokersInMonth.forEach(brokerCode => {
-                        // Find which date we used for this broker's margin
-                        for (let i = 0; i < sortedDates.length; i++) {
-                            const checkDate = sortedDates[i];
-                            
-                            if (brokerMarginsByDate[checkDate] && brokerMarginsByDate[checkDate][brokerCode]) {
-                                const strategyMargins = Object.entries(brokerMarginsByDate[checkDate][brokerCode]);
-                                const margins = strategyMargins.map(([strat, margin]) => margin);
-                                const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
-                                
-                                if (maxMargin > 0) {
-                                    // Accumulate PnL Tax from this date FORWARD to end of month
-                                    for (let j = i; j >= 0; j--) {
-                                        const dateToCheck = sortedDates[j];
-                                        
-                                        if (brokerPnlTaxByDate[dateToCheck] && brokerPnlTaxByDate[dateToCheck][brokerCode]) {
-                                            Object.entries(brokerPnlTaxByDate[dateToCheck][brokerCode]).forEach(([stratName, pnlTax]) => {
-                                                const isHidden = hiddenStrategies.has(stratName);
-                                                
-                                                if (!strategyPnlTaxMap[stratName]) {
-                                                    strategyPnlTaxMap[stratName] = 0;
-                                                }
-                                                strategyPnlTaxMap[stratName] += pnlTax;
-                                                
-                                                if (!isHidden) {
-                                                    if (!filteredStrategyPnlTaxMap[stratName]) {
-                                                        filteredStrategyPnlTaxMap[stratName] = 0;
-                                                    }
-                                                    filteredStrategyPnlTaxMap[stratName] += pnlTax;
-                                                }
-                                            });
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    });
-                    
-                    latestDayPnlTax = Object.values(strategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
-                    filteredLatestDayPnlTax = Object.values(filteredStrategyPnlTaxMap).reduce((sum, val) => sum + val, 0);
-                }
-                
-                const displayMargin = useFilteredTotals ? filteredMonthMargin : monthMargin;
-                const displayLatestDayPnlTax = useFilteredTotals ? filteredLatestDayPnlTax : latestDayPnlTax;
-                const totalMargin = displayMargin + displayLatestDayPnlTax;
-                
-                // Calculate starting capital for first month
-                if (monthIdx === 0 && monthTrades.length > 0) {
-                    const tradesByDate = {};
-                    monthTrades.forEach(trade => {
-                        const dateKey = trade.date;
-                        if (!tradesByDate[dateKey]) {
-                            tradesByDate[dateKey] = [];
-                        }
-                        tradesByDate[dateKey].push(trade);
-                    });
-                    
-                    const sortedDatesInMonth = Object.keys(tradesByDate).sort((a, b) => {
-                        const dayA = parseInt(a.split('/')[0]);
-                        const dayB = parseInt(b.split('/')[0]);
-                        return dayA - dayB;
-                    });
-                    
-                    if (sortedDatesInMonth.length > 0) {
-                        const firstDate = sortedDatesInMonth[0];
-                        const firstDateTrades = tradesByDate[firstDate];
-                        
-                        const firstDateBrokerMargins = {};
-                        const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
-                        
-                        firstDateTrades.forEach(trade => {
-                            if (trade.strategyDetails) {
-                                allBrokerStrategies.forEach(brokerStrat => {
-                                    const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
-                                    const brokerMatch = brokerStrat.match(/^(B\d+)/);
-                                    if (brokerMatch && margin > 0) {
-                                        const brokerCode = brokerMatch[1];
-                                        if (!firstDateBrokerMargins[brokerCode]) {
-                                            firstDateBrokerMargins[brokerCode] = {};
-                                        }
-                                        firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
-                                    }
-                                });
-                            }
-                        });
-                        
-                        let firstDateMargin = 0;
-                        Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
-                            const margins = Object.values(firstDateBrokerMargins[brokerCode]);
-                            if (margins.length > 0) {
-                                firstDateMargin += Math.max(...margins);
-                            }
-                        });
-                        
-                        startingCapital = firstDateMargin;
-                    }
-                }
-                
-                // Calculate month net PnL
-                let monthNet = 0;
+                // Get all dates in this month
+                const tradesByDate = {};
                 monthTrades.forEach(trade => {
-                    if (trade && trade.strategyPnlTax) {
-                        Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
-                            if (!stratName.startsWith('A.PRO')) {
-                                // If useFilteredTotals is true, only include non-hidden strategies
-                                // If useFilteredTotals is false, include all strategies
-                                if (!useFilteredTotals || !hiddenStrategies.has(stratName)) {
-                                    monthNet += pnlTax;
-                                }
-                            }
-                        });
+                    const dateKey = trade.date;
+                    if (!tradesByDate[dateKey]) {
+                        tradesByDate[dateKey] = [];
                     }
+                    tradesByDate[dateKey].push(trade);
                 });
                 
-                cumulativeNetPnl += monthNet;
-                const runningCapital = startingCapital + cumulativeNetPnl;
-                const chargesWithdrawn = totalMargin - runningCapital - cumulativeCharges;
+                const sortedDatesInMonth = Object.keys(tradesByDate).sort((a, b) => {
+                    const dayA = parseInt(a.split('/')[0]);
+                    const dayB = parseInt(b.split('/')[0]);
+                    return dayA - dayB;
+                });
                 
-                cumulativeCharges += chargesWithdrawn;
-                previousMonthTotalMargin = totalMargin;
+                // Sum daily expenses for this month
+                let monthExpenses = 0;
+                sortedDatesInMonth.forEach(dateKey => {
+                    monthExpenses += (dailyExpenses[dateKey] || 0);
+                });
+                
+                // Get the last day's total margin for this month
+                let monthTotalMargin = 0;
+                if (sortedDatesInMonth.length > 0) {
+                    const lastDate = sortedDatesInMonth[sortedDatesInMonth.length - 1];
+                    monthTotalMargin = dailyTotalMargins[lastDate] || 0;
+                }
                 
                 result[monthKey] = {
-                    totalMargin: totalMargin,
-                    expenses: chargesWithdrawn
+                    totalMargin: monthTotalMargin,
+                    expenses: monthExpenses
                 };
             });
             
