@@ -996,7 +996,7 @@
             
             htmlParts.push('<table class="orders-table"><thead><tr>');
             htmlParts.push('<th>S.No</th><th>Date</th><th>Symbol</th><th>Qty</th>');
-            htmlParts.push('<th style="text-align: right;">Buy Price</th><th style="text-align: right;">Sell Price</th>');
+            htmlParts.push('<th style="text-align: right;">Sell Price</th><th style="text-align: right;">Buy Price</th>');
             htmlParts.push('<th style="text-align: right;">PNL</th><th style="text-align: right;">Un PNL</th>');
             htmlParts.push('<th style="text-align: right;">Lot Size</th><th style="text-align: right;">Lot PNL</th><th style="text-align: right;">Slippage</th>');
             htmlParts.push('</tr></thead><tbody>');
@@ -1019,8 +1019,8 @@
                     <td>${trade.date}</td>
                     <td>${trade.symbol}</td>
                     <td>${details.qty > 0 ? details.qty : '-'}</td>
-                    <td style="text-align: right;">${details.buy > 0 ? details.buy.toFixed(2) : '-'}</td>
                     <td style="text-align: right;">${details.sell > 0 ? details.sell.toFixed(2) : '-'}</td>
+                    <td style="text-align: right;">${details.buy > 0 ? details.buy.toFixed(2) : '-'}</td>
                     <td class="profit-cell ${pnl >= 0 ? 'positive' : 'negative'}">${pnl !== 0 ? `₹${pnl >= 0 ? '' : '-'}${Math.abs(pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
                     <td class="profit-cell ${details.unpnl >= 0 ? 'positive' : 'negative'}">${details.unpnl !== 0 ? `${details.unpnl >= 0 ? '' : '-'}${Math.abs(details.unpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
                     <td style="text-align: right;">${details.lot > 0 ? details.lot : '-'}</td>
