@@ -2164,7 +2164,7 @@
                 const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
                 const lastColBorder = 'border-right: 1px solid #d1d5db;';
                 
-                const fields = ['pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'buy', 'sell'];
+                const fields = ['pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'sell', 'buy'];
                 const fieldLabels = { pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', buy: 'BUY', sell: 'SELL' };
                 
                 fields.forEach((field, fIdx) => {
@@ -2249,8 +2249,8 @@
                 row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${entime}</td>`;
                 row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${extime}</td>`;
                 row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${qty !== 0 ? qty : ''}</td>`;
-                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
-                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
             });
             
             return row + '</tr>';
@@ -2408,7 +2408,7 @@
                 headers.push(`${displayName} DBUY`, `${displayName} DSELL`);
                 headers.push(`${displayName} entime`, `${displayName} extime`);
                 if (showBuySellColumns) {
-                    headers.push(`${displayName} QTY`, `${displayName} BUY`, `${displayName} SELL`);
+                    headers.push(`${displayName} QTY`, `${displayName} SELL`, `${displayName} BUY`);
                 }
             });
             
@@ -2426,7 +2426,7 @@
                     row.push(details.dbuy || '', details.dsell || '');
                     row.push(details.entime || '', details.extime || '');
                     if (showBuySellColumns) {
-                        row.push(details.qty || '', details.buy || '', details.sell || '');
+                        row.push(details.qty || '', details.sell || '', details.buy || '');
                     }
                 });
                 
