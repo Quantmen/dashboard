@@ -107,9 +107,9 @@
         .negative { color: #dc2626; }
         .earnings-card { display: flex; flex-direction: column; justify-content: center; }
         .earnings-card .card-value { font-size: 28px; }
-        .chart-card { padding: 16px 18px; }
-        .chart-card .card-title { font-size: 13px; margin-bottom: 12px; }
-        .chart-container { height: 240px; position: relative; width: 100%; }
+        .chart-card { padding: 20px 22px 12px 22px; }
+        .chart-card .card-title { font-size: 13px; margin-bottom: 16px; font-weight: 600; color: #475569; }
+        .chart-container { height: 280px; position: relative; width: 100%; }
         .chart-container canvas { width: 100% !important; height: 100% !important; }
         .strategy-performance-container { min-height: 120px; }
         .strategy-performance-header {
@@ -1114,6 +1114,12 @@
 
         function initializeChart() {
             const ctx = elements.pnlChart.getContext('2d');
+            
+            // Create gradient for area fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+            gradient.addColorStop(0, 'rgba(5, 150, 105, 0.15)');
+            gradient.addColorStop(1, 'rgba(5, 150, 105, 0)');
+            
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1122,61 +1128,122 @@
                         label: 'Cumulative P&L',
                         data: [],
                         borderColor: '#059669',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2.5,
+                        backgroundColor: gradient,
+                        borderWidth: 3,
                         tension: 0.4,
-                        fill: false,
+                        fill: true,
                         pointRadius: 0,
-                        pointHoverRadius: 4,
+                        pointHoverRadius: 6,
                         pointHoverBackgroundColor: '#059669',
                         pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2
+                        pointHoverBorderWidth: 3,
+                        shadowOffsetX: 0,
+                        shadowOffsetY: 4,
+                        shadowBlur: 8,
+                        shadowColor: 'rgba(5, 150, 105, 0.3)'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 10,
+                            bottom: 0
+                        }
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
                             enabled: true,
-                            backgroundColor: '#1e293b',
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
                             titleColor: '#fff',
                             bodyColor: '#fff',
-                            borderColor: '#334155',
-                            borderWidth: 1,
-                            padding: 12,
+                            borderColor: '#059669',
+                            borderWidth: 2,
+                            padding: 16,
                             displayColors: false,
+                            titleFont: {
+                                size: 13,
+                                weight: '600',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            bodyFont: {
+                                size: 14,
+                                weight: '700',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            cornerRadius: 8,
+                            caretSize: 6,
                             callbacks: {
-                                label: ctx => `P&L: ₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2})}`
+                                title: ctx => ctx[0].label,
+                                label: ctx => `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
                             }
                         }
                     },
                     scales: {
                         y: {
                             display: true,
-                            grid: { color: '#f1f5f9', drawBorder: false },
+                            position: 'right',
+                            grid: { 
+                                color: 'rgba(148, 163, 184, 0.1)',
+                                lineWidth: 1,
+                                drawBorder: false,
+                                drawTicks: false
+                            },
+                            border: {
+                                display: false
+                            },
                             ticks: {
-                                font: { size: 11, family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' },
-                                color: '#94a3b8',
+                                font: { 
+                                    size: 11, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' 
+                                },
+                                color: '#64748b',
+                                padding: 8,
+                                maxTicksLimit: 8,
                                 callback: value => {
                                     if (value === 0) return '₹0';
-                                    if (Math.abs(value) >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
-                                    return `₹${(value / 1000).toFixed(0)}k`;
+                                    if (Math.abs(value) >= 100000) return `₹${Math.round(value / 100000)}L`;
+                                    if (Math.abs(value) >= 1000) return `₹${Math.round(value / 1000)}K`;
+                                    return `₹${Math.round(value)}`;
                                 }
                             }
                         },
                         x: {
                             display: true,
-                            grid: { display: false },
+                            grid: { 
+                                display: false,
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            },
                             ticks: {
-                                font: { size: 11, family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' },
-                                color: '#94a3b8',
-                                maxTicksLimit: 8
+                                font: { 
+                                    size: 11, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' 
+                                },
+                                color: '#64748b',
+                                maxTicksLimit: 10,
+                                padding: 4
                             }
                         }
                     },
-                    interaction: { intersect: false, mode: 'index' }
+                    interaction: { 
+                        intersect: false, 
+                        mode: 'index' 
+                    },
+                    elements: {
+                        line: {
+                            borderCapStyle: 'round',
+                            borderJoinStyle: 'round'
+                        }
+                    }
                 }
             });
         }
@@ -1215,14 +1282,63 @@
             
             const minValue = Math.min(...data);
             const maxValue = Math.max(...data);
-            const padding = (maxValue - minValue) * 0.05;
+            
+            // Calculate nice round numbers for axis that stay close to actual data
+            function roundToNice(value, roundUp) {
+                if (value === 0) return 0;
+                
+                const absValue = Math.abs(value);
+                const sign = value < 0 ? -1 : 1;
+                
+                // Choose appropriate step size based on magnitude
+                let step;
+                if (absValue >= 5000000) {
+                    step = 1000000; // 10L steps for values >= 50L
+                } else if (absValue >= 1000000) {
+                    step = 500000; // 5L steps for values >= 10L
+                } else if (absValue >= 100000) {
+                    step = 100000; // 1L steps for values >= 1L
+                } else if (absValue >= 10000) {
+                    step = 10000; // 10K steps
+                } else if (absValue >= 1000) {
+                    step = 1000; // 1K steps
+                } else {
+                    step = 100; // 100 steps
+                }
+                
+                return sign * (roundUp ? Math.ceil(absValue / step) : Math.floor(absValue / step)) * step;
+            }
+            
+            const range = maxValue - minValue;
+            const padding = range * 0.08; // 8% padding
+            const niceMin = roundToNice(minValue - padding, false);
+            const niceMax = roundToNice(maxValue + padding, true);
+            
+            // Determine if profit or loss for color scheme
+            const isProfit = data[data.length - 1] >= 0;
+            const lineColor = isProfit ? '#059669' : '#dc2626';
+            const hoverColor = isProfit ? '#059669' : '#dc2626';
+            const borderColor = isProfit ? '#059669' : '#dc2626';
+            
+            // Create new gradient based on profit/loss
+            const ctx = elements.pnlChart.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+            if (isProfit) {
+                gradient.addColorStop(0, 'rgba(5, 150, 105, 0.15)');
+                gradient.addColorStop(1, 'rgba(5, 150, 105, 0)');
+            } else {
+                gradient.addColorStop(0, 'rgba(220, 38, 38, 0.15)');
+                gradient.addColorStop(1, 'rgba(220, 38, 38, 0)');
+            }
             
             chartInstance.data.labels = labels;
             chartInstance.data.datasets[0].data = data;
-            chartInstance.data.datasets[0].borderColor = data[data.length - 1] >= 0 ? '#059669' : '#dc2626';
-            chartInstance.data.datasets[0].pointHoverBackgroundColor = data[data.length - 1] >= 0 ? '#059669' : '#dc2626';
-            chartInstance.options.scales.y.min = minValue - padding;
-            chartInstance.options.scales.y.max = maxValue + padding;
+            chartInstance.data.datasets[0].borderColor = lineColor;
+            chartInstance.data.datasets[0].backgroundColor = gradient;
+            chartInstance.data.datasets[0].pointHoverBackgroundColor = hoverColor;
+            chartInstance.options.plugins.tooltip.borderColor = borderColor;
+            chartInstance.options.scales.y.min = niceMin;
+            chartInstance.options.scales.y.max = niceMax;
             chartInstance.update('none');
         }
     </script>
