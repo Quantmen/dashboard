@@ -943,6 +943,22 @@
             elements.strategyGridInline.innerHTML = htmlParts.join('');
         }
 
+        function formatDateForTable(dateStr) {
+            if (!dateStr) return '-';
+            // Expected format: dd/mm/yyyy
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return dateStr;
+            
+            const day = parts[0].padStart(2, '0');
+            const monthIndex = parseInt(parts[1]) - 1;
+            const year = parts[2].slice(-2); // Get last 2 digits of year
+            
+            const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const month = monthNames[monthIndex] || '';
+            
+            return `${day}-${month}-${year}`;
+        }
+
         function updateOrdersSummary(todayTrades) {
             if (todayTrades.length === 0) {
                 elements.ordersSummary.innerHTML = '<div class="no-data">No Data</div>';
@@ -1014,7 +1030,7 @@
                 
                 htmlParts.push(`<tr>
                     <td>${trade.sno}</td>
-                    <td>${trade.date}</td>
+                    <td>${formatDateForTable(trade.date)}</td>
                     <td>${trade.symbol}</td>
                     <td>${details.qty > 0 ? details.qty : '-'}</td>
                     <td style="text-align: right;">${details.sell > 0 ? details.sell.toFixed(2) : '-'}</td>
@@ -1089,7 +1105,7 @@
                     const pnl = trade.profit || 0;
                     htmlParts.push(`<tr>
                         <td>${trade.sno || i + 1}</td>
-                        <td>${trade.date || '-'}</td>
+                        <td>${formatDateForTable(trade.date)}</td>
                         <td>${trade.trade ? trade.trade.toString().toUpperCase() : '-'}</td>
                         <td>${trade.symbol || '-'}</td>
                         <td style="text-align: center;">${trade.a_entime || '-'}</td>
