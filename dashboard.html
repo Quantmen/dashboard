@@ -1261,8 +1261,16 @@
             const maxPoints = 100;
             const step = Math.max(1, Math.floor(allTrades.length / maxPoints));
             const sampledTrades = [];
+            
+            // Sample trades but always include the last one
             for (let i = 0; i < allTrades.length; i += step) {
                 sampledTrades.push(allTrades[i]);
+            }
+            
+            // Ensure the very last trade is included (important for today's data)
+            const lastTrade = allTrades[allTrades.length - 1];
+            if (sampledTrades[sampledTrades.length - 1] !== lastTrade) {
+                sampledTrades.push(lastTrade);
             }
             
             const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -1310,7 +1318,7 @@
             }
             
             const range = maxValue - minValue;
-            const padding = range * 0.08; // 8% padding
+            const padding = range * 0.01; // 1% padding
             const niceMin = roundToNice(minValue - padding, false);
             const niceMax = roundToNice(maxValue + padding, true);
             
