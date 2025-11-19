@@ -2106,17 +2106,21 @@
             const totals = { profit: 0 };
             const brokerTotals = {};
             displayStrategies.forEach(stratName => {
-                brokerTotals[stratName] = { pnl: 0, dpnl: 0, dbuy: 0, dsell: 0 };
+                brokerTotals[stratName] = { pnl: 0, dpnl: 0, dbuy: 0, dsell: 0, lot_pnl: 0 };
             });
             
             filteredTrades.forEach(trade => {
                 totals.profit += trade.profit || 0;
                 displayStrategies.forEach(stratName => {
                     const details = trade.strategyDetails?.[stratName] || {};
-                    brokerTotals[stratName].pnl += details.pnl || 0;
+                    const pnl = details.pnl || 0;
+                    const lot_size = details.lot;
+                    const lot_pnl = (lot_size && lot_size !== 0) ? (pnl / lot_size) : 0;
+                    brokerTotals[stratName].pnl += pnl;
                     brokerTotals[stratName].dpnl += details.dpnl || 0;
                     brokerTotals[stratName].dbuy += details.dbuy || 0;
                     brokerTotals[stratName].dsell += details.dsell || 0;
+                    brokerTotals[stratName].lot_pnl += lot_pnl;
                 });
             });
             
@@ -2135,7 +2139,7 @@
                 const groupStyle = `style=""`;
                 const lastColStyle = `style="border-right: 1px solid #d1d5db;"`;
                 
-                totalsRow += `<th class="number-col lot-column${showLotColumns ? ' visible' : ''}" ${firstColStyle}></th>`;
+                totalsRow += `<th class="number-col ${bt.lot_pnl >= 0 ? 'positive' : 'negative'} lot-column${showLotColumns ? ' visible' : ''}" ${firstColStyle}>${bt.lot_pnl !== 0 ? bt.lot_pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</th>`;
                 totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dbuy >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
