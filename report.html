@@ -568,6 +568,8 @@
         .time-column { display: none; }
         .time-column.visible { display: table-cell; }
         .report-table td.time-column, .report-table th.time-column { color: #475569; font-weight: 400; }
+        .lot-column { display: none; }
+        .lot-column.visible { display: table-cell; }
         
         .report-table td.price-column, .report-table th.price-column { color: #475569; font-weight: 400; }
         
@@ -761,6 +763,9 @@
             <button id="toggleTimeBtn" onclick="toggleTimeColumns()">
                 <span id="timeBtnText">Show Time</span>
             </button>
+            <button id="toggleLotBtn" onclick="toggleLotColumns()">
+                <span id="lotBtnText">Show Lot</span>
+            </button>
             <div class="control-group">
                 <label class="control-label">Symbol:</label>
                 <input type="text" id="symbolFilter" placeholder="Filter...">
@@ -829,6 +834,8 @@
         let originalBuySellState = false; // Tracks original Buy/Sell/Qty state before strategy selection
         let showTimeColumns = false; // Time columns hidden by default
         let originalTimeState = false; // Tracks original Time state before strategy selection
+        let showLotColumns = false; // Lot columns hidden by default
+        let originalLotState = false; // Tracks original Lot state before strategy selection
         let columnFilters = {};
         let currentFilterColumn = null;
         let selectedStrategyNumber = null; // null means "All Strategies"
@@ -1810,6 +1817,7 @@
             if (selectedStrategyNumber === null && strategy !== null) {
                 originalBuySellState = showBuySellColumns;
                 originalTimeState = showTimeColumns;
+                originalLotState = showLotColumns;
             }
             
             selectedStrategyNumber = strategy;
@@ -1827,6 +1835,10 @@
                 // Restore original Time state
                 showTimeColumns = originalTimeState;
                 document.getElementById('timeBtnText').textContent = showTimeColumns ? 'Hide Time' : 'Show Time';
+                
+                // Restore original Lot state
+                showLotColumns = originalLotState;
+                document.getElementById('lotBtnText').textContent = showLotColumns ? 'Hide Lot' : 'Show Lot';
             } else {
                 elements.strategyNumberText.textContent = strategy;
                 // Combine manual filter + auto filter based on selected strategy
@@ -1849,6 +1861,10 @@
                 // Temporarily enable Time columns for specific strategy
                 showTimeColumns = true;
                 document.getElementById('timeBtnText').textContent = 'Hide Time';
+                
+                // Temporarily enable Lot columns for specific strategy
+                showLotColumns = true;
+                document.getElementById('lotBtnText').textContent = 'Hide Lot';
             }
             
             saveBrokerFilters();
@@ -2085,7 +2101,7 @@
             }
             
             const colors = ['#fef5f5', '#fefaf5', '#fefef5', '#f5fef8', '#f5f8fe', '#f8f5fe'];
-            const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
+            const colsPerStrategy = (showLotColumns ? 2 : 0) + 4 + (showTimeColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
             
             const totals = { profit: 0 };
             const brokerTotals = {};
@@ -2119,13 +2135,15 @@
                 const groupStyle = `style=""`;
                 const lastColStyle = `style="border-right: 1px solid #d1d5db;"`;
                 
-                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${firstColStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col lot-column${showLotColumns ? ' visible' : ''}" ${firstColStyle}></th>`;
+                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dbuy >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dsell >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dsell.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
+                totalsRow += `<th class="number-col lot-column${showLotColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColStyle}></th>`;
             });
@@ -2164,8 +2182,8 @@
                 const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
                 const lastColBorder = 'border-right: 1px solid #d1d5db;';
                 
-                const fields = ['pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'sell', 'buy'];
-                const fieldLabels = { pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', buy: 'BUY', sell: 'SELL' };
+                const fields = ['lot_pnl', 'pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'lot_size', 'sell', 'buy'];
+                const fieldLabels = { lot_pnl: 'LOT PNL', pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', lot_size: 'LOT SIZE', buy: 'BUY', sell: 'SELL' };
                 
                 fields.forEach((field, fIdx) => {
                     const filterKey = `${stratName}_${field}`;
@@ -2173,13 +2191,15 @@
                     const filterIcon = hasFilter ? ' active' : '';
                     const isBuySell = ['qty', 'buy', 'sell'].includes(field);
                     const isTime = ['entime', 'extime'].includes(field);
+                    const isLot = ['lot_size', 'lot_pnl'].includes(field);
                     const isPrice = ['qty', 'buy', 'sell'].includes(field);
                     const border = fIdx === 0 ? firstColBorder : (fIdx === fields.length - 1 ? lastColBorder : '');
                     const buySellClass = isBuySell ? ` buy-sell-column${showBuySellColumns ? ' visible' : ''}` : '';
                     const timeClass = isTime ? ` time-column${showTimeColumns ? ' visible' : ''}` : '';
+                    const lotClass = isLot ? ` lot-column${showLotColumns ? ' visible' : ''}` : '';
                     const priceClass = isPrice ? ' price-column' : '';
                     
-                    headerRow2 += `<th class="number-col sortable${buySellClass}${timeClass}${priceClass}" data-stratname="${stratName}" data-field="${field}" style="${baseBg} ${border}">
+                    headerRow2 += `<th class="number-col sortable${buySellClass}${timeClass}${lotClass}${priceClass}" data-stratname="${stratName}" data-field="${field}" style="${baseBg} ${border}">
                         ${fieldLabels[field]}
                         <span class="filter-icon${filterIcon}" data-filter-strat="${stratName}" data-filter-field="${field}">🔽</span>
                     </th>`;
@@ -2231,24 +2251,29 @@
                 const entime = details.entime || '';
                 const extime = details.extime || '';
                 const qty = details.qty || 0;
+                const lot_size = details.lot !== undefined && details.lot !== null ? details.lot : '';
+                const lot_pnl = (lot_size && lot_size !== 0) ? (pnl / lot_size) : 0;
                 
                 const bgColor = colors[index % colors.length];
                 const pnlClass = pnl > 0 ? 'positive' : pnl < 0 ? 'negative' : '';
                 const dpnlClass = dpnl > 0 ? 'positive' : dpnl < 0 ? 'negative' : '';
                 const dbuyClass = dbuy > 0 ? 'positive' : dbuy < 0 ? 'negative' : '';
                 const dsellClass = dsell > 0 ? 'positive' : dsell < 0 ? 'negative' : '';
+                const lot_pnlClass = lot_pnl > 0 ? 'positive' : lot_pnl < 0 ? 'negative' : '';
                 const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
                 const groupBorder = `style="background-color: ${bgColor}; ${firstColBorder}"`;
                 const groupBorderNoFirst = `style="background-color: ${bgColor};"`;
                 const lastColBorder = 'style="background-color: ' + bgColor + '; border-right: 1px solid #d1d5db;"';
                 
-                row += `<td class="number-col ${pnlClass}" ${groupBorder}>${pnl !== 0 ? pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${lot_pnlClass} lot-column${showLotColumns ? ' visible' : ''}" ${groupBorder}>${lot_pnl !== 0 ? lot_pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${pnlClass}" ${groupBorderNoFirst}>${pnl !== 0 ? pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
                 row += `<td class="number-col ${dpnlClass}" ${groupBorderNoFirst}>${dpnl !== 0 ? dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
                 row += `<td class="number-col ${dbuyClass}" ${groupBorderNoFirst}>${dbuy !== 0 ? dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
                 row += `<td class="number-col ${dsellClass}" ${groupBorderNoFirst}>${dsell !== 0 ? dsell.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
                 row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${entime}</td>`;
                 row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${extime}</td>`;
                 row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${qty !== 0 ? qty : ''}</td>`;
+                row += `<td class="number-col price-column lot-column${showLotColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${lot_size && lot_size !== 0 ? parseFloat(lot_size).toFixed(1) : ''}</td>`;
                 row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
                 row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
             });
@@ -2272,7 +2297,7 @@
             const endIndex = Math.min(startIndex + rowsPerPage, filteredTrades.length);
             const pageData = filteredTrades.slice(startIndex, endIndex);
 
-            const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
+            const colsPerStrategy = (showLotColumns ? 2 : 0) + 4 + (showTimeColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
             const totalCols = 9 + (showTimeColumns ? 2 : 0) + (displayStrategies.length * colsPerStrategy);
 
             if (filteredTrades.length === 0) {
@@ -2379,8 +2404,26 @@
             th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
 
             filteredTrades.sort((a, b) => {
-                const valA = a.strategyDetails?.[stratName]?.[field] || 0;
-                const valB = b.strategyDetails?.[stratName]?.[field] || 0;
+                let valA, valB;
+                
+                // Handle lot_pnl specially since it's calculated
+                if (field === 'lot_pnl') {
+                    const detailsA = a.strategyDetails?.[stratName] || {};
+                    const detailsB = b.strategyDetails?.[stratName] || {};
+                    const lotA = detailsA.lot || 0;
+                    const lotB = detailsB.lot || 0;
+                    const pnlA = detailsA.pnl || 0;
+                    const pnlB = detailsB.pnl || 0;
+                    valA = (lotA && lotA !== 0) ? (pnlA / lotA) : 0;
+                    valB = (lotB && lotB !== 0) ? (pnlB / lotB) : 0;
+                } else if (field === 'lot_size') {
+                    // Handle lot_size which is stored as 'lot'
+                    valA = a.strategyDetails?.[stratName]?.lot || 0;
+                    valB = b.strategyDetails?.[stratName]?.lot || 0;
+                } else {
+                    valA = a.strategyDetails?.[stratName]?.[field] || 0;
+                    valB = b.strategyDetails?.[stratName]?.[field] || 0;
+                }
 
                 if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
                 if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
@@ -2404,11 +2447,18 @@
             const headers = ['S.No', 'Date', 'Strategy', 'Trade', 'Symbol', 'EN TIME', 'EX TIME', 'Qty', 'Entry', 'Exit', 'Profit'];
             displayStrategies.forEach(stratName => {
                 const displayName = formatStrategyName(stratName);
+                headers.push(`${displayName} LOT PNL`);
                 headers.push(`${displayName} PNL`, `${displayName} DPNL`);
                 headers.push(`${displayName} DBUY`, `${displayName} DSELL`);
                 headers.push(`${displayName} entime`, `${displayName} extime`);
                 if (showBuySellColumns) {
-                    headers.push(`${displayName} QTY`, `${displayName} SELL`, `${displayName} BUY`);
+                    headers.push(`${displayName} QTY`);
+                }
+                if (showLotColumns) {
+                    headers.push(`${displayName} LOT SIZE`);
+                }
+                if (showBuySellColumns) {
+                    headers.push(`${displayName} SELL`, `${displayName} BUY`);
                 }
             });
             
@@ -2422,11 +2472,20 @@
                 
                 displayStrategies.forEach(stratName => {
                     const details = trade.strategyDetails?.[stratName] || {};
+                    const lot = details.lot || 0;
+                    const lot_pnl = (lot && lot !== 0) ? ((details.pnl || 0) / lot) : 0;
+                    row.push(lot_pnl !== 0 ? lot_pnl.toFixed(0) : '');
                     row.push(details.pnl || '', details.dpnl || '');
                     row.push(details.dbuy || '', details.dsell || '');
                     row.push(details.entime || '', details.extime || '');
                     if (showBuySellColumns) {
-                        row.push(details.qty || '', details.sell || '', details.buy || '');
+                        row.push(details.qty || '');
+                    }
+                    if (showLotColumns) {
+                        row.push(lot !== 0 ? parseFloat(lot).toFixed(1) : '');
+                    }
+                    if (showBuySellColumns) {
+                        row.push(details.sell || '', details.buy || '');
                     }
                 });
                 
@@ -2471,11 +2530,27 @@
             renderTable();
         }
 
+        function toggleLotColumns() {
+            showLotColumns = !showLotColumns;
+            
+            // Update original state if we're on "All Strategies"
+            if (selectedStrategyNumber === null) {
+                originalLotState = showLotColumns;
+            }
+            
+            document.getElementById('lotBtnText').textContent = showLotColumns ? 'Hide Lot' : 'Show Lot';
+            const visibleBrokerStrategies = brokerStrategies.filter(s => !hiddenBrokerStrategies.has(s));
+            const showAll = !brokerStrategies.length || visibleBrokerStrategies.length === brokerStrategies.length;
+            buildTableHeaders(showAll ? 'all' : visibleBrokerStrategies);
+            renderTable();
+        }
+
         window.addEventListener('DOMContentLoaded', initEventListeners);
         
         window.addEventListener('DOMContentLoaded', () => {
             // Initialize button text based on default state
             document.getElementById('timeBtnText').textContent = showTimeColumns ? 'Hide Time' : 'Show Time';
+            document.getElementById('lotBtnText').textContent = showLotColumns ? 'Hide Lot' : 'Show Lot';
         });
 
         window.addEventListener('message', async (event) => {
