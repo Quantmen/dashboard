@@ -127,6 +127,8 @@
             100% { transform: rotate(360deg); }
         }
     </style>
+    <!-- XLSX Library for data processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -142,12 +144,16 @@
         <span id="mainToastText"></span>
     </div>
 
+    <!-- Hidden file input for centralized file upload -->
+    <input type="file" id="hiddenFileInput" accept=".xlsx,.xls" style="display: none;" />
+
     <iframe id="sidebar" src="sidebar.html"></iframe>
     <div class="main-content-container" id="mainContentContainer">
         <iframe id="dashboardFrame" class="main-content-frame active" src="dashboard.html"></iframe>
         <iframe id="strategyFrame" class="main-content-frame" src="strategy-performance.html"></iframe>
         <iframe id="drawdownFrame" class="main-content-frame" src="drawdown.html"></iframe>
         <iframe id="reportFrame" class="main-content-frame" src="report.html"></iframe>
+        <iframe id="chartAnalysisFrame" class="main-content-frame" src="chart-analysis.html"></iframe>
     </div>
 
     <script>
@@ -158,6 +164,8 @@
         const strategyFrame = document.getElementById('strategyFrame');
         const drawdownFrame = document.getElementById('drawdownFrame');
         const reportFrame = document.getElementById('reportFrame');
+        const chartAnalysisFrame = document.getElementById('chartAnalysisFrame');
+        const hiddenFileInput = document.getElementById('hiddenFileInput');
         
         // Loading overlay elements
         const loadingOverlay = document.getElementById('mainLoadingOverlay');
@@ -165,6 +173,11 @@
         
         let currentTradesData = null;
         let currentPage = 'dashboard.html';
+
+        // Constants for Google Drive integration
+        const DEFAULT_DRIVE_XLSX_URL = "";
+        const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+        const LS_KEY_DRIVE_URL = "driveXlsxUrl";
 
         function showMainLoading(text, progress) {
             let message = 'Loading dashboard data...';
@@ -228,6 +241,18 @@
                 case 'RELOAD_PAGE':
                     window.location.reload();
                     break;
+                case 'TRIGGER_FILE_UPLOAD':
+                    // Sidebar requests file upload - trigger the hidden input
+                    hiddenFileInput.click();
+                    break;
+                case 'TRIGGER_DRIVE_LINK_SET':
+                    // Sidebar requests to set Google Drive link
+                    setGoogleDriveLink();
+                    break;
+                case 'TRIGGER_DRIVE_LOAD':
+                    // Sidebar requests to load from Google Drive
+                    loadFromGoogleDrive();
+                    break;
             }
         });
 
@@ -255,6 +280,7 @@
             strategyFrame.classList.remove('active');
             drawdownFrame.classList.remove('active');
             reportFrame.classList.remove('active');
+            chartAnalysisFrame.classList.remove('active');
             
             if (page === 'dashboard.html') {
                 dashboardFrame.classList.add('active');
@@ -264,6 +290,8 @@
                 drawdownFrame.classList.add('active');
             } else if (page === 'report.html') {
                 reportFrame.classList.add('active');
+            } else if (page === 'chart-analysis.html') {
+                chartAnalysisFrame.classList.add('active');
             }
             
             currentPage = page;
@@ -285,6 +313,8 @@
             strategyFrame.contentWindow.postMessage(message, '*');
             drawdownFrame.contentWindow.postMessage(message, '*');
             reportFrame.contentWindow.postMessage(message, '*');
+            chartAnalysisFrame.contentWindow.postMessage(message, '*');
+            sidebar.contentWindow.postMessage(message, '*');
         }
 
         // Show toast notification at bottom center of screen
@@ -309,6 +339,314 @@
                 }, 300);
             }, 2000);
         }
+
+        // ====================================================================
+        // CENTRALIZED DATA READING FUNCTIONALITY
+        // ====================================================================
+
+        // File upload handler
+        hiddenFileInput.addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            showMainLoading('Reading file...');
+            try {
+                const buffer = await file.arrayBuffer();
+                const wb = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+                await processWorkbook(wb);
+                showMainToast('✅ Data loaded successfully');
+                hideMainLoading();
+                event.target.value = ''; // Reset input
+            } catch (err) {
+                console.error('File upload error:', err);
+                showMainToast('❌ Failed to load file', false);
+                hideMainLoading();
+            }
+        });
+
+        // Google Drive link management
+        function normalizeGSheetUrl(url) {
+            const u = (url || '').trim();
+            if (!u) return '';
+            if (u.includes('/pubhtml')) return u.replace('/pubhtml', '/pub?output=xlsx');
+            if (u.includes('/pub?output=')) return u.replace(/output=\w+/i, 'output=xlsx');
+            const match = u.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match) {
+                return `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=xlsx`;
+            }
+            return u;
+        }
+
+        function getDriveUrl() {
+            return localStorage.getItem(LS_KEY_DRIVE_URL) || DEFAULT_DRIVE_XLSX_URL || "";
+        }
+
+        function getBustedDriveUrl() {
+            const base = getDriveUrl();
+            if (!base) return "";
+            const sep = base.includes('?') ? '&' : '?';
+            return `${base}${sep}cb=${Date.now()}`;
+        }
+
+        function setGoogleDriveLink() {
+            const current = getDriveUrl();
+            const input = prompt('Paste your Google Sheets link (leave blank to clear):', current);
+            if (input === null) {
+                // User cancelled
+                return;
+            }
+            const norm = normalizeGSheetUrl(input);
+            localStorage.setItem(LS_KEY_DRIVE_URL, norm);
+            showMainToast(norm ? '✅ Link saved!' : '🔄 Link cleared', norm);
+            
+            // Notify sidebar about link update
+            broadcastMessage({ type: 'DRIVE_LINK_UPDATED', url: norm });
+        }
+
+        async function loadFromGoogleDrive() {
+            const url = getDriveUrl();
+            if (!url) {
+                console.log('No Drive URL configured');
+                return;
+            }
+
+            const maxRetries = 2;
+            let lastError = null;
+
+            showMainLoading('Connecting to Google Drive...');
+
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    const fetchUrl = `${CORS_PROXY}${encodeURIComponent(getBustedDriveUrl())}`;
+                    const response = await fetch(fetchUrl, { 
+                        method: 'GET',
+                        headers: { 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    showMainLoading('Downloading file...');
+                    const arrayBuffer = await response.arrayBuffer();
+
+                    if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+                        throw new Error('Empty response from server');
+                    }
+
+                    let workbook;
+                    try {
+                        workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    } catch (parseErr) {
+                        throw new Error('Parsing workbook error: ' + parseErr.message);
+                    }
+
+                    showMainLoading('Processing Google Sheet...');
+                    await processWorkbook(workbook);
+
+                    showMainToast('✅ Data updated');
+                    hideMainLoading();
+                    return;
+
+                } catch (err) {
+                    lastError = err;
+                    console.error(`Drive fetch attempt ${attempt + 1} failed:`, err);
+
+                    if (attempt < maxRetries) {
+                        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+                        showMainLoading(`Retrying... (${attempt + 2}/${maxRetries + 1})`);
+                    }
+                }
+            }
+
+            // After all retries failed
+            hideMainLoading();
+            showMainToast('❌ Update failed: ' + (lastError?.message || ''), false);
+        }
+
+        // Process Excel workbook
+        async function processWorkbook(workbook) {
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            if (!rows || rows.length === 0) return;
+
+            const headers = rows[0];
+            const totalRows = rows.length - 1;
+
+            const cols = {};
+            const stratCols = {
+                pnl: {}, pnltax: {}, dpnl: {}, br: {},
+                buy: {}, sell: {}, dbuy: {}, dsell: {},
+                qty: {}, unpnl: {}, margin: {}, lot: {}, apro: {},
+                entime: {}, extime: {}
+            };
+
+            headers.forEach((h, i) => {
+                if (!h) return;
+                const hs = h.toString();
+                cols[h] = i;
+
+                const m = hs.match(/^([A-Za-z]+)_(.+)$/);
+                if (m) {
+                    const prefix = m[1].toLowerCase();
+                    const name = m[2];
+                    if (stratCols[prefix]) {
+                        stratCols[prefix][name] = i;
+                    }
+                } else if (hs.startsWith('A.PRO')) {
+                    stratCols.apro[hs] = i;
+                }
+            });
+
+            const strategies = Object.keys(stratCols.pnl);
+            const trades = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || !row.length) continue;
+
+                if (totalRows > 10000 && i % 1000 === 0) {
+                    const pct = Math.floor((i / totalRows) * 100);
+                    showMainLoading('Processing...', `${pct}% (${i.toLocaleString()} / ${totalRows.toLocaleString()})`);
+                    await new Promise(r => setTimeout(r, 0));
+                }
+
+                const trade = {
+                    sno: row[cols['S.NO']] || i,
+                    date: formatDate(row[cols['Date']]),
+                    strategy: row[cols['Strategy']] || 'Unknown',
+                    trade: row[cols['Trade']] || row[cols['trade']] || '',
+                    symbol: row[cols['Symbol']] || 'Unknown',
+                    qty: parseFloat(row[cols['A. Qty']]) || 0,
+                    profit: parseFloat(row[cols['A. Profit']]) || 0,
+                    cumPnl: parseFloat(row[cols['Cumulative PNLTAX']]) || 0,
+                    entry: parseFloat(row[cols['A.EnPrice']]) || 0,
+                    exit: parseFloat(row[cols['A.ExPrice']]) || 0,
+                    a_entime: row[cols['A.EnTime']] || '',
+                    a_extime: row[cols['A.ExTime']] || '',
+                    strategyPnls: {}, strategyPnlTax: {}, strategyDetails: {}, brokerCodes: {}
+                };
+
+                Object.entries(stratCols.apro).forEach(([name, idx]) => {
+                    const pnl = parseFloat(row[idx]) || 0;
+                    trade.strategyPnls[name] = pnl;
+                    trade.strategyPnlTax[name] = pnl;
+                    trade.strategyDetails[name] = {
+                        buy: 0, qty: 0, sell: 0, dbuy: 0, dsell: 0, unpnl: 0, margin: 0,
+                        lot: pnl !== 0 ? 1 : 0, pnl, dpnl: pnl, entime: '', extime: ''
+                    };
+                    trade.brokerCodes[name] = 'A';
+                });
+
+                strategies.forEach(s => {
+                    trade.strategyPnls[s] = parseFloat(row[stratCols.pnl[s]]) || 0;
+                    trade.strategyPnlTax[s] = parseFloat(row[stratCols.pnltax[s]]) || 0;
+                    if (stratCols.br[s]) trade.brokerCodes[s] = row[stratCols.br[s]]?.toString();
+                    const dpnl = parseFloat(row[stratCols.dpnl[s]]) || parseFloat(row[stratCols.pnltax[s]]) || 0;
+
+                    trade.strategyDetails[s] = {
+                        buy: parseFloat(row[stratCols.buy[s]]) || 0,
+                        qty: parseFloat(row[stratCols.qty[s]]) || 0,
+                        sell: parseFloat(row[stratCols.sell[s]]) || 0,
+                        dbuy: parseFloat(row[stratCols.dbuy[s]]) || 0,
+                        dsell: parseFloat(row[stratCols.dsell[s]]) || 0,
+                        unpnl: parseFloat(row[stratCols.unpnl[s]]) || 0,
+                        margin: parseFloat(row[stratCols.margin[s]]) || 0,
+                        lot: parseFloat(row[stratCols.lot[s]]) || 0,
+                        entime: row[stratCols.entime[s]] || '',
+                        extime: row[stratCols.extime[s]] || '',
+                        pnl: trade.strategyPnls[s],
+                        dpnl
+                    };
+                });
+
+                trades.push(trade);
+            }
+
+            await saveData(trades);
+            currentTradesData = trades;
+            broadcastMessage({ type: 'TRADES_DATA', data: trades });
+        }
+
+        function formatDate(val) {
+            if (!val) return '';
+            if (typeof val === 'string') {
+                if (val.includes('T')) {
+                    const d = new Date(val);
+                    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+                }
+                return val;
+            }
+            if (typeof val === 'number') {
+                const d = new Date((val - 25569) * 86400 * 1000);
+                return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+            }
+            try {
+                const d = new Date(val);
+                if (!isNaN(d.getTime())) {
+                    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+                }
+            } catch (e) { }
+            return String(val);
+        }
+
+        function pad(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        async function saveData(trades) {
+            const json = JSON.stringify(trades);
+            const size = json.length;
+            const limit = 4.5 * 1024 * 1024;
+            try {
+                if (size > limit) {
+                    await saveToIndexedDB(trades);
+                    localStorage.setItem('useIndexedDB', 'true');
+                } else {
+                    localStorage.setItem('uploadedTradesData', json);
+                    localStorage.removeItem('useIndexedDB');
+                }
+                localStorage.setItem('dataUploadTime', new Date().toISOString());
+            } catch (err) {
+                console.warn('SaveData fallback to IndexedDB:', err);
+                await saveToIndexedDB(trades);
+                localStorage.setItem('useIndexedDB', 'true');
+                localStorage.setItem('dataUploadTime', new Date().toISOString());
+            }
+        }
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('TradingDashboard', 3);
+                req.onerror = () => reject(req.error);
+                req.onsuccess = () => resolve(req.result);
+                req.onupgradeneeded = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('trades')) {
+                        db.createObjectStore('trades', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        async function saveToIndexedDB(data) {
+            const db = await openDB();
+            const tx = db.transaction(['trades'], 'readwrite');
+            return new Promise((res, rej) => {
+                const req = tx.objectStore('trades').put({
+                    id: 'tradesData',
+                    data,
+                    timestamp: new Date().toISOString()
+                });
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        // Initialize: Try to load from Google Drive on startup
+        (function init() {
+            loadFromGoogleDrive();
+        })();
     </script>
 </body>
 </html>
