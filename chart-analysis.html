@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        .main-content {
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 32px 32px 32px;
+            background: #f8fafc;
+            height: 100vh;
+            width: 100%;
+        }
+        .page-header { margin-bottom: 20px; }
+        .page-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
+        .page-subtitle { font-size: 12px; color: #6b7280; font-weight: 400; }
+        
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            border: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.2s ease;
+            overflow: hidden;
+        }
+        
+        .chart-card:hover { 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05); 
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            letter-spacing: 0.3px;
+        }
+        
+        .chart-toggles {
+            display: flex;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 8px;
+        }
+        
+        .toggle-btn {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .toggle-btn:hover {
+            color: #475569;
+        }
+        
+        .toggle-btn.active {
+            background: white;
+            color: #1e40af;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+        
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Loading State */
+        .loading-state {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .loading-state.active {
+            display: block;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #1e40af;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        .loading-message {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="page-title">Advanced Chart Analysis</div>
+            <div class="page-subtitle">Comprehensive performance visualization across multiple metrics</div>
+        </div>
+        
+        <div class="charts-grid">
+            <!-- Net PNL Equity Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Net PNL Equity</div>
+                    <div class="chart-toggles">
+                        <button class="toggle-btn active" data-chart="pnl" data-period="day">Day</button>
+                        <button class="toggle-btn" data-chart="pnl" data-period="week">Week</button>
+                        <button class="toggle-btn" data-chart="pnl" data-period="month">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pnlChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Drawdown Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Drawdown</div>
+                    <div class="chart-toggles">
+                        <button class="toggle-btn active" data-chart="drawdown" data-period="day">Day</button>
+                        <button class="toggle-btn" data-chart="drawdown" data-period="week">Week</button>
+                        <button class="toggle-btn" data-chart="drawdown" data-period="month">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="drawdownChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- PNL Bar Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">PNL</div>
+                    <div class="chart-toggles">
+                        <button class="toggle-btn" data-chart="pnlbar" data-period="day">Day</button>
+                        <button class="toggle-btn" data-chart="pnlbar" data-period="week">Week</button>
+                        <button class="toggle-btn active" data-chart="pnlbar" data-period="month">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pnlBarChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Strategy Comparison Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Strategy Comparison</div>
+                    <div class="chart-toggles">
+                        <button class="toggle-btn" data-chart="compare" data-period="day">Day</button>
+                        <button class="toggle-btn" data-chart="compare" data-period="week">Week</button>
+                        <button class="toggle-btn active" data-chart="compare" data-period="month">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="compareChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <div class="loading-message">Loading chart data...</div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let allTrades = [];
+        const charts = {
+            pnl: null,
+            drawdown: null,
+            pnlbar: null,
+            compare: null
+        };
+        const activePeriods = {
+            pnl: 'day',
+            drawdown: 'day',
+            pnlbar: 'month',
+            compare: 'month'
+        };
+
+        // Elements
+        const elements = {
+            loadingState: document.getElementById('loadingState'),
+            pnlChart: document.getElementById('pnlChart'),
+            drawdownChart: document.getElementById('drawdownChart'),
+            pnlBarChart: document.getElementById('pnlBarChart'),
+            compareChart: document.getElementById('compareChart')
+        };
+
+        // Initialize
+        (function init() {
+            loadStoredData();
+            setupEventListeners();
+            initializeCharts();
+            window.addEventListener('message', handleParentMessage);
+            
+            // Request data from parent on load
+            setTimeout(() => {
+                window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
+            }, 100);
+        })();
+
+        function setupEventListeners() {
+            // Toggle button listeners
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const chartType = this.dataset.chart;
+                    const period = this.dataset.period;
+                    
+                    // Update active state for this chart's toggles
+                    document.querySelectorAll(`.toggle-btn[data-chart="${chartType}"]`).forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Update period and refresh chart
+                    activePeriods[chartType] = period;
+                    updateChart(chartType);
+                });
+            });
+        }
+
+        function handleParentMessage(event) {
+            const { type, data } = event.data;
+            
+            if (type === 'TRADES_DATA' && data) {
+                console.log('Received trades data:', data.length, 'trades');
+                allTrades = data;
+                updateAllCharts();
+            } else if (type === 'UPDATE_DATA' && data) {
+                const tradesCount = data.tradesData ? data.tradesData.length : 0;
+                console.log('Received update data:', tradesCount, 'trades');
+                allTrades = data.tradesData || [];
+                updateAllCharts();
+            }
+        }
+
+        function loadStoredData() {
+            try {
+                const stored = localStorage.getItem('dashboardData');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    console.log('Loaded stored data:', data);
+                    allTrades = data.tradesData || data || [];
+                    console.log('All trades loaded:', allTrades.length);
+                    if (allTrades.length > 0) {
+                        console.log('First trade sample:', allTrades[0]);
+                        console.log('Last trade sample:', allTrades[allTrades.length - 1]);
+                        updateAllCharts();
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to load stored data:', e);
+            }
+        }
+
+        // Data aggregation functions
+        function aggregateByPeriod(trades, period) {
+            if (!trades || trades.length === 0) {
+                console.warn('No trades to aggregate');
+                return [];
+            }
+            
+            console.log('Aggregating', trades.length, 'trades by', period);
+            
+            // First, sort trades chronologically to ensure proper ordering
+            const sortedTrades = [...trades].sort((a, b) => {
+                return compareDates(a.date, b.date);
+            });
+            
+            console.log('First trade date:', sortedTrades[0].date, 'cumPnl:', sortedTrades[0].cumPnl);
+            console.log('Last trade date:', sortedTrades[sortedTrades.length - 1].date, 'cumPnl:', sortedTrades[sortedTrades.length - 1].cumPnl);
+            
+            const aggregated = new Map();
+            
+            sortedTrades.forEach((trade, idx) => {
+                const key = getAggregationKey(trade.date, period);
+                if (!aggregated.has(key)) {
+                    aggregated.set(key, {
+                        date: key,
+                        profit: 0,
+                        cumPnl: 0,
+                        drawdown: 0,
+                        peak: 0,
+                        trades: [],
+                        lastCumPnl: 0,
+                        lastTradeIndex: -1
+                    });
+                }
+                
+                const agg = aggregated.get(key);
+                agg.profit += trade.profit || 0;
+                agg.trades.push(trade);
+                
+                // Keep track of the last trade (by index, since we sorted)
+                agg.lastTradeIndex = idx;
+                agg.lastCumPnl = trade.cumPnl !== undefined ? trade.cumPnl : 0;
+            });
+            
+            // Convert to array and calculate cumulative values
+            const result = Array.from(aggregated.values()).sort((a, b) => {
+                return compareDates(a.date, b.date);
+            });
+            
+            console.log('Aggregated into', result.length, 'data points');
+            
+            // Log aggregated periods for debugging
+            if (result.length > 0 && result.length <= 20) {
+                console.log('All aggregated periods:');
+                result.forEach((item, i) => {
+                    console.log(`  ${i}: ${item.date} - trades: ${item.trades.length}, lastCumPnl: ${item.lastCumPnl}`);
+                });
+            }
+            
+            // For aggregated data, use the cumPnl from the last trade in each period
+            // This ensures we have the correct cumulative value at the end of each period
+            let peak = 0;
+            let runningCumPnl = 0;
+            let prevCumPnl = 0;
+            
+            result.forEach((item, index) => {
+                // Use the last cumPnl value from the period if available and non-zero
+                if (item.lastCumPnl !== undefined && item.lastCumPnl !== 0) {
+                    item.cumPnl = item.lastCumPnl;
+                } else {
+                    // Fallback: calculate cumulative from period profits
+                    runningCumPnl += item.profit;
+                    item.cumPnl = runningCumPnl;
+                    console.log(`Period ${index}: using fallback cumPnl calculation, profit=${item.profit}, cumPnl=${item.cumPnl}`);
+                }
+                
+                // Calculate period profit as the change in cumPnl
+                item.periodProfit = item.cumPnl - prevCumPnl;
+                
+                console.log(`Period ${item.date}: cumPnl=${item.cumPnl}, prevCumPnl=${prevCumPnl}, periodProfit=${item.periodProfit}`);
+                
+                prevCumPnl = item.cumPnl;
+                
+                if (item.cumPnl > peak) {
+                    peak = item.cumPnl;
+                }
+                item.peak = peak;
+                item.drawdown = item.cumPnl - peak;
+            });
+            
+            if (result.length > 0) {
+                console.log('Sample aggregated data:', {
+                    date: result[0].date,
+                    profit: result[0].profit,
+                    lastCumPnl: result[0].lastCumPnl,
+                    cumPnl: result[0].cumPnl,
+                    peak: result[0].peak,
+                    drawdown: result[0].drawdown,
+                    periodProfit: result[0].periodProfit
+                });
+                console.log('Final values:', {
+                    date: result[result.length - 1].date,
+                    cumPnl: result[result.length - 1].cumPnl,
+                    peak: result[result.length - 1].peak,
+                    drawdown: result[result.length - 1].drawdown,
+                    periodProfit: result[result.length - 1].periodProfit
+                });
+                console.log('ℹ️  Drawdown = cumPnl - peak (negative when below peak, 0 at peak)');
+            }
+            
+            return result;
+        }
+
+        function getAggregationKey(dateStr, period) {
+            if (!dateStr) return '';
+            
+            const [day, month, year] = dateStr.split('/').map(Number);
+            const date = new Date(2000 + year, month - 1, day);
+            
+            if (period === 'day') {
+                return dateStr; // Keep original format
+            } else if (period === 'week') {
+                // Get week number
+                const weekNum = getWeekNumber(date);
+                return `W${weekNum}-${year}`;
+            } else if (period === 'month') {
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const key = `${monthNames[month - 1]}-${String(2000 + year).slice(-2)}`;
+                return key;
+            }
+            
+            return dateStr;
+        }
+
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function compareDates(dateStr1, dateStr2) {
+            // Handle different formats
+            const parseDate = (str) => {
+                if (str.startsWith('W')) {
+                    // Week format: W23-23
+                    const [week, year] = str.substring(1).split('-').map(Number);
+                    return new Date(2000 + year, 0, 1 + (week - 1) * 7);
+                } else if (str.includes('-') && str.length <= 7) {
+                    // Month format: Jan-23
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const [monthStr, year] = str.split('-');
+                    const month = monthNames.indexOf(monthStr);
+                    return new Date(2000 + parseInt(year), month, 1);
+                } else {
+                    // Day format: 15/05/23
+                    const [day, month, year] = str.split('/').map(Number);
+                    return new Date(2000 + year, month - 1, day);
+                }
+            };
+            
+            return parseDate(dateStr1) - parseDate(dateStr2);
+        }
+
+        // Aggregate trades by strategy and period for comparison chart
+        function aggregateByStrategyAndPeriod(trades, period) {
+            if (!trades || trades.length === 0) {
+                console.warn('No trades to aggregate by strategy');
+                return { labels: [], strategies: {} };
+            }
+            
+            console.log('Aggregating by strategy and period:', period);
+            
+            // Sort trades chronologically first
+            const sortedTrades = [...trades].sort((a, b) => {
+                return compareDates(a.date, b.date);
+            });
+            
+            // Get unique strategies
+            const strategies = {};
+            const periodKeys = new Set();
+            
+            // Group trades by strategy and period
+            sortedTrades.forEach(trade => {
+                const strategy = trade.strategy || 'Unknown';
+                const periodKey = getAggregationKey(trade.date, period);
+                
+                if (!strategies[strategy]) {
+                    strategies[strategy] = new Map();
+                }
+                
+                if (!strategies[strategy].has(periodKey)) {
+                    strategies[strategy].set(periodKey, {
+                        date: periodKey,
+                        profit: 0,
+                        trades: [],
+                        lastCumPnl: 0
+                    });
+                }
+                
+                const agg = strategies[strategy].get(periodKey);
+                agg.profit += trade.profit || 0;
+                agg.trades.push(trade);
+                agg.lastCumPnl = trade.cumPnl !== undefined ? trade.cumPnl : 0;
+                
+                periodKeys.add(periodKey);
+            });
+            
+            // Convert to sorted arrays and calculate cumulative values per strategy
+            const sortedPeriods = Array.from(periodKeys).sort((a, b) => compareDates(a, b));
+            
+            const result = { labels: sortedPeriods, strategies: {} };
+            
+            for (const [strategyName, periodMap] of Object.entries(strategies)) {
+                const strategyData = [];
+                let strategyCumPnl = 0;
+                
+                sortedPeriods.forEach(periodKey => {
+                    if (periodMap.has(periodKey)) {
+                        const periodData = periodMap.get(periodKey);
+                        // Add the profit from this period to strategy cumulative
+                        strategyCumPnl += periodData.profit;
+                        strategyData.push(strategyCumPnl);
+                    } else {
+                        // No trades in this period for this strategy
+                        if (period === 'day') {
+                            // For day view: carry forward the previous value (line continues)
+                            strategyData.push(strategyCumPnl);
+                        } else {
+                            // For week/month view: create a gap in the line
+                            strategyData.push(null);
+                        }
+                    }
+                });
+                
+                result.strategies[strategyName] = strategyData;
+            }
+            
+            console.log('Strategies found:', Object.keys(result.strategies).join(', '));
+            
+            return result;
+        }
+
+        function formatLabel(dateStr, period) {
+            if (period === 'day') {
+                const [day, month] = dateStr.split('/');
+                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                return `${day.padStart(2, '0')}-${monthNames[parseInt(month) - 1] || ''}`;
+            } else if (period === 'week') {
+                return dateStr; // Already formatted as W23-23
+            } else {
+                return dateStr; // Already formatted as Jan-23
+            }
+        }
+
+        // Chart initialization
+        function initializeCharts() {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'white',
+                        borderWidth: 2,
+                        padding: 14,
+                        displayColors: false,
+                        titleFont: { size: 12, weight: '600', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' },
+                        bodyFont: { size: 14, weight: '700', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' },
+                        cornerRadius: 8,
+                        caretSize: 6,
+                        titleColor: '#64748b',
+                        bodyColor: '#1e293b'
+                    }
+                },
+                scales: {
+                    y: {
+                        display: true,
+                        position: 'right',
+                        grid: { 
+                            color: 'rgba(148, 163, 184, 0.08)',
+                            lineWidth: 1,
+                            drawBorder: false,
+                            drawTicks: false
+                        },
+                        border: { display: false },
+                        ticks: {
+                            font: { size: 10, weight: '500', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' },
+                            color: '#94a3b8',
+                            padding: 8,
+                            maxTicksLimit: 8,
+                            callback: value => {
+                                if (value === 0) return '₹0';
+                                if (Math.abs(value) >= 100000) return `₹${Math.round(value / 100000)}L`;
+                                if (Math.abs(value) >= 1000) return `₹${Math.round(value / 1000)}K`;
+                                return `₹${Math.round(value)}`;
+                            }
+                        }
+                    },
+                    x: {
+                        display: true,
+                        grid: { display: false, drawBorder: false },
+                        border: { display: false },
+                        ticks: {
+                            font: { size: 10, weight: '500', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' },
+                            color: '#94a3b8',
+                            maxTicksLimit: 10,
+                            padding: 6
+                        }
+                    }
+                },
+                interaction: { intersect: false, mode: 'index' },
+                elements: {
+                    line: {
+                        borderCapStyle: 'round',
+                        borderJoinStyle: 'round'
+                    }
+                }
+            };
+
+            // Net PNL Equity Chart
+            charts.pnl = new Chart(elements.pnlChart, {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: '#059669', backgroundColor: createGradient(elements.pnlChart, '#059669'), borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#059669', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, fill: true, tension: 0.4 }] },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        ...commonOptions.plugins,
+                        tooltip: {
+                            ...commonOptions.plugins.tooltip,
+                            borderColor: '#059669',
+                            callbacks: {
+                                title: ctx => ctx[0].label,
+                                label: ctx => `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Drawdown Chart
+            charts.drawdown = new Chart(elements.drawdownChart, {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: '#dc2626', backgroundColor: createGradient(elements.drawdownChart, '#dc2626'), borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#dc2626', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, fill: true, tension: 0.4 }] },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        ...commonOptions.plugins,
+                        tooltip: {
+                            ...commonOptions.plugins.tooltip,
+                            borderColor: '#dc2626',
+                            callbacks: {
+                                title: ctx => ctx[0].label,
+                                label: ctx => `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                            }
+                        }
+                    }
+                }
+            });
+
+            // PNL Bar Chart
+            charts.pnlbar = new Chart(elements.pnlBarChart, {
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        data: [], 
+                        backgroundColor: [],
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8
+                    }] 
+                },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        ...commonOptions.plugins,
+                        tooltip: {
+                            ...commonOptions.plugins.tooltip,
+                            borderColor: '#059669',
+                            callbacks: {
+                                title: ctx => ctx[0].label,
+                                label: ctx => `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                            }
+                        }
+                    },
+                    scales: {
+                        ...commonOptions.scales,
+                        y: {
+                            ...commonOptions.scales.y,
+                            beginAtZero: true,
+                            grace: '5%'
+                        }
+                    }
+                }
+            });
+
+
+            // Strategy Comparison Chart
+            charts.compare = new Chart(elements.compareChart, {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [] // Will be populated dynamically based on strategies
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            align: 'start',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 8,
+                                font: { 
+                                    size: 10, 
+                                    weight: '600',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                },
+                                color: '#475569',
+                                usePointStyle: false,
+                                generateLabels: (chart) => {
+                                    // Custom label generation to show performance indicators
+                                    return chart.data.datasets.map((dataset, i) => ({
+                                        text: dataset.label,
+                                        fillStyle: dataset.borderColor,
+                                        strokeStyle: dataset.borderColor,
+                                        lineWidth: dataset.borderWidth,
+                                        hidden: false,
+                                        index: i,
+                                        lineDash: dataset.borderDash || []
+                                    }));
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            borderWidth: 2,
+                            padding: 14,
+                            displayColors: true,
+                            titleFont: { 
+                                size: 12, 
+                                weight: '600',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            bodyFont: { 
+                                size: 13, 
+                                weight: '600',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            cornerRadius: 8,
+                            caretSize: 6,
+                            titleColor: '#64748b',
+                            bodyColor: '#1e293b',
+                            boxPadding: 6,
+                            callbacks: {
+                                title: ctx => ctx[0].label,
+                                label: ctx => {
+                                    const label = ctx.dataset.label; // Strategy name only
+                                    const value = ctx.parsed.y;
+                                    return `${label}: ₹${value.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+                                },
+                                labelColor: ctx => ({
+                                    borderColor: ctx.dataset.borderColor,
+                                    backgroundColor: ctx.dataset.borderColor,
+                                    borderWidth: 2,
+                                    borderRadius: 2
+                                })
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: true,
+                            position: 'right',
+                            grid: { 
+                                color: 'rgba(148, 163, 184, 0.08)',
+                                lineWidth: 1,
+                                drawBorder: false,
+                                drawTicks: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' 
+                                },
+                                color: '#94a3b8',
+                                padding: 8,
+                                maxTicksLimit: 8,
+                                callback: value => {
+                                    if (value === 0) return '₹0';
+                                    if (Math.abs(value) >= 100000) return `₹${Math.round(value / 100000)}L`;
+                                    if (Math.abs(value) >= 1000) return `₹${Math.round(value / 1000)}K`;
+                                    return `₹${Math.round(value)}`;
+                                }
+                            }
+                        },
+                        x: {
+                            display: true,
+                            grid: { 
+                                display: false,
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                },
+                                color: '#94a3b8',
+                                maxTicksLimit: 10,
+                                padding: 6
+                            }
+                        }
+                    },
+                    interaction: { 
+                        intersect: false, 
+                        mode: 'index' 
+                    },
+                    elements: {
+                        line: {
+                            borderCapStyle: 'round',
+                            borderJoinStyle: 'round'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createGradient(canvas, color) {
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            
+            if (color === '#059669' || color === '#10b981') {
+                gradient.addColorStop(0, 'rgba(5, 150, 105, 0.15)');
+                gradient.addColorStop(1, 'rgba(5, 150, 105, 0)');
+            } else if (color === '#dc2626') {
+                gradient.addColorStop(0, 'rgba(220, 38, 38, 0.15)');
+                gradient.addColorStop(1, 'rgba(220, 38, 38, 0)');
+            }
+            
+            return gradient;
+        }
+
+        // Update functions
+        function updateAllCharts() {
+            console.log('Updating all charts with', allTrades.length, 'trades');
+            if (allTrades.length === 0) {
+                console.warn('No trades data available');
+                return;
+            }
+            updateChart('pnl');
+            updateChart('drawdown');
+            updateChart('pnlbar');
+            updateChart('compare');
+        }
+
+        function updateChart(chartType) {
+            if (!charts[chartType]) {
+                console.warn('Chart not initialized:', chartType);
+                return;
+            }
+            
+            if (allTrades.length === 0) {
+                console.warn('No trades data for chart:', chartType);
+                // Clear the chart
+                charts[chartType].data.labels = [];
+                charts[chartType].data.datasets.forEach(dataset => {
+                    dataset.data = [];
+                });
+                charts[chartType].update('none');
+                return;
+            }
+            
+            const period = activePeriods[chartType];
+            console.log(`\n=== Updating ${chartType} chart with period: ${period} ===`);
+            const aggregatedData = aggregateByPeriod(allTrades, period);
+            console.log('Aggregated data points:', aggregatedData.length);
+            
+            if (period === 'month' && aggregatedData.length > 0) {
+                console.log('\n📊 MONTH VIEW - Period Profits:');
+                aggregatedData.forEach((d, i) => {
+                    const periodProfit = d.periodProfit !== undefined ? d.periodProfit.toFixed(2) : '0.00';
+                    const cumPnl = d.cumPnl !== undefined ? d.cumPnl.toFixed(2) : '0.00';
+                    console.log(`  ${d.date}: periodProfit=₹${periodProfit}, cumPnl=₹${cumPnl}, trades=${d.trades.length}`);
+                });
+            }
+            
+            const labels = aggregatedData.map(d => formatLabel(d.date, period));
+            
+            if (chartType === 'pnl') {
+                const data = aggregatedData.map(d => d.cumPnl);
+                charts.pnl.data.labels = labels;
+                charts.pnl.data.datasets[0].data = data;
+                
+                // Update color based on final value
+                const isProfit = data[data.length - 1] >= 0;
+                charts.pnl.data.datasets[0].borderColor = isProfit ? '#059669' : '#dc2626';
+                charts.pnl.data.datasets[0].backgroundColor = createGradient(elements.pnlChart, isProfit ? '#059669' : '#dc2626');
+                charts.pnl.data.datasets[0].pointHoverBackgroundColor = isProfit ? '#059669' : '#dc2626';
+                
+                charts.pnl.update('none');
+            } else if (chartType === 'drawdown') {
+                const data = aggregatedData.map(d => d.drawdown);
+                
+                // Log drawdown values for verification
+                if (period === 'month' && aggregatedData.length > 0) {
+                    console.log('\n📉 DRAWDOWN - Values:');
+                    aggregatedData.forEach((d, i) => {
+                        console.log(`  ${d.date}: drawdown=₹${d.drawdown.toFixed(2)}, cumPnl=₹${d.cumPnl.toFixed(2)}, peak=₹${d.peak.toFixed(2)}`);
+                    });
+                }
+                
+                charts.drawdown.data.labels = labels;
+                charts.drawdown.data.datasets[0].data = data;
+                charts.drawdown.update('none');
+            } else if (chartType === 'pnlbar') {
+                // Show period profits (change in cumPnl for each period)
+                const profitData = aggregatedData.map(d => d.periodProfit || 0);
+                
+                // Create color array - green for positive, red for negative
+                const colors = profitData.map(val => val >= 0 ? '#10b981' : '#ef4444');
+                
+                charts.pnlbar.data.labels = labels;
+                charts.pnlbar.data.datasets[0].data = profitData;
+                charts.pnlbar.data.datasets[0].backgroundColor = colors;
+                charts.pnlbar.update('none');
+            } else if (chartType === 'compare') {
+                // Use strategy aggregation
+                const strategyData = aggregateByStrategyAndPeriod(allTrades, period);
+                const labels = strategyData.labels.map(d => formatLabel(d, period));
+                
+                // Premium professional color palette with better differentiation
+                const premiumColors = [
+                    { solid: '#2563eb', gradient: 'rgba(37, 99, 235, 0.1)' },   // Royal Blue
+                    { solid: '#059669', gradient: 'rgba(5, 150, 105, 0.1)' },   // Emerald
+                    { solid: '#dc2626', gradient: 'rgba(220, 38, 38, 0.1)' },   // Crimson
+                    { solid: '#7c3aed', gradient: 'rgba(124, 58, 237, 0.1)' },  // Purple
+                    { solid: '#ea580c', gradient: 'rgba(234, 88, 12, 0.1)' },   // Orange
+                    { solid: '#0891b2', gradient: 'rgba(8, 145, 178, 0.1)' },   // Cyan
+                    { solid: '#d946ef', gradient: 'rgba(217, 70, 239, 0.1)' },  // Magenta
+                    { solid: '#65a30d', gradient: 'rgba(101, 163, 13, 0.1)' }   // Lime
+                ];
+                
+                // Line style variations for better distinction
+                const lineStyles = [
+                    [],           // Solid
+                    [5, 5],       // Dashed
+                    [2, 3],       // Dotted
+                    [10, 5, 2, 5], // Dash-dot
+                    [],           // Solid
+                    [8, 4],       // Long dash
+                    [3, 3],       // Short dash
+                    [15, 3, 3, 3] // Long dash-dot
+                ];
+                
+                // Calculate final PnL for each strategy to rank them
+                const strategyPerformance = [];
+                for (const [strategyName, data] of Object.entries(strategyData.strategies)) {
+                    const finalPnl = data[data.length - 1] || 0;
+                    strategyPerformance.push({ name: strategyName, pnl: finalPnl, data: data });
+                }
+                
+                // Sort by performance (descending)
+                strategyPerformance.sort((a, b) => b.pnl - a.pnl);
+                
+                // Create datasets with enhanced styling
+                const datasets = [];
+                
+                strategyPerformance.forEach((strategy, index) => {
+                    const colorSet = premiumColors[index % premiumColors.length];
+                    const lineStyle = lineStyles[index % lineStyles.length];
+                    const isTopPerformer = index < 3; // Top 3 strategies
+                    
+                    // Create gradient
+                    const ctx = elements.compareChart.getContext('2d');
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, colorSet.gradient.replace('0.1', isTopPerformer ? '0.15' : '0.08'));
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    
+                    // spanGaps: false means null values create gaps in the line
+                    // Day view: no nulls, line continues (no gaps)
+                    // Week/Month view: nulls for missing periods, line stops (gaps shown)
+                    datasets.push({
+                        label: strategy.name, // Only strategy name, no PnL or indicators
+                        data: strategy.data,
+                        borderColor: colorSet.solid,
+                        backgroundColor: gradient,
+                        borderWidth: isTopPerformer ? 3 : 2.5,
+                        borderDash: lineStyle,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: colorSet.solid,
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        spanGaps: false, // Don't connect lines across gaps (null values)
+                        order: isTopPerformer ? 0 : 1 // Top performers drawn last (on top)
+                    });
+                });
+                
+                // Log for debugging
+                if (period === 'month') {
+                    console.log('\n📊 STRATEGY COMPARISON (Ranked):');
+                    strategyPerformance.forEach((strategy, i) => {
+                        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '  ';
+                        console.log(`  ${medal} ${strategy.name}: ₹${strategy.pnl.toFixed(2)}`);
+                    });
+                }
+                
+                charts.compare.data.labels = labels;
+                charts.compare.data.datasets = datasets;
+                
+                // Update chart options for professional look
+                charts.compare.options.plugins.legend.labels.font.size = 10;
+                charts.compare.options.plugins.legend.labels.padding = 8;
+                charts.compare.options.plugins.legend.labels.boxWidth = 10;
+                charts.compare.options.plugins.legend.labels.boxHeight = 10;
+                
+                charts.compare.update('none');
+            }
+        }
+    </script>
+</body>
+</html>
