@@ -253,40 +253,47 @@
         /* Set common width for margin columns */
         th:nth-child(3), td:nth-child(3),  /* STG Margin */
         th:nth-child(4), td:nth-child(4),  /* Broker Margin */
-        th:nth-child(5), td:nth-child(5) { /* Extra Margin */
+        th:nth-child(5), td:nth-child(5) { /* Add Fund */
             width: 105px;
             min-width: 105px;
             max-width: 105px;
         }
         
+        /* Add Fund % */
+        th:nth-child(6), td:nth-child(6) {
+            width: 95px;
+            min-width: 95px;
+            max-width: 95px;
+        }
+        
         /* DD-related columns */
-        th:nth-child(6), td:nth-child(6),  /* Current DD (₹) */
-        th:nth-child(7), td:nth-child(7),  /* Current DD % */
-        th:nth-child(8), td:nth-child(8),  /* A.PRO DD(₹) */
-        th:nth-child(9), td:nth-child(9) { /* A.PRO DD(%) */
+        th:nth-child(7), td:nth-child(7),  /* Current DD (₹) */
+        th:nth-child(8), td:nth-child(8),  /* Current DD % */
+        th:nth-child(9), td:nth-child(9),  /* A.PRO DD(₹) */
+        th:nth-child(10), td:nth-child(10) { /* A.PRO DD(%) */
             width: 95px;
             min-width: 95px;
             max-width: 95px;
         }
 
         /* DD Duration */
-        th:nth-child(10), td:nth-child(10) { /* DD Duration */
+        th:nth-child(11), td:nth-child(11) { /* DD Duration */
             width: 85px;
             min-width: 85px;
             max-width: 85px;
         }
 
         /* Date columns */
-        th:nth-child(11), td:nth-child(11), /* STG DD Start */
-        th:nth-child(12), td:nth-child(12) { /* STG DD End */
+        th:nth-child(12), td:nth-child(12), /* STG DD Start */
+        th:nth-child(13), td:nth-child(13) { /* STG DD End */
             width: 90px;
             min-width: 90px;
             max-width: 90px;
         }
 
         /* Max DD columns */
-        th:nth-child(13), td:nth-child(13), /* Max DD (₹) */
-        th:nth-child(14), td:nth-child(14) { /* Max DD % */
+        th:nth-child(14), td:nth-child(14), /* Max DD (₹) */
+        th:nth-child(15), td:nth-child(15) { /* Max DD % */
             width: 95px;
             min-width: 95px;
             max-width: 95px;
@@ -770,7 +777,7 @@
                     <option value="maxDDPercent">Max DD %</option>
                     <option value="currentDDPercent">Current DD %</option>
                     <option value="currentDDDuration">DD Duration</option>
-                    <option value="extraMargin">Extra Margin</option>
+                    <option value="extraMargin">Add Fund</option>
                 </select>
             </div>
             <button class="btn" onclick="expandAll()">Expand All</button>
@@ -786,7 +793,8 @@
                         <th onclick="sortTable('lotSize')">Lot Size</th>
                         <th onclick="sortTable('stgMargin')">STG Margin</th>
                         <th onclick="sortTable('brokerMargin')">Broker Margin</th>
-                        <th onclick="sortTable('extraMargin')">Extra Margin</th>
+                        <th onclick="sortTable('extraMargin')">Add Fund</th>
+                        <th onclick="sortTable('extraMarginPercent')">Add Fund(%)</th>
                         <th onclick="sortTable('currentDD')">Current DD (₹)</th>
                         <th onclick="sortTable('currentDDPercent')">Current DD %</th>
                         <th onclick="sortTable('aproDD')">A.PRO DD (₹)</th>
@@ -1442,7 +1450,7 @@
         function renderTable() {
             const tbody = document.getElementById('drawdownTableBody');
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:40px;">No data available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:40px;">No data available</td></tr>';
                 return;
             }
 
@@ -1495,9 +1503,10 @@
                     sums.currentDDPercent = 0;
                 }
                 
-                // Broker margin and extra margin are left blank for account rows
+                // Broker margin and Add Fund are left blank for account rows
                 sums.brokerMargin = null;
                 sums.extraMargin = null;
+                sums.extraMarginPercent = null;
                 
                 return sums;
             }
@@ -1552,9 +1561,16 @@
                 console.log(`Getting broker margin for ${brokerStrategy}: ${marginValue}, available margins:`, calculatedBrokerMargins);
                 sums.brokerMargin = marginValue || 0;
                 
-                // Calculate Extra Margin = Broker Margin - sum of STG Margin (filtered)
+                // Calculate Add Fund = Broker Margin - sum of STG Margin (filtered)
                 // sums.stgMargin already contains the sum of filtered account STG margins
                 sums.extraMargin = sums.brokerMargin - sums.stgMargin;
+                
+                // Calculate Add Fund % = (Add Fund / STG Margin) * 100
+                if (sums.stgMargin > 0) {
+                    sums.extraMarginPercent = (sums.extraMargin / sums.stgMargin) * 100;
+                } else {
+                    sums.extraMarginPercent = 0;
+                }
                 
                 return sums;
             }
@@ -1570,6 +1586,7 @@
                 
                 // Render broker row with calculated sums
                 const extraMarginClass = displayData.extraMargin > 0 ? 'positive' : (displayData.extraMargin < 0 ? 'negative' : 'neutral');
+                const extraMarginPercentClass = displayData.extraMarginPercent > 0 ? 'positive' : (displayData.extraMarginPercent < 0 ? 'negative' : 'neutral');
                 
                 // Calculate total A.PRO DD for all strategies under this broker
                 const brokerStrategies = strategies.filter(s => s.parentBroker === broker.strategy);
@@ -1584,6 +1601,7 @@
                     <td>${formatCurrency(displayData.stgMargin)}</td>
                     <td>${formatCurrency(displayData.brokerMargin)}</td>
                     <td class="${extraMarginClass}">${formatCurrency(displayData.extraMargin)}</td>
+                    <td class="${extraMarginPercentClass}">${formatPercent(displayData.extraMarginPercent)}</td>
                     <td class="${displayData.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.currentDD)}</td>
                     <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
                     <td class="${totalAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDD)}</td>
@@ -1610,12 +1628,19 @@
                     // Get broker margin from calculated trade data
                     const accountBrokerMargin = getBrokerMarginForAccount(account.strategy.toUpperCase()) || 0;
                     
-                    // Calculate total STG Margin for this account for Extra Margin calculation
+                    // Calculate total STG Margin for this account for Add Fund calculation
                     const totalAccountStgMargin = accountStrategies.reduce((sum, s) => sum + (s.lotSize * 400000), 0);
                     const accountExtraMargin = accountBrokerMargin - totalAccountStgMargin;
                     const extraMarginClass = accountExtraMargin > 0 ? 'positive' : (accountExtraMargin < 0 ? 'negative' : 'neutral');
                     
-                    // Account row - Broker Margin and Extra Margin are shown ONLY when viewType is 'account'
+                    // Calculate Add Fund %
+                    let accountExtraMarginPercent = 0;
+                    if (totalAccountStgMargin > 0) {
+                        accountExtraMarginPercent = (accountExtraMargin / totalAccountStgMargin) * 100;
+                    }
+                    const extraMarginPercentClass = accountExtraMarginPercent > 0 ? 'positive' : (accountExtraMarginPercent < 0 ? 'negative' : 'neutral');
+                    
+                    // Account row - Broker Margin and Add Fund are shown ONLY when viewType is 'account'
                     const showBrokerMarginInAccount = viewType === 'account';
                     
                     // Calculate total A.PRO DD for all strategies under this account
@@ -1630,6 +1655,7 @@
                         <td>${formatCurrency(displayData.stgMargin)}</td>
                         <td>${showBrokerMarginInAccount ? formatCurrency(accountBrokerMargin) : ''}</td>
                         <td${showBrokerMarginInAccount ? ` class="${extraMarginClass}"` : ''}>${showBrokerMarginInAccount ? formatCurrency(accountExtraMargin) : ''}</td>
+                        <td${showBrokerMarginInAccount ? ` class="${extraMarginPercentClass}"` : ''}>${showBrokerMarginInAccount ? formatPercent(accountExtraMarginPercent) : ''}</td>
                         <td class="${displayData.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.currentDD)}</td>
                         <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
                         <td class="${totalAProDDAccount < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDDAccount)}</td>
@@ -1641,11 +1667,11 @@
                         <td class="negative">${formatPercent(displayData.maxDDPercent)}</td>
                     </tr>`;
                     
-                    // Strategy rows - STG Margin individual, Broker Margin and Extra Margin merged
+                    // Strategy rows - STG Margin individual, Broker Margin and Add Fund merged
                     accountStrategies.forEach((strategy, index) => {
                         const parentAccountCode = strategy.parentAccount.toLowerCase();
                         if (index === 0) {
-                            // First strategy row - add merged Broker Margin and Extra Margin cells
+                            // First strategy row - add merged Broker Margin, Add Fund and Add Fund % cells
                             const aproDD = getAProDrawdown(strategy.strategy, strategy.lotSize);
                             const strategyStgMargin = strategy.lotSize * 400000;
                             const aproDDPercent = strategyStgMargin > 0 ? (aproDD / strategyStgMargin) * 100 : 0;
@@ -1656,6 +1682,7 @@
                                 <td>${formatCurrency(strategy.lotSize * 400000)}</td>
                                 <td rowspan="${accountStrategies.length}">${formatCurrency(accountBrokerMargin)}</td>
                                 <td rowspan="${accountStrategies.length}" class="${extraMarginClass}">${formatCurrency(accountExtraMargin)}</td>
+                                <td rowspan="${accountStrategies.length}" class="${extraMarginPercentClass}">${formatPercent(accountExtraMarginPercent)}</td>
                                 <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
                                 <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                                 <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
@@ -1667,7 +1694,7 @@
                                 <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
                             </tr>`;
                         } else {
-                            // Subsequent strategy rows - show individual STG Margin, no Broker Margin or Extra Margin cells (merged from first row)
+                            // Subsequent strategy rows - show individual STG Margin, no Broker Margin, Add Fund or Add Fund % cells (merged from first row)
                             const aproDD = getAProDrawdown(strategy.strategy, strategy.lotSize);
                             const strategyStgMargin = strategy.lotSize * 400000;
                             const aproDDPercent = strategyStgMargin > 0 ? (aproDD / strategyStgMargin) * 100 : 0;
