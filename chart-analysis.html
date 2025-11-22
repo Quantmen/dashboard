@@ -705,7 +705,52 @@
                             grace: '5%'
                         }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'barLabels',
+                    afterDatasetsDraw(chart) {
+                        // Only show labels in month view
+                        if (activePeriods.pnlbar !== 'month') {
+                            return;
+                        }
+                        
+                        const { ctx, data } = chart;
+                        chart.getDatasetMeta(0).data.forEach((bar, index) => {
+                            const value = data.datasets[0].data[index];
+                            
+                            // Format value
+                            let label;
+                            const absValue = Math.abs(value);
+                            if (absValue >= 100000) {
+                                label = `₹${(value / 100000).toFixed(1)}L`;
+                            } else if (absValue >= 1000) {
+                                label = `₹${(value / 1000).toFixed(1)}K`;
+                            } else {
+                                label = `₹${Math.round(value)}`;
+                            }
+                            
+                            // Style
+                            ctx.save();
+                            ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                            ctx.fillStyle = value >= 0 ? '#059669' : '#dc2626';
+                            ctx.textAlign = 'center';
+                            
+                            // Position above bar for positive, below bar for negative
+                            const x = bar.x;
+                            let y;
+                            if (value >= 0) {
+                                ctx.textBaseline = 'bottom';
+                                y = bar.y - 5; // Above the bar
+                            } else {
+                                ctx.textBaseline = 'top';
+                                y = bar.y + 5; // Below the bar (bar.y is at top of negative bar)
+                            }
+                            
+                            ctx.fillText(label, x, y);
+                            ctx.restore();
+                        });
+                    }
+                }]
             });
 
 
@@ -724,8 +769,23 @@
                             display: true,
                             position: 'top',
                             align: 'start',
+                            onClick: (e, legendItem, legend) => {
+                                const index = legendItem.datasetIndex;
+                                const chart = legend.chart;
+                                const meta = chart.getDatasetMeta(index);
+                                
+                                // Toggle visibility - true = hidden, false/null = visible
+                                if (meta.hidden === true) {
+                                    meta.hidden = null; // Show
+                                } else {
+                                    meta.hidden = true; // Hide
+                                }
+                                
+                                // Update chart
+                                chart.update();
+                            },
                             labels: {
-                                boxWidth: 10,
+                                boxWidth: 20,
                                 boxHeight: 10,
                                 padding: 8,
                                 font: { 
@@ -736,17 +796,30 @@
                                 color: '#475569',
                                 usePointStyle: false,
                                 generateLabels: (chart) => {
-                                    // Custom label generation to show performance indicators
-                                    return chart.data.datasets.map((dataset, i) => ({
-                                        text: dataset.label,
-                                        fillStyle: dataset.borderColor,
-                                        strokeStyle: dataset.borderColor,
-                                        lineWidth: dataset.borderWidth,
-                                        hidden: false,
-                                        index: i,
-                                        lineDash: dataset.borderDash || []
-                                    }));
+                                    // Custom label generation with strikethrough support
+                                    return chart.data.datasets.map((dataset, i) => {
+                                        const meta = chart.getDatasetMeta(i);
+                                        const isHidden = meta.hidden === true;
+                                        
+                                        return {
+                                            text: dataset.label,
+                                            fillStyle: isHidden ? '#cbd5e1' : dataset.borderColor,
+                                            strokeStyle: isHidden ? '#cbd5e1' : dataset.borderColor,
+                                            lineWidth: 0,
+                                            hidden: isHidden,
+                                            datasetIndex: i,
+                                            lineDash: [],
+                                            fontColor: isHidden ? '#cbd5e1' : '#475569',
+                                            textDecoration: isHidden ? 'line-through' : 'none'
+                                        };
+                                    });
                                 }
+                            },
+                            onHover: (event, legendItem) => {
+                                event.native.target.style.cursor = 'pointer';
+                            },
+                            onLeave: (event, legendItem) => {
+                                event.native.target.style.cursor = 'default';
                             }
                         },
                         tooltip: {
@@ -846,7 +919,54 @@
                             borderJoinStyle: 'round'
                         }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'customLegendStrikethrough',
+                    afterUpdate: (chart) => {
+                        // Store legend item positions for strikethrough rendering
+                        const legend = chart.legend;
+                        if (legend && legend.legendHitBoxes) {
+                            chart._legendHitBoxes = legend.legendHitBoxes;
+                        }
+                    },
+                    afterDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        const legend = chart.legend;
+                        
+                        if (!legend || !chart._legendHitBoxes) return;
+                        
+                        ctx.save();
+                        
+                        // Iterate through each dataset
+                        chart.data.datasets.forEach((dataset, i) => {
+                            const meta = chart.getDatasetMeta(i);
+                            const isHidden = meta.hidden === true;
+                            
+                            if (isHidden) {
+                                const hitBox = chart._legendHitBoxes[i];
+                                if (!hitBox) return;
+                                
+                                // Calculate text position
+                                const textX = hitBox.left + hitBox.width - (hitBox.width - legend.options.labels.boxWidth - legend.options.labels.padding);
+                                const textY = hitBox.top + (hitBox.height / 2);
+                                
+                                // Measure text width
+                                ctx.font = '600 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                                const textWidth = ctx.measureText(dataset.label).width;
+                                
+                                // Draw strikethrough line
+                                ctx.strokeStyle = '#94a3b8';
+                                ctx.lineWidth = 1.3;
+                                ctx.beginPath();
+                                ctx.moveTo(textX, textY);
+                                ctx.lineTo(textX + textWidth, textY);
+                                ctx.stroke();
+                            }
+                        });
+                        
+                        ctx.restore();
+                    }
+                }]
             });
         }
 
@@ -1038,7 +1158,7 @@
                 // Update chart options for professional look
                 charts.compare.options.plugins.legend.labels.font.size = 10;
                 charts.compare.options.plugins.legend.labels.padding = 8;
-                charts.compare.options.plugins.legend.labels.boxWidth = 10;
+                charts.compare.options.plugins.legend.labels.boxWidth = 20;
                 charts.compare.options.plugins.legend.labels.boxHeight = 10;
                 
                 charts.compare.update('none');
