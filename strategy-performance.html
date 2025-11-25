@@ -57,13 +57,24 @@
             border: 1px solid #d1d5db;
             border-radius: 10px;
             box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
-            min-width: 280px;
+            min-width: 320px;
             max-height: 400px;
             overflow-y: auto;
             z-index: 1000;
             display: none;
         }
         .strategy-filter-dropdown.active { display: block; }
+        #monthFilterDropdown {
+            min-width: 160px;
+            max-width: 160px;
+            max-height: 500px;
+        }
+        #monthFilterDropdown .strategy-filter-label {
+            font-size: 12px;
+        }
+        #monthFilterDropdown .strategy-filter-item {
+            padding: 6px 14px;
+        }
         .strategy-filter-header {
             padding: 12px 14px;
             border-bottom: 1px solid #e2e8f0;
@@ -928,11 +939,21 @@
         </div>
 
         <div class="controls-section">
-            <div class="control-group">
-                <label class="control-label">Month:</label>
-                <select id="monthFilter">
-                    <option value="all">All Months</option>
-                </select>
+            <div class="strategy-filter-container">
+                <button class="strategy-filter-button" onclick="toggleMonthFilter()">
+                    <span>Select Months</span>
+                    <span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="monthFilterDropdown">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Select Months</span>
+                        <div class="strategy-filter-actions">
+                            <span class="filter-action-btn" onclick="selectAllMonths()">All</span>
+                        </div>
+                    </div>
+                    <div class="strategy-filter-list" id="monthFilterList"></div>
+                </div>
             </div>
             <div class="strategy-filter-container">
                 <button class="strategy-filter-button" onclick="toggleStrategyFilter()">
@@ -972,7 +993,11 @@
                 <input type="checkbox" id="showPnlTax" onchange="togglePnlTaxMode()" style="margin-right: 6px; cursor: pointer;">
                 <label for="showPnlTax" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show PNL TAX</label>
             </div>
-            <button class="primary" onclick="refreshData()">Refresh</button>
+            <div class="control-group">
+                <input type="checkbox" id="showLotPnl" onchange="toggleLotPnlMode()" style="margin-right: 6px; cursor: pointer;">
+                <label for="showLotPnl" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show LOT PNL</label>
+            </div>
+            <button class="primary" onclick="resetAllFilters()">Reset Filter</button>
             <button onclick="expandAll()">Expand All</button>
             <button onclick="collapseAll()">Collapse All</button>
         </div>
@@ -1000,7 +1025,9 @@
             runningMargin: document.getElementById('runningMargin'),
             totalExpense: document.getElementById('totalExpense'),
             netProfit: document.getElementById('netProfit'),
-            monthFilter: document.getElementById('monthFilter'),
+            monthFilterDropdown: document.getElementById('monthFilterDropdown'),
+            monthFilterList: document.getElementById('monthFilterList'),
+            monthFilterBadge: document.getElementById('monthFilterBadge'),
             strategyFilterDropdown: document.getElementById('strategyFilterDropdown'),
             strategyFilterList: document.getElementById('strategyFilterList'),
             filterBadge: document.getElementById('filterBadge'),
@@ -1010,6 +1037,7 @@
 
         let allTrades = [];
         let hiddenStrategies = new Set();
+        let selectedMonths = new Set();
         let allStrategies = [];
         let globalTotalExpenses = 0;
         let globalLastTotalMargin = 0;
@@ -1020,24 +1048,50 @@
         let showDrawdown = false;
         let showLot = false;
         let showPnlTax = false;
+	let showLotPnl = false;
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        let dropdownCloseTimeout = null;  // NEW: Add this line
 
         window.addEventListener('DOMContentLoaded', () => {
             loadSavedFilters();
-            initializeHeadersOnly(); // Initialize headers only on page load
-            
-            elements.monthFilter.addEventListener('change', function() {
-                try {
-                    localStorage.setItem('selectedMonth', this.value);
-                } catch (e) {}
-                processAndDisplayData();
-            });
+            initializeHeadersOnly();
             
             document.addEventListener('click', (event) => {
+                // Close strategy filter dropdown if clicking outside
                 if (!elements.strategyFilterDropdown.contains(event.target) && 
                     !event.target.closest('.strategy-filter-button')) {
                     elements.strategyFilterDropdown.classList.remove('active');
                 }
+                
+                // Close month filter dropdown only if clicking outside (not on button or inside dropdown)
+                const clickedButton = event.target.closest('.strategy-filter-button');
+                const isMonthButton = clickedButton && clickedButton.querySelector('#monthFilterBadge');
+                
+                if (!elements.monthFilterDropdown.contains(event.target) && !isMonthButton) {
+                    elements.monthFilterDropdown.classList.remove('active');
+                }
+            });
+            
+            // NEW: Close dropdowns when mouse leaves with delay
+            document.querySelectorAll('.strategy-filter-container').forEach(container => {
+                container.addEventListener('mouseenter', () => {
+                    // Cancel any pending close timeout when mouse enters
+                    if (dropdownCloseTimeout) {
+                        clearTimeout(dropdownCloseTimeout);
+                        dropdownCloseTimeout = null;
+                    }
+                });
+                
+                container.addEventListener('mouseleave', () => {
+                    // Set a timeout to close the dropdown after 800ms
+                    dropdownCloseTimeout = setTimeout(() => {
+                        const dropdown = container.querySelector('.strategy-filter-dropdown');
+                        if (dropdown) {
+                            dropdown.classList.remove('active');
+                        }
+                        dropdownCloseTimeout = null;
+                    }, 500);  // Change this number to adjust delay (milliseconds)
+                });
             });
         });
 
@@ -1056,6 +1110,10 @@
                 const savedFilters = localStorage.getItem('strategyFilters');
                 if (savedFilters) {
                     hiddenStrategies = new Set(JSON.parse(savedFilters));
+                }
+                const savedMonths = localStorage.getItem('selectedMonths');
+                if (savedMonths) {
+                    selectedMonths = new Set(JSON.parse(savedMonths));
                 }
                 const savedTotalsMode = localStorage.getItem('showFilteredTotals');
                 if (savedTotalsMode !== null) {
@@ -1086,6 +1144,12 @@
                     showPnlTax = savedPnlTaxMode === 'true';
                     const checkbox = document.getElementById('showPnlTax');
                     if (checkbox) checkbox.checked = showPnlTax;
+                }
+                const savedLotPnlMode = localStorage.getItem('showLotPnl');
+                if (savedLotPnlMode !== null) {
+                    showLotPnl = savedLotPnlMode === 'true';
+                    const checkbox = document.getElementById('showLotPnl');
+                    if (checkbox) checkbox.checked = showLotPnl;
                 }
             } catch (e) {
                 hiddenStrategies = new Set();
@@ -1154,6 +1218,15 @@
             showPnlTax = checkbox.checked;
             try {
                 localStorage.setItem('showPnlTax', showPnlTax);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleLotPnlMode() {
+            const checkbox = document.getElementById('showLotPnl');
+            showLotPnl = checkbox.checked;
+            try {
+                localStorage.setItem('showLotPnl', showLotPnl);
             } catch (e) {}
             processAndDisplayData();
         }
@@ -1249,16 +1322,16 @@
         function clearSavedFilters() {
             try {
                 localStorage.removeItem('strategyFilters');
-                localStorage.removeItem('selectedMonth');
+                localStorage.removeItem('selectedMonths');
                 localStorage.removeItem('showFilteredTotals');
                 localStorage.removeItem('showTradeCount');
                 localStorage.removeItem('showDrawdown');
             } catch (e) {}
             hiddenStrategies.clear();
+            selectedMonths.clear();
             showFilteredTotals = false;
             showTradeCount = false;
             showDrawdown = false;
-            elements.monthFilter.value = 'all';
             const filteredCheckbox = document.getElementById('showFilteredTotals');
             if (filteredCheckbox) filteredCheckbox.checked = false;
             const tradeCheckbox = document.getElementById('showTradeCount');
@@ -1266,6 +1339,154 @@
             const drawdownCheckbox = document.getElementById('showDrawdown');
             if (drawdownCheckbox) drawdownCheckbox.checked = false;
             updateStrategyFilterList();
+            updateMonthFilterList();
+            processAndDisplayData();
+        }
+
+        function resetAllFilters() {
+            try {
+                localStorage.removeItem('strategyFilters');
+                localStorage.removeItem('selectedMonths');
+                localStorage.removeItem('showFilteredTotals');
+                localStorage.removeItem('showTradeCount');
+                localStorage.removeItem('showDrawdown');
+                localStorage.removeItem('showLot');
+                localStorage.removeItem('showPnlTax');
+                localStorage.removeItem('showLotPnl');
+            } catch (e) {}
+            
+            hiddenStrategies.clear();
+            selectedMonths.clear();
+            showFilteredTotals = false;
+            showTradeCount = false;
+            showDrawdown = false;
+            showLot = false;
+            showPnlTax = false;
+            showLotPnl = false;
+            
+            const filteredCheckbox = document.getElementById('showFilteredTotals');
+            if (filteredCheckbox) filteredCheckbox.checked = false;
+            const tradeCheckbox = document.getElementById('showTradeCount');
+            if (tradeCheckbox) tradeCheckbox.checked = false;
+            const drawdownCheckbox = document.getElementById('showDrawdown');
+            if (drawdownCheckbox) drawdownCheckbox.checked = false;
+            const lotCheckbox = document.getElementById('showLot');
+            if (lotCheckbox) lotCheckbox.checked = false;
+            const pnlTaxCheckbox = document.getElementById('showPnlTax');
+            if (pnlTaxCheckbox) pnlTaxCheckbox.checked = false;
+            const lotPnlCheckbox = document.getElementById('showLotPnl');
+            if (lotPnlCheckbox) lotPnlCheckbox.checked = false;
+            
+            updateStrategyFilterList();
+            updateMonthFilterList();
+            processAndDisplayData();
+        }
+
+        function toggleMonthFilter() {
+            elements.monthFilterDropdown.classList.toggle('active');
+        }
+
+        function updateMonthFilterList() {
+            const monthsSet = new Set();
+            allTrades.forEach(trade => {
+                const parts = trade.date.split('/');
+                if (parts.length >= 2) monthsSet.add(parts[1]);
+            });
+
+            const availableMonths = Array.from(monthsSet).sort();
+            
+            // If no months selected, select all by default
+            if (selectedMonths.size === 0) {
+                availableMonths.forEach(month => selectedMonths.add(month));
+            }
+
+            const html = availableMonths.map(month => {
+                const isChecked = selectedMonths.has(month);
+                const displayName = monthNames[parseInt(month) - 1];
+                return `<div class="strategy-filter-item" onclick="event.stopPropagation(); toggleMonthRow('${month}')">
+                    <input type="checkbox" class="strategy-filter-checkbox" id="month_check_${month}" 
+                           ${isChecked ? 'checked' : ''}>
+                    <label class="strategy-filter-label" for="month_check_${month}">${displayName}</label>
+                </div>`;
+            }).join('');
+            
+            elements.monthFilterList.innerHTML = html;
+            updateMonthFilterBadge();
+        }
+
+        function toggleMonthRow(month) {
+            const checkbox = document.getElementById(`month_check_${month}`);
+            if (!checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                selectedMonths.add(month);
+            } else {
+                selectedMonths.delete(month);
+            }
+            
+            saveMonthFilters();
+            updateMonthFilterBadge();
+            processAndDisplayData();
+        }
+
+        function saveMonthFilters() {
+            try {
+                localStorage.setItem('selectedMonths', JSON.stringify(Array.from(selectedMonths)));
+            } catch (e) {}
+        }
+
+        function updateMonthFilterBadge() {
+            const monthsSet = new Set();
+            allTrades.forEach(trade => {
+                const parts = trade.date.split('/');
+                if (parts.length >= 2) monthsSet.add(parts[1]);
+            });
+            const totalMonths = monthsSet.size;
+            const selectedCount = selectedMonths.size;
+            
+            if (selectedCount > 0 && selectedCount < totalMonths) {
+                elements.monthFilterBadge.textContent = selectedCount;
+                elements.monthFilterBadge.style.display = 'inline-block';
+            } else {
+                elements.monthFilterBadge.style.display = 'none';
+            }
+        }
+
+        function selectAllMonths() {
+            const monthsSet = new Set();
+            allTrades.forEach(trade => {
+                const parts = trade.date.split('/');
+                if (parts.length >= 2) monthsSet.add(parts[1]);
+            });
+            
+            monthsSet.forEach(month => selectedMonths.add(month));
+            saveMonthFilters();
+            
+            monthsSet.forEach(month => {
+                const checkbox = document.getElementById(`month_check_${month}`);
+                if (checkbox) checkbox.checked = true;
+            });
+            updateMonthFilterBadge();
+            processAndDisplayData();
+        }
+
+        function deselectAllMonths() {
+            selectedMonths.clear();
+            saveMonthFilters();
+            
+            const monthsSet = new Set();
+            allTrades.forEach(trade => {
+                const parts = trade.date.split('/');
+                if (parts.length >= 2) monthsSet.add(parts[1]);
+            });
+            
+            monthsSet.forEach(month => {
+                const checkbox = document.getElementById(`month_check_${month}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            updateMonthFilterBadge();
             processAndDisplayData();
         }
 
@@ -1460,50 +1681,19 @@
         function processAndDisplayData() {
             if (allTrades.length === 0) return;
 
-            let monthFilter = elements.monthFilter.value;
-            if (!monthFilter || monthFilter === 'all') {
-                try {
-                    const savedMonth = localStorage.getItem('selectedMonth');
-                    if (savedMonth) monthFilter = savedMonth;
-                } catch (e) {}
-            }
-            
-            const filteredTrades = monthFilter && monthFilter !== 'all' 
-                ? allTrades.filter(trade => trade.date?.split('/')[1] === monthFilter)
+            // Filter trades by selected months
+            const filteredTrades = selectedMonths.size > 0
+                ? allTrades.filter(trade => {
+                    const month = trade.date?.split('/')[1];
+                    return selectedMonths.has(month);
+                })
                 : allTrades;
 
             displayPivotData(filteredTrades);
-            updateMonthFilter();
+            updateMonthFilterList();
             updateSummaryCards(filteredTrades);
             updateStrategyFilterList();
             cleanupSavedFilters();
-        }
-
-        function updateMonthFilter() {
-            const monthsSet = new Set();
-            allTrades.forEach(trade => {
-                const parts = trade.date.split('/');
-                if (parts.length >= 2) monthsSet.add(parts[1]);
-            });
-
-            let savedMonth = null;
-            try {
-                savedMonth = localStorage.getItem('selectedMonth');
-            } catch (e) {}
-            
-            const currentValue = savedMonth || elements.monthFilter.value;
-            elements.monthFilter.innerHTML = '<option value="all">All Months</option>';
-            
-            Array.from(monthsSet).sort().forEach(month => {
-                const option = document.createElement('option');
-                option.value = month;
-                option.textContent = monthNames[parseInt(month) - 1];
-                elements.monthFilter.appendChild(option);
-            });
-
-            if (currentValue && (currentValue === 'all' || monthsSet.has(currentValue))) {
-                elements.monthFilter.value = currentValue;
-            }
         }
 
         function displayPivotData(trades) {
@@ -2264,7 +2454,14 @@
                 sortedBrokers.forEach((brokerCode, brokerIdx) => {
                     brokerGroups[brokerCode].forEach((strategy, idx) => {
                         const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
-                        const pnl = showPnlTax ? stratData.net : stratData.pnl;
+                        let pnl;
+                        if (showLotPnl) {
+                            // Show LOT PNL = PNL / lot size (average lot)
+                            const avgLot = stratData.lotCount > 0 ? (stratData.lotSum / stratData.lotCount) : 0;
+                            pnl = avgLot > 0 ? (showPnlTax ? (stratData.net / avgLot) : (stratData.pnl / avgLot)) : 0;
+                        } else {
+                            pnl = showPnlTax ? stratData.net : stratData.pnl;
+                        }
                         const stratIndex = allStrategies.indexOf(strategy);
                         const bgClass = `strategy-bg-${stratIndex % 5}`;
                         const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
@@ -2457,7 +2654,14 @@
                         sortedBrokers.forEach((brokerCode, brokerIdx) => {
                             brokerGroups[brokerCode].forEach((strategy, idx) => {
                                 const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
-                                const pnl = showPnlTax ? stratData.net : stratData.pnl;
+                                let pnl;
+                                if (showLotPnl) {
+                                    // Show LOT PNL = PNL / lot size (average lot)
+                                    const avgLot = stratData.lotCount > 0 ? (stratData.lotSum / stratData.lotCount) : 0;
+                                    pnl = avgLot > 0 ? (showPnlTax ? (stratData.net / avgLot) : (stratData.pnl / avgLot)) : 0;
+                                } else {
+                                    pnl = showPnlTax ? stratData.net : stratData.pnl;
+                                }
                                 const stratIndex = allStrategies.indexOf(strategy);
                                 const bgClass = `strategy-bg-${stratIndex % 5}`;
                                 const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
@@ -2545,7 +2749,14 @@
             sortedBrokers.forEach((brokerCode, brokerIdx) => {
                 brokerGroups[brokerCode].forEach((strategy, idx) => {
                     const stratTotal = totals.strategies[strategy];
-                    const pnlValue = showPnlTax ? stratTotal.net : stratTotal.pnl;
+                    let pnlValue;
+                    if (showLotPnl) {
+                        // Show LOT PNL = PNL / lot size (average lot)
+                        const avgLot = stratTotal.lotCount > 0 ? (stratTotal.lotSum / stratTotal.lotCount) : 0;
+                        pnlValue = avgLot > 0 ? (showPnlTax ? (stratTotal.net / avgLot) : (stratTotal.pnl / avgLot)) : 0;
+                    } else {
+                        pnlValue = showPnlTax ? stratTotal.net : stratTotal.pnl;
+                    }
                     const stratIndex = allStrategies.indexOf(strategy);
                     const bgClass = `strategy-bg-${stratIndex % 5}`;
                     const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
