@@ -57,7 +57,7 @@
             border: 1px solid #d1d5db;
             border-radius: 10px;
             box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
-            min-width: 320px;
+            min-width: 250px;
             max-height: 400px;
             overflow-y: auto;
             z-index: 1000;
@@ -957,13 +957,13 @@
             </div>
             <div class="strategy-filter-container">
                 <button class="strategy-filter-button" onclick="toggleStrategyFilter()">
-                    <span>Hide Strategies</span>
+                    <span>Select Strategies</span>
                     <span class="filter-badge" id="filterBadge" style="display: none;">0</span>
                     <span>▼</span>
                 </button>
                 <div class="strategy-filter-dropdown" id="strategyFilterDropdown">
                     <div class="strategy-filter-header">
-                        <span class="strategy-filter-title">Select Strategies</span>
+                        <span class="strategy-filter-title">Select STG</span>
                         <div class="strategy-filter-actions">
                             <span class="filter-action-btn" onclick="selectAllStrategies()">All</span>
                             <span class="filter-action-btn" onclick="deselectAllStrategies()">None</span>
@@ -1048,13 +1048,12 @@
         let showDrawdown = false;
         let showLot = false;
         let showPnlTax = false;
-	let showLotPnl = false;
+        let showLotPnl = false;
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        let dropdownCloseTimeout = null;  // NEW: Add this line
 
         window.addEventListener('DOMContentLoaded', () => {
             loadSavedFilters();
-            initializeHeadersOnly();
+            initializeHeadersOnly(); // Initialize headers only on page load
             
             document.addEventListener('click', (event) => {
                 // Close strategy filter dropdown if clicking outside
@@ -1072,25 +1071,29 @@
                 }
             });
             
-            // NEW: Close dropdowns when mouse leaves with delay
+            // Close dropdowns when mouse leaves the entire container (button + dropdown)
+            // with 500ms delay to prevent accidental closures
+            const closeTimeouts = new Map();
+            
             document.querySelectorAll('.strategy-filter-container').forEach(container => {
-                container.addEventListener('mouseenter', () => {
-                    // Cancel any pending close timeout when mouse enters
-                    if (dropdownCloseTimeout) {
-                        clearTimeout(dropdownCloseTimeout);
-                        dropdownCloseTimeout = null;
+                container.addEventListener('mouseleave', () => {
+                    const dropdown = container.querySelector('.strategy-filter-dropdown');
+                    if (dropdown) {
+                        // Set a timeout to close after 500ms
+                        const timeoutId = setTimeout(() => {
+                            dropdown.classList.remove('active');
+                            closeTimeouts.delete(container);
+                        }, 500);
+                        closeTimeouts.set(container, timeoutId);
                     }
                 });
                 
-                container.addEventListener('mouseleave', () => {
-                    // Set a timeout to close the dropdown after 800ms
-                    dropdownCloseTimeout = setTimeout(() => {
-                        const dropdown = container.querySelector('.strategy-filter-dropdown');
-                        if (dropdown) {
-                            dropdown.classList.remove('active');
-                        }
-                        dropdownCloseTimeout = null;
-                    }, 500);  // Change this number to adjust delay (milliseconds)
+                container.addEventListener('mouseenter', () => {
+                    // Cancel the close timeout if mouse re-enters within 500ms
+                    if (closeTimeouts.has(container)) {
+                        clearTimeout(closeTimeouts.get(container));
+                        closeTimeouts.delete(container);
+                    }
                 });
             });
         });
@@ -1165,36 +1168,6 @@
             processAndDisplayData();
         }
 
-        function toggleLotTradeMode() {
-            const checkbox = document.getElementById('showTradeCount');
-            showTradeCount = checkbox.checked;
-            
-            // Automatically enable LOT column when showing Trade Count
-            if (showTradeCount && !showLot) {
-                showLot = true;
-                const lotCheckbox = document.getElementById('showLot');
-                if (lotCheckbox) lotCheckbox.checked = true;
-                try {
-                    localStorage.setItem('showLot', showLot);
-                } catch (e) {}
-            }
-            
-            // Automatically disable LOT column when hiding Trade Count
-            if (!showTradeCount && showLot) {
-                showLot = false;
-                const lotCheckbox = document.getElementById('showLot');
-                if (lotCheckbox) lotCheckbox.checked = false;
-                try {
-                    localStorage.setItem('showLot', showLot);
-                } catch (e) {}
-            }
-            
-            try {
-                localStorage.setItem('showTradeCount', showTradeCount);
-            } catch (e) {}
-            processAndDisplayData();
-        }
-
         function toggleDrawdownMode() {
             const checkbox = document.getElementById('showDrawdown');
             showDrawdown = checkbox.checked;
@@ -1231,6 +1204,25 @@
             processAndDisplayData();
         }
 
+        function toggleLotTradeMode() {
+            const checkbox = document.getElementById('showTradeCount');
+            showTradeCount = checkbox.checked;
+            if (showTradeCount && !showLot) {
+                showLot = true;
+                const lotCheckbox = document.getElementById('showLot');
+                if (lotCheckbox) lotCheckbox.checked = true;
+                try { localStorage.setItem('showLot', showLot); } catch (e) {}
+            }
+            if (!showTradeCount && showLot) {
+                showLot = false;
+                const lotCheckbox = document.getElementById('showLot');
+                if (lotCheckbox) lotCheckbox.checked = false;
+                try { localStorage.setItem('showLot', showLot); } catch (e) {}
+            }
+            try { localStorage.setItem('showTradeCount', showTradeCount); } catch (e) {}
+            processAndDisplayData();
+        }
+
         function saveFilters() {
             try {
                 localStorage.setItem('strategyFilters', JSON.stringify(Array.from(hiddenStrategies)));
@@ -1251,6 +1243,9 @@
         }
 
         function toggleStrategyFilter() {
+            // Close month filter dropdown if open
+            elements.monthFilterDropdown.classList.remove('active');
+            // Toggle strategy filter dropdown
             elements.strategyFilterDropdown.classList.toggle('active');
         }
 
@@ -1383,6 +1378,9 @@
         }
 
         function toggleMonthFilter() {
+            // Close strategy filter dropdown if open
+            elements.strategyFilterDropdown.classList.remove('active');
+            // Toggle month filter dropdown
             elements.monthFilterDropdown.classList.toggle('active');
         }
 
@@ -1472,23 +1470,6 @@
             processAndDisplayData();
         }
 
-        function deselectAllMonths() {
-            selectedMonths.clear();
-            saveMonthFilters();
-            
-            const monthsSet = new Set();
-            allTrades.forEach(trade => {
-                const parts = trade.date.split('/');
-                if (parts.length >= 2) monthsSet.add(parts[1]);
-            });
-            
-            monthsSet.forEach(month => {
-                const checkbox = document.getElementById(`month_check_${month}`);
-                if (checkbox) checkbox.checked = false;
-            });
-            updateMonthFilterBadge();
-            processAndDisplayData();
-        }
 
         function updateFilterBadge() {
             const hiddenCount = hiddenStrategies.size;
@@ -2979,12 +2960,6 @@
             }
         }
 
-        function refreshData() {
-            if (window.parent !== window) {
-                window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
-            }
-            processAndDisplayData();
-        }
     </script>
 </body>
 </html>
