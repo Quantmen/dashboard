@@ -892,6 +892,7 @@
         let columnFilters = {};
         let currentFilterColumn = null;
         let selectedStrategyNumber = null; // null means "All Strategies"
+        let dropdownCloseTimeout = null; // Timeout for delayed dropdown closing
 
         // Initialize with one sample strategy
         function initializeSampleStrategy() {
@@ -1356,6 +1357,28 @@
                 if (!e.target.closest('.strategy-filter-container')) {
                     closeAllDropdowns();
                 }
+            });
+            
+            // Add mouseleave event to all filter containers for delayed closing
+            document.querySelectorAll('.strategy-filter-container').forEach(container => {
+                container.addEventListener('mouseleave', () => {
+                    // Clear any existing timeout
+                    if (dropdownCloseTimeout) {
+                        clearTimeout(dropdownCloseTimeout);
+                    }
+                    // Set a new timeout to close dropdowns after 500ms
+                    dropdownCloseTimeout = setTimeout(() => {
+                        closeAllDropdowns();
+                    }, 500);
+                });
+                
+                container.addEventListener('mouseenter', () => {
+                    // If cursor is back inside container, cancel the close timeout
+                    if (dropdownCloseTimeout) {
+                        clearTimeout(dropdownCloseTimeout);
+                        dropdownCloseTimeout = null;
+                    }
+                });
             });
             
             elements.tableHeaders.addEventListener('click', async (e) => {
