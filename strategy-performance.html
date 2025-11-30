@@ -987,19 +987,20 @@
             </div>
             <div class="control-group">
                 <input type="checkbox" id="showLot" onchange="toggleLotMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showLot" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show LOT</label>
+                <label for="showLot" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Lot</label>
             </div>
             <div class="control-group">
                 <input type="checkbox" id="showPnlTax" onchange="togglePnlTaxMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showPnlTax" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show PNL TAX</label>
+                <label for="showPnlTax" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Tax PNL</label>
             </div>
             <div class="control-group">
                 <input type="checkbox" id="showLotPnl" onchange="toggleLotPnlMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showLotPnl" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show LOT PNL</label>
+                <label for="showLotPnl" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Lot PNL</label>
             </div>
             <button class="primary" onclick="resetAllFilters()">Reset Filter</button>
             <button onclick="expandAll()">Expand All</button>
             <button onclick="collapseAll()">Collapse All</button>
+            <button onclick="exportToCSV()">Export to csv</button>
         </div>
 
         <div class="table-container">
@@ -2957,6 +2958,128 @@
             if (elements.netProfit) {
                 elements.netProfit.textContent = `₹${netProfitValue >= 0 ? '' : '-'}${Math.abs(netProfitValue).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
                 elements.netProfit.className = 'summary-card-value ' + (netProfitValue >= 0 ? 'positive' : 'negative');
+            }
+        }
+
+        function exportToCSV() {
+            const table = document.getElementById('performanceTable');
+            const rows = [];
+            
+            // Process header rows specially
+            const headerRow1 = table.querySelector('thead tr.header-row-1');
+            const headerRow2 = table.querySelector('thead tr.header-row-2');
+            
+            if (headerRow1 && headerRow2) {
+                const headers1 = [];
+                const headers2 = [];
+                
+                // Process first header row
+                headerRow1.querySelectorAll('th').forEach(th => {
+                    const text = th.textContent.trim();
+                    const colspan = parseInt(th.getAttribute('colspan')) || 1;
+                    const rowspan = parseInt(th.getAttribute('rowspan')) || 1;
+                    
+                    // Add header text for colspan times
+                    for (let i = 0; i < colspan; i++) {
+                        headers1.push(rowspan === 2 ? text : text);
+                    }
+                });
+                
+                // Process second header row
+                headerRow2.querySelectorAll('th').forEach(th => {
+                    const text = th.textContent.trim();
+                    headers2.push(text);
+                });
+                
+                // Merge headers - for rowspan=2 columns, use only row1, otherwise combine row1 and row2
+                const finalHeaders = [];
+                let row2Index = 0;
+                
+                headerRow1.querySelectorAll('th').forEach(th => {
+                    const text = th.textContent.trim();
+                    const colspan = parseInt(th.getAttribute('colspan')) || 1;
+                    const rowspan = parseInt(th.getAttribute('rowspan')) || 1;
+                    
+                    if (rowspan === 2) {
+                        // Single column header (spans both rows)
+                        finalHeaders.push(text);
+                    } else {
+                        // Multi-column header (has sub-headers in row 2)
+                        for (let i = 0; i < colspan; i++) {
+                            const subHeader = headers2[row2Index] || '';
+                            if (text && subHeader) {
+                                finalHeaders.push(`${text} ${subHeader}`);
+                            } else {
+                                finalHeaders.push(text || subHeader);
+                            }
+                            row2Index++;
+                        }
+                    }
+                });
+                
+                // Add header row to CSV
+                rows.push(finalHeaders.map(h => {
+                    if (h.includes(',') || h.includes('"') || h.includes('\n')) {
+                        return '"' + h.replace(/"/g, '""') + '"';
+                    }
+                    return h;
+                }).join(','));
+            }
+            
+            // Process data rows
+            const bodyRows = table.querySelectorAll('tbody tr');
+            
+            bodyRows.forEach(row => {
+                // Skip rows that are hidden (day rows that aren't expanded)
+                if (row.classList.contains('day-row') && !row.classList.contains('expanded')) {
+                    return;
+                }
+                
+                const cells = row.querySelectorAll('td');
+                const rowData = [];
+                
+                cells.forEach(cell => {
+                    // Get text content and clean it
+                    let text = cell.textContent.trim();
+                    
+                    // Remove expand icons
+                    text = text.replace(/[►▼]/g, '').trim();
+                    
+                    // Escape quotes and wrap in quotes if contains comma
+                    if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+                        text = '"' + text.replace(/"/g, '""') + '"';
+                    }
+                    
+                    rowData.push(text);
+                });
+                
+                if (rowData.length > 0) {
+                    rows.push(rowData.join(','));
+                }
+            });
+            
+            // Create CSV content
+            const csvContent = rows.join('\n');
+            
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            // Generate filename with current date
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            const filename = `Strategy_Performance_${dateStr}.csv`;
+            
+            if (navigator.msSaveBlob) {
+                // IE 10+
+                navigator.msSaveBlob(blob, filename);
+            } else {
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
         }
 
