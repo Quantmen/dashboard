@@ -569,6 +569,54 @@
         
         .report-table td.price-column, .report-table th.price-column { color: #475569; font-weight: 400; }
         
+        /* Expanded column widths when table content is less than 1450px */
+        .table-wrapper.expand-columns .report-table {
+            min-width: 1450px !important;
+        }
+        .table-wrapper.expand-columns .report-table thead tr.header-row-1 th {
+            min-width: 110px !important;
+        }
+        .table-wrapper.expand-columns .report-table thead tr.header-row-2 th {
+            min-width: 95px !important;
+        }
+        .table-wrapper.expand-columns .report-table th.number-col {
+            min-width: 95px !important;
+        }
+        .table-wrapper.expand-columns .report-table td.number-col {
+            min-width: 95px !important;
+        }
+        .table-wrapper.expand-columns .report-table th {
+            min-width: 95px !important;
+        }
+        .table-wrapper.expand-columns .report-table td {
+            min-width: 85px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(1) {
+            min-width: 65px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(2) {
+            min-width: 115px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(3) {
+            min-width: 105px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(4) {
+            min-width: 90px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(5) {
+            min-width: 135px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(6) {
+            min-width: 80px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(7),
+        .table-wrapper.expand-columns .report-table td:nth-child(8) {
+            min-width: 100px !important;
+        }
+        .table-wrapper.expand-columns .report-table td:nth-child(9) {
+            min-width: 110px !important;
+        }
+        
         /* Expanded column widths for single strategy view - balanced to fill 1500px without exceeding */
         .table-wrapper.single-strategy .report-table thead tr.header-row-1 th {
             min-width: 80px;
@@ -810,6 +858,9 @@
                     </div>
                 </div>
             </div>
+            <div class="control-group" id="brokerButtonsContainer">
+                <!-- Broker buttons will be dynamically generated here -->
+            </div>
             <button id="toggleBuySellBtn" onclick="toggleBuySellColumns()">
                 <span id="buySellBtnText">Show Buy/Sell/Qty</span>
             </button>
@@ -876,6 +927,7 @@
         let sortColumn = null;
         let sortDirection = 'asc';
         let brokerStrategies = [];
+        let uniqueBrokers = []; // List of unique broker prefixes (B1, B2, etc.)
         let strategies = [];
         let hiddenBrokerStrategies = new Set();
         let manualHiddenBrokerStrategies = new Set(); // Tracks manual hides from "Hide Broker Columns"
@@ -1918,14 +1970,28 @@
             } else {
                 elements.strategyNumberText.textContent = strategy;
                 // Combine manual filter + auto filter based on selected strategy
-                const strategyPattern = strategy.replace(/\s+/g, ''); // Remove spaces for matching
+                const strategyPattern = strategy.replace(/\s+/g, ''); // Remove spaces for matching (e.g., "PRO 4" -> "PRO4")
                 hiddenBrokerStrategies.clear();
                 
                 brokerStrategies.forEach(brokerStrat => {
                     const brokerStratClean = brokerStrat.replace(/\s+/g, '').replace(/_/g, '');
                     
+                    // Extract the PRO number from both strings for exact matching
+                    // Match patterns like "PRO4", "PRO 4", "4PRO", etc.
+                    const strategyProMatch = strategyPattern.match(/PRO(\d+)/i);
+                    const brokerProMatch = brokerStratClean.match(/PRO(\d+)/i);
+                    
+                    let matches = false;
+                    if (strategyProMatch && brokerProMatch) {
+                        // Both have PRO numbers - they must match exactly
+                        matches = strategyProMatch[1] === brokerProMatch[1];
+                    } else {
+                        // Fallback to contains check for non-PRO patterns
+                        matches = brokerStratClean.includes(strategyPattern);
+                    }
+                    
                     // Hide if: manually hidden OR doesn't match the selected strategy
-                    if (manualHiddenBrokerStrategies.has(brokerStrat) || !brokerStratClean.includes(strategyPattern)) {
+                    if (manualHiddenBrokerStrategies.has(brokerStrat) || !matches) {
                         hiddenBrokerStrategies.add(brokerStrat);
                     }
                 });
@@ -2030,6 +2096,112 @@
             setTimeout(() => applyFilters(), 10);
         }
 
+        function createDynamicBrokerButtons() {
+            const container = document.getElementById('brokerButtonsContainer');
+            if (!container) return;
+            
+            // Clear existing buttons
+            container.innerHTML = '';
+            
+            // Create "All" button
+            const allBtn = document.createElement('button');
+            allBtn.className = 'quick-date-btn';
+            allBtn.textContent = 'All';
+            allBtn.onclick = showAllBrokers;
+            container.appendChild(allBtn);
+            
+            // Create dynamic broker buttons (B1, B2, B3, etc.)
+            uniqueBrokers.forEach(broker => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-date-btn';
+                btn.textContent = broker;
+                btn.onclick = () => showSpecificBroker(broker);
+                container.appendChild(btn);
+            });
+        }
+
+        function showSpecificBroker(brokerPrefix) {
+            // Show only specified broker columns (temporarily)
+            hiddenBrokerStrategies.clear();
+            
+            brokerStrategies.forEach(brokerStrat => {
+                let shouldHide = false;
+                
+                // First, hide if not the specified broker
+                if (!brokerStrat.startsWith(brokerPrefix)) {
+                    shouldHide = true;
+                }
+                
+                // If a specific strategy is selected, also apply that filter
+                if (!shouldHide && selectedStrategyNumber !== null) {
+                    const strategyPattern = selectedStrategyNumber.replace(/\s+/g, '');
+                    const brokerStratClean = brokerStrat.replace(/\s+/g, '').replace(/_/g, '');
+                    
+                    // Extract PRO numbers for exact matching
+                    const strategyProMatch = strategyPattern.match(/PRO(\d+)/i);
+                    const brokerProMatch = brokerStratClean.match(/PRO(\d+)/i);
+                    
+                    let matches = false;
+                    if (strategyProMatch && brokerProMatch) {
+                        matches = strategyProMatch[1] === brokerProMatch[1];
+                    } else {
+                        matches = brokerStratClean.includes(strategyPattern);
+                    }
+                    
+                    if (!matches) {
+                        shouldHide = true;
+                    }
+                }
+                
+                if (shouldHide) {
+                    hiddenBrokerStrategies.add(brokerStrat);
+                }
+            });
+            
+            // Re-apply manual filters on top
+            manualHiddenBrokerStrategies.forEach(s => hiddenBrokerStrategies.add(s));
+            
+            // Don't save - this is a temporary view
+            updateBrokerStrategyFilterList();
+            setTimeout(() => applyFilters(), 10);
+        }
+
+        function showAllBrokers() {
+            // Show all broker columns (temporarily, without clearing saved manual filters)
+            hiddenBrokerStrategies.clear();
+            
+            // If a specific strategy is selected, apply that filter first
+            if (selectedStrategyNumber !== null) {
+                const strategyPattern = selectedStrategyNumber.replace(/\s+/g, '');
+                
+                brokerStrategies.forEach(brokerStrat => {
+                    const brokerStratClean = brokerStrat.replace(/\s+/g, '').replace(/_/g, '');
+                    
+                    // Extract PRO numbers for exact matching
+                    const strategyProMatch = strategyPattern.match(/PRO(\d+)/i);
+                    const brokerProMatch = brokerStratClean.match(/PRO(\d+)/i);
+                    
+                    let matches = false;
+                    if (strategyProMatch && brokerProMatch) {
+                        matches = strategyProMatch[1] === brokerProMatch[1];
+                    } else {
+                        matches = brokerStratClean.includes(strategyPattern);
+                    }
+                    
+                    if (!matches) {
+                        hiddenBrokerStrategies.add(brokerStrat);
+                    }
+                });
+            }
+            
+            // Re-apply manual filters on top
+            manualHiddenBrokerStrategies.forEach(s => hiddenBrokerStrategies.add(s));
+            
+            // Don't save - this is a temporary view
+            updateBrokerStrategyFilterList();
+            setTimeout(() => applyFilters(), 10);
+        }
+
         function updateBrokerFilterBadge() {
             const hiddenCount = hiddenBrokerStrategies.size;
             if (hiddenCount > 0 && brokerStrategies.length > 0) {
@@ -2048,6 +2220,7 @@
         function extractBrokerStrategies() {
             const strategiesSet = new Set();
             const mainStrategiesSet = new Set();
+            const brokersSet = new Set();
             
             allTrades.forEach(trade => {
                 if (trade.strategy) mainStrategiesSet.add(trade.strategy);
@@ -2055,6 +2228,11 @@
                     Object.keys(trade.strategyDetails).forEach(stratName => {
                         if (!stratName.startsWith('A.PRO')) {
                             strategiesSet.add(stratName);
+                            // Extract broker prefix (B1, B2, B3, etc.)
+                            const brokerMatch = stratName.match(/^(B\d+)/);
+                            if (brokerMatch) {
+                                brokersSet.add(brokerMatch[1]);
+                            }
                         }
                     });
                 }
@@ -2069,11 +2247,15 @@
                 return parseInt(aPro) - parseInt(bPro);
             });
             
+            // Extract and sort unique brokers
+            uniqueBrokers = Array.from(brokersSet).sort();
+            
             strategies = Array.from(mainStrategiesSet).sort();
             
             updateBrokerStrategyFilterList();
             updateStrategyFilterList();
             updateStrategyNumberList();
+            createDynamicBrokerButtons(); // Create dynamic broker buttons
             buildTableHeaders('all');
         }
 
@@ -2374,6 +2556,9 @@
                 tableWrapper.classList.remove('single-strategy');
             }
             
+            // Adjust table width based on visible columns
+            adjustTableWidth(displayStrategies.length);
+            
             const rowsPerPage = elements.rowsPerPage.value === 'all' ? 
                 filteredTrades.length : parseInt(elements.rowsPerPage.value);
             const totalPages = Math.ceil(filteredTrades.length / rowsPerPage);
@@ -2403,6 +2588,30 @@
                 renderPagination(totalPages);
             } else {
                 elements.pagination.style.display = 'none';
+            }
+        }
+
+        function adjustTableWidth(visibleStrategyCount) {
+            const tableWrapper = document.querySelector('.table-wrapper');
+            
+            if (!tableWrapper) return;
+            
+            // Calculate approximate columns
+            // Base columns: 9 (S.No, Date, Strategy, Trade, Symbol, Qty, Entry, Exit, Profit)
+            // Additional time columns: 2 if enabled
+            // Per strategy: 4 base (PNL, DPNL, DBUY, DSELL) + optional (2 time + 1 lot + 3 buy/sell/qty)
+            const baseColumns = 9 + (showTimeColumns ? 2 : 0);
+            const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showLotColumns ? 1 : 0) + (showBuySellColumns ? 3 : 0);
+            const totalColumns = baseColumns + (visibleStrategyCount * colsPerStrategy);
+            
+            // Rough estimate: base columns ~700px + ~75px per strategy column
+            const estimatedWidth = 700 + (visibleStrategyCount * colsPerStrategy * 75);
+            
+            // If estimated width is less than 1450px, expand columns
+            if (estimatedWidth < 1450) {
+                tableWrapper.classList.add('expand-columns');
+            } else {
+                tableWrapper.classList.remove('expand-columns');
             }
         }
 
