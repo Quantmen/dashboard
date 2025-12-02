@@ -96,15 +96,18 @@
             top: 100%;
             left: 0;
             margin-top: 6px;
-            background: white;
+            background: #ffffff;
             border: 1px solid #d1d5db;
             border-radius: 10px;
             box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
             width: max-content;
             max-height: 400px;
             overflow-y: auto;
+            overflow-x: hidden;
             z-index: 1000;
             display: none;
+            transform: translateZ(0);
+            will-change: transform;
         }
         .strategy-filter-dropdown.active { display: block; }
         .strategy-filter-dropdown * { pointer-events: auto; }
@@ -116,8 +119,8 @@
             align-items: center;
             position: sticky;
             top: 0;
-            background: white;
-            z-index: 1;
+            background: #ffffff;
+            z-index: 100;
         }
         .strategy-filter-title { font-size: 13px; font-weight: 600; color: #1e293b; }
         .strategy-filter-actions { display: flex; gap: 8px; }
@@ -147,7 +150,10 @@
             border-color: #1e40af;
             color: #1e40af;
         }
-        .strategy-filter-list { padding: 8px 0; }
+        .strategy-filter-list { 
+            padding: 8px 0; 
+            background: #ffffff;
+        }
         .filter-info-note {
             padding: 10px 14px;
             background: #eff6ff;
@@ -163,6 +169,7 @@
             padding: 8px 14px;
             cursor: pointer;
             transition: background 0.2s ease;
+            background: #ffffff;
         }
         .strategy-filter-item:hover { background: #f8fafc; }
         .strategy-filter-checkbox { 
@@ -326,7 +333,7 @@
             color: #1e40af;
         }
         .report-table thead tr.header-row-2 th {
-            padding: 6px 6px 6px 6px;
+            padding: 4px 4px 4px 4px;
             font-size: 10px;
             position: sticky;
             top: 50px;
@@ -744,7 +751,7 @@
                 </button>
                 <div class="strategy-filter-dropdown" id="strategyFilterDropdown">
                     <div class="strategy-filter-header">
-                        <span class="strategy-filter-title">Select Strategies</span>
+                        <span class="strategy-filter-title">Select Stg</span>
                         <div class="strategy-filter-actions">
                             <span class="filter-action-btn" id="selectAllStrategiesBtn">All</span>
                             <span class="filter-action-btn" id="deselectAllStrategiesBtn">Clear</span>
@@ -761,7 +768,7 @@
                 </button>
                 <div class="strategy-filter-dropdown" id="brokerStrategyFilterDropdown">
                     <div class="strategy-filter-header">
-                        <span class="strategy-filter-title">Hide Broker Columns</span>
+                        <span class="strategy-filter-title">Hide Columns</span>
                         <div class="strategy-filter-actions">
                             <span class="filter-action-btn" id="selectAllBrokerStrategiesBtn">All</span>
                             <span class="filter-action-btn" id="deselectAllBrokerStrategiesBtn">Clear</span>
@@ -1190,6 +1197,11 @@
                 if (savedCollapsedMonths) {
                     collapsedMonths = new Set(JSON.parse(savedCollapsedMonths));
                 }
+                
+                const savedRowsPerPage = localStorage.getItem('reportRowsPerPage');
+                if (savedRowsPerPage) {
+                    elements.rowsPerPage.value = savedRowsPerPage;
+                }
             } catch (e) {
                 hiddenStrategies = new Set();
                 hiddenBrokerStrategies = new Set();
@@ -1216,6 +1228,12 @@
             try {
                 localStorage.setItem('reportDateFilters', JSON.stringify(Array.from(hiddenDates)));
                 localStorage.setItem('reportCollapsedMonths', JSON.stringify(Array.from(collapsedMonths)));
+            } catch (e) {}
+        }
+
+        function saveRowsPerPage() {
+            try {
+                localStorage.setItem('reportRowsPerPage', elements.rowsPerPage.value);
             } catch (e) {}
         }
 
@@ -1308,6 +1326,12 @@
             elements.exportCSVBtn.addEventListener('click', exportToCSV);
             
             elements.symbolFilter.addEventListener('input', debounce(applyFilters, 300));
+            
+            elements.rowsPerPage.addEventListener('change', () => {
+                saveRowsPerPage();
+                currentPage = 1;
+                renderTable();
+            });
             
             elements.dateFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
             elements.strategyFilterDropdown.addEventListener('click', (e) => e.stopPropagation());
@@ -2243,6 +2267,7 @@
                 localStorage.removeItem('reportBrokerStrategyFilters');
                 localStorage.removeItem('reportDateFilters');
                 localStorage.removeItem('reportCollapsedMonths');
+                localStorage.removeItem('reportRowsPerPage');
             } catch (e) {}
             
             // Save the cleared date filters immediately
