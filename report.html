@@ -41,13 +41,13 @@
             border: 1px solid #e5e7eb;
         }
         .loading-spinner {
-            width: 44px;
             height: 44px;
             border: 4px solid #e5e7eb;
             border-top-color: #1e40af;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 18px;
+            aspect-ratio: 1;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -89,7 +89,6 @@
             color: #374151;
             cursor: pointer;
             transition: all 0.15s ease;
-            min-width: 130px;
         }
         .strategy-filter-button:hover { border-color: #9ca3af; background: #f9fafb; }
         .strategy-filter-dropdown {
@@ -168,12 +167,12 @@
         .strategy-filter-item:hover { background: #f8fafc; }
         .strategy-filter-checkbox { 
             margin-right: 10px; 
-            width: 16px; 
             height: 16px; 
             cursor: pointer;
             pointer-events: auto !important;
             position: relative;
             z-index: 10;
+            aspect-ratio: 1;
         }
         .strategy-filter-label { 
             font-size: 13px; 
@@ -187,7 +186,6 @@
         .date-day-item { padding-left: 32px; font-size: 12px; }
         .expand-icon {
             display: inline-block;
-            width: 18px;
             height: 18px;
             margin-right: 6px;
             font-size: 11px;
@@ -199,6 +197,7 @@
             pointer-events: auto;
             position: relative;
             z-index: 10;
+            aspect-ratio: 1;
         }
         .expand-icon.expanded { transform: rotate(90deg); }
         .month-children { display: none; }
@@ -251,8 +250,8 @@
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
             border: 1px solid #e5e7eb;
-            min-width: 1500px;
-            display: inline-block;
+            display: block;
+            width: 100%;
         }
         .table-wrapper { 
             scrollbar-width: thin;
@@ -267,7 +266,6 @@
             border-collapse: separate;
             border-spacing: 0;
             font-size: 13px;
-            min-width: 1500px;
         }
         .report-table thead { 
             position: sticky; 
@@ -311,8 +309,6 @@
             white-space: nowrap;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            min-width: 60px;
-            max-width: 97px;
             transition: background 0.2s ease;
         }
         /* Slightly reduced height for broker strategy group headers */
@@ -346,8 +342,6 @@
             cursor: pointer;
             user-select: none;
             letter-spacing: 0.3px;
-            min-width: 60px;
-            max-width: 83px;
             transition: all 0.2s ease;
         }
         .report-table thead tr.header-row-2 th:hover { 
@@ -372,7 +366,7 @@
             color: #1e40af;
             font-weight: 900;
         }
-        .report-table th.number-col { text-align: right; min-width: 69px; max-width: 90px; }
+        .report-table th.number-col { text-align: right; }
         
         .filter-icon {
             display: inline-block;
@@ -408,7 +402,6 @@
             border-radius: 6px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             border: 1px solid #d1d5db;
-            width: 180px;
             max-height: 280px;
             overflow: hidden;
             display: flex;
@@ -437,12 +430,12 @@
             color: #6b7280;
             cursor: pointer;
             padding: 0;
-            width: 16px;
             height: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 3px;
+            aspect-ratio: 1;
         }
         .filter-popup-close:hover {
             background: #e5e7eb;
@@ -524,22 +517,19 @@
             white-space: nowrap;
             font-size: 13px;
             font-weight: 400;
-            max-width: 107px;
             overflow: hidden;
             text-overflow: ellipsis;
             vertical-align: middle;
             box-sizing: border-box;
         }
-        .report-table td:nth-child(1) { min-width: 50px; max-width: 64px; text-align: center; color: #4b5563; font-weight: 400; font-size: 12px; }
-        .report-table td:nth-child(2) { min-width: 93px; max-width: 107px; font-weight: 400; color: #1f2937; font-size: 12px; }
-        .report-table td:nth-child(3) { min-width: 79px; max-width: 100px; font-weight: 400; color: #1f2937; font-size: 12px; }
-        .report-table td:nth-child(4) { min-width: 69px; max-width: 83px; font-size: 12px; }
-        .report-table td:nth-child(5) { min-width: 100px; max-width: 129px; font-weight: 400; color: #1f2937; font-size: 12px; }
-        .report-table td:nth-child(6) { min-width: 60px; max-width: 74px; font-size: 12px; }
-        .report-table td:nth-child(7), .report-table td:nth-child(8) { min-width: 74px; max-width: 96px; font-size: 12px; }
+        .report-table td:nth-child(1) { text-align: center; color: #4b5563; font-weight: 400; font-size: 12px; }
+        .report-table td:nth-child(2) { font-weight: 400; color: #1f2937; font-size: 12px; }
+        .report-table td:nth-child(3) { font-weight: 400; color: #1f2937; font-size: 12px; }
+        .report-table td:nth-child(4) { font-size: 12px; }
+        .report-table td:nth-child(5) { font-weight: 400; color: #1f2937; font-size: 12px; }
+        .report-table td:nth-child(6) { font-size: 12px; }
+        .report-table td:nth-child(7), .report-table td:nth-child(8) { font-size: 12px; }
         .report-table td:nth-child(9) { 
-            min-width: 83px; 
-            max-width: 104px;
         }
         .report-table td:nth-child(11) { 
             border-right: 1px solid #e5e7eb;
@@ -553,8 +543,6 @@
         .report-table td.number-col {
             text-align: right;
             font-variant-numeric: tabular-nums;
-            min-width: 69px;
-            max-width: 90px;
             font-weight: 400;
         }
         .report-table td.positive { color: #15803d; font-weight: 500; }
@@ -570,106 +558,33 @@
         
         .report-table td.price-column, .report-table th.price-column { color: #475569; font-weight: 400; }
         
-        /* Expanded column widths when table content is less than 1450px */
-        .table-wrapper.expand-columns .report-table {
-            min-width: 1450px !important;
-        }
-        .table-wrapper.expand-columns .report-table thead tr.header-row-1 th {
-            min-width: 110px !important;
-        }
-        .table-wrapper.expand-columns .report-table thead tr.header-row-2 th {
-            min-width: 95px !important;
-        }
-        .table-wrapper.expand-columns .report-table th.number-col {
-            min-width: 95px !important;
-        }
-        .table-wrapper.expand-columns .report-table td.number-col {
-            min-width: 95px !important;
-        }
-        .table-wrapper.expand-columns .report-table th {
-            min-width: 95px !important;
-        }
-        .table-wrapper.expand-columns .report-table td {
-            min-width: 85px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(1) {
-            min-width: 65px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(2) {
-            min-width: 115px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(3) {
-            min-width: 105px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(4) {
-            min-width: 90px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(5) {
-            min-width: 135px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(6) {
-            min-width: 80px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(7),
-        .table-wrapper.expand-columns .report-table td:nth-child(8) {
-            min-width: 100px !important;
-        }
-        .table-wrapper.expand-columns .report-table td:nth-child(9) {
-            min-width: 110px !important;
-        }
-        
-        /* Expanded column widths for single strategy view - balanced to fill 1500px without exceeding */
+        /* Single strategy view */
         .table-wrapper.single-strategy .report-table thead tr.header-row-1 th {
-            min-width: 80px;
-            max-width: 150px;
         }
         .table-wrapper.single-strategy .report-table thead tr.header-row-2 th {
-            min-width: 70px;
-            max-width: 120px;
         }
         .table-wrapper.single-strategy .report-table th.number-col {
-            min-width: 75px;
-            max-width: 120px;
         }
         .table-wrapper.single-strategy .report-table td.number-col {
-            min-width: 75px;
-            max-width: 120px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(1) {
-            min-width: 55px;
-            max-width: 70px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(2) {
-            min-width: 100px;
-            max-width: 130px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(3) {
-            min-width: 85px;
-            max-width: 120px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(4) {
-            min-width: 75px;
-            max-width: 100px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(5) {
-            min-width: 110px;
-            max-width: 150px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(6) {
-            min-width: 70px;
-            max-width: 90px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(7),
         .table-wrapper.single-strategy .report-table td:nth-child(8) {
-            min-width: 80px;
-            max-width: 110px;
         }
         .table-wrapper.single-strategy .report-table td:nth-child(9) {
-            min-width: 90px;
-            max-width: 120px;
         }
         .table-wrapper.single-strategy .report-table td {
-            max-width: 130px;
         }
         
         .no-data { 
@@ -688,7 +603,6 @@
             padding: 14px 20px;
             background: #f8fafc;
             border-top: 1px solid #e5e7eb;
-            min-width: 1500px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -897,7 +811,7 @@
                         <tr>
                             <th rowspan="2" class="sortable" data-column="sno">S.No</th>
                             <th rowspan="2" class="sortable" data-column="date">Date</th>
-                            <th rowspan="2" class="sortable" data-column="strategy">Strategy</th>
+                            <th rowspan="2" class="sortable" data-column="strategy">STG</th>
                             <th rowspan="2" class="sortable" data-column="trade">Trade</th>
                             <th rowspan="2" class="sortable" data-column="symbol">Symbol</th>
                             <th rowspan="2" class="sortable number-col" data-column="qty">Qty</th>
@@ -2413,7 +2327,7 @@
             totalsRow += '</tr>';
             
             const mainColumns = ['sno', 'date', 'strategy', 'trade', 'symbol', 'a_entime', 'a_extime', 'qty', 'entry', 'exit', 'profit'];
-            const columnLabels = { sno: 'S.No', date: 'Date', strategy: 'Strategy', trade: 'Trade', symbol: 'Symbol', a_entime: 'ENTIME', a_extime: 'EXTIME', qty: 'Qty', entry: 'Entry', exit: 'Exit', profit: 'Profit' };
+            const columnLabels = { sno: 'S.No', date: 'Date', strategy: 'STG', trade: 'Trade', symbol: 'Symbol', a_entime: 'ENTIME', a_extime: 'EXTIME', qty: 'Qty', entry: 'Entry', exit: 'Exit', profit: 'Profit' };
             
             let headerRow1 = '<tr class="header-row-1">';
             mainColumns.forEach(col => {
@@ -2604,16 +2518,6 @@
             const baseColumns = 9 + (showTimeColumns ? 2 : 0);
             const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showLotColumns ? 1 : 0) + (showBuySellColumns ? 3 : 0);
             const totalColumns = baseColumns + (visibleStrategyCount * colsPerStrategy);
-            
-            // Rough estimate: base columns ~700px + ~75px per strategy column
-            const estimatedWidth = 700 + (visibleStrategyCount * colsPerStrategy * 75);
-            
-            // If estimated width is less than 1450px, expand columns
-            if (estimatedWidth < 1450) {
-                tableWrapper.classList.add('expand-columns');
-            } else {
-                tableWrapper.classList.remove('expand-columns');
-            }
         }
 
         function renderPagination(totalPages) {
@@ -2742,7 +2646,7 @@
             const displayStrategies = visibleBrokerStrategies.length === brokerStrategies.length ? 
                 brokerStrategies : visibleBrokerStrategies;
 
-            const headers = ['S.No', 'Date', 'Strategy', 'Trade', 'Symbol', 'EN TIME', 'EX TIME', 'Qty', 'Entry', 'Exit', 'Profit'];
+            const headers = ['S.No', 'Date', 'STG', 'Trade', 'Symbol', 'EN TIME', 'EX TIME', 'Qty', 'Entry', 'Exit', 'Profit'];
             displayStrategies.forEach(stratName => {
                 const displayName = formatStrategyName(stratName);
                 headers.push(`${displayName} LOT PNL`);
