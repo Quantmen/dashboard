@@ -1010,7 +1010,7 @@
             
             htmlParts.push('<table class="orders-table"><thead><tr>');
             htmlParts.push('<th>S.No</th><th>Date</th><th>Symbol</th><th>Qty</th>');
-            htmlParts.push('<th style="text-align: right;">Sell Price</th><th style="text-align: right;">Buy Price</th>');
+            htmlParts.push('<th style="text-align: right;">En.Price</th><th style="text-align: right;">Ex.Price</th>');
             htmlParts.push('<th style="text-align: right;">PNL</th><th style="text-align: right;">Un PNL</th>');
             htmlParts.push('<th style="text-align: right;">Lot Size</th><th style="text-align: right;">Lot PNL</th><th style="text-align: right;">Slippage</th>');
             htmlParts.push('</tr></thead><tbody>');
@@ -1028,13 +1028,30 @@
                 const pnl = trade.strategyPnls[selectedStrategy] || 0;
                 const lotPnl = details.lot > 0 ? pnl / details.lot : 0;
                 
+                // Determine BR.Entry Price and BR.Exit Price based on trade.trade field
+                let brEntryPrice = '-';
+                let brExitPrice = '-';
+                
+                if (trade.trade) {
+                    const tradeType = trade.trade.toString().toUpperCase();
+                    if (tradeType === 'SHORT') {
+                        // Short trade: Entry = Sell, Exit = Buy
+                        brEntryPrice = details.sell > 0 ? details.sell.toFixed(2) : '-';
+                        brExitPrice = details.buy > 0 ? details.buy.toFixed(2) : '-';
+                    } else if (tradeType === 'LONG') {
+                        // Long trade: Entry = Buy, Exit = Sell
+                        brEntryPrice = details.buy > 0 ? details.buy.toFixed(2) : '-';
+                        brExitPrice = details.sell > 0 ? details.sell.toFixed(2) : '-';
+                    }
+                }
+                
                 htmlParts.push(`<tr>
                     <td>${trade.sno}</td>
                     <td>${formatDateForTable(trade.date)}</td>
                     <td>${trade.symbol}</td>
                     <td>${details.qty > 0 ? details.qty : '-'}</td>
-                    <td style="text-align: right;">${details.sell > 0 ? details.sell.toFixed(2) : '-'}</td>
-                    <td style="text-align: right;">${details.buy > 0 ? details.buy.toFixed(2) : '-'}</td>
+                    <td style="text-align: right;">${brEntryPrice}</td>
+                    <td style="text-align: right;">${brExitPrice}</td>
                     <td class="profit-cell ${pnl >= 0 ? 'positive' : 'negative'}">${pnl !== 0 ? `₹${pnl >= 0 ? '' : '-'}${Math.abs(pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
                     <td class="profit-cell ${details.unpnl >= 0 ? 'positive' : 'negative'}">${details.unpnl !== 0 ? `${details.unpnl >= 0 ? '' : '-'}${Math.abs(details.unpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
                     <td style="text-align: right;">${details.lot > 0 ? details.lot : '-'}</td>
