@@ -2384,17 +2384,17 @@
                 const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
                 const lastColBorder = 'border-right: 1px solid #d1d5db;';
                 
-                const fields = ['lot_pnl', 'pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'lot_size', 'sell', 'buy'];
-                const fieldLabels = { lot_pnl: 'LOT PNL', pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', lot_size: 'LOT SIZE', buy: 'BUY', sell: 'SELL' };
+                const fields = ['lot_pnl', 'pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'lot_size', 'enprc', 'exprc'];
+                const fieldLabels = { lot_pnl: 'LOT PNL', pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', lot_size: 'LOT SIZE', enprc: 'ENPRC', exprc: 'EXPRC' };
                 
                 fields.forEach((field, fIdx) => {
                     const filterKey = `${stratName}_${field}`;
                     const hasFilter = columnFilters[filterKey];
                     const filterIcon = hasFilter ? ' active' : '';
-                    const isBuySell = ['qty', 'buy', 'sell'].includes(field);
+                    const isBuySell = ['qty', 'enprc', 'exprc'].includes(field);
                     const isTime = ['entime', 'extime'].includes(field);
                     const isLot = ['lot_size', 'lot_pnl'].includes(field);
-                    const isPrice = ['qty', 'buy', 'sell'].includes(field);
+                    const isPrice = ['qty', 'enprc', 'exprc'].includes(field);
                     const border = fIdx === 0 ? firstColBorder : (fIdx === fields.length - 1 ? lastColBorder : '');
                     const buySellClass = isBuySell ? ` buy-sell-column${showBuySellColumns ? ' visible' : ''}` : '';
                     const timeClass = isTime ? ` time-column${showTimeColumns ? ' visible' : ''}` : '';
@@ -2456,6 +2456,22 @@
                 const lot_size = details.lot !== undefined && details.lot !== null ? details.lot : '';
                 const lot_pnl = (lot_size && lot_size !== 0) ? (pnl / lot_size) : 0;
                 
+                // Calculate ENPRC and EXPRC based on trade type
+                let enprc = 0;
+                let exprc = 0;
+                if (trade.trade) {
+                    const tradeType = trade.trade.toString().toUpperCase();
+                    if (tradeType === 'SHORT') {
+                        // Short trade: ENPRC = sell, EXPRC = buy
+                        enprc = sell;
+                        exprc = buy;
+                    } else if (tradeType === 'LONG') {
+                        // Long trade: ENPRC = buy, EXPRC = sell
+                        enprc = buy;
+                        exprc = sell;
+                    }
+                }
+                
                 const bgColor = colors[index % colors.length];
                 const pnlClass = pnl > 0 ? 'positive' : pnl < 0 ? 'negative' : '';
                 const dpnlClass = dpnl > 0 ? 'positive' : dpnl < 0 ? 'negative' : '';
@@ -2476,8 +2492,8 @@
                 row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${extime}</td>`;
                 row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${qty !== 0 ? qty : ''}</td>`;
                 row += `<td class="number-col price-column lot-column${showLotColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${lot_size && lot_size !== 0 ? parseFloat(lot_size).toFixed(1) : ''}</td>`;
-                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${sell !== 0 ? sell.toFixed(2) : ''}</td>`;
-                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${buy !== 0 ? buy.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${enprc !== 0 ? enprc.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${exprc !== 0 ? exprc.toFixed(2) : ''}</td>`;
             });
             
             return row + '</tr>';
@@ -2539,9 +2555,9 @@
             // Calculate approximate columns
             // Base columns: 9 (S.No, Date, Strategy, Trade, Symbol, Qty, Entry, Exit, Profit)
             // Additional time columns: 2 if enabled
-            // Per strategy: 4 base (PNL, DPNL, DBUY, DSELL) + optional (2 time + 1 lot + 3 buy/sell/qty)
+            // Per strategy: 4 base (PNL, DPNL, DBUY, DSELL) + optional (2 time + 2 lot + 3 buy/sell/qty/enprc/exprc)
             const baseColumns = 9 + (showTimeColumns ? 2 : 0);
-            const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showLotColumns ? 1 : 0) + (showBuySellColumns ? 3 : 0);
+            const colsPerStrategy = 4 + (showTimeColumns ? 2 : 0) + (showLotColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
             const totalColumns = baseColumns + (visibleStrategyCount * colsPerStrategy);
         }
 
@@ -2685,7 +2701,7 @@
                     headers.push(`${displayName} LOT SIZE`);
                 }
                 if (showBuySellColumns) {
-                    headers.push(`${displayName} SELL`, `${displayName} BUY`);
+                    headers.push(`${displayName} ENPRC`, `${displayName} EXPRC`);
                 }
             });
             
@@ -2701,6 +2717,21 @@
                     const details = trade.strategyDetails?.[stratName] || {};
                     const lot = details.lot || 0;
                     const lot_pnl = (lot && lot !== 0) ? ((details.pnl || 0) / lot) : 0;
+                    
+                    // Calculate ENPRC and EXPRC based on trade type
+                    let enprc = 0;
+                    let exprc = 0;
+                    if (trade.trade) {
+                        const tradeType = trade.trade.toString().toUpperCase();
+                        if (tradeType === 'SHORT') {
+                            enprc = details.sell || 0;
+                            exprc = details.buy || 0;
+                        } else if (tradeType === 'LONG') {
+                            enprc = details.buy || 0;
+                            exprc = details.sell || 0;
+                        }
+                    }
+                    
                     row.push(lot_pnl !== 0 ? lot_pnl.toFixed(0) : '');
                     row.push(details.pnl || '', details.dpnl || '');
                     row.push(details.dbuy || '', details.dsell || '');
@@ -2712,7 +2743,7 @@
                         row.push(lot !== 0 ? parseFloat(lot).toFixed(1) : '');
                     }
                     if (showBuySellColumns) {
-                        row.push(details.sell || '', details.buy || '');
+                        row.push(enprc !== 0 ? enprc.toFixed(2) : '', exprc !== 0 ? exprc.toFixed(2) : '');
                     }
                 });
                 
