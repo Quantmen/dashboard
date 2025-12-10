@@ -28,17 +28,23 @@
         .page-subtitle { font-size: 12px; color: #6b7280; font-weight: 400; }
         .controls-section {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
             align-items: center;
+            justify-content: space-between;
+        }
+        .controls-section > * {
+            flex: 1 1 auto;
+            min-width: 0;
         }
         .control-group { display: flex; align-items: center; gap: 8px; }
         .control-label { font-size: 12px; color: #374151; font-weight: 600; }
-        .strategy-filter-container { position: relative; }
+        .strategy-filter-container { position: relative; flex: 1 1 auto; min-width: 0; }
         .strategy-filter-button {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             padding: 7px 12px;
             border: 1px solid #d1d5db;
@@ -49,6 +55,8 @@
             color: #374151;
             cursor: pointer;
             transition: all 0.15s ease;
+            width: 100%;
+            white-space: nowrap;
         }
         .strategy-filter-button:hover { border-color: #9ca3af; background: #f9fafb; }
         .strategy-filter-dropdown {
@@ -129,6 +137,10 @@
             cursor: pointer;
             transition: all 0.15s ease;
             font-family: inherit;
+            white-space: nowrap;
+            text-align: center;
+            flex: 1 1 auto;
+            min-width: 0;
         }
         select:hover, button:hover { border-color: #9ca3af; background: #f9fafb; }
         select:focus, button:focus {
