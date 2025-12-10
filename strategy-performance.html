@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Strategy Performance</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -973,34 +976,16 @@
                     <div class="strategy-filter-list" id="strategyFilterList"></div>
                 </div>
             </div>
-            <div class="control-group">
-                <input type="checkbox" id="showFilteredTotals" onchange="toggleTotalsMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showFilteredTotals" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Filtered Totals</label>
-            </div>
-            <div class="control-group">
-                <input type="checkbox" id="showTradeCount" onchange="toggleLotTradeMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showTradeCount" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Trade Count</label>
-            </div>
-            <div class="control-group">
-                <input type="checkbox" id="showDrawdown" onchange="toggleDrawdownMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showDrawdown" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Drawdown</label>
-            </div>
-            <div class="control-group">
-                <input type="checkbox" id="showLot" onchange="toggleLotMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showLot" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Lot</label>
-            </div>
-            <div class="control-group">
-                <input type="checkbox" id="showPnlTax" onchange="togglePnlTaxMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showPnlTax" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Tax PNL</label>
-            </div>
-            <div class="control-group">
-                <input type="checkbox" id="showLotPnl" onchange="toggleLotPnlMode()" style="margin-right: 6px; cursor: pointer;">
-                <label for="showLotPnl" style="cursor: pointer; font-size: 12px; color: #374151; font-weight: 500;">Show Lot PNL</label>
-            </div>
-            <button class="primary" onclick="resetAllFilters()">Reset Filter</button>
+            <button onclick="toggleFilteredTotalsButton()" id="filteredTotalsButton">Show Filtered Totals</button>
+            <button onclick="toggleTradeCountButton()" id="tradeCountButton">Show Trade Count</button>
+            <button onclick="toggleDrawdownButton()" id="drawdownButton">Show Drawdown</button>
+            <button onclick="toggleLotButton()" id="lotButton">Show Lot</button>
+            <button onclick="toggleLotPnlButton()" id="lotPnlButton">Show Lot PNL</button>
+            <button onclick="togglePnlTaxModeButton()" id="pnlTaxButton">Show Tax PNL</button>
             <button onclick="expandAll()">Expand All</button>
             <button onclick="collapseAll()">Collapse All</button>
             <button onclick="exportToCSV()">Export to csv</button>
+            <button class="primary" onclick="resetAllFilters()">Reset Filter</button>
         </div>
 
         <div class="table-container">
@@ -1122,38 +1107,38 @@
                 const savedTotalsMode = localStorage.getItem('showFilteredTotals');
                 if (savedTotalsMode !== null) {
                     showFilteredTotals = savedTotalsMode === 'true';
-                    const checkbox = document.getElementById('showFilteredTotals');
-                    if (checkbox) checkbox.checked = showFilteredTotals;
+                    const button = document.getElementById('filteredTotalsButton');
+                    if (button) button.textContent = showFilteredTotals ? 'Hide Filtered Totals' : 'Show Filtered Totals';
                 }
                 const savedTradeMode = localStorage.getItem('showTradeCount');
                 if (savedTradeMode !== null) {
                     showTradeCount = savedTradeMode === 'true';
-                    const checkbox = document.getElementById('showTradeCount');
-                    if (checkbox) checkbox.checked = showTradeCount;
+                    const button = document.getElementById('tradeCountButton');
+                    if (button) button.textContent = showTradeCount ? 'Hide Trade Count' : 'Show Trade Count';
                 }
                 const savedDrawdownMode = localStorage.getItem('showDrawdown');
                 if (savedDrawdownMode !== null) {
                     showDrawdown = savedDrawdownMode === 'true';
-                    const checkbox = document.getElementById('showDrawdown');
-                    if (checkbox) checkbox.checked = showDrawdown;
+                    const button = document.getElementById('drawdownButton');
+                    if (button) button.textContent = showDrawdown ? 'Hide Drawdown' : 'Show Drawdown';
                 }
                 const savedLotMode = localStorage.getItem('showLot');
                 if (savedLotMode !== null) {
                     showLot = savedLotMode === 'true';
-                    const checkbox = document.getElementById('showLot');
-                    if (checkbox) checkbox.checked = showLot;
+                    const button = document.getElementById('lotButton');
+                    if (button) button.textContent = showLot ? 'Hide Lot' : 'Show Lot';
                 }
                 const savedPnlTaxMode = localStorage.getItem('showPnlTax');
                 if (savedPnlTaxMode !== null) {
                     showPnlTax = savedPnlTaxMode === 'true';
-                    const checkbox = document.getElementById('showPnlTax');
-                    if (checkbox) checkbox.checked = showPnlTax;
+                    const button = document.getElementById('pnlTaxButton');
+                    if (button) button.textContent = showPnlTax ? 'Hide Tax PNL' : 'Show Tax PNL';
                 }
                 const savedLotPnlMode = localStorage.getItem('showLotPnl');
                 if (savedLotPnlMode !== null) {
                     showLotPnl = savedLotPnlMode === 'true';
-                    const checkbox = document.getElementById('showLotPnl');
-                    if (checkbox) checkbox.checked = showLotPnl;
+                    const button = document.getElementById('lotPnlButton');
+                    if (button) button.textContent = showLotPnl ? 'Hide Lot PNL' : 'Show Lot PNL';
                 }
             } catch (e) {
                 hiddenStrategies = new Set();
@@ -1192,6 +1177,88 @@
             showPnlTax = checkbox.checked;
             try {
                 localStorage.setItem('showPnlTax', showPnlTax);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function togglePnlTaxModeButton() {
+            showPnlTax = !showPnlTax;
+            const button = document.getElementById('pnlTaxButton');
+            if (button) {
+                button.textContent = showPnlTax ? 'Hide Tax PNL' : 'Show Tax PNL';
+            }
+            try {
+                localStorage.setItem('showPnlTax', showPnlTax);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleFilteredTotalsButton() {
+            showFilteredTotals = !showFilteredTotals;
+            const button = document.getElementById('filteredTotalsButton');
+            if (button) {
+                button.textContent = showFilteredTotals ? 'Hide Filtered Totals' : 'Show Filtered Totals';
+            }
+            try {
+                localStorage.setItem('showFilteredTotals', showFilteredTotals);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleTradeCountButton() {
+            showTradeCount = !showTradeCount;
+            const button = document.getElementById('tradeCountButton');
+            if (button) {
+                button.textContent = showTradeCount ? 'Hide Trade Count' : 'Show Trade Count';
+            }
+            if (showTradeCount && !showLot) {
+                showLot = true;
+                const lotButton = document.getElementById('lotButton');
+                if (lotButton) lotButton.textContent = 'Hide Lot';
+                try { localStorage.setItem('showLot', showLot); } catch (e) {}
+            }
+            if (!showTradeCount && showLot) {
+                showLot = false;
+                const lotButton = document.getElementById('lotButton');
+                if (lotButton) lotButton.textContent = 'Show Lot';
+                try { localStorage.setItem('showLot', showLot); } catch (e) {}
+            }
+            try { localStorage.setItem('showTradeCount', showTradeCount); } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleDrawdownButton() {
+            showDrawdown = !showDrawdown;
+            const button = document.getElementById('drawdownButton');
+            if (button) {
+                button.textContent = showDrawdown ? 'Hide Drawdown' : 'Show Drawdown';
+            }
+            try {
+                localStorage.setItem('showDrawdown', showDrawdown);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleLotButton() {
+            showLot = !showLot;
+            const button = document.getElementById('lotButton');
+            if (button) {
+                button.textContent = showLot ? 'Hide Lot' : 'Show Lot';
+            }
+            try {
+                localStorage.setItem('showLot', showLot);
+            } catch (e) {}
+            processAndDisplayData();
+        }
+
+        function toggleLotPnlButton() {
+            showLotPnl = !showLotPnl;
+            const button = document.getElementById('lotPnlButton');
+            if (button) {
+                button.textContent = showLotPnl ? 'Hide Lot PNL' : 'Show Lot PNL';
+            }
+            try {
+                localStorage.setItem('showLotPnl', showLotPnl);
             } catch (e) {}
             processAndDisplayData();
         }
@@ -1328,12 +1395,12 @@
             showFilteredTotals = false;
             showTradeCount = false;
             showDrawdown = false;
-            const filteredCheckbox = document.getElementById('showFilteredTotals');
-            if (filteredCheckbox) filteredCheckbox.checked = false;
-            const tradeCheckbox = document.getElementById('showTradeCount');
-            if (tradeCheckbox) tradeCheckbox.checked = false;
-            const drawdownCheckbox = document.getElementById('showDrawdown');
-            if (drawdownCheckbox) drawdownCheckbox.checked = false;
+            const filteredButton = document.getElementById('filteredTotalsButton');
+            if (filteredButton) filteredButton.textContent = 'Show Filtered Totals';
+            const tradeButton = document.getElementById('tradeCountButton');
+            if (tradeButton) tradeButton.textContent = 'Show Trade Count';
+            const drawdownButton = document.getElementById('drawdownButton');
+            if (drawdownButton) drawdownButton.textContent = 'Show Drawdown';
             updateStrategyFilterList();
             updateMonthFilterList();
             processAndDisplayData();
@@ -1360,18 +1427,18 @@
             showPnlTax = false;
             showLotPnl = false;
             
-            const filteredCheckbox = document.getElementById('showFilteredTotals');
-            if (filteredCheckbox) filteredCheckbox.checked = false;
-            const tradeCheckbox = document.getElementById('showTradeCount');
-            if (tradeCheckbox) tradeCheckbox.checked = false;
-            const drawdownCheckbox = document.getElementById('showDrawdown');
-            if (drawdownCheckbox) drawdownCheckbox.checked = false;
-            const lotCheckbox = document.getElementById('showLot');
-            if (lotCheckbox) lotCheckbox.checked = false;
-            const pnlTaxCheckbox = document.getElementById('showPnlTax');
-            if (pnlTaxCheckbox) pnlTaxCheckbox.checked = false;
-            const lotPnlCheckbox = document.getElementById('showLotPnl');
-            if (lotPnlCheckbox) lotPnlCheckbox.checked = false;
+            const filteredButton = document.getElementById('filteredTotalsButton');
+            if (filteredButton) filteredButton.textContent = 'Show Filtered Totals';
+            const tradeButton = document.getElementById('tradeCountButton');
+            if (tradeButton) tradeButton.textContent = 'Show Trade Count';
+            const drawdownButton = document.getElementById('drawdownButton');
+            if (drawdownButton) drawdownButton.textContent = 'Show Drawdown';
+            const lotButton = document.getElementById('lotButton');
+            if (lotButton) lotButton.textContent = 'Show Lot';
+            const pnlTaxButton = document.getElementById('pnlTaxButton');
+            if (pnlTaxButton) pnlTaxButton.textContent = 'Show Tax PNL';
+            const lotPnlButton = document.getElementById('lotPnlButton');
+            if (lotPnlButton) lotPnlButton.textContent = 'Show Lot PNL';
             
             updateStrategyFilterList();
             updateMonthFilterList();
@@ -1536,14 +1603,20 @@
             });
             
             // PNL section by broker
+            let brokerPnlHeaderText;
+            if (showLotPnl) {
+                brokerPnlHeaderText = showPnlTax ? 'LOT PNL TAX' : 'LOT PNL';
+            } else {
+                brokerPnlHeaderText = showPnlTax ? 'PNL TAX' : 'PNL';
+            }
             sortedBrokers.forEach(brokerCode => {
                 const count = brokerGroups[brokerCode].length;
-                headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} PNL</th>`;
+                headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} ${brokerPnlHeaderText}</th>`;
             });
             
             headerRow1 += '<th class="number-col total-net-col" rowspan="2">AMI PNL</th>';
-            headerRow1 += '<th class="number-col total-net-col total-col-border" rowspan="2">TOTAL</th>';
-            headerRow1 += '<th class="number-col total-net-col" rowspan="2">NET PNL</th>';
+            const netPnlHeaderText = showPnlTax ? 'NET PNL TAX' : 'NET PNL';
+            headerRow1 += `<th class="number-col total-net-col" rowspan="2">${netPnlHeaderText}</th>`;
             headerRow1 += '<th class="number-col net-pnl-percent-col" rowspan="2">NET PNL%</th>';
             headerRow1 += '<th class="number-col expenses-col" rowspan="2">Expenses</th>';
             headerRow1 += '<th class="number-col total-net-col" rowspan="2">TOTAL MARGIN</th>';
@@ -2233,8 +2306,9 @@
         function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses) {
             if (strategies.length === 0) {
                 const drawdownHeader = showDrawdown ? '<th class="number-col">DRAWDOWN</th>' : '';
-                const colspan = showDrawdown ? '4' : '3';
-                elements.tableHeaders.innerHTML = `<tr><th>Period</th><th class="number-col">TOTAL</th><th class="number-col">NET</th>${drawdownHeader}</tr>`;
+                const colspan = showDrawdown ? '3' : '2';
+                const netPnlHeaderText = showPnlTax ? 'NET PNL TAX' : 'NET PNL';
+                elements.tableHeaders.innerHTML = `<tr><th>Period</th><th class="number-col">${netPnlHeaderText}</th>${drawdownHeader}</tr>`;
                 elements.tableBody.innerHTML = `<tr><td colspan="${colspan}" class="no-data">No strategies selected. Use "Hide Strategies" filter to show strategies.</td></tr>`;
                 return;
             }
@@ -2281,14 +2355,20 @@
             });
             
             // PNL section by broker
+            let brokerPnlHeaderText;
+            if (showLotPnl) {
+                brokerPnlHeaderText = showPnlTax ? 'LOT PNL TAX' : 'LOT PNL';
+            } else {
+                brokerPnlHeaderText = showPnlTax ? 'PNL TAX' : 'PNL';
+            }
             sortedBrokers.forEach(brokerCode => {
                 const count = brokerGroups[brokerCode].length;
-                headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} PNL</th>`;
+                headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} ${brokerPnlHeaderText}</th>`;
             });
             
             headerRow1 += '<th class="number-col total-net-col" rowspan="2">AMI PNL</th>';
-            headerRow1 += '<th class="number-col total-net-col total-col-border" rowspan="2">TOTAL</th>';
-            headerRow1 += '<th class="number-col total-net-col" rowspan="2">NET PNL</th>';
+            const netPnlHeaderText = showPnlTax ? 'NET PNL TAX' : 'NET PNL';
+            headerRow1 += `<th class="number-col total-net-col" rowspan="2">${netPnlHeaderText}</th>`;
             headerRow1 += '<th class="number-col net-pnl-percent-col" rowspan="2">NET PNL%</th>';
             headerRow1 += '<th class="number-col expenses-col" rowspan="2">Expenses</th>';
             headerRow1 += '<th class="number-col total-net-col" rowspan="2">TOTAL MARGIN</th>';
@@ -2457,10 +2537,9 @@
                 const monthAmiPnl = totalsToUse[month]?.amiPnl || 0;
                 bodyHtml += `<td class="number-col total-net-col ${monthAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(monthAmiPnl)}</td>`;
 
-                bodyHtml += `<td class="number-col total-net-col total-col-border ${monthTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(monthTotal)}</td>`;
-                
-                // NET PNL
-                bodyHtml += `<td class="number-col total-net-col ${monthNetTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(monthNetTotal)}</td>`;
+                // NET PNL column - shows monthNetTotal when showPnlTax is true, otherwise shows monthTotal
+                const netPnlValue = showPnlTax ? monthNetTotal : monthTotal;
+                bodyHtml += `<td class="number-col total-net-col ${netPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(netPnlValue)}</td>`;
                 
                 // NET PNL % calculation
                 let netPnlPercent = 0;
@@ -2657,10 +2736,9 @@
                         const dayAmiPnl = totalsToUse[month][date]?.amiPnl || 0;
                         bodyHtml += `<td class="number-col total-net-col ${dayAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dayAmiPnl)}</td>`;
 
-                        bodyHtml += `<td class="number-col total-net-col total-col-border ${dayTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(dayTotal)}</td>`;
-                        
-                        // NET PNL
-                        bodyHtml += `<td class="number-col total-net-col ${dayNetTotal >= 0 ? 'positive' : 'negative'}">${formatNumber(dayNetTotal)}</td>`;
+                        // NET PNL column - shows dayNetTotal when showPnlTax is true, otherwise shows dayTotal
+                        const dayNetPnlValue = showPnlTax ? dayNetTotal : dayTotal;
+                        bodyHtml += `<td class="number-col total-net-col ${dayNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(dayNetPnlValue)}</td>`;
                         
                         // NET PNL % calculation for day rows
                         let dayNetPnlPercent = 0;
@@ -2751,10 +2829,9 @@
             // AMI PNL total
             bodyHtml += `<td class="number-col total-net-col ${totals.totalAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalAmiPnl)}</td>`;
             
-            bodyHtml += `<td class="number-col total-net-col total-col-border ${totals.totalProfits >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalProfits)}</td>`;
-            
-            // NET total
-            bodyHtml += `<td class="number-col total-net-col ${totals.netBrProfits >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.netBrProfits)}</td>`;
+            // NET PNL column - shows totals.netBrProfits when showPnlTax is true, otherwise shows totals.totalProfits
+            const totalNetPnlValue = showPnlTax ? totals.netBrProfits : totals.totalProfits;
+            bodyHtml += `<td class="number-col total-net-col ${totalNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(totalNetPnlValue)}</td>`;
             
             // NET PNL % total
             const totalNetPnlPercent = totals.totalMarginSum !== 0 ? (totals.netBrProfits / totals.totalMarginSum) * 100 : 0;
