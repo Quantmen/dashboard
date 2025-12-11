@@ -83,7 +83,7 @@
             padding: 7px 12px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
             background: white;
             color: #374151;
@@ -122,7 +122,7 @@
             background: #ffffff;
             z-index: 100;
         }
-        .strategy-filter-title { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .strategy-filter-title { font-size: 12px; font-weight: 600; color: #1e293b; }
         .strategy-filter-actions { display: flex; gap: 8px; }
         .filter-action-btn {
             font-size: 11px;
@@ -182,7 +182,7 @@
             aspect-ratio: 1;
         }
         .strategy-filter-label { 
-            font-size: 13px; 
+            font-size: 12px; 
             color: #475569; 
             cursor: pointer; 
             user-select: none; 
@@ -252,7 +252,22 @@
             border-color: #1e3a8a;
         }
         
-        #symbolFilter, #rowsPerPage {
+        /* Make specific buttons extend */
+        #toggleBuySellBtn,
+        #toggleTimeBtn,
+        #toggleLotBtn,
+        #applyFiltersBtn,
+        #resetFiltersBtn,
+        #exportCSVBtn {
+            flex: 1;
+            min-width: fit-content;
+        }
+        
+        #symbolFilter {
+            box-sizing: border-box;
+        }
+        
+        #rowsPerPage {
             box-sizing: border-box;
         }
         
