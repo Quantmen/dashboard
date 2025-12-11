@@ -320,6 +320,14 @@
 
         tbody tr:hover { opacity: 0.9; }
 
+        .empty-state {
+            text-align: left !important;
+            padding: 12px !important;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
         /* Value Colors - matching strategy-performance.html */
         .negative { color: #b96060; }
         .positive { color: #059669; }
@@ -806,7 +814,9 @@
                         <th onclick="sortTable('maxDDPercent')">Max DD %</th>
                     </tr>
                 </thead>
-                <tbody id="drawdownTableBody"></tbody>
+                <tbody id="drawdownTableBody">
+                    <tr><td class="empty-state">No data loaded yet.</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -1450,7 +1460,7 @@
         function renderTable() {
             const tbody = document.getElementById('drawdownTableBody');
             if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:40px;">No data available</td></tr>';
+                tbody.innerHTML = '<tr><td class="empty-state">No data available</td></tr>';
                 return;
             }
 
