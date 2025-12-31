@@ -1621,14 +1621,16 @@
             });
 
             allBrokers = Array.from(brokersSet).sort();
+            
+            // Filter out 'A' (Amibroker) from dropdown - it's always selected by default
+            const selectableBrokers = allBrokers.filter(broker => broker !== 'A');
 
-            const html = allBrokers.map(broker => {
+            const html = selectableBrokers.map(broker => {
                 const isChecked = selectedBrokers.has(broker);
-                const displayName = broker === 'A' ? 'Amibroker' : broker;
                 return `<div class="strategy-filter-item" onclick="event.stopPropagation(); toggleBrokerRow('${broker}')">
                     <input type="checkbox" class="strategy-filter-checkbox" id="broker_check_${broker}" 
                            ${isChecked ? 'checked' : ''}>
-                    <label class="strategy-filter-label" for="broker_check_${broker}">${displayName}</label>
+                    <label class="strategy-filter-label" for="broker_check_${broker}">${broker}</label>
                 </div>`;
             }).join('');
             
@@ -1658,11 +1660,13 @@
         }
 
         function updateBrokerFilterBadge() {
-            const totalBrokers = allBrokers.length;
-            const selectedCount = selectedBrokers.size;
+            // Count only non-'A' brokers for badge (since 'A' is always selected)
+            const selectableBrokers = allBrokers.filter(b => b !== 'A');
+            const totalSelectable = selectableBrokers.length;
+            const selectedSelectable = selectableBrokers.filter(b => selectedBrokers.has(b)).length;
             
-            if (selectedCount > 0 && selectedCount < totalBrokers) {
-                elements.brokerFilterBadge.textContent = selectedCount;
+            if (selectedSelectable > 0 && selectedSelectable < totalSelectable) {
+                elements.brokerFilterBadge.textContent = selectedSelectable;
                 elements.brokerFilterBadge.style.display = 'inline-block';
             } else {
                 elements.brokerFilterBadge.style.display = 'none';
@@ -1672,10 +1676,12 @@
         function selectAllBrokers() {
             allBrokers.forEach(broker => selectedBrokers.add(broker));
             
-            // Directly check all checkboxes
+            // Directly check all checkboxes (only non-'A' brokers are in the dropdown)
             allBrokers.forEach(broker => {
-                const checkbox = document.getElementById(`broker_check_${broker}`);
-                if (checkbox) checkbox.checked = true;
+                if (broker !== 'A') {
+                    const checkbox = document.getElementById(`broker_check_${broker}`);
+                    if (checkbox) checkbox.checked = true;
+                }
             });
             
             saveBrokerFilters();
@@ -1684,12 +1690,16 @@
         }
 
         function clearAllBrokers() {
+            // Clear all brokers except 'A' (Amibroker) which is always selected
             selectedBrokers.clear();
+            selectedBrokers.add('A'); // Always keep Amibroker selected
             
-            // Directly uncheck all checkboxes
+            // Directly uncheck all checkboxes ('A' is not in dropdown)
             allBrokers.forEach(broker => {
-                const checkbox = document.getElementById(`broker_check_${broker}`);
-                if (checkbox) checkbox.checked = false;
+                if (broker !== 'A') {
+                    const checkbox = document.getElementById(`broker_check_${broker}`);
+                    if (checkbox) checkbox.checked = false;
+                }
             });
             
             saveBrokerFilters();
@@ -1922,8 +1932,13 @@
             });
             const tempAllBrokers = Array.from(brokersSet).sort();
             
+            // Always ensure 'A' (Amibroker) is selected if it exists
+            if (tempAllBrokers.includes('A')) {
+                selectedBrokers.add('A');
+            }
+            
             // On first load or when explicitly reset, select all brokers
-            if (!brokersInitialized && selectedBrokers.size === 0 && tempAllBrokers.length > 0) {
+            if (!brokersInitialized && selectedBrokers.size <= 1 && tempAllBrokers.length > 0) {
                 tempAllBrokers.forEach(broker => selectedBrokers.add(broker));
                 brokersInitialized = true;
             }
@@ -1947,11 +1962,28 @@
                         const filteredStrategyDetails = {};
                         const filteredBrokerCodes = {};
                         
+                        // Collect base strategy names from selected non-Amibroker brokers
+                        const selectedBaseStrategies = new Set();
+                        
                         // Only include strategies if brokers are selected
                         if (selectedBrokers.size > 0) {
                             Object.keys(trade.brokerCodes).forEach(strategyName => {
                                 const brokerCode = trade.brokerCodes[strategyName];
+                                
+                                // Include strategy if its broker is selected
                                 if (selectedBrokers.has(brokerCode)) {
+                                    // For non-Amibroker strategies, extract base strategy name
+                                    if (brokerCode !== 'A') {
+                                        // Remove broker prefix from strategy name
+                                        // Handle formats like "B1PRO 5", "B2PRO 3", "IBPRO 4", etc.
+                                        let baseStrategy = strategyName.replace(/^[A-Z]+\d*/, '').trim();
+                                        // Normalize: remove spaces for matching
+                                        baseStrategy = baseStrategy.replace(/\s+/g, '');
+                                        if (baseStrategy) {
+                                            selectedBaseStrategies.add(baseStrategy);
+                                        }
+                                    }
+                                    
                                     if (trade.strategyPnls && trade.strategyPnls[strategyName] !== undefined) {
                                         filteredStrategyPnls[strategyName] = trade.strategyPnls[strategyName];
                                     }
@@ -1964,6 +1996,28 @@
                                     filteredBrokerCodes[strategyName] = brokerCode;
                                 }
                             });
+                            
+                            // Now filter Amibroker strategies based on selected base strategies
+                            // Only filter if non-Amibroker brokers are selected
+                            if (selectedBrokers.has('A') && selectedBaseStrategies.size > 0) {
+                                // Remove Amibroker strategies that don't match selected base strategies
+                                Object.keys(filteredBrokerCodes).forEach(strategyName => {
+                                    if (filteredBrokerCodes[strategyName] === 'A') {
+                                        // Extract base strategy from Amibroker strategy name (e.g., "A.PRO 2" -> "PRO2")
+                                        let amiBaseStrategy = strategyName.replace(/^A\./, '');
+                                        // Normalize: remove spaces to match consistently
+                                        amiBaseStrategy = amiBaseStrategy.replace(/\s+/g, '');
+                                        
+                                        // Keep only if this base strategy exists in selected brokers
+                                        if (!selectedBaseStrategies.has(amiBaseStrategy)) {
+                                            delete filteredStrategyPnls[strategyName];
+                                            delete filteredStrategyPnlTax[strategyName];
+                                            delete filteredStrategyDetails[strategyName];
+                                            delete filteredBrokerCodes[strategyName];
+                                        }
+                                    }
+                                });
+                            }
                         }
                         // If selectedBrokers.size === 0, all objects remain empty (show nothing)
                         
@@ -2236,6 +2290,42 @@
                 
                 return a.localeCompare(b);
             });
+            
+            // Filter Amibroker strategies based on selected brokers
+            if (selectedBrokers.size > 0 && allBrokers.length > 0 && selectedBrokers.size < allBrokers.length) {
+                // Collect base strategies from selected non-Amibroker brokers
+                const selectedBaseStrategies = new Set();
+                allStrategies.forEach(stratName => {
+                    // Find broker code for this strategy
+                    let brokerCode = null;
+                    for (const trade of trades) {
+                        if (trade.brokerCodes && trade.brokerCodes[stratName]) {
+                            brokerCode = trade.brokerCodes[stratName];
+                            break;
+                        }
+                    }
+                    
+                    if (brokerCode && brokerCode !== 'A' && selectedBrokers.has(brokerCode)) {
+                        // Extract base strategy name
+                        let baseStrategy = stratName.replace(/^[A-Z]+\d*/, '').trim();
+                        baseStrategy = baseStrategy.replace(/\s+/g, '');
+                        if (baseStrategy) {
+                            selectedBaseStrategies.add(baseStrategy);
+                        }
+                    }
+                });
+                
+                // Filter out Amibroker strategies that don't match selected base strategies
+                if (selectedBaseStrategies.size > 0) {
+                    allStrategies = allStrategies.filter(stratName => {
+                        if (!stratName.startsWith('A.')) return true; // Keep non-Amibroker
+                        
+                        // Extract base from Amibroker strategy
+                        let amiBase = stratName.replace(/^A\./, '').replace(/\s+/g, '');
+                        return selectedBaseStrategies.has(amiBase);
+                    });
+                }
+            }
             
             const visibleStrategies = allStrategies.filter(s => !hiddenStrategies.has(s));
             
