@@ -68,7 +68,7 @@
             border: 1px solid #d1d5db;
             border-radius: 10px;
             box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
-            min-width: 250px;
+            min-width: 180px;
             max-height: 400px;
             overflow-y: auto;
             z-index: 1000;
@@ -87,19 +87,19 @@
             padding: 6px 14px;
         }
         .strategy-filter-header {
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .strategy-filter-title { font-size: 13px; font-weight: 600; color: #1e293b; }
-        .strategy-filter-actions { display: flex; gap: 8px; }
+        .strategy-filter-actions { display: flex; gap: 4px; }
         .filter-action-btn {
             font-size: 11px;
             color: #1e40af;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 4px 6px;
             border-radius: 4px;
             transition: background 0.2s ease;
         }
@@ -982,10 +982,26 @@
                         <div class="strategy-filter-actions">
                             <span class="filter-action-btn" onclick="selectAllStrategies()">All</span>
                             <span class="filter-action-btn" onclick="deselectAllStrategies()">None</span>
-                            <span class="filter-action-btn" onclick="clearSavedFilters()" style="color: #dc2626;">Reset</span>
                         </div>
                     </div>
                     <div class="strategy-filter-list" id="strategyFilterList"></div>
+                </div>
+            </div>
+            <div class="strategy-filter-container">
+                <button class="strategy-filter-button" onclick="toggleBrokerFilter()">
+                    <span>Select Brokers</span>
+                    <span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span>
+                    <span>▼</span>
+                </button>
+                <div class="strategy-filter-dropdown" id="brokerFilterDropdown">
+                    <div class="strategy-filter-header">
+                        <span class="strategy-filter-title">Select Brokers</span>
+                        <div class="strategy-filter-actions">
+                            <span class="filter-action-btn" onclick="selectAllBrokers()">All</span>
+                            <span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span>
+                        </div>
+                    </div>
+                    <div class="strategy-filter-list" id="brokerFilterList"></div>
                 </div>
             </div>
             <button onclick="toggleFilteredTotalsButton()" id="filteredTotalsButton">Show Filtered Totals</button>
@@ -1029,6 +1045,9 @@
             strategyFilterDropdown: document.getElementById('strategyFilterDropdown'),
             strategyFilterList: document.getElementById('strategyFilterList'),
             filterBadge: document.getElementById('filterBadge'),
+            brokerFilterDropdown: document.getElementById('brokerFilterDropdown'),
+            brokerFilterList: document.getElementById('brokerFilterList'),
+            brokerFilterBadge: document.getElementById('brokerFilterBadge'),
             tableHeaders: document.getElementById('tableHeaders'),
             tableBody: document.getElementById('tableBody')
         };
@@ -1036,7 +1055,9 @@
         let allTrades = [];
         let hiddenStrategies = new Set();
         let selectedMonths = new Set();
+        let selectedBrokers = new Set();
         let allStrategies = [];
+        let allBrokers = [];
         let globalTotalExpenses = 0;
         let globalLastTotalMargin = 0;
         let globalStartingCapital = 0;
@@ -1058,6 +1079,12 @@
                 if (!elements.strategyFilterDropdown.contains(event.target) && 
                     !event.target.closest('.strategy-filter-button')) {
                     elements.strategyFilterDropdown.classList.remove('active');
+                }
+                
+                // Close broker filter dropdown if clicking outside
+                if (!elements.brokerFilterDropdown.contains(event.target) && 
+                    !event.target.closest('.strategy-filter-button')) {
+                    elements.brokerFilterDropdown.classList.remove('active');
                 }
                 
                 // Close month filter dropdown only if clicking outside (not on button or inside dropdown)
@@ -1115,6 +1142,10 @@
                 const savedMonths = localStorage.getItem('selectedMonths');
                 if (savedMonths) {
                     selectedMonths = new Set(JSON.parse(savedMonths));
+                }
+                const savedBrokers = localStorage.getItem('selectedBrokers');
+                if (savedBrokers) {
+                    selectedBrokers = new Set(JSON.parse(savedBrokers));
                 }
                 const savedTotalsMode = localStorage.getItem('showFilteredTotals');
                 if (savedTotalsMode !== null) {
@@ -1398,12 +1429,14 @@
             try {
                 localStorage.removeItem('strategyFilters');
                 localStorage.removeItem('selectedMonths');
+                localStorage.removeItem('selectedBrokers');
                 localStorage.removeItem('showFilteredTotals');
                 localStorage.removeItem('showTradeCount');
                 localStorage.removeItem('showDrawdown');
             } catch (e) {}
             hiddenStrategies.clear();
             selectedMonths.clear();
+            selectedBrokers.clear();
             showFilteredTotals = false;
             showTradeCount = false;
             showDrawdown = false;
@@ -1415,6 +1448,7 @@
             if (drawdownButton) drawdownButton.textContent = 'Show Drawdown';
             updateStrategyFilterList();
             updateMonthFilterList();
+            updateBrokerFilterList();
             processAndDisplayData();
         }
 
@@ -1422,6 +1456,7 @@
             try {
                 localStorage.removeItem('strategyFilters');
                 localStorage.removeItem('selectedMonths');
+                localStorage.removeItem('selectedBrokers');
                 localStorage.removeItem('showFilteredTotals');
                 localStorage.removeItem('showTradeCount');
                 localStorage.removeItem('showDrawdown');
@@ -1432,6 +1467,7 @@
             
             hiddenStrategies.clear();
             selectedMonths.clear();
+            selectedBrokers.clear();
             showFilteredTotals = false;
             showTradeCount = false;
             showDrawdown = false;
@@ -1454,6 +1490,7 @@
             
             updateStrategyFilterList();
             updateMonthFilterList();
+            updateBrokerFilterList();
             processAndDisplayData();
         }
 
@@ -1547,6 +1584,107 @@
                 if (checkbox) checkbox.checked = true;
             });
             updateMonthFilterBadge();
+            processAndDisplayData();
+        }
+
+        function toggleBrokerFilter() {
+            // Close strategy and month filter dropdowns if open
+            elements.strategyFilterDropdown.classList.remove('active');
+            elements.monthFilterDropdown.classList.remove('active');
+            // Toggle broker filter dropdown
+            elements.brokerFilterDropdown.classList.toggle('active');
+        }
+
+        function updateBrokerFilterList() {
+            const brokersSet = new Set();
+            
+            // Extract broker codes from strategy names in brokerCodes mapping
+            allTrades.forEach(trade => {
+                if (trade.brokerCodes) {
+                    Object.values(trade.brokerCodes).forEach(code => {
+                        if (code) brokersSet.add(code);
+                    });
+                }
+            });
+
+            allBrokers = Array.from(brokersSet).sort();
+            
+            // If no brokers exist in savedBrokers and this is first load, select all by default
+            const savedBrokers = localStorage.getItem('selectedBrokers');
+            if (!savedBrokers && selectedBrokers.size === 0) {
+                allBrokers.forEach(broker => selectedBrokers.add(broker));
+            }
+
+            const html = allBrokers.map(broker => {
+                const isChecked = selectedBrokers.has(broker);
+                const displayName = broker === 'A' ? 'Amibroker' : broker;
+                return `<div class="strategy-filter-item" onclick="event.stopPropagation(); toggleBrokerRow('${broker}')">
+                    <input type="checkbox" class="strategy-filter-checkbox" id="broker_check_${broker}" 
+                           ${isChecked ? 'checked' : ''}>
+                    <label class="strategy-filter-label" for="broker_check_${broker}">${displayName}</label>
+                </div>`;
+            }).join('');
+            
+            elements.brokerFilterList.innerHTML = html;
+            updateBrokerFilterBadge();
+        }
+
+        function toggleBrokerRow(broker) {
+            const checkbox = document.getElementById(`broker_check_${broker}`);
+            if (!checkbox) return;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                selectedBrokers.add(broker);
+            } else {
+                selectedBrokers.delete(broker);
+            }
+            
+            saveBrokerFilters();
+            updateBrokerFilterBadge();
+            processAndDisplayData();
+        }
+
+        function saveBrokerFilters() {
+            try {
+                localStorage.setItem('selectedBrokers', JSON.stringify(Array.from(selectedBrokers)));
+            } catch (e) {}
+        }
+
+        function updateBrokerFilterBadge() {
+            const totalBrokers = allBrokers.length;
+            const selectedCount = selectedBrokers.size;
+            
+            if (selectedCount > 0 && selectedCount < totalBrokers) {
+                elements.brokerFilterBadge.textContent = selectedCount;
+                elements.brokerFilterBadge.style.display = 'inline-block';
+            } else {
+                elements.brokerFilterBadge.style.display = 'none';
+            }
+        }
+
+        function selectAllBrokers() {
+            allBrokers.forEach(broker => selectedBrokers.add(broker));
+            saveBrokerFilters();
+            
+            allBrokers.forEach(broker => {
+                const checkbox = document.getElementById(`broker_check_${broker}`);
+                if (checkbox) checkbox.checked = true;
+            });
+            updateBrokerFilterBadge();
+            processAndDisplayData();
+        }
+
+        function clearAllBrokers() {
+            selectedBrokers.clear();
+            saveBrokerFilters();
+            
+            allBrokers.forEach(broker => {
+                const checkbox = document.getElementById(`broker_check_${broker}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            updateBrokerFilterBadge();
             processAndDisplayData();
         }
 
@@ -1749,15 +1887,57 @@
             if (allTrades.length === 0) return;
 
             // Filter trades by selected months
-            const filteredTrades = selectedMonths.size > 0
-                ? allTrades.filter(trade => {
-                    const month = trade.date?.split('/')[1];
-                    return selectedMonths.has(month);
-                })
-                : allTrades;
+            let filteredTrades = allTrades.filter(trade => {
+                const month = trade.date?.split('/')[1];
+                return selectedMonths.size === 0 || selectedMonths.has(month);
+            });
+
+            // If broker filter is active, filter the strategies within each trade
+            if (selectedBrokers.size < allBrokers.length) {
+                filteredTrades = filteredTrades.map(trade => {
+                    // Create a filtered version of the trade
+                    const filteredTrade = { ...trade };
+                    
+                    // Filter strategy-related data based on broker codes
+                    if (trade.brokerCodes) {
+                        const filteredStrategyPnls = {};
+                        const filteredStrategyPnlTax = {};
+                        const filteredStrategyDetails = {};
+                        const filteredBrokerCodes = {};
+                        
+                        // Only include strategies if brokers are selected
+                        if (selectedBrokers.size > 0) {
+                            Object.keys(trade.brokerCodes).forEach(strategyName => {
+                                const brokerCode = trade.brokerCodes[strategyName];
+                                if (selectedBrokers.has(brokerCode)) {
+                                    if (trade.strategyPnls && trade.strategyPnls[strategyName] !== undefined) {
+                                        filteredStrategyPnls[strategyName] = trade.strategyPnls[strategyName];
+                                    }
+                                    if (trade.strategyPnlTax && trade.strategyPnlTax[strategyName] !== undefined) {
+                                        filteredStrategyPnlTax[strategyName] = trade.strategyPnlTax[strategyName];
+                                    }
+                                    if (trade.strategyDetails && trade.strategyDetails[strategyName]) {
+                                        filteredStrategyDetails[strategyName] = trade.strategyDetails[strategyName];
+                                    }
+                                    filteredBrokerCodes[strategyName] = brokerCode;
+                                }
+                            });
+                        }
+                        // If selectedBrokers.size === 0, all objects remain empty (show nothing)
+                        
+                        filteredTrade.strategyPnls = filteredStrategyPnls;
+                        filteredTrade.strategyPnlTax = filteredStrategyPnlTax;
+                        filteredTrade.strategyDetails = filteredStrategyDetails;
+                        filteredTrade.brokerCodes = filteredBrokerCodes;
+                    }
+                    
+                    return filteredTrade;
+                });
+            }
 
             displayPivotData(filteredTrades);
             updateMonthFilterList();
+            updateBrokerFilterList();
             updateSummaryCards(filteredTrades);
             updateStrategyFilterList();
             cleanupSavedFilters();
@@ -2018,21 +2198,22 @@
             const visibleStrategies = allStrategies.filter(s => !hiddenStrategies.has(s));
             
             // Calculate daily values first as they are needed for monthly calculations
-            const sortedAllTrades = [...allTrades].sort((a, b) => {
+            // Use the filtered trades (not allTrades) so broker filter affects expenses
+            const sortedFilteredTrades = [...trades].sort((a, b) => {
                 const dateA = a.date.split('/').reverse().join('');
                 const dateB = b.date.split('/').reverse().join('');
                 return dateA.localeCompare(dateB);
             });
             
             // Calculate daily total margins
-            const dailyTotalMargins = calculateDailyTotalMargins(sortedAllTrades, Array.from(strategies));
+            const dailyTotalMargins = calculateDailyTotalMargins(sortedFilteredTrades, Array.from(strategies));
             
             // Calculate daily expenses
-            const dailyExpenses = calculateDailyExpenses(sortedAllTrades, Array.from(strategies), dailyTotalMargins);
+            const dailyExpenses = calculateDailyExpenses(sortedFilteredTrades, Array.from(strategies), dailyTotalMargins);
             
-            // Calculate Expenses and TOTAL MARGIN using ALL trades (not filtered by month)
+            // Calculate Expenses and TOTAL MARGIN using filtered trades (affected by broker filter)
             // Pass dailyTotalMargins and dailyExpenses to aggregate them monthly
-            const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedAllTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals, dailyTotalMargins, dailyExpenses);
+            const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedFilteredTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals, dailyTotalMargins, dailyExpenses);
             
             renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses);
         }
