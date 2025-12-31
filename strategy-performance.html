@@ -1058,6 +1058,7 @@
         let selectedBrokers = new Set();
         let allStrategies = [];
         let allBrokers = [];
+        let brokersInitialized = false; // Track if brokers have been initialized
         let globalTotalExpenses = 0;
         let globalLastTotalMargin = 0;
         let globalStartingCapital = 0;
@@ -1127,6 +1128,21 @@
             const { type, data } = event.data;
             if (type === 'TRADES_DATA') {
                 allTrades = data;
+                selectedBrokers.clear(); // Clear broker selections on new data load
+                brokersInitialized = false; // Reset flag on new data load to allow auto-selection
+                
+                // Reload saved strategy filters from localStorage to restore original saved state
+                try {
+                    const savedFilters = localStorage.getItem('strategyFilters');
+                    if (savedFilters) {
+                        hiddenStrategies = new Set(JSON.parse(savedFilters));
+                    } else {
+                        hiddenStrategies.clear();
+                    }
+                } catch (e) {
+                    hiddenStrategies.clear();
+                }
+                
                 processAndDisplayData();
             } else if (type === 'LOAD_SAMPLE_DATA') {
                 loadSampleData();
@@ -1135,6 +1151,9 @@
 
         function loadSavedFilters() {
             try {
+                // Explicitly remove broker selection from localStorage (should not be saved)
+                localStorage.removeItem('selectedBrokers');
+                
                 const savedFilters = localStorage.getItem('strategyFilters');
                 if (savedFilters) {
                     hiddenStrategies = new Set(JSON.parse(savedFilters));
@@ -1142,10 +1161,6 @@
                 const savedMonths = localStorage.getItem('selectedMonths');
                 if (savedMonths) {
                     selectedMonths = new Set(JSON.parse(savedMonths));
-                }
-                const savedBrokers = localStorage.getItem('selectedBrokers');
-                if (savedBrokers) {
-                    selectedBrokers = new Set(JSON.parse(savedBrokers));
                 }
                 const savedTotalsMode = localStorage.getItem('showFilteredTotals');
                 if (savedTotalsMode !== null) {
@@ -1349,7 +1364,7 @@
                     }
                 });
                 hiddenStrategies = validHiddenStrategies;
-                saveFilters();
+                // Removed saveFilters() - don't save when broker changes update the strategy list
             }
         }
 
@@ -1429,7 +1444,6 @@
             try {
                 localStorage.removeItem('strategyFilters');
                 localStorage.removeItem('selectedMonths');
-                localStorage.removeItem('selectedBrokers');
                 localStorage.removeItem('showFilteredTotals');
                 localStorage.removeItem('showTradeCount');
                 localStorage.removeItem('showDrawdown');
@@ -1456,7 +1470,6 @@
             try {
                 localStorage.removeItem('strategyFilters');
                 localStorage.removeItem('selectedMonths');
-                localStorage.removeItem('selectedBrokers');
                 localStorage.removeItem('showFilteredTotals');
                 localStorage.removeItem('showTradeCount');
                 localStorage.removeItem('showDrawdown');
@@ -1608,12 +1621,6 @@
             });
 
             allBrokers = Array.from(brokersSet).sort();
-            
-            // If no brokers exist in savedBrokers and this is first load, select all by default
-            const savedBrokers = localStorage.getItem('selectedBrokers');
-            if (!savedBrokers && selectedBrokers.size === 0) {
-                allBrokers.forEach(broker => selectedBrokers.add(broker));
-            }
 
             const html = allBrokers.map(broker => {
                 const isChecked = selectedBrokers.has(broker);
@@ -1647,9 +1654,7 @@
         }
 
         function saveBrokerFilters() {
-            try {
-                localStorage.setItem('selectedBrokers', JSON.stringify(Array.from(selectedBrokers)));
-            } catch (e) {}
+            // Removed localStorage for broker filters
         }
 
         function updateBrokerFilterBadge() {
@@ -1666,24 +1671,28 @@
 
         function selectAllBrokers() {
             allBrokers.forEach(broker => selectedBrokers.add(broker));
-            saveBrokerFilters();
             
+            // Directly check all checkboxes
             allBrokers.forEach(broker => {
                 const checkbox = document.getElementById(`broker_check_${broker}`);
                 if (checkbox) checkbox.checked = true;
             });
+            
+            saveBrokerFilters();
             updateBrokerFilterBadge();
             processAndDisplayData();
         }
 
         function clearAllBrokers() {
             selectedBrokers.clear();
-            saveBrokerFilters();
             
+            // Directly uncheck all checkboxes
             allBrokers.forEach(broker => {
                 const checkbox = document.getElementById(`broker_check_${broker}`);
                 if (checkbox) checkbox.checked = false;
             });
+            
+            saveBrokerFilters();
             updateBrokerFilterBadge();
             processAndDisplayData();
         }
@@ -1818,6 +1827,21 @@
 
         function loadSampleData() {
             allTrades = [];
+            selectedBrokers.clear(); // Clear broker selections when loading sample data
+            brokersInitialized = false; // Reset flag when loading sample data
+            
+            // Reload saved strategy filters from localStorage to restore original saved state
+            try {
+                const savedFilters = localStorage.getItem('strategyFilters');
+                if (savedFilters) {
+                    hiddenStrategies = new Set(JSON.parse(savedFilters));
+                } else {
+                    hiddenStrategies.clear();
+                }
+            } catch (e) {
+                hiddenStrategies.clear();
+            }
+            
             const strategies = ['PRO 2', 'PRO 3', 'PRO 4', 'PRO 5', 'PRO 7'];
             const aProStrategies = ['A.PRO 1', 'A.PRO 2', 'A.PRO 3', 'A.PRO 4', 'A.PRO 5', 'A.PRO 7'];
             const brokerCodes = ['B1', 'B2'];
@@ -1886,6 +1910,24 @@
         function processAndDisplayData() {
             if (allTrades.length === 0) return;
 
+            // Initialize broker selection FIRST - before any data processing
+            // This must happen before filtering so data isn't filtered out
+            const brokersSet = new Set();
+            allTrades.forEach(trade => {
+                if (trade.brokerCodes) {
+                    Object.values(trade.brokerCodes).forEach(code => {
+                        if (code) brokersSet.add(code);
+                    });
+                }
+            });
+            const tempAllBrokers = Array.from(brokersSet).sort();
+            
+            // On first load or when explicitly reset, select all brokers
+            if (!brokersInitialized && selectedBrokers.size === 0 && tempAllBrokers.length > 0) {
+                tempAllBrokers.forEach(broker => selectedBrokers.add(broker));
+                brokersInitialized = true;
+            }
+
             // Filter trades by selected months
             let filteredTrades = allTrades.filter(trade => {
                 const month = trade.date?.split('/')[1];
@@ -1893,7 +1935,7 @@
             });
 
             // If broker filter is active, filter the strategies within each trade
-            if (selectedBrokers.size < allBrokers.length) {
+            if (selectedBrokers.size < tempAllBrokers.length) {
                 filteredTrades = filteredTrades.map(trade => {
                     // Create a filtered version of the trade
                     const filteredTrade = { ...trade };
