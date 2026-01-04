@@ -2105,7 +2105,6 @@
                     if (!isAPro) {
                         const netPnl = trade.strategyPnlTax[stratName] || 0;
                         runningTotal += netPnl;
-                        if (runningTotal > peakTotal) peakTotal = runningTotal;
                         
                         monthlyTotals[monthKey].total += details.pnl;
                         monthlyTotals[monthKey].net += netPnl;
@@ -2130,11 +2129,16 @@
                         }
                     }
                     
+                    // Update peak BEFORE calculating drawdown to ensure new highs show zero drawdown
+                    if (runningTotal > peakTotal) {
+                        peakTotal = runningTotal;
+                    }
+                    
                     if (!cumulativeData[monthKey]) cumulativeData[monthKey] = {};
                     cumulativeData[monthKey][dateKey] = {
                         cumTotal: runningTotal,
                         peak: peakTotal,
-                        drawdown: peakTotal - runningTotal
+                        drawdown: peakTotal - runningTotal  // Now drawdown will be 0 when runningTotal == peakTotal (new high)
                     };
                 });
             });
@@ -2340,6 +2344,9 @@
             // Calculate daily total margins
             const dailyTotalMargins = calculateDailyTotalMargins(sortedFilteredTrades, Array.from(strategies));
             
+            // Calculate margin-based drawdown from TOTAL MARGIN values
+            const marginDrawdownData = calculateMarginDrawdown(dailyTotalMargins);
+            
             // Calculate daily expenses
             const dailyExpenses = calculateDailyExpenses(sortedFilteredTrades, Array.from(strategies), dailyTotalMargins);
             
@@ -2347,7 +2354,7 @@
             // Pass dailyTotalMargins and dailyExpenses to aggregate them monthly
             const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedFilteredTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals, dailyTotalMargins, dailyExpenses);
             
-            renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses);
+            renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses, marginDrawdownData);
         }
         
         function calculateExpensesAndMargins(sortedTrades, hiddenStrategies, allStrategiesParam, useFilteredTotals, dailyTotalMargins, dailyExpenses) {
@@ -2628,7 +2635,47 @@
             return result;
         }
 
-        function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses) {
+        function calculateMarginDrawdown(dailyTotalMargins) {
+            const result = {};
+            
+            // Sort dates chronologically
+            const sortedDates = Object.keys(dailyTotalMargins).sort((a, b) => {
+                const dateA = a.split('/').reverse().join('');
+                const dateB = b.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+            
+            let peakMargin = 0;
+            
+            sortedDates.forEach(dateKey => {
+                const currentMargin = dailyTotalMargins[dateKey] || 0;
+                
+                // Update peak if current margin is higher
+                if (currentMargin > peakMargin) {
+                    peakMargin = currentMargin;
+                }
+                
+                // Calculate drawdown from peak
+                const drawdown = peakMargin - currentMargin;
+                
+                const dateParts = dateKey.split('/');
+                const monthKey = dateParts[1];
+                
+                if (!result[monthKey]) {
+                    result[monthKey] = {};
+                }
+                
+                result[monthKey][dateKey] = {
+                    peak: peakMargin,
+                    current: currentMargin,
+                    drawdown: drawdown  // Will be 0 when currentMargin == peakMargin (new high)
+                };
+            });
+            
+            return result;
+        }
+
+        function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses, marginDrawdownData) {
             if (strategies.length === 0) {
                 const drawdownHeader = showDrawdown ? '<th class="number-col">DRAWDOWN</th>' : '';
                 const colspan = showDrawdown ? '3' : '2';
@@ -2970,8 +3017,19 @@
                 bodyHtml += `<td class="number-col total-net-col ${totalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMargin)}</td>`;
                 
                 if (showDrawdown) {
-                    const monthDrawdown = totalsToUse[month]?.drawdown || 0;
-                    bodyHtml += `<td class="number-col drawdown-col negative">${formatNumber(monthDrawdown)}</td>`;
+                    // Get the last day's margin drawdown for the month
+                    const datesInMonth = Object.keys(dailyData[month] || {}).sort((a, b) => {
+                        const dateA = a.split('/').reverse().join('');
+                        const dateB = b.split('/').reverse().join('');
+                        return dateA.localeCompare(dateB);
+                    });
+                    let monthDrawdown = 0;
+                    if (datesInMonth.length > 0) {
+                        const lastDate = datesInMonth[datesInMonth.length - 1];
+                        monthDrawdown = (marginDrawdownData[month] && marginDrawdownData[month][lastDate]) ? marginDrawdownData[month][lastDate].drawdown : 0;
+                    }
+                    const drawdownDisplay = monthDrawdown > 0 ? `-${formatNumber(monthDrawdown)}` : formatNumber(monthDrawdown);
+                    bodyHtml += `<td class="number-col drawdown-col negative">${drawdownDisplay}</td>`;
                 }
                 bodyHtml += '</tr>';
                 
@@ -3079,8 +3137,9 @@
                         bodyHtml += `<td class="number-col total-net-col ${dayTotalMargin >= 0 ? 'positive' : 'negative'}">${dayTotalMargin > 0 ? formatNumber(dayTotalMargin) : ''}</td>`;
                         
                         if (showDrawdown) {
-                            const dayDrawdown = (cumulativeData[month] && cumulativeData[month][date]) ? cumulativeData[month][date].drawdown : 0;
-                            bodyHtml += `<td class="number-col drawdown-col negative">${formatNumber(dayDrawdown)}</td>`;
+                            const dayMarginDrawdown = (marginDrawdownData[month] && marginDrawdownData[month][date]) ? marginDrawdownData[month][date].drawdown : 0;
+                            const drawdownDisplay = dayMarginDrawdown > 0 ? `-${formatNumber(dayMarginDrawdown)}` : formatNumber(dayMarginDrawdown);
+                            bodyHtml += `<td class="number-col drawdown-col negative">${drawdownDisplay}</td>`;
                         }
                         bodyHtml += '</tr>';
                     });
