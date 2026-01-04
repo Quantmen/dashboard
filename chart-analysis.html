@@ -280,12 +280,10 @@
             const { type, data } = event.data;
             
             if (type === 'TRADES_DATA' && data) {
-                console.log('Received trades data:', data.length, 'trades');
                 allTrades = data;
                 updateAllCharts();
             } else if (type === 'UPDATE_DATA' && data) {
                 const tradesCount = data.tradesData ? data.tradesData.length : 0;
-                console.log('Received update data:', tradesCount, 'trades');
                 allTrades = data.tradesData || [];
                 updateAllCharts();
             }
@@ -296,36 +294,24 @@
                 const stored = localStorage.getItem('dashboardData');
                 if (stored) {
                     const data = JSON.parse(stored);
-                    console.log('Loaded stored data:', data);
                     allTrades = data.tradesData || data || [];
-                    console.log('All trades loaded:', allTrades.length);
                     if (allTrades.length > 0) {
-                        console.log('First trade sample:', allTrades[0]);
-                        console.log('Last trade sample:', allTrades[allTrades.length - 1]);
                         updateAllCharts();
                     }
                 }
             } catch (e) {
-                console.warn('Failed to load stored data:', e);
             }
         }
 
         // Data aggregation functions
         function aggregateByPeriod(trades, period) {
             if (!trades || trades.length === 0) {
-                console.warn('No trades to aggregate');
                 return [];
             }
             
-            console.log('Aggregating', trades.length, 'trades by', period);
-            
-            // First, sort trades chronologically to ensure proper ordering
             const sortedTrades = [...trades].sort((a, b) => {
                 return compareDates(a.date, b.date);
             });
-            
-            console.log('First trade date:', sortedTrades[0].date, 'cumPnl:', sortedTrades[0].cumPnl);
-            console.log('Last trade date:', sortedTrades[sortedTrades.length - 1].date, 'cumPnl:', sortedTrades[sortedTrades.length - 1].cumPnl);
             
             const aggregated = new Map();
             
@@ -353,42 +339,23 @@
                 agg.lastCumPnl = trade.cumPnl !== undefined ? trade.cumPnl : 0;
             });
             
-            // Convert to array and calculate cumulative values
             const result = Array.from(aggregated.values()).sort((a, b) => {
                 return compareDates(a.date, b.date);
             });
             
-            console.log('Aggregated into', result.length, 'data points');
-            
-            // Log aggregated periods for debugging
-            if (result.length > 0 && result.length <= 20) {
-                console.log('All aggregated periods:');
-                result.forEach((item, i) => {
-                    console.log(`  ${i}: ${item.date} - trades: ${item.trades.length}, lastCumPnl: ${item.lastCumPnl}`);
-                });
-            }
-            
-            // For aggregated data, use the cumPnl from the last trade in each period
-            // This ensures we have the correct cumulative value at the end of each period
             let peak = 0;
             let runningCumPnl = 0;
             let prevCumPnl = 0;
             
             result.forEach((item, index) => {
-                // Use the last cumPnl value from the period if available and non-zero
                 if (item.lastCumPnl !== undefined && item.lastCumPnl !== 0) {
                     item.cumPnl = item.lastCumPnl;
                 } else {
-                    // Fallback: calculate cumulative from period profits
                     runningCumPnl += item.profit;
                     item.cumPnl = runningCumPnl;
-                    console.log(`Period ${index}: using fallback cumPnl calculation, profit=${item.profit}, cumPnl=${item.cumPnl}`);
                 }
                 
-                // Calculate period profit as the change in cumPnl
                 item.periodProfit = item.cumPnl - prevCumPnl;
-                
-                console.log(`Period ${item.date}: cumPnl=${item.cumPnl}, prevCumPnl=${prevCumPnl}, periodProfit=${item.periodProfit}`);
                 
                 prevCumPnl = item.cumPnl;
                 
@@ -398,26 +365,6 @@
                 item.peak = peak;
                 item.drawdown = item.cumPnl - peak;
             });
-            
-            if (result.length > 0) {
-                console.log('Sample aggregated data:', {
-                    date: result[0].date,
-                    profit: result[0].profit,
-                    lastCumPnl: result[0].lastCumPnl,
-                    cumPnl: result[0].cumPnl,
-                    peak: result[0].peak,
-                    drawdown: result[0].drawdown,
-                    periodProfit: result[0].periodProfit
-                });
-                console.log('Final values:', {
-                    date: result[result.length - 1].date,
-                    cumPnl: result[result.length - 1].cumPnl,
-                    peak: result[result.length - 1].peak,
-                    drawdown: result[result.length - 1].drawdown,
-                    periodProfit: result[result.length - 1].periodProfit
-                });
-                console.log('ℹ️  Drawdown = cumPnl - peak (negative when below peak, 0 at peak)');
-            }
             
             return result;
         }
@@ -477,13 +424,9 @@
         // Aggregate trades by strategy and period for comparison chart
         function aggregateByStrategyAndPeriod(trades, period) {
             if (!trades || trades.length === 0) {
-                console.warn('No trades to aggregate by strategy');
                 return { labels: [], strategies: {} };
             }
             
-            console.log('Aggregating by strategy and period:', period);
-            
-            // Sort trades chronologically first
             const sortedTrades = [...trades].sort((a, b) => {
                 return compareDates(a.date, b.date);
             });
@@ -547,8 +490,6 @@
                 
                 result.strategies[strategyName] = strategyData;
             }
-            
-            console.log('Strategies found:', Object.keys(result.strategies).join(', '));
             
             return result;
         }
@@ -987,9 +928,7 @@
 
         // Update functions
         function updateAllCharts() {
-            console.log('Updating all charts with', allTrades.length, 'trades');
             if (allTrades.length === 0) {
-                console.warn('No trades data available');
                 return;
             }
             updateChart('pnl');
@@ -1000,13 +939,10 @@
 
         function updateChart(chartType) {
             if (!charts[chartType]) {
-                console.warn('Chart not initialized:', chartType);
                 return;
             }
             
             if (allTrades.length === 0) {
-                console.warn('No trades data for chart:', chartType);
-                // Clear the chart
                 charts[chartType].data.labels = [];
                 charts[chartType].data.datasets.forEach(dataset => {
                     dataset.data = [];
@@ -1016,18 +952,7 @@
             }
             
             const period = activePeriods[chartType];
-            console.log(`\n=== Updating ${chartType} chart with period: ${period} ===`);
             const aggregatedData = aggregateByPeriod(allTrades, period);
-            console.log('Aggregated data points:', aggregatedData.length);
-            
-            if (period === 'month' && aggregatedData.length > 0) {
-                console.log('\n📊 MONTH VIEW - Period Profits:');
-                aggregatedData.forEach((d, i) => {
-                    const periodProfit = d.periodProfit !== undefined ? d.periodProfit.toFixed(2) : '0.00';
-                    const cumPnl = d.cumPnl !== undefined ? d.cumPnl.toFixed(2) : '0.00';
-                    console.log(`  ${d.date}: periodProfit=₹${periodProfit}, cumPnl=₹${cumPnl}, trades=${d.trades.length}`);
-                });
-            }
             
             const labels = aggregatedData.map(d => formatLabel(d.date, period));
             
@@ -1045,14 +970,6 @@
                 charts.pnl.update('none');
             } else if (chartType === 'drawdown') {
                 const data = aggregatedData.map(d => d.drawdown);
-                
-                // Log drawdown values for verification
-                if (period === 'month' && aggregatedData.length > 0) {
-                    console.log('\n📉 DRAWDOWN - Values:');
-                    aggregatedData.forEach((d, i) => {
-                        console.log(`  ${d.date}: drawdown=₹${d.drawdown.toFixed(2)}, cumPnl=₹${d.cumPnl.toFixed(2)}, peak=₹${d.peak.toFixed(2)}`);
-                    });
-                }
                 
                 charts.drawdown.data.labels = labels;
                 charts.drawdown.data.datasets[0].data = data;
@@ -1142,15 +1059,6 @@
                         order: isTopPerformer ? 0 : 1 // Top performers drawn last (on top)
                     });
                 });
-                
-                // Log for debugging
-                if (period === 'month') {
-                    console.log('\n📊 STRATEGY COMPARISON (Ranked):');
-                    strategyPerformance.forEach((strategy, i) => {
-                        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '  ';
-                        console.log(`  ${medal} ${strategy.name}: ₹${strategy.pnl.toFixed(2)}`);
-                    });
-                }
                 
                 charts.compare.data.labels = labels;
                 charts.compare.data.datasets = datasets;
