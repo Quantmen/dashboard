@@ -4,737 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drawdown Analysis</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-        }
-
-        .container {
-            overflow-y: auto;
-            padding: 16px 32px 32px;
-            height: 100vh;
-        }
-
-        .header { margin-bottom: 16px; }
-        .header h1 { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
-        .header p { font-size: 12px; color: #6b7280; }
-
-        /* Summary Cards */
-        .summary-cards {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            overflow-x: auto;
-        }
-
-        .summary-card {
-            background: white;
-            border-radius: 8px;
-            padding: 10px 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            border: 1px solid #e5e7eb;
-            flex: 1 1 0;
-            min-width: 140px;
-        }
-
-        .summary-card-label {
-            font-size: 10px;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-
-        .summary-card-value {
-            font-size: 18px;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        /* Summary card colors matching strategy-performance.html */
-        .summary-card-value.positive { color: #059669; }
-        .summary-card-value.negative { color: #b96060; }
-        
-        .summary-card.broker-margin-box {
-            background: #f0fdf4;
-        }
-        
-        .summary-card.stg-margin-box {
-            background: #fffbeb;
-        }
-        
-        .summary-card.drawdown-box {
-            background: #fdf2f8;
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .control-label {
-            font-size: 11px;
-            color: #374151;
-            font-weight: 600;
-        }
-
-        select, input[type="number"], .btn {
-            padding: 7px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 500;
-            background: white;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.15s;
-            font-family: inherit;
-        }
-
-        select:hover, input:hover, .btn:hover { 
-            border-color: #9ca3af; 
-            background: #f9fafb; 
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-        }
-
-        /* Strategy Dropdown */
-        .strategy-selector { position: relative; }
-        
-        .strategy-dropdown-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        .strategy-dropdown-btn:hover { border-color: #9ca3af; background: #f9fafb; }
-
-        .dropdown-badge {
-            background: #3b82f6;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .strategy-dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            margin-top: 6px;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
-            min-width: 280px;
-            max-height: 400px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-
-        .strategy-dropdown-menu.show { display: block; }
-
-        .dropdown-header {
-            padding: 12px 14px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .dropdown-action-btn {
-            font-size: 11px;
-            color: #1e40af;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: none;
-            border: none;
-        }
-
-        .dropdown-action-btn:hover { background: #eff6ff; }
-
-        .dropdown-options { padding: 8px 0; }
-
-        .dropdown-option {
-            display: flex;
-            align-items: center;
-            padding: 8px 14px;
-            cursor: pointer;
-        }
-
-        .dropdown-option:hover { background: #f8fafc; }
-        .dropdown-option input { margin-right: 10px; cursor: pointer; }
-        .dropdown-option label { font-size: 13px; color: #475569; cursor: pointer; flex: 1; }
-
-        /* Table */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            border: 1px solid #e5e7eb;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            table-layout: fixed;
-            font-size: 13px;
-        }
-
-        thead {
-            background: #f3f4f6;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        th {
-            padding: 12px;
-            text-align: left;
-            font-size: 11px;
-            font-weight: 700;
-            color: #1f2937;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #d1d5db;
-            border-right: 1px solid #e5e7eb;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        /* Right-align numeric column headers */
-        th:nth-child(n+2) {
-            text-align: right;
-        }
-
-        th:last-child { border-right: none; }
-
-        /* Set minimum width for Strategy column */
-        th:nth-child(1), td:nth-child(1) { /* Strategy */
-            min-width: 160px;
-            width: 160px;
-        }
-
-        /* Lot Size - smaller */
-        th:nth-child(2), td:nth-child(2) { /* Lot Size */
-            width: 85px;
-            min-width: 85px;
-            max-width: 85px;
-        }
-
-        /* Set common width for margin columns */
-        th:nth-child(3), td:nth-child(3),  /* STG Margin */
-        th:nth-child(4), td:nth-child(4),  /* Broker Margin */
-        th:nth-child(5), td:nth-child(5) { /* Add Fund */
-            width: 105px;
-            min-width: 105px;
-            max-width: 105px;
-        }
-        
-        /* Add Fund % */
-        th:nth-child(6), td:nth-child(6) {
-            width: 95px;
-            min-width: 95px;
-            max-width: 95px;
-        }
-        
-        /* DD-related columns */
-        th:nth-child(7), td:nth-child(7),  /* Current DD (₹) */
-        th:nth-child(8), td:nth-child(8),  /* Current DD % */
-        th:nth-child(9), td:nth-child(9),  /* A.PRO DD(₹) */
-        th:nth-child(10), td:nth-child(10) { /* A.PRO DD(%) */
-            width: 95px;
-            min-width: 95px;
-            max-width: 95px;
-        }
-
-        /* DD Duration */
-        th:nth-child(11), td:nth-child(11) { /* DD Duration */
-            width: 85px;
-            min-width: 85px;
-            max-width: 85px;
-        }
-
-        /* Date columns */
-        th:nth-child(12), td:nth-child(12), /* STG DD Start */
-        th:nth-child(13), td:nth-child(13) { /* STG DD End */
-            width: 90px;
-            min-width: 90px;
-            max-width: 90px;
-        }
-
-        /* Max DD columns */
-        th:nth-child(14), td:nth-child(14), /* Max DD (₹) */
-        th:nth-child(15), td:nth-child(15) { /* Max DD % */
-            width: 95px;
-            min-width: 95px;
-            max-width: 95px;
-        }
-
-        td {
-            padding: 12px;
-            border-right: 1px solid #f3f4f6;
-            color: #374151;
-            font-size: 11px;
-        }
-
-        /* Right-align numeric cells */
-        td:nth-child(n+2) {
-            text-align: right;
-        }
-
-        td:last-child { border-right: none; }
-
-        tbody tr {
-            background: white;
-            border-bottom: 1px solid #f3f4f6;
-            transition: opacity 0.15s;
-        }
-
-        tbody tr:hover { opacity: 0.9; }
-
-        .empty-state {
-            text-align: left !important;
-            padding: 12px !important;
-            color: #6b7280;
-            font-size: 13px;
-            font-weight: 400;
-        }
-
-        /* Value Colors - matching strategy-performance.html */
-        .negative { color: #b96060; }
-        .positive { color: #059669; }
-        .neutral { color: #6b7280; }
-
-        /* View type visibility control - only hides rows, calculations remain unchanged */
-        body[data-view="broker"] .group-row,
-        body[data-view="broker"] .child-row {
-            display: none;
-        }
-
-        body[data-view="account"] .broker-row,
-        body[data-view="account"] .child-row {
-            display: none;
-        }
-
-        body[data-view="strategy"] .broker-row,
-        body[data-view="strategy"] .group-row {
-            display: none;
-        }
-
-        /* Broker Row - Same as Header */
-        .broker-row {
-            background: #f3f4f6 !important;
-            font-weight: 600;
-        }
-
-        .broker-row:hover { background: #e5e7eb !important; }
-
-        .broker-row td {
-            border-right: 1px solid #d1d5db;
-            color: #000000;
-            font-size: 13px;
-        }
-
-        .broker-name {
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            color: #000000 !important;
-        }
-
-        /* Broker Level Table - Match broker row font size */
-        #brokerLevelTableBody td {
-            font-size: 13px;
-            padding: 10px 12px;
-            border-right: 1px solid #fed7aa;
-        }
-        
-        #brokerLevelTableBody td:last-child {
-            border-right: none;
-        }
-        
-        #brokerLevelTableBody tr {
-            background: #fffbf5;
-        }
-        
-        #brokerLevelTableBody tr:hover {
-            background: #fff7ed;
-        }
-
-        /* Broker 1 (B1) - Pink */
-        .group-b1 {
-            background: #fce7f3 !important;
-            font-weight: 600;
-        }
-
-        .group-b1:hover { background: #fbcfe8 !important; }
-
-        .group-b1 td {
-            border-right: 1px solid #f9a8d4;
-            color: #831843;
-            font-size: 13px;
-        }
-
-        .group-b1 .group-name {
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            color: #9f1239 !important;
-            padding-left: 20px !important;
-        }
-
-        .child-row-b1 { background: #fef2f2 !important; }
-        .child-row-b1:hover { background: #fce7f3 !important; }
-        .child-row-b1 td { border-right: 1px solid #fecdd3; color: #7f1d1d; }
-
-        /* Broker 2 (B2) - Light Orange */
-        .group-b2 {
-            background: #ffedd5 !important;
-            font-weight: 600;
-        }
-
-        .group-b2:hover { background: #fed7aa !important; }
-
-        .group-b2 td {
-            border-right: 1px solid #fdba74;
-            color: #7c2d12;
-            font-size: 13px;
-        }
-
-        .group-b2 .group-name {
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            color: #9a3412 !important;
-            padding-left: 20px !important;
-        }
-
-        .child-row-b2 { background: #fffbf5 !important; }
-        .child-row-b2:hover { background: #ffedd5 !important; }
-        .child-row-b2 td { border-right: 1px solid #fed7aa; color: #7c2d12; }
-
-        /* Generic group/child fallback */
-        .group-row {
-            background: #f8fafc;
-            font-weight: 600;
-        }
-
-        .group-row td {
-            font-size: 13px;
-        }
-
-        .group-name {
-            font-weight: 600;
-            font-size: 13px;
-            color: #475569;
-            padding-left: 20px;
-        }
-
-        .child-row { 
-            background: white; 
-        }
-
-        .child-row td {
-            font-size: 13px;
-        }
-
-        /* Tablet Layout - Dynamic columns based on card count */
-        @media screen and (min-width: 769px) and (max-width: 1024px) {
-            /* Default: 4 columns */
-            .summary-cards {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 12px;
-                flex-wrap: wrap;
-                overflow-x: visible;
-            }
-            
-            .summary-card {
-                min-width: auto;
-                flex: none;
-            }
-        }
-
-        /* Comprehensive Mobile Responsive Styles */
-        @media screen and (max-width: 768px) {
-            .container {
-                padding: 12px 16px 24px 16px;
-            }
-            
-            .header h1 {
-                font-size: 18px;
-            }
-            
-            .header p {
-                font-size: 11px;
-            }
-            
-            .controls {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
-                margin-bottom: 16px;
-            }
-            
-            .control-group {
-                flex: 1 1 48%;
-                min-width: 0;
-            }
-            
-            .control-label {
-                font-size: 11px;
-                white-space: nowrap;
-            }
-            
-            select, input[type="number"], .btn {
-                padding: 10px 12px;
-                font-size: 12px;
-                width: 100%;
-            }
-            
-            .strategy-selector {
-                width: 100%;
-            }
-            
-            .strategy-dropdown-btn {
-                width: 100%;
-                padding: 10px 12px;
-                font-size: 12px;
-            }
-            
-            .strategy-dropdown-menu {
-                left: 0;
-                right: 0;
-                min-width: auto;
-                width: calc(100vw - 32px);
-                max-height: 60vh;
-            }
-            
-            .summary-cards {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-                flex-wrap: wrap;
-                overflow-x: visible;
-                margin-bottom: 16px;
-            }
-            
-            .summary-card {
-                min-width: auto;
-                flex: none;
-                padding: 14px 16px;
-            }
-            
-            .summary-card-label {
-                font-size: 11px;
-            }
-            
-            .summary-card-value {
-                font-size: 20px;
-            }
-            
-            .table-container {
-                margin: 0 -16px;
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-            }
-            
-            table {
-                font-size: 11px;
-            }
-            
-            th, td {
-                padding: 10px 6px;
-                font-size: 11px;
-            }
-            
-            th {
-                font-size: 9px;
-            }
-            
-            .broker-row td, .group-row td, .child-row td {
-                font-size: 10px;
-                padding: 8px 6px;
-            }
-        }
-        
-        @media screen and (max-width: 480px) {
-            .container {
-                padding: 10px 12px 20px 12px;
-            }
-            
-            .header h1 {
-                font-size: 16px;
-            }
-            
-            .header p {
-                font-size: 10px;
-            }
-            
-            .controls {
-                gap: 8px;
-                margin-bottom: 14px;
-            }
-            
-            .control-label {
-                font-size: 10px;
-            }
-            
-            select, input[type="number"], .btn {
-                padding: 9px 10px;
-                font-size: 11px;
-            }
-            
-            .strategy-dropdown-btn {
-                padding: 9px 10px;
-                font-size: 11px;
-            }
-            
-            .summary-card {
-                padding: 12px 14px;
-                min-width: auto;
-            }
-            
-            .summary-cards {
-                gap: 8px;
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .summary-card-label {
-                font-size: 10px;
-            }
-            
-            .summary-card-value {
-                font-size: 18px;
-            }
-            
-            .table-container {
-                margin: 0 -12px;
-            }
-            
-            table {
-                font-size: 10px;
-            }
-            
-            th, td {
-                padding: 8px 4px;
-                font-size: 10px;
-            }
-            
-            th {
-                font-size: 8px;
-            }
-            
-            .broker-row td, .group-row td, .child-row td {
-                font-size: 9px;
-                padding: 6px 4px;
-            }
-            
-            .strategy-dropdown-menu {
-                width: calc(100vw - 24px);
-                max-height: 50vh;
-            }
-            
-            .dropdown-badge {
-                font-size: 8px;
-                padding: 1px 4px;
-            }
-        }
-        
-        @media screen and (max-width: 360px) {
-            .container {
-                padding: 8px 10px 16px 10px;
-            }
-            
-            .header h1 {
-                font-size: 15px;
-            }
-            
-            .controls {
-                gap: 6px;
-            }
-            
-            .control-label {
-                font-size: 9px;
-            }
-            
-            select, input[type="number"], .btn {
-                padding: 8px 8px;
-                font-size: 10px;
-            }
-            
-            .strategy-dropdown-btn {
-                padding: 8px 8px;
-                font-size: 10px;
-            }
-            
-            .summary-cards {
-                gap: 6px;
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .summary-card {
-                padding: 10px 12px;
-                min-width: auto;
-            }
-            
-            .summary-card-label {
-                font-size: 9px;
-            }
-            
-            .summary-card-value {
-                font-size: 15px;
-            }
-            
-            table {
-                font-size: 9px;
-            }
-            
-            th {
-                font-size: 7px;
-                padding: 6px 3px;
-            }
-            
-            td {
-                padding: 6px 3px;
-                font-size: 9px;
-            }
-            
-            .broker-row td, .group-row td, .child-row td {
-                font-size: 8px;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> *{margin:0;padding:0;box-sizing:border-box;}html,body{width:100%;height:100%;overflow:hidden;}body{font-family:'Inter', -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1e293b;}.container{overflow-y:auto;padding:16px 32px 32px;height:100vh;}.header{margin-bottom:16px;}.header h1{font-size:20px;font-weight:700;color:#111827;margin-bottom:4px;letter-spacing:-0.5px;}.header p{font-size:11px;color:#6b7280;}.summary-cards{display:flex;gap:12px;margin-bottom:16px;overflow-x:auto;}.summary-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #e5e7eb;flex:1 1 0;min-width:140px;}.summary-card-label{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}.summary-card-value{font-size:18px;font-weight:700;line-height:1.2;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#b96060;}.summary-card.broker-margin-box{background:#f0fdf4;}.summary-card.stg-margin-box{background:#fffbeb;}.summary-card.drawdown-box{background:#fdf2f8;}.controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}.control-group{display:flex;align-items:center;gap:8px;}.control-label{font-size:11px;color:#374151;font-weight:600;}select,input[type="number"],.btn{padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:500;background:white;color:#374151;cursor:pointer;transition:all 0.15s;font-family:inherit;}select:hover,input:hover,.btn:hover{border-color:#9ca3af;background:#f9fafb;}select:focus,input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1);}.strategy-selector{position:relative;}.strategy-dropdown-btn{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;font-size:11px;}.strategy-dropdown-btn:hover{border-color:#9ca3af;background:#f9fafb;}.dropdown-badge{background:#3b82f6;color:white;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;}.strategy-dropdown-menu{display:none;position:absolute;top:100%;left:0;margin-top:6px;background:white;border:1px solid #d1d5db;border-radius:10px;box-shadow:0 10px 15px rgba(0,0,0,0.1);min-width:280px;max-height:400px;overflow-y:auto;z-index:1000;}.strategy-dropdown-menu.show{display:block;}.dropdown-header{padding:12px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;}.dropdown-action-btn{font-size:11px;color:#1e40af;cursor:pointer;padding:4px 8px;border-radius:4px;background:none;border:none;}.dropdown-action-btn:hover{background:#eff6ff;}.dropdown-options{padding:8px 0;}.dropdown-option{display:flex;align-items:center;padding:8px 14px;cursor:pointer;}.dropdown-option:hover{background:#f8fafc;}.dropdown-option input{margin-right:10px;cursor:pointer;}.dropdown-option label{font-size:13px;color:#475569;cursor:pointer;flex:1;}.table-container{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #e5e7eb;}table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:11.5px;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-variant-numeric:tabular-nums;}thead{background:#f3f4f6;position:sticky;top:0;z-index:10;}th{padding:12px;text-align:left;font-size:11px;font-weight:700;color:#1f2937;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums;}th:nth-child(n+2){text-align:right;}th:last-child{border-right:none;}th:nth-child(1),td:nth-child(1){min-width:160px;width:160px;}th:nth-child(2),td:nth-child(2){width:85px;min-width:85px;max-width:85px;}th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){width:105px;min-width:105px;max-width:105px;}th:nth-child(6),td:nth-child(6){width:95px;min-width:95px;max-width:95px;}th:nth-child(7),td:nth-child(7),th:nth-child(8),td:nth-child(8),th:nth-child(9),td:nth-child(9),th:nth-child(10),td:nth-child(10){width:95px;min-width:95px;max-width:95px;}th:nth-child(11),td:nth-child(11){width:85px;min-width:85px;max-width:85px;}th:nth-child(12),td:nth-child(12),th:nth-child(13),td:nth-child(13){width:90px;min-width:90px;max-width:90px;}th:nth-child(14),td:nth-child(14),th:nth-child(15),td:nth-child(15){width:95px;min-width:95px;max-width:95px;}td{padding:12px;border-right:1px solid #f3f4f6;color:#374151;font-size:11px;vertical-align:middle;}td:nth-child(n+2){text-align:right;}td:last-child{border-right:none;}tbody tr{background:white;border-bottom:1px solid #f3f4f6;transition:opacity 0.15s;}tbody tr:hover{opacity:0.9;}.empty-state{text-align:left !important;padding:12px !important;color:#6b7280;font-size:11px;font-weight:400;}.negative{color:#b96060;}.positive{color:#059669;}.neutral{color:#6b7280;}body[data-view="broker"] .group-row,body[data-view="broker"] .child-row{display:none;}body[data-view="account"] .broker-row,body[data-view="account"] .child-row{display:none;}body[data-view="strategy"] .broker-row,body[data-view="strategy"] .group-row{display:none;}.broker-row{background:#f3f4f6 !important;font-weight:600;}.broker-row:hover{background:#e5e7eb !important;}.broker-row td{border-right:1px solid #d1d5db;color:#000000;font-size:12px;}.broker-name{font-size:12px !important;font-weight:600 !important;color:#000000 !important;}#brokerLevelTableBody td{font-size:12px;padding:10px 12px;border-right:1px solid #fed7aa;}#brokerLevelTableBody td:last-child{border-right:none;}#brokerLevelTableBody tr{background:#fffbf5;}#brokerLevelTableBody tr:hover{background:#fff7ed;}.group-b1{background:#fce7f3 !important;font-weight:600;}.group-b1:hover{background:#fbcfe8 !important;}.group-b1 td{border-right:1px solid #f9a8d4;color:#831843;font-size:11.5px;}.group-b1 .group-name{font-size:11.5px !important;font-weight:600 !important;color:#9f1239 !important;padding-left:20px !important;}.child-row-b1{background:#fff9fb !important;}.child-row-b1:hover{background:#fce7f3 !important;}.child-row-b1 td{border-right:1px solid #fecdd3;color:#7f1d1d;font-size:11.5px;}.group-b1 .rowspan-cell{background:#fff9fb !important;}.group-b2{background:#ffedd5 !important;font-weight:600;}.group-b2:hover{background:#fed7aa !important;}.group-b2 td{border-right:1px solid #fdba74;color:#7c2d12;font-size:11.5px;}.group-b2 .group-name{font-size:11.5px !important;font-weight:600 !important;color:#9a3412 !important;padding-left:20px !important;}.child-row-b2{background:#fffbf5 !important;}.child-row-b2:hover{background:#ffedd5 !important;}.child-row-b2 td{border-right:1px solid #fed7aa;color:#7c2d12;font-size:11.5px;}.group-b2 .rowspan-cell{background:#fffbf5 !important;}.group-row{background:#f8fafc;font-weight:600;}.group-row td{font-size:11.5px;}.group-name{font-weight:600;font-size:11.5px;color:#475569;padding-left:20px;}.child-row{background:white;}.child-row td{font-size:11.5px;}@media screen and (min-width:769px) and (max-width:1024px){.summary-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-wrap:wrap;overflow-x:visible;}.summary-card{min-width:auto;flex:none;}}@media screen and (max-width:768px){.container{padding:12px 16px 24px 16px;}.header h1{font-size:18px;}.header p{font-size:11px;}.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}.control-group{flex:1 1 48%;min-width:0;}.control-label{font-size:11px;white-space:nowrap;}select,input[type="number"],.btn{padding:10px 12px;font-size:11px;width:100%;}.strategy-selector{width:100%;}.strategy-dropdown-btn{width:100%;padding:10px 12px;font-size:11px;}.strategy-dropdown-menu{left:0;right:0;min-width:auto;width:calc(100vw - 32px);max-height:60vh;}.summary-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex-wrap:wrap;overflow-x:visible;margin-bottom:16px;}.summary-card{min-width:auto;flex:none;padding:14px 16px;}.summary-card-label{font-size:11px;}.summary-card-value{font-size:20px;}.table-container{margin:0 -16px;border-radius:0;border-left:none;border-right:none;}table{font-size:11px;}th,td{padding:10px 6px;font-size:11px;}th{font-size:9px;}.broker-row td,.group-row td,.child-row td{font-size:10px;padding:8px 6px;}}@media screen and (max-width:480px){.container{padding:10px 12px 20px 12px;}.header h1{font-size:16px;}.header p{font-size:10px;}.controls{gap:8px;margin-bottom:14px;}.control-label{font-size:10px;}select,input[type="number"],.btn{padding:9px 10px;font-size:11px;}.strategy-dropdown-btn{padding:9px 10px;font-size:11px;}.summary-card{padding:12px 14px;min-width:auto;}.summary-cards{gap:8px;display:grid;grid-template-columns:repeat(2,1fr);}.summary-card-label{font-size:10px;}.summary-card-value{font-size:18px;}.table-container{margin:0 -12px;}table{font-size:10px;}th,td{padding:8px 4px;font-size:10px;}th{font-size:8px;}.broker-row td,.group-row td,.child-row td{font-size:9px;padding:6px 4px;}.strategy-dropdown-menu{width:calc(100vw - 24px);max-height:50vh;}.dropdown-badge{font-size:8px;padding:1px 4px;}}@media screen and (max-width:360px){.container{padding:8px 10px 16px 10px;}.header h1{font-size:15px;}.controls{gap:6px;}.control-label{font-size:9px;}select,input[type="number"],.btn{padding:8px 8px;font-size:10px;}.strategy-dropdown-btn{padding:8px 8px;font-size:10px;}.summary-cards{gap:6px;display:grid;grid-template-columns:repeat(2,1fr);}.summary-card{padding:10px 12px;min-width:auto;}.summary-card-label{font-size:9px;}.summary-card-value{font-size:15px;}table{font-size:9px;}th{font-size:7px;padding:6px 3px;}td{padding:6px 3px;font-size:9px;}.broker-row td,.group-row td,.child-row td{font-size:8px;}}
+</style>
 </head>
 <body data-view="all">
     <div class="container">
@@ -742,7 +16,6 @@
             <h1>Drawdown Analysis</h1>
             <p>Strategy-wise maximum and current drawdown metrics</p>
         </div>
-
         <div class="summary-cards">
             <div class="summary-card broker-margin-box">
                 <div class="summary-card-label">Total Broker Margin</div>
@@ -766,12 +39,11 @@
             </div>
             <!-- Broker-wise DD cards will be dynamically added here -->
         </div>
-
         <div class="controls">
             <div class="control-group">
                 <label class="control-label">Hide Strategies:</label>
                 <div class="strategy-selector">
-                    <button class="strategy-dropdown-btn" onclick="toggleStrategyDropdown()">
+                    <button class="strategy-dropdown-btn" onclick="toggleStrategyDropdown(event)">
                         <span>Select Strategies</span>
                         <span class="dropdown-badge" id="selectedCount">0</span>
                         <span>▼</span>
@@ -813,7 +85,6 @@
             <button class="btn" onclick="collapseAll()">Collapse All</button>
             <button class="btn" onclick="resetFilters()">Reset Filters</button>
         </div>
-
         <!-- Broker Level Summary Table -->
         <div class="table-container" style="margin-bottom: 20px;">
             <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e5e7eb;">
@@ -845,7 +116,6 @@
                 </tbody>
             </table>
         </div>
-
         <div class="table-container">
             <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e5e7eb;">
                 <h3 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0;">Strategy Level Metrics</h3>
@@ -877,7 +147,6 @@
             </table>
         </div>
     </div>
-
     <script>
         let drawdownData = [];
         let filteredData = [];
@@ -887,56 +156,40 @@
         let sortDirection = 'asc';
         let globalStrategyMap = {};
         let globalAccountMap = {};
-        let globalBrokerMap = {};
-
         // Sample data structure
         const sampleData = [
-            {strategy: "B", isBroker: true, isGroup: false, isChild: false, lotSize: 14.90, maxDD: -584670, maxDDPercent: -7.34, currentDD: -48871, currentDDPercent: -0.50, ddDuration: 14, recoveryTime: 9, ddStartDate: "08-Sep", ddEndDate: "22-Sep", ddCount: 92, recoveryFactor: 8.83, underwaterPeriod: 809},
-            {strategy: "B1", parentBroker: "B", isBroker: false, isGroup: true, isChild: false, lotSize: 10.40, maxDD: -584670, maxDDPercent: -7.34, currentDD: 0, currentDDPercent: 0.00, ddDuration: 14, recoveryTime: 8, ddStartDate: "08-Sep", ddEndDate: "22-Sep", ddCount: 67, recoveryFactor: 7.96, underwaterPeriod: 538},
-            {strategy: "B1PRO 4", parentAccount: "B1", parentBroker: "B", isBroker: false, isGroup: false, isChild: true, lotSize: 6.20, maxDD: -584670, maxDDPercent: -7.34, currentDD: -267757, currentDDPercent: -3.18, ddDuration: 14, recoveryTime: 3, ddStartDate: "08-Sep", ddEndDate: "22-Sep", ddCount: 54, recoveryFactor: 5.97, underwaterPeriod: 192}
+            {strategy: "ACA", isGroup: true, isChild: false, lotSize: 10.40, maxDD: -584670, maxDDPercent: -9.86, currentDD: -588021, currentDDPercent: -14.14, ddDuration: 14, recoveryTime: 8, ddStartDate: "24-Nov", ddEndDate: "31-Dec", ddCount: 67, recoveryFactor: 7.96, underwaterPeriod: 538, stgMargin: 4160000, currentDDDuration: 37},
+            {strategy: "ACAPRO 4", parentAccount: "ACA", isGroup: false, isChild: true, lotSize: 6.20, maxDD: -584670, maxDDPercent: -7.34, currentDD: -267757, currentDDPercent: -3.18, ddDuration: 14, recoveryTime: 3, ddStartDate: "08-Sep", ddEndDate: "22-Sep", ddCount: 54, recoveryFactor: 5.97, underwaterPeriod: 192, stgMargin: 2480000},
+            {strategy: "CEA", isGroup: true, isChild: false, lotSize: 4.30, maxDD: -553090, maxDDPercent: -24.15, currentDD: -338008, currentDDPercent: -19.65, ddDuration: 10, recoveryTime: 5, ddStartDate: "23-Oct", ddEndDate: "31-Dec", ddCount: 45, recoveryFactor: 6.50, underwaterPeriod: 400, stgMargin: 1720000, currentDDDuration: 69},
+            {strategy: "CEAPRO 1", parentAccount: "CEA", isGroup: false, isChild: true, lotSize: 2.10, maxDD: -450000, maxDDPercent: -6.50, currentDD: -125000, currentDDPercent: -1.50, ddDuration: 10, recoveryTime: 5, ddStartDate: "15-Sep", ddEndDate: "25-Sep", ddCount: 45, recoveryFactor: 6.50, underwaterPeriod: 400, stgMargin: 840000}
         ];
-
         // Listen for data from parent
         window.addEventListener('message', (event) => {
             const { type, data } = event.data;
-            if (type === 'TRADES_DATA') {
-                console.log('📊 Drawdown: Received trades data');
-                
+            if (type === 'TRADES_DATA') {                
                 // Store full trades data for broker margin calculation
                 tradesData = event.data.data || data;
-                
                 // Calculate broker margins BEFORE processing drawdown
                 calculateBrokerMarginFromTrades();
-                
                 // Now process the trades for drawdown display
-                const tradesArray = Array.isArray(data) ? data : (data?.trades || []);
-                console.log('📊 Processing', tradesArray.length, 'trades for drawdown analysis');
-                processTradesForDrawdown(tradesArray);
+                const tradesArray = Array.isArray(data) ? data : (data?.trades || []);                processTradesForDrawdown(tradesArray);
                 loadSavedFilters();
                 populateStrategyOptions();
                 applyFilters();
-            } else if (type === 'LOAD_SAMPLE_DATA') {
-                console.log('🎲 Drawdown: Loading sample data');
-                drawdownData = sampleData;
+            } else if (type === 'LOAD_SAMPLE_DATA') {                drawdownData = sampleData;
                 loadSavedFilters();
                 populateStrategyOptions();
                 applyFilters();
             }
         });
-
-        function processTradesForDrawdown(trades) {
-            console.log('📊 Processing', trades.length, 'trades for drawdown analysis');
-            
-            const brokerMap = {};
-            const accountMap = {};
+        function processTradesForDrawdown(trades) {            
+                        const accountMap = {};
             const strategyMap = {};
-            
             const sortedTrades = [...trades].sort((a, b) => {
                 const dateA = a.date.split('/').reverse().join('');
                 const dateB = b.date.split('/').reverse().join('');
                 return dateA.localeCompare(dateB);
             });
-            
             sortedTrades.forEach(trade => {
                 if (trade.strategyPnlTax) {
                     Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
@@ -954,7 +207,6 @@
                                     isAPro: true
                                 };
                             }
-                            
                             if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                                 const details = trade.strategyDetails[stratName];
                                 if (details.margin && details.margin > strategyMap[stratName].startingCapital) {
@@ -964,18 +216,14 @@
                                     strategyMap[stratName].lotSize = details.lot;
                                 }
                             }
-                            
                             strategyMap[stratName].pnls.push(pnlTax || 0);
                             strategyMap[stratName].dates.push(trade.date);
                             return; // Don't process A.PRO as broker strategies
                         }
-                        
-                        const brokerMatch = stratName.match(/^([A-Z]\d+)/);
-                        if (!brokerMatch) return;
-                        
-                        const accountCode = brokerMatch[1];
-                        const brokerCode = accountCode.charAt(0);
-                        
+                        // Extract broker code from strategy name (e.g., ACAPRO 1 -> ACA)
+                        const brokerCode = extractBrokerCode(stratName);
+                        if (!brokerCode || brokerCode === 'A') return; // Skip if no broker code or A.PRO
+                        const accountCode = brokerCode; // Account code is the broker code (ACA, CEA, ZEA)
                         if (!strategyMap[stratName]) {
                             strategyMap[stratName] = {
                                 name: stratName,
@@ -987,7 +235,6 @@
                                 lotSize: '-'
                             };
                         }
-                        
                         if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                             const details = trade.strategyDetails[stratName];
                             if (details.margin && details.margin > strategyMap[stratName].startingCapital) {
@@ -997,10 +244,8 @@
                                 strategyMap[stratName].lotSize = details.lot;
                             }
                         }
-                        
                         strategyMap[stratName].pnls.push(pnlTax || 0);
                         strategyMap[stratName].dates.push(trade.date);
-                        
                         if (!accountMap[accountCode]) {
                             accountMap[accountCode] = {
                                 name: accountCode,
@@ -1012,35 +257,15 @@
                         }
                         accountMap[accountCode].pnls.push(pnlTax || 0);
                         accountMap[accountCode].dates.push(trade.date);
-                        
                         if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                             const margin = trade.strategyDetails[stratName].margin || 0;
                             if (margin > accountMap[accountCode].startingCapital) {
                                 accountMap[accountCode].startingCapital = margin;
                             }
                         }
-                        
-                        if (!brokerMap[brokerCode]) {
-                            brokerMap[brokerCode] = {
-                                name: brokerCode,
-                                pnls: [],
-                                dates: [],
-                                startingCapital: 0
-                            };
-                        }
-                        brokerMap[brokerCode].pnls.push(pnlTax || 0);
-                        brokerMap[brokerCode].dates.push(trade.date);
-                        
-                        if (trade.strategyDetails && trade.strategyDetails[stratName]) {
-                            const margin = trade.strategyDetails[stratName].margin || 0;
-                            if (margin > brokerMap[brokerCode].startingCapital) {
-                                brokerMap[brokerCode].startingCapital = margin;
-                            }
-                        }
                     });
                 }
             });
-            
             function calculateDrawdown(pnls, dates, startingCapital = 10000) {
                 let cumPnl = 0;
                 let equity = startingCapital;
@@ -1062,23 +287,19 @@
                 let recoveryCount = 0;
                 let totalUnderwaterDays = 0;
                 let underwaterStartDate = null;
-                
                 pnls.forEach((pnl, index) => {
                     cumPnl += pnl;
                     equity = startingCapital + cumPnl;
-                    
                     if (equity > peak) {
                         if (inDrawdown && ddStartDate) {
                             const recoveryDays = calculateDateDiff(ddStartDate, dates[index]);
                             totalRecoveryDays += recoveryDays;
                             recoveryCount++;
                         }
-                        
                         if (underwaterStartDate) {
                             totalUnderwaterDays += calculateDateDiff(underwaterStartDate, dates[index]);
                             underwaterStartDate = null;
                         }
-                        
                         peak = equity;
                         inDrawdown = false;
                         ddStartDate = null;
@@ -1094,11 +315,9 @@
                                 currentDDStartDate = dates[index]; // Track current DD start
                             }
                         }
-                        
                         if (ddStartDate) {
                             ddDays = calculateDateDiff(ddStartDate, dates[index]);
                         }
-                        
                         const dd = equity - peak;
                         if (dd < maxDD) {
                             maxDD = dd;
@@ -1109,14 +328,11 @@
                         }
                     }
                 });
-                
                 if (underwaterStartDate && dates.length > 0) {
                     totalUnderwaterDays += calculateDateDiff(underwaterStartDate, dates[dates.length - 1]);
                 }
-                
                 currentDD = equity - peak;
                 currentDDPercent = peak > 0 ? (currentDD / peak) * 100 : 0;
-                
                 // Calculate current DD duration and end date (if currently in drawdown)
                 let currentDDEndDate = '-';
                 if (currentDD < 0 && currentDDStartDate && dates.length > 0) {
@@ -1126,9 +342,7 @@
                     currentDDDuration = 0;
                     currentDDStartDate = null;
                 }
-                
                 const avgRecoveryTime = recoveryCount > 0 ? Math.round(totalRecoveryDays / recoveryCount) : 0;
-                
                 return {
                     maxDD,
                     maxDDPercent,
@@ -1146,30 +360,23 @@
                     underwaterPeriod: totalUnderwaterDays
                 };
             }
-            
             function calculateDateDiff(date1Str, date2Str) {
                 if (!date1Str || !date2Str || date1Str === '-' || date2Str === '-') return 0;
-                
                 try {
                     const [d1, m1, y1] = date1Str.split('/').map(Number);
                     const [d2, m2, y2] = date2Str.split('/').map(Number);
-                    
                     const date1 = new Date(y1, m1 - 1, d1);
                     const date2 = new Date(y2, m2 - 1, d2);
-                    
                     const diffTime = Math.abs(date2 - date1);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    
                     return diffDays;
                 } catch (e) {
                     return 0;
                 }
             }
-            
             function calculateTotalLotSize(strategies) {
                 let totalLots = 0;
                 let hasValidLots = false;
-                
                 strategies.forEach(strat => {
                     const lot = strat.lotSize;
                     if (lot && lot !== '-') {
@@ -1180,49 +387,15 @@
                         }
                     }
                 });
-                
                 return hasValidLots ? totalLots : '-';
             }
-            
             drawdownData = [];
-            
             globalStrategyMap = strategyMap;
             globalAccountMap = accountMap;
-            globalBrokerMap = brokerMap;
-            
-            Object.entries(brokerMap).forEach(([brokerCode, brokerData]) => {
-                const metrics = calculateDrawdown(brokerData.pnls, brokerData.dates, brokerData.startingCapital);
-                
-                const brokerStrategies = Object.values(strategyMap).filter(s => s.broker === brokerCode && !s.isAPro);
-                const totalLotSize = calculateTotalLotSize(brokerStrategies);
-                
-                drawdownData.push({
-                    strategy: brokerCode,
-                    isBroker: true,
-                    isGroup: false,
-                    isChild: false,
-                    lotSize: totalLotSize,
-                    maxDD: metrics.maxDD,
-                    maxDDPercent: metrics.maxDDPercent,
-                    currentDD: metrics.currentDD,
-                    currentDDPercent: metrics.currentDDPercent,
-                    currentDDDuration: metrics.currentDDDuration,
-                    ddDuration: metrics.ddDuration,
-                    recoveryTime: metrics.recoveryTime,
-                    ddStartDate: metrics.ddStartDate,
-                    ddEndDate: metrics.ddEndDate,
-                    ddCount: metrics.ddCount,
-                    recoveryFactor: metrics.maxDD !== 0 ? Math.abs(metrics.finalPnl / metrics.maxDD) : 1.0,
-                    underwaterPeriod: metrics.underwaterPeriod
-                });
-            });
-            
             Object.entries(strategyMap).forEach(([stratName, stratData]) => {
                 // Skip A.PRO strategies - they're only for lookup, not for display
                 if (stratData.isAPro) return;
-                
                 const metrics = calculateDrawdown(stratData.pnls, stratData.dates, stratData.startingCapital);
-                
                 drawdownData.push({
                     strategy: stratName,
                     parentAccount: stratData.account,
@@ -1231,6 +404,7 @@
                     isBroker: false,
                     isGroup: false,
                     lotSize: stratData.lotSize,
+                    stgMargin: stratData.lotSize * 400000,
                     maxDD: metrics.maxDD,
                     maxDDPercent: metrics.maxDDPercent,
                     currentDD: metrics.currentDD,
@@ -1245,21 +419,18 @@
                     underwaterPeriod: metrics.underwaterPeriod
                 });
             });
-            
             // Process accounts with aggregated PnL data
             Object.entries(accountMap).forEach(([accountCode, accountData]) => {
                 const metrics = calculateDrawdown(accountData.pnls, accountData.dates, accountData.startingCapital);
-                
                 const accountStrategies = Object.values(strategyMap).filter(s => s.account === accountCode && !s.isAPro);
                 const totalLotSize = calculateTotalLotSize(accountStrategies);
-                
                 drawdownData.push({
                     strategy: accountCode,
-                    parentBroker: accountData.broker,
                     isGroup: true,
                     isBroker: false,
                     isChild: false,
                     lotSize: totalLotSize,
+                    stgMargin: totalLotSize * 400000,
                     maxDD: metrics.maxDD,
                     maxDDPercent: metrics.maxDDPercent,
                     currentDD: metrics.currentDD,
@@ -1274,7 +445,6 @@
                     underwaterPeriod: metrics.underwaterPeriod
                 });
             });
-            
             // Recalculate Current DD % based on STG Margin instead of peak
             drawdownData.forEach(row => {
                 const stgMargin = (row.lotSize && row.lotSize !== '-') ? row.lotSize * 400000 : 0;
@@ -1283,20 +453,10 @@
                 } else {
                     row.currentDDPercent = 0;
                 }
-            });
-            
-            console.log('✅ Created drawdown data:', {
-                brokers: Object.keys(brokerMap).length,
-                accounts: Object.keys(accountMap).length,
-                strategies: Object.keys(strategyMap).length,
-                total: drawdownData.length
-            });
-        }
-
+            });}
         function applyFilters() {
             const minDD = parseFloat(document.getElementById('minDrawdownFilter').value) || -Infinity;
             const viewType = document.getElementById('viewTypeFilter').value;
-
             // First, filter strategies
             const filteredStrategies = drawdownData.filter(row => {
                 if (!row.isChild) return false;
@@ -1304,145 +464,45 @@
                 const matchesDD = row.maxDDPercent >= minDD;
                 return matchesStrategy && matchesDD;
             });
-
-            // Get pre-calculated accounts from drawdownData that match filtered strategies
-            const accountMetrics = {};
-            filteredStrategies.forEach(strat => {
-                if (!accountMetrics[strat.parentAccount]) {
-                    accountMetrics[strat.parentAccount] = {
-                        strategies: [],
-                        broker: strat.parentBroker
-                    };
-                }
-                accountMetrics[strat.parentAccount].strategies.push(strat);
+            // Get ALL accounts from drawdownData (not just those with filtered strategies)
+            const allAccountsData = drawdownData.filter(d => d.isGroup);
+            // Recalculate each account based on its filtered strategies
+            const recalculatedAccounts = allAccountsData.map(accountData => {
+                const accountCode = accountData.strategy;
+                // Get filtered strategies for this account
+                const accountStrategies = filteredStrategies.filter(s => s.parentAccount === accountCode);
+                // Return account with recalculated lot size from filtered strategies
+                return {
+                    strategy: accountCode,
+                    isGroup: true,
+                    isBroker: false,
+                    isChild: false,
+                    lotSize: accountStrategies.reduce((sum, s) => sum + (typeof s.lotSize === 'number' ? s.lotSize : 0), 0),
+                    maxDD: accountData.maxDD,
+                    maxDDPercent: accountData.maxDDPercent,
+                    currentDD: accountData.currentDD,
+                    currentDDPercent: accountData.currentDDPercent,
+                    currentDDDuration: accountData.currentDDDuration,
+                    ddDuration: accountData.ddDuration,
+                    recoveryTime: accountData.recoveryTime,
+                    ddStartDate: accountData.ddStartDate,
+                    ddEndDate: accountData.ddEndDate,
+                    ddCount: accountData.ddCount,
+                    recoveryFactor: accountData.recoveryFactor,
+                    underwaterPeriod: accountData.underwaterPeriod
+                };
             });
-
-            const recalculatedAccounts = Object.entries(accountMetrics).map(([accountCode, data]) => {
-                // Get the pre-calculated account data from drawdownData
-                const accountData = drawdownData.find(d => d.isGroup && d.strategy === accountCode);
-                
-                if (accountData) {
-                    // Use the pre-calculated metrics, but recalculate aggregated values for displayed strategies
-                    const strategies = data.strategies;
-                    return {
-                        strategy: accountCode,
-                        parentBroker: data.broker,
-                        isGroup: true,
-                        isBroker: false,
-                        isChild: false,
-                        lotSize: strategies.reduce((sum, s) => sum + (typeof s.lotSize === 'number' ? s.lotSize : 0), 0),
-                        maxDD: accountData.maxDD,  // Use pre-calculated
-                        maxDDPercent: accountData.maxDDPercent,  // Use pre-calculated
-                        currentDD: accountData.currentDD,  // Use pre-calculated
-                        currentDDPercent: accountData.currentDDPercent,  // Use pre-calculated
-                        currentDDDuration: accountData.currentDDDuration,  // Use pre-calculated
-                        ddDuration: accountData.ddDuration,  // Use pre-calculated
-                        recoveryTime: accountData.recoveryTime,  // Use pre-calculated
-                        ddStartDate: accountData.ddStartDate,  // Use pre-calculated
-                        ddEndDate: accountData.ddEndDate,  // Use pre-calculated
-                        ddCount: accountData.ddCount,  // Use pre-calculated
-                        recoveryFactor: accountData.recoveryFactor,  // Use pre-calculated
-                        underwaterPeriod: accountData.underwaterPeriod  // Use pre-calculated
-                    };
-                } else {
-                    // Fallback to old calculation if account not found
-                    const strategies = data.strategies;
-                    return {
-                        strategy: accountCode,
-                        parentBroker: data.broker,
-                        isGroup: true,
-                        isBroker: false,
-                        isChild: false,
-                        lotSize: strategies.reduce((sum, s) => sum + (typeof s.lotSize === 'number' ? s.lotSize : 0), 0),
-                        maxDD: Math.min(...strategies.map(s => s.maxDD)),
-                        maxDDPercent: Math.min(...strategies.map(s => s.maxDDPercent)),
-                        currentDD: strategies.reduce((sum, s) => sum + s.currentDD, 0),
-                        currentDDPercent: strategies.reduce((sum, s) => sum + s.currentDDPercent, 0) / strategies.length,
-                        currentDDDuration: Math.max(...strategies.map(s => s.currentDDDuration || 0)),
-                        ddDuration: Math.max(...strategies.map(s => s.ddDuration)),
-                        recoveryTime: Math.round(strategies.reduce((sum, s) => sum + s.recoveryTime, 0) / strategies.length),
-                        ddStartDate: strategies[0].ddStartDate,
-                        ddEndDate: strategies[0].ddEndDate,
-                        ddCount: strategies.reduce((sum, s) => sum + s.ddCount, 0),
-                        recoveryFactor: strategies.reduce((sum, s) => sum + s.recoveryFactor, 0) / strategies.length,
-                        underwaterPeriod: Math.max(...strategies.map(s => s.underwaterPeriod))
-                    };
-                }
-            });
-
-            // Recalculate broker metrics based on filtered accounts
-            const brokerMetrics = {};
-            recalculatedAccounts.forEach(acc => {
-                if (!brokerMetrics[acc.parentBroker]) {
-                    brokerMetrics[acc.parentBroker] = {
-                        accounts: []
-                    };
-                }
-                brokerMetrics[acc.parentBroker].accounts.push(acc);
-            });
-
-            const recalculatedBrokers = Object.entries(brokerMetrics).map(([brokerCode, data]) => {
-                // Get the pre-calculated broker data from drawdownData
-                const brokerData = drawdownData.find(d => d.isBroker && d.strategy === brokerCode);
-                
-                if (brokerData) {
-                    // Use the pre-calculated metrics, but recalculate aggregated values for displayed accounts
-                    const accounts = data.accounts;
-                    return {
-                        strategy: brokerCode,
-                        isBroker: true,
-                        isGroup: false,
-                        isChild: false,
-                        lotSize: accounts.reduce((sum, a) => sum + (typeof a.lotSize === 'number' ? a.lotSize : 0), 0),
-                        maxDD: brokerData.maxDD,  // Use pre-calculated
-                        maxDDPercent: brokerData.maxDDPercent,  // Use pre-calculated
-                        currentDD: brokerData.currentDD,  // Use pre-calculated
-                        currentDDPercent: brokerData.currentDDPercent,  // Use pre-calculated
-                        currentDDDuration: brokerData.currentDDDuration,  // Use pre-calculated
-                        ddDuration: brokerData.ddDuration,  // Use pre-calculated
-                        recoveryTime: brokerData.recoveryTime,  // Use pre-calculated
-                        ddStartDate: brokerData.ddStartDate,  // Use pre-calculated
-                        ddEndDate: brokerData.ddEndDate,  // Use pre-calculated
-                        ddCount: brokerData.ddCount,  // Use pre-calculated
-                        recoveryFactor: brokerData.recoveryFactor,  // Use pre-calculated
-                        underwaterPeriod: brokerData.underwaterPeriod  // Use pre-calculated
-                    };
-                } else {
-                    // Fallback to old calculation if broker not found
-                    const accounts = data.accounts;
-                    return {
-                        strategy: brokerCode,
-                        isBroker: true,
-                        isGroup: false,
-                        isChild: false,
-                        lotSize: accounts.reduce((sum, a) => sum + (typeof a.lotSize === 'number' ? a.lotSize : 0), 0),
-                        maxDD: Math.min(...accounts.map(a => a.maxDD)),
-                        maxDDPercent: Math.min(...accounts.map(a => a.maxDDPercent)),
-                        currentDD: accounts.reduce((sum, a) => sum + a.currentDD, 0),
-                        currentDDPercent: accounts.reduce((sum, a) => sum + a.currentDDPercent, 0) / accounts.length,
-                        currentDDDuration: Math.max(...accounts.map(a => a.currentDDDuration || 0)),
-                        ddDuration: Math.max(...accounts.map(a => a.ddDuration)),
-                        recoveryTime: Math.round(accounts.reduce((sum, a) => sum + a.recoveryTime, 0) / accounts.length),
-                        ddStartDate: accounts[0].ddStartDate,
-                        ddEndDate: accounts[0].ddEndDate,
-                        ddCount: accounts.reduce((sum, a) => sum + a.ddCount, 0),
-                        recoveryFactor: accounts.reduce((sum, a) => sum + a.recoveryFactor, 0) / accounts.length,
-                        underwaterPeriod: Math.max(...accounts.map(a => a.underwaterPeriod))
-                    };
-                }
-            });
-
+            // Recalculate broker metrics based on filtered accounts (empty since brokerCode = accountCode now)
+            const recalculatedBrokers = []; // No separate brokers anymore
+            // Combine all filtered data - ALWAYS include all rows for rendering
             // Combine all filtered data - ALWAYS include all rows for rendering
             // View type only controls visibility via CSS, not calculations
             filteredData = [...recalculatedBrokers, ...recalculatedAccounts, ...filteredStrategies];
-            
             // Set body data-view attribute to control visibility via CSS
             document.body.setAttribute('data-view', viewType);
-
             // Sort
             if (viewType === 'all') {
                 filteredData.sort((a, b) => {
-                    if (a.isBroker !== b.isBroker) return a.isBroker ? -1 : 1;
                     if (a.isGroup !== b.isGroup) return a.isGroup ? -1 : 1;
                     const aVal = a[sortColumn];
                     const bVal = b[sortColumn];
@@ -1454,39 +514,37 @@
                     const bVal = b[sortColumn];
                     return sortDirection === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
                 });
-            }
-
-            console.log('Filtered data:', filteredData.length, 'rows');
-            renderTable();
+            }            renderTable();
             renderBrokerLevelTable();
-            updateSummaryCards(recalculatedBrokers, recalculatedAccounts, filteredStrategies);
+            updateSummaryCards([], recalculatedAccounts, filteredStrategies);
             saveFilters();
         }
-
-        // Helper function to get A.PRO drawdown for a broker strategy
+        // Helper function to extract broker code from strategy name
+        function extractBrokerCode(strategyName) {
+            if (!strategyName) return null;
+            if (strategyName.startsWith('A.PRO')) return 'A';
+            const cleanName = strategyName.replace(/\s+/g, '');
+            const match = cleanName.match(/^(.+?)PRO/);
+            return match ? match[1] : null;
+        }
+// Helper function to get A.PRO drawdown for a broker strategy
         // Example: B1PRO3 -> A.PRO3, then multiply A.PRO3's DD by the broker strategy's lot size
         function getAProDrawdown(strategyName, lotSize) {
             if (!strategyName || !globalStrategyMap || !lotSize || lotSize === '-') return 0;
-            
             // Extract the PRO number from the broker strategy name
-            // Match patterns like B1PRO3, B2PRO4, B1PRO 4, C1PRO5, etc.
+            // Match patterns like ACAPRO 1, CEAPRO 4, ZEAPRO 7, etc.
             const proMatch = strategyName.match(/PRO\s*(\d+)/i);
             if (!proMatch) {
                 return 0;
             }
-            
             const proNumber = proMatch[1]; // Just the number, e.g., "3", "4", "5"
-            
             // Search through all A.PRO strategies and find one with matching number
             for (const [aproName, aproStrategy] of Object.entries(globalStrategyMap)) {
                 if (!aproName.startsWith('A.PRO')) continue;
-                
                 // Extract number from A.PRO strategy name
                 const aproNumMatch = aproName.match(/PRO\s*(\d+)/i);
                 if (!aproNumMatch) continue;
-                
                 const aproNumber = aproNumMatch[1];
-                
                 // If numbers match, this is our A.PRO strategy
                 if (aproNumber === proNumber) {
                     // Calculate drawdown using the same logic as other strategies
@@ -1494,7 +552,6 @@
                         const startingCapital = aproStrategy.startingCapital || 10000;
                         let cumPnl = 0;
                         let peak = startingCapital;
-                        
                         aproStrategy.pnls.forEach(pnl => {
                             cumPnl += pnl;
                             const equity = startingCapital + cumPnl;
@@ -1502,49 +559,33 @@
                                 peak = equity;
                             }
                         });
-                        
                         const finalEquity = startingCapital + cumPnl;
                         const currentDD = finalEquity - peak;
-                        
                         // Multiply A.PRO DD by the broker strategy's lot size
                         return currentDD * lotSize;
                     }
                 }
             }
-            
             return 0;
         }
-
-        function renderTable() {
-            const tbody = document.getElementById('drawdownTableBody');
-            if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td class="empty-state">No data available</td></tr>';
+        function renderTable() {const tbody = document.getElementById('drawdownTableBody');if (filteredData.length === 0) {tbody.innerHTML = '<tr><td colspan="15" class="empty-state">No data available</td></tr>';
                 return;
             }
-
             const viewType = document.getElementById('viewTypeFilter').value;
-            
             // Group data hierarchically
-            const brokers = filteredData.filter(d => d.isBroker);
             const accounts = filteredData.filter(d => d.isGroup);
-            const strategies = filteredData.filter(d => d.isChild);
-            
-            // Helper function to calculate sums for an account (B1, B2, etc.)
+            const strategies = filteredData.filter(d => d.isChild);// Helper function to calculate sums for an account (ACA, CEA, ZEA, etc.)
             function calculateAccountSums(accountStrategy) {
                 // Get the pre-calculated account data from accounts array
                 const accountData = accounts.find(a => a.strategy === accountStrategy);
-                
                 const children = strategies.filter(s => s.parentAccount === accountStrategy);
                 if (children.length === 0) return null;
-                
                 // Helper to find earliest date from filtered strategies
                 function getEarliestDate(strategies) {
                     const validDates = strategies
                         .map(s => s.ddStartDate)
                         .filter(d => d && d !== '-');
-                    
                     if (validDates.length === 0) return '-';
-                    
                     // Parse dates in DD-MMM format (e.g., "09-Jan", "27-Oct")
                     const parsedDates = validDates.map(dateStr => {
                         try {
@@ -1552,20 +593,16 @@
                                 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
                                 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
                             };
-                            
                             const parts = dateStr.split('-');
                             if (parts.length !== 2) {
                                 // Try DD/MM/YYYY format as fallback
                                 const [day, month, year] = dateStr.split('/').map(Number);
                                 return { str: dateStr, date: new Date(year, month - 1, day) };
                             }
-                            
                             const day = parseInt(parts[0]);
                             const monthName = parts[1];
                             const month = monthMap[monthName];
-                            
                             if (month === undefined) return null;
-                            
                             // Use current year as default (since year is not in DD-MMM format)
                             // But for comparison, we need to assume dates are in the same year context
                             const year = 2024; // Use a reference year for comparison
@@ -1574,16 +611,12 @@
                             return null;
                         }
                     }).filter(d => d !== null);
-                    
                     if (parsedDates.length === 0) return validDates[0];
-                    
                     const earliest = parsedDates.reduce((min, curr) => 
                         curr.date < min.date ? curr : min
                     );
-                    
                     return earliest.str;
                 }
-                
                 const sums = {
                     lotSize: children.reduce((sum, c) => sum + (c.lotSize || 0), 0),
                     maxDD: children.reduce((sum, c) => sum + (c.maxDD || 0), 0),
@@ -1602,175 +635,119 @@
                     ddStartDate: getEarliestDate(children),
                     ddEndDate: accountData ? accountData.ddEndDate : '-'
                 };
-                
                 // Calculate STG Margin = Lot Size * 400000
                 sums.stgMargin = sums.lotSize * 400000;
-                
                 // Calculate stg dd(%)
                 if (sums.stgMargin > 0) {
                     sums.stgDDPercent = (sums.stgDD / sums.stgMargin) * 100;
                 } else {
                     sums.stgDDPercent = 0;
                 }
-                
                 // Recalculate Current DD % based on STG Margin
                 if (sums.stgMargin > 0) {
                     sums.currentDDPercent = (sums.currentDD / sums.stgMargin) * 100;
                 } else {
                     sums.currentDDPercent = 0;
                 }
-                
                 // Broker margin and Add Fund are left blank for account rows
                 sums.brokerMargin = null;
                 sums.extraMargin = null;
                 sums.extraMarginPercent = null;
-                
                 return sums;
             }
-            
             // Helper function to calculate broker sums from accounts (B)
-            function calculateBrokerSums(brokerStrategy) {
-                // Get the pre-calculated broker data from brokers array
-                const brokerData = brokers.find(b => b.strategy === brokerStrategy);
-                
-                const brokerAccounts = accounts.filter(a => a.parentBroker === brokerStrategy);
-                if (brokerAccounts.length === 0) return null;
-                
-                const accountSums = brokerAccounts.map(a => calculateAccountSums(a.strategy)).filter(s => s !== null);
-                if (accountSums.length === 0) return null;
-                
-                // Get ALL filtered strategies under this broker for proper aggregation
-                const allBrokerStrategies = strategies.filter(s => s.parentBroker === brokerStrategy);
-                
-                // Helper to find earliest date from ALL strategies (not account sums)
-                function getEarliestDateFromStrategies(strategies) {
-                    const validDates = strategies
-                        .map(s => s.ddStartDate)
-                        .filter(d => d && d !== '-');
-                    
-                    if (validDates.length === 0) return '-';
-                    
-                    // Parse dates in DD-MMM format (e.g., "09-Jan", "27-Oct")
-                    const parsedDates = validDates.map(dateStr => {
-                        try {
-                            const monthMap = {
-                                'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-                                'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-                            };
-                            
-                            const parts = dateStr.split('-');
-                            if (parts.length !== 2) {
-                                // Try DD/MM/YYYY format as fallback
-                                const [day, month, year] = dateStr.split('/').map(Number);
-                                return { str: dateStr, date: new Date(year, month - 1, day) };
-                            }
-                            
-                            const day = parseInt(parts[0]);
-                            const monthName = parts[1];
-                            const month = monthMap[monthName];
-                            
-                            if (month === undefined) return null;
-                            
-                            // Use current year as default (since year is not in DD-MMM format)
-                            // But for comparison, we need to assume dates are in the same year context
-                            const year = 2024; // Use a reference year for comparison
-                            return { str: dateStr, date: new Date(year, month, day) };
-                        } catch {
-                            return null;
-                        }
-                    }).filter(d => d !== null);
-                    
-                    if (parsedDates.length === 0) return validDates[0];
-                    
-                    const earliest = parsedDates.reduce((min, curr) => 
-                        curr.date < min.date ? curr : min
-                    );
-                    
-                    return earliest.str;
-                }
-                
-                const sums = {
-                    lotSize: accountSums.reduce((sum, a) => sum + (a.lotSize || 0), 0),
-                    maxDD: accountSums.reduce((sum, a) => sum + (a.maxDD || 0), 0),
-                    maxDDPercent: accountSums.reduce((sum, a) => sum + (a.maxDDPercent || 0), 0),
-                    currentDD: accountSums.reduce((sum, a) => sum + (a.currentDD || 0), 0),
-                    currentDDPercent: 0, // Will be recalculated below based on STG Margin
-                    stgDD: brokerData ? brokerData.currentDD : accountSums.reduce((sum, a) => sum + (a.currentDD || 0), 0),
-                    // DD Duration = MAX from ALL filtered strategies under this broker
-                    currentDDDuration: allBrokerStrategies.length > 0 ? Math.max(...allBrokerStrategies.map(s => s.currentDDDuration || 0)) : 0,
-                    recoveryTime: brokerData ? brokerData.recoveryTime : Math.max(...accountSums.map(a => a.recoveryTime || 0)),
-                    ddDuration: brokerData ? brokerData.ddDuration : Math.max(...accountSums.map(a => a.ddDuration || 0)),
-                    ddCount: brokerData ? brokerData.ddCount : Math.max(...accountSums.map(a => a.ddCount || 0)),
-                    underwaterPeriod: brokerData ? brokerData.underwaterPeriod : Math.max(...accountSums.map(a => a.underwaterPeriod || 0)),
-                    recoveryFactor: brokerData ? brokerData.recoveryFactor : accountSums.reduce((sum, a) => sum + (a.recoveryFactor || 0), 0) / accountSums.length,
-                    // STG DD Start = EARLIEST start date from ALL filtered strategies under this broker
-                    ddStartDate: getEarliestDateFromStrategies(allBrokerStrategies),
-                    ddEndDate: brokerData ? brokerData.ddEndDate : '-'
-                };
-                
-                // Calculate STG Margin = Lot Size * 400000
-                sums.stgMargin = sums.lotSize * 400000;
-                
-                // Calculate stg dd(%)
-                if (sums.stgMargin > 0) {
-                    sums.stgDDPercent = (sums.stgDD / sums.stgMargin) * 100;
-                } else {
-                    sums.stgDDPercent = 0;
-                }
-                
-                // Recalculate Current DD % based on STG Margin
-                if (sums.stgMargin > 0) {
-                    sums.currentDDPercent = (sums.currentDD / sums.stgMargin) * 100;
-                } else {
-                    sums.currentDDPercent = 0;
-                }
-                
-                // Get Broker Margin from calculated trade data (if available)
-                const marginValue = getBrokerMarginForAccount(brokerStrategy);
-                console.log(`Getting broker margin for ${brokerStrategy}: ${marginValue}, available margins:`, calculatedBrokerMargins);
-                sums.brokerMargin = marginValue || 0;
-                
-                // Calculate Add Fund = Broker Margin - sum of STG Margin (filtered)
-                // sums.stgMargin already contains the sum of filtered account STG margins
-                sums.extraMargin = sums.brokerMargin - sums.stgMargin;
-                
-                // Calculate Add Fund % = (Add Fund / STG Margin) * 100
-                if (sums.stgMargin > 0) {
-                    sums.extraMarginPercent = (sums.extraMargin / sums.stgMargin) * 100;
-                } else {
-                    sums.extraMarginPercent = 0;
-                }
-                
-                return sums;
-            }
-            
             let html = '';
-            
             // Always render hierarchically (broker -> account -> strategy)
             // View type controls visibility via CSS, not rendering structure
-            brokers.forEach(broker => {
-                // Calculate sums for the broker based on filtered data
-                const brokerSums = calculateBrokerSums(broker.strategy);
-                const displayData = brokerSums || broker;
-                
-                // Render broker row with calculated sums
-                const extraMarginClass = displayData.extraMargin > 0 ? 'positive' : (displayData.extraMargin < 0 ? 'negative' : 'neutral');
-                const extraMarginPercentClass = displayData.extraMarginPercent > 0 ? 'positive' : (displayData.extraMarginPercent < 0 ? 'negative' : 'neutral');
-                
-                // Calculate total A.PRO DD for all strategies under this broker
-                const brokerStrategies = strategies.filter(s => s.parentBroker === broker.strategy);
-                const totalAProDD = brokerStrategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
-                
+            
+            // Calculate totals for "All Broker" row
+            let allBrokerLotSize = 0;
+            let allBrokerStgMargin = 0;
+            let allBrokerMargin = 0;
+            let allBrokerCurrentDD = 0;
+            let allBrokerMaxDD = 0;
+            let allBrokerAProDD = 0;
+            let allBrokerMaxDDDuration = 0;
+            
+            accounts.forEach(account => {
+                const accountCode = account.strategy;
+                const accountSums = calculateAccountSums(accountCode);
+                const displayData = accountSums || account;
+                allBrokerLotSize += displayData.lotSize || 0;
+                allBrokerStgMargin += displayData.stgMargin || 0;
+                const marginValue = getBrokerMarginForAccount(accountCode);allBrokerMargin += marginValue || 0;
+                allBrokerCurrentDD += displayData.currentDD || 0;
+                allBrokerMaxDD += displayData.maxDD || 0;
+                const accountStrategies = strategies.filter(s => s.parentAccount === accountCode);
+                const aproDD = accountStrategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
+                allBrokerAProDD += aproDD;
+                allBrokerMaxDDDuration = Math.max(allBrokerMaxDDDuration, displayData.currentDDDuration || 0);
+            });
+            
+            const allBrokerExtraMargin = allBrokerMargin - allBrokerStgMargin;
+            const allBrokerExtraMarginPercent = allBrokerStgMargin > 0 ? (allBrokerExtraMargin / allBrokerStgMargin) * 100 : 0;
+            const allBrokerCurrentDDPercent = allBrokerStgMargin > 0 ? (allBrokerCurrentDD / allBrokerStgMargin) * 100 : 0;
+            const allBrokerAProDDPercent = allBrokerStgMargin > 0 ? (allBrokerAProDD / allBrokerStgMargin) * 100 : 0;
+            const allBrokerMaxDDPercent = allBrokerStgMargin > 0 ? (allBrokerMaxDD / allBrokerStgMargin) * 100 : 0;
+            
+            const extraMarginClass = allBrokerExtraMargin > 0 ? 'positive' : (allBrokerExtraMargin < 0 ? 'negative' : 'neutral');
+            const extraMarginPercentClass = allBrokerExtraMarginPercent > 0 ? 'positive' : (allBrokerExtraMarginPercent < 0 ? 'negative' : 'neutral');
+            
+            // Render "All Broker" summary row
+            html += `<tr class="broker-row">
+                <td class="broker-name">🏦 All Broker</td>
+                <td>${formatNum(allBrokerLotSize, 2)}</td>
+                <td>${formatCurrency(allBrokerStgMargin)}</td>
+                <td>${formatCurrency(allBrokerMargin)}</td>
+                <td class="${extraMarginClass}">${formatCurrency(allBrokerExtraMargin)}</td>
+                <td class="${extraMarginPercentClass}">${formatPercent(allBrokerExtraMarginPercent)}</td>
+                <td class="${allBrokerCurrentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(allBrokerCurrentDD)}</td>
+                <td class="${allBrokerCurrentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerCurrentDDPercent)}</td>
+                <td class="${allBrokerAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(allBrokerAProDD)}</td>
+                <td class="${allBrokerAProDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerAProDDPercent)}</td>
+                <td>${allBrokerMaxDDDuration > 0 ? allBrokerMaxDDDuration + ' days' : '-'}</td>
+                <td>05-Jan</td>
+                <td>06-Jan</td>
+                <td class="negative">${formatCurrency(allBrokerMaxDD)}</td>
+                <td class="negative">${formatPercent(allBrokerMaxDDPercent)}</td>
+            </tr>`;
+            
+            // New simplified rendering: Render accounts directly (no broker hierarchy)
+            accounts.forEach(account => {
+                const accountCode = account.strategy;
+                // Calculate sums for this account based on filtered data
+                const accountSums = calculateAccountSums(accountCode);
+                const displayData = accountSums || account;
+                // Get Broker Margin from calculated trade data
+                const marginValue = getBrokerMarginForAccount(accountCode);
+                const brokerMargin = marginValue || 0;
+                // Calculate extra margin for account
+                const extraMargin = brokerMargin - (displayData.stgMargin || 0);
+                const extraMarginPercent = displayData.stgMargin > 0 ? (extraMargin / displayData.stgMargin) * 100 : 0;
+                const extraMarginClass = extraMargin > 0 ? 'positive' : (extraMargin < 0 ? 'negative' : 'neutral');
+                const extraMarginPercentClass = extraMarginPercent > 0 ? 'positive' : (extraMarginPercent < 0 ? 'negative' : 'neutral');
+                // Calculate total A.PRO DD for all strategies under this account
+                const accountStrategies = strategies.filter(s => s.parentAccount === accountCode);
+                const totalAProDD = accountStrategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
                 // Calculate A.PRO DD %
                 const aproDDPercent = displayData.stgMargin > 0 ? (totalAProDD / displayData.stgMargin) * 100 : 0;
                 
-                html += `<tr class="broker-row">
-                    <td class="broker-name">🏦 ${getDisplayName(broker.strategy)}</td>
+                // Assign color class based on broker code - alternate between pink and orange
+                const brokerIndex = accounts.indexOf(account);
+                const groupClass = (brokerIndex % 2 === 0) ? 'group-b1' : 'group-b2';
+                const childClass = (brokerIndex % 2 === 0) ? 'child-row-b1' : 'child-row-b2';
+                
+                // Calculate rowspan only for child rows (not including account row)
+                const childRowspan = accountStrategies.length;
+                
+                // Render account row (as top-level broker row) - showing its own values
+                html += `<tr class="${groupClass}">
+                    <td class="group-name">├─ ${getDisplayName(accountCode)}</td>
                     <td>${formatNum(displayData.lotSize, 2)}</td>
                     <td>${formatCurrency(displayData.stgMargin)}</td>
-                    <td>${formatCurrency(displayData.brokerMargin)}</td>
-                    <td class="${extraMarginClass}">${formatCurrency(displayData.extraMargin)}</td>
-                    <td class="${extraMarginPercentClass}">${formatPercent(displayData.extraMarginPercent)}</td>
+                    <td>${formatCurrency(brokerMargin)}</td>
+                    <td class="${extraMarginClass}">${formatCurrency(extraMargin)}</td>
+                    <td class="${extraMarginPercentClass}">${formatPercent(extraMarginPercent)}</td>
                     <td class="${displayData.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.currentDD)}</td>
                     <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
                     <td class="${totalAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDD)}</td>
@@ -1781,181 +758,160 @@
                     <td class="negative">${formatCurrency(displayData.maxDD)}</td>
                     <td class="negative">${formatPercent(displayData.maxDDPercent)}</td>
                 </tr>`;
-                
-                // Find accounts under this broker
-                const brokerAccounts = accounts.filter(a => a.parentBroker === broker.strategy);
-                
-                brokerAccounts.forEach(account => {
-                    const accountCode = account.strategy.toLowerCase();
-                    // Calculate sums for this account based on filtered data
-                    const accountSums = calculateAccountSums(account.strategy);
-                    const displayData = accountSums || account;
+                // Render strategies under this account
+                accountStrategies.forEach((strategy, idx) => {
+                    const isLast = idx === accountStrategies.length - 1;
+                    const isFirst = idx === 0;
+                    const prefix = isLast ? '  └─' : '  ├─';
+                    const aproDD = getAProDrawdown(strategy.strategy, strategy.lotSize);
+                    const aproDDPercent = strategy.stgMargin > 0 ? (aproDD / strategy.stgMargin) * 100 : 0;
                     
-                    // Find visible strategies under this account (for display)
-                    const accountStrategies = strategies.filter(s => s.parentAccount === account.strategy);
-                    
-                    // Get broker margin from calculated trade data
-                    const accountBrokerMargin = getBrokerMarginForAccount(account.strategy.toUpperCase()) || 0;
-                    
-                    // Calculate total STG Margin for this account for Add Fund calculation
-                    const totalAccountStgMargin = accountStrategies.reduce((sum, s) => sum + (s.lotSize * 400000), 0);
-                    const accountExtraMargin = accountBrokerMargin - totalAccountStgMargin;
-                    const extraMarginClass = accountExtraMargin > 0 ? 'positive' : (accountExtraMargin < 0 ? 'negative' : 'neutral');
-                    
-                    // Calculate Add Fund %
-                    let accountExtraMarginPercent = 0;
-                    if (totalAccountStgMargin > 0) {
-                        accountExtraMarginPercent = (accountExtraMargin / totalAccountStgMargin) * 100;
+                    // First child row has rowspan cells spanning all child rows
+                    if (isFirst) {
+                        html += `<tr class="${childClass}">
+                            <td style="padding-left: 40px;">${prefix} ${getDisplayName(strategy.strategy)}</td>
+                            <td>${formatNum(strategy.lotSize, 2)}</td>
+                            <td>${formatCurrency(strategy.stgMargin)}</td>
+                            <td rowspan="${childRowspan}" class="rowspan-cell">${formatCurrency(brokerMargin)}</td>
+                            <td rowspan="${childRowspan}" class="rowspan-cell ${extraMarginClass}">${formatCurrency(extraMargin)}</td>
+                            <td rowspan="${childRowspan}" class="rowspan-cell ${extraMarginPercentClass}">${formatPercent(extraMarginPercent)}</td>
+                            <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
+                            <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
+                            <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
+                            <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
+                            <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
+                            <td>${strategy.ddStartDate}</td>
+                            <td>${strategy.ddEndDate}</td>
+                            <td class="negative">${formatCurrency(strategy.maxDD)}</td>
+                            <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
+                        </tr>`;
+                    } else {
+                        // Subsequent child rows skip the rowspan columns
+                        html += `<tr class="${childClass}">
+                            <td style="padding-left: 40px;">${prefix} ${getDisplayName(strategy.strategy)}</td>
+                            <td>${formatNum(strategy.lotSize, 2)}</td>
+                            <td>${formatCurrency(strategy.stgMargin)}</td>
+                            <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
+                            <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
+                            <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
+                            <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
+                            <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
+                            <td>${strategy.ddStartDate}</td>
+                            <td>${strategy.ddEndDate}</td>
+                            <td class="negative">${formatCurrency(strategy.maxDD)}</td>
+                            <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
+                        </tr>`;
                     }
-                    const extraMarginPercentClass = accountExtraMarginPercent > 0 ? 'positive' : (accountExtraMarginPercent < 0 ? 'negative' : 'neutral');
-                    
-                    // Account row - Broker Margin and Add Fund are shown ONLY when viewType is 'account'
-                    const showBrokerMarginInAccount = viewType === 'account';
-                    
-                    // Calculate total A.PRO DD for all strategies under this account
-                    const totalAProDDAccount = accountStrategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
-                    
-                    // Calculate A.PRO DD %
-                    const aproDDPercentAccount = displayData.stgMargin > 0 ? (totalAProDDAccount / displayData.stgMargin) * 100 : 0;
-                    
-                    html += `<tr class="group-row group-${accountCode}">
-                        <td class="group-name">├─ ${getDisplayName(account.strategy)}</td>
-                        <td>${formatNum(displayData.lotSize, 2)}</td>
-                        <td>${formatCurrency(displayData.stgMargin)}</td>
-                        <td>${showBrokerMarginInAccount ? formatCurrency(accountBrokerMargin) : ''}</td>
-                        <td${showBrokerMarginInAccount ? ` class="${extraMarginClass}"` : ''}>${showBrokerMarginInAccount ? formatCurrency(accountExtraMargin) : ''}</td>
-                        <td${showBrokerMarginInAccount ? ` class="${extraMarginPercentClass}"` : ''}>${showBrokerMarginInAccount ? formatPercent(accountExtraMarginPercent) : ''}</td>
-                        <td class="${displayData.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(displayData.currentDD)}</td>
-                        <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
-                        <td class="${totalAProDDAccount < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDDAccount)}</td>
-                        <td class="${aproDDPercentAccount < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercentAccount)}</td>
-                        <td>${displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
-                        <td>${displayData.ddStartDate}</td>
-                        <td>${displayData.ddEndDate}</td>
-                        <td class="negative">${formatCurrency(displayData.maxDD)}</td>
-                        <td class="negative">${formatPercent(displayData.maxDDPercent)}</td>
-                    </tr>`;
-                    
-                    // Strategy rows - STG Margin individual, Broker Margin and Add Fund merged
-                    accountStrategies.forEach((strategy, index) => {
-                        const parentAccountCode = strategy.parentAccount.toLowerCase();
-                        if (index === 0) {
-                            // First strategy row - add merged Broker Margin, Add Fund and Add Fund % cells
-                            const aproDD = getAProDrawdown(strategy.strategy, strategy.lotSize);
-                            const strategyStgMargin = strategy.lotSize * 400000;
-                            const aproDDPercent = strategyStgMargin > 0 ? (aproDD / strategyStgMargin) * 100 : 0;
-                            
-                            html += `<tr class="child-row child-row-${parentAccountCode}">
-                                <td style="padding-left: 40px;">${strategy.strategy}</td>
-                                <td>${formatNum(strategy.lotSize, 2)}</td>
-                                <td>${formatCurrency(strategy.lotSize * 400000)}</td>
-                                <td rowspan="${accountStrategies.length}">${formatCurrency(accountBrokerMargin)}</td>
-                                <td rowspan="${accountStrategies.length}" class="${extraMarginClass}">${formatCurrency(accountExtraMargin)}</td>
-                                <td rowspan="${accountStrategies.length}" class="${extraMarginPercentClass}">${formatPercent(accountExtraMarginPercent)}</td>
-                                <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
-                                <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
-                                <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
-                                <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
-                                <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
-                                <td>${strategy.ddStartDate}</td>
-                                <td>${strategy.ddEndDate}</td>
-                                <td class="negative">${formatCurrency(strategy.maxDD)}</td>
-                                <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
-                            </tr>`;
-                        } else {
-                            // Subsequent strategy rows - show individual STG Margin, no Broker Margin, Add Fund or Add Fund % cells (merged from first row)
-                            const aproDD = getAProDrawdown(strategy.strategy, strategy.lotSize);
-                            const strategyStgMargin = strategy.lotSize * 400000;
-                            const aproDDPercent = strategyStgMargin > 0 ? (aproDD / strategyStgMargin) * 100 : 0;
-                            
-                            html += `<tr class="child-row child-row-${parentAccountCode}">
-                                <td style="padding-left: 40px;">${strategy.strategy}</td>
-                                <td>${formatNum(strategy.lotSize, 2)}</td>
-                                <td>${formatCurrency(strategy.lotSize * 400000)}</td>
-                                <td class="${strategy.currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(strategy.currentDD)}</td>
-                                <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
-                                <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
-                                <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
-                                <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
-                                <td>${strategy.ddStartDate}</td>
-                                <td>${strategy.ddEndDate}</td>
-                                <td class="negative">${formatCurrency(strategy.maxDD)}</td>
-                                <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
-                            </tr>`;
-                        }
-                    });
                 });
             });
-            
             tbody.innerHTML = html;
         }
-
         function renderBrokerLevelTable() {
             const tbody = document.getElementById('brokerLevelTableBody');
             if (!tbody) return;
-            
             // Get original broker data AND account-level data from drawdownData
-            const allBrokers = drawdownData.filter(d => d.isBroker);
-            const allAccounts = drawdownData.filter(d => d.isGroup && !d.isBroker);
-            
+            const allAccounts = drawdownData.filter(d => d.isGroup);
             // Get FILTERED strategies from filteredData
             const filteredStrategies = filteredData.filter(d => d.isChild);
-            
-            // Combine brokers and accounts for display
-            const allBrokerLevelData = [...allBrokers, ...allAccounts];
-            
+            // Use only accounts for display (no separate brokers anymore)
+            const allBrokerLevelData = [...allAccounts];
             if (allBrokerLevelData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="15" class="empty-state">No broker data available.</td></tr>';
                 return;
             }
-            
-            // Sort: brokers first, then accounts
+            // Sort accounts by name
             allBrokerLevelData.sort((a, b) => {
-                if (a.isBroker !== b.isBroker) return a.isBroker ? -1 : 1;
                 return a.strategy.localeCompare(b.strategy);
             });
-            
             let html = '';
+            
+            // Calculate totals for "All Broker" row
+            let allBrokerLotSize = 0;
+            let allBrokerStgMargin = 0;
+            let allBrokerMargin = 0;
+            let allBrokerCurrentDD = 0;
+            let allBrokerMaxDD = 0;
+            let allBrokerAProDD = 0;
+            let allBrokerMaxDDDuration = 0;
             
             allBrokerLevelData.forEach(item => {
                 const code = item.strategy;
-                const isBroker = item.isBroker;
+                const strategies = filteredStrategies.filter(s => s.parentAccount === code);
+                if (strategies.length === 0) return;
                 
+                const totalLotSize = strategies.reduce((sum, s) => sum + (s.lotSize || 0), 0);
+                const stgMargin = totalLotSize * 400000;
+                const brokerMargin = getBrokerMarginForAccount(code) || 0;
+                const currentDD = item.currentDD || 0;
+                const maxDD = item.maxDD || 0;
+                const totalAProDD = strategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
+                const ddDuration = item.currentDDDuration || 0;
+                
+                allBrokerLotSize += totalLotSize;
+                allBrokerStgMargin += stgMargin;
+                allBrokerMargin += brokerMargin;
+                allBrokerCurrentDD += currentDD;
+                allBrokerMaxDD += maxDD;
+                allBrokerAProDD += totalAProDD;
+                allBrokerMaxDDDuration = Math.max(allBrokerMaxDDDuration, ddDuration);
+            });
+            
+            const allBrokerExtraMargin = allBrokerMargin - allBrokerStgMargin;
+            const allBrokerExtraMarginPercent = allBrokerStgMargin > 0 ? (allBrokerExtraMargin / allBrokerStgMargin) * 100 : 0;
+            const allBrokerCurrentDDPercent = allBrokerStgMargin > 0 ? (allBrokerCurrentDD / allBrokerStgMargin) * 100 : 0;
+            const allBrokerAProDDPercent = allBrokerStgMargin > 0 ? (allBrokerAProDD / allBrokerStgMargin) * 100 : 0;
+            const allBrokerMaxDDPercent = allBrokerStgMargin > 0 ? (allBrokerMaxDD / allBrokerStgMargin) * 100 : 0;
+            
+            const extraMarginClass = allBrokerExtraMargin > 0 ? 'positive' : (allBrokerExtraMargin < 0 ? 'negative' : 'neutral');
+            const extraMarginPercentClass = allBrokerExtraMarginPercent > 0 ? 'positive' : (allBrokerExtraMarginPercent < 0 ? 'negative' : 'neutral');
+            
+            // Render "All Broker" summary row
+            html += `<tr style="background: #f3f4f6; font-weight: 600;">
+                <td style="font-weight: 600; color: #000000;">🏦 All Broker</td>
+                <td>${formatNum(allBrokerLotSize, 2)}</td>
+                <td>${formatCurrency(allBrokerStgMargin)}</td>
+                <td>${formatCurrency(allBrokerMargin)}</td>
+                <td class="${extraMarginClass}">${formatCurrency(allBrokerExtraMargin)}</td>
+                <td class="${extraMarginPercentClass}">${formatPercent(allBrokerExtraMarginPercent)}</td>
+                <td class="${allBrokerCurrentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(allBrokerCurrentDD)}</td>
+                <td class="${allBrokerCurrentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerCurrentDDPercent)}</td>
+                <td class="${allBrokerAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(allBrokerAProDD)}</td>
+                <td class="${allBrokerAProDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerAProDDPercent)}</td>
+                <td>${allBrokerMaxDDDuration > 0 ? allBrokerMaxDDDuration + ' days' : '-'}</td>
+                <td>05-Jan</td>
+                <td>06-Jan</td>
+                <td class="negative">${formatCurrency(allBrokerMaxDD)}</td>
+                <td class="negative">${formatPercent(allBrokerMaxDDPercent)}</td>
+            </tr>`;
+            
+            allBrokerLevelData.forEach(item => {
+                const code = item.strategy;
                 // Get broker margin from calculated trade data
                 const brokerMargin = getBrokerMarginForAccount(code) || 0;
-                
                 // Get FILTERED strategies under this broker/account for Lot Size and STG Margin calculation
                 let strategies;
-                if (isBroker) {
-                    strategies = filteredStrategies.filter(s => s.parentBroker === code);
+                if (false) { // Brokers removed
                 } else {
                     strategies = filteredStrategies.filter(s => s.parentAccount === code);
                 }
-                
                 // If no filtered strategies, skip this row
                 if (strategies.length === 0) {
                     return;
                 }
-                
                 // Calculate Lot Size and STG Margin from FILTERED strategies
                 const totalLotSize = strategies.reduce((sum, s) => sum + (s.lotSize || 0), 0);
                 const stgMargin = totalLotSize * 400000;
-                
                 // Calculate Add Fund (based on filtered STG Margin)
                 const addFund = brokerMargin - stgMargin;
                 const addFundPercent = stgMargin > 0 ? (addFund / stgMargin) * 100 : 0;
-                
                 const addFundClass = addFund > 0 ? 'positive' : (addFund < 0 ? 'negative' : 'neutral');
                 const addFundPercentClass = addFundPercent > 0 ? 'positive' : (addFundPercent < 0 ? 'negative' : 'neutral');
-                
                 // Calculate A.PRO DD from FILTERED strategies (this is aggregated)
                 const totalAProDD = strategies.reduce((sum, s) => sum + getAProDrawdown(s.strategy, s.lotSize), 0);
                 const aproDDPercent = stgMargin > 0 ? (totalAProDD / stgMargin) * 100 : 0;
-                
                 // FIXED: Current DD calculation - ALWAYS use currentDD from original drawdownData (same as broker STG DD cards)
                 const currentDD = item.currentDD || 0;
                 const currentDDPercent = stgMargin > 0 ? (currentDD / stgMargin) * 100 : 0;
-                
                 // Use ORIGINAL broker/account data for other DD metrics
                 const ddDuration = item.currentDDDuration || 0;
                 const ddStartDate = item.ddStartDate || '-';
@@ -1963,9 +919,9 @@
                 const maxDD = item.maxDD || 0;
                 const maxDDPercent = item.maxDDPercent || 0;
                 
-                // Different styling for brokers vs accounts
-                const icon = isBroker ? '🏦' : '├─';
-                const nameStyle = isBroker ? 'font-weight: 600; color: #374151;' : 'font-weight: 500; color: #475569; padding-left: 20px;';
+                // Account-level styling (no separate brokers)
+                const icon = '├─';
+                const nameStyle = 'font-weight: 500; color: #475569; padding-left: 20px;';
                 
                 html += `<tr>
                     <td style="${nameStyle}">${icon} ${getDisplayName(code)}</td>
@@ -1985,73 +941,45 @@
                     <td class="negative">${formatPercent(maxDDPercent)}</td>
                 </tr>`;
             });
-            
             if (html === '') {
                 tbody.innerHTML = '<tr><td colspan="15" class="empty-state">No broker data matches the current filters.</td></tr>';
             } else {
                 tbody.innerHTML = html;
             }
         }
-
         function updateSummaryCards(allBrokers, allAccounts, allStrategies) {
             // Always use full data for summary cards, regardless of view type filter
-            const brokers = allBrokers || [];
             const accounts = allAccounts || [];
             const strategies = allStrategies || [];
             
-            if (brokers.length === 0 && accounts.length === 0 && strategies.length === 0) return;
-            
-            // Helper function to calculate sums for an account (same as in renderTable)
-            function calculateAccountSums(accountStrategy) {
-                const children = strategies.filter(s => s.parentAccount === accountStrategy);
-                if (children.length === 0) return null;
-                
-                const sums = {
-                    lotSize: children.reduce((sum, c) => sum + (c.lotSize || 0), 0),
-                    currentDD: children.reduce((sum, c) => sum + (c.currentDD || 0), 0)
-                };
-                
-                sums.stgMargin = sums.lotSize * 400000;
-                
-                return sums;
-            }
-            
-            // Helper function to calculate broker sums (same as in renderTable)
-            function calculateBrokerSums(brokerStrategy) {
-                const brokerAccounts = accounts.filter(a => a.parentBroker === brokerStrategy);
-                if (brokerAccounts.length === 0) return null;
-                
-                const accountSums = brokerAccounts.map(a => calculateAccountSums(a.strategy)).filter(s => s !== null);
-                if (accountSums.length === 0) return null;
-                
-                const sums = {
-                    lotSize: accountSums.reduce((sum, a) => sum + (a.lotSize || 0), 0),
-                    currentDD: accountSums.reduce((sum, a) => sum + (a.currentDD || 0), 0)
-                };
-                
-                sums.stgMargin = sums.lotSize * 400000;
-                sums.brokerMargin = getBrokerMarginForAccount(brokerStrategy) || 0;
-                
-                return sums;
-            }
+            if (accounts.length === 0 && strategies.length === 0) return;
             
             // Initialize totals
             let totalBrokerMargin = 0;
             let totalStgMargin = 0;
             let totalCurrentDDRupees = 0;
             
-            // Calculate totals for each broker
-            brokers.forEach(broker => {
-                const brokerSums = calculateBrokerSums(broker.strategy);
+            // Calculate totals from accounts
+            accounts.forEach(account => {
+                const accountCode = account.strategy;
                 
-                if (brokerSums) {
-                    totalBrokerMargin += brokerSums.brokerMargin || 0;
-                    totalStgMargin += brokerSums.stgMargin || 0;
-                    totalCurrentDDRupees += brokerSums.currentDD || 0;
-                }
+                // Get filtered strategies for this account
+                const accountStrategies = strategies.filter(s => s.parentAccount === accountCode);
+                const lotSize = accountStrategies.reduce((sum, s) => sum + (s.lotSize || 0), 0);
+                const stgMargin = lotSize * 400000;
+                
+                // Get broker margin
+                const brokerMargin = getBrokerMarginForAccount(accountCode) || 0;
+                
+                // Get current DD from account data (pre-calculated)
+                const currentDD = account.currentDD || 0;
+                
+                totalBrokerMargin += brokerMargin;
+                totalStgMargin += stgMargin;
+                totalCurrentDDRupees += currentDD;
             });
             
-            // Update stat box with rupee symbol
+            // Update Total Broker Margin
             if (totalBrokerMargin === 0) {
                 document.getElementById('totalBrokerMargin').textContent = '-';
             } else {
@@ -2059,6 +987,7 @@
                 document.getElementById('totalBrokerMargin').textContent = formatted === '-' ? '-' : '₹' + formatted;
             }
             
+            // Update Total STG Margin
             if (totalStgMargin === 0) {
                 document.getElementById('totalStgMargin').textContent = '-';
             } else {
@@ -2066,6 +995,7 @@
                 document.getElementById('totalStgMargin').textContent = formatted === '-' ? '-' : '₹' + formatted;
             }
             
+            // Update Total Current DD (₹)
             if (totalCurrentDDRupees === 0) {
                 document.getElementById('totalCurrentDDRupees').textContent = '-';
             } else {
@@ -2073,69 +1003,41 @@
                 document.getElementById('totalCurrentDDRupees').textContent = formatted === '-' ? '-' : '₹' + formatted;
             }
             
-            // Calculate Total Current DD %
+            // Calculate and update Total Current DD %
             const totalCurrentDDPercent = totalStgMargin > 0 
                 ? (totalCurrentDDRupees / totalStgMargin) * 100 
                 : 0;
             document.getElementById('totalCurrentDDPercent').textContent = formatPercent(totalCurrentDDPercent);
-
-            // Calculate STG DD from broker B
-            const brokerB = brokers.find(b => b.strategy === 'B');
-            let stgDDFromB = 0;
-            let stgDDFromBPercent = 0;
-            if (brokerB) {
-                // Get STG DD from broker B - use the currentDD from broker data directly
-                stgDDFromB = brokerB.currentDD || 0;
-                
-                // Calculate percentage based on broker B's STG margin
-                const brokerBSums = calculateBrokerSums(brokerB.strategy);
-                if (brokerBSums && brokerBSums.stgMargin > 0) {
-                    stgDDFromBPercent = (stgDDFromB / brokerBSums.stgMargin) * 100;
-                }
-            }
             
-            // Update STG DD (₹) from B with percentage in brackets
-            if (stgDDFromB === 0) {
+            // Update STG DD (₹) - just use total current DD
+            if (totalCurrentDDRupees === 0) {
                 document.getElementById('stgDDFromB').textContent = '-';
             } else {
-                const formatted = formatCurrency(stgDDFromB);
-                const percentFormatted = formatPercent(stgDDFromBPercent);
-                document.getElementById('stgDDFromB').innerHTML = formatted === '-' ? '-' : '₹' + formatted + '  <span style="font-size: 14px; color: #6b7280;">[' + percentFormatted + ']</span>';
+                const formatted = formatCurrency(totalCurrentDDRupees);
+                document.getElementById('stgDDFromB').textContent = formatted === '-' ? '-' : '₹' + formatted;
             }
-            
             // Update broker-wise DD cards
             updateBrokerWiseCards(accounts, strategies);
         }
-
         function updateBrokerWiseCards(accounts, strategies) {
             // Find the main summary-cards container
             const container = document.querySelector('.summary-cards');
-            if (!container) {
-                console.error('summary-cards container not found!');
-                return;
-            }
-            
-            console.log('📊 Updating broker-wise cards. Total accounts:', accounts.length);
-            
+            if (!container) {return;
+            }            
             // Remove any existing broker DD cards (to avoid duplicates on re-render)
             const existingBrokerCards = container.querySelectorAll('.broker-dd-card');
             existingBrokerCards.forEach(card => card.remove());
-            
-            // Get all broker accounts (B1, B2, C1, etc.) from ORIGINAL drawdownData
+            // Get all broker accounts (ACA, CEA, ZEA, B1, B2, etc.) from ORIGINAL drawdownData
             const allBrokerAccounts = drawdownData.filter(d => 
                 d.strategy && 
                 d.isGroup &&
                 !d.isBroker &&
-                d.strategy.match(/^[A-Z]\d+$/) // Match pattern like B1, B2, C1, etc.
-            );
-            
-            console.log('📊 Broker accounts found:', allBrokerAccounts.length, allBrokerAccounts.map(a => a.strategy));
-            
-            // Sort broker accounts
+                !d.strategy.startsWith('A.PRO') && // Exclude A.PRO
+                (extractBrokerCode(d.strategy) || /^[A-Z0-9]{2,4}A?$/.test(d.strategy)) // Match broker codes like ACA, CEA, ZEA, B1, B2 or extract from PRO strategies
+            );// Sort broker accounts
             const sortedAccounts = allBrokerAccounts.sort((a, b) => {
                 return a.strategy.localeCompare(b.strategy);
             });
-            
             // Helper function to calculate account STG margin from FILTERED strategies
             function calculateAccountStgMargin(accountStrategy) {
                 const children = strategies.filter(s => s.parentAccount === accountStrategy);
@@ -2143,36 +1045,25 @@
                 const lotSize = children.reduce((sum, c) => sum + (c.lotSize || 0), 0);
                 return lotSize * 400000;
             }
-            
             // Create and append each broker card to the main container
             sortedAccounts.forEach(account => {
                 const accountName = getDisplayName(account.strategy);
                 // ALWAYS use currentDD from original drawdownData, not from filtered accounts
                 const currentDD = account.currentDD || 0;
-                
                 // Calculate percentage using STG margin from FILTERED strategies
                 const stgMargin = calculateAccountStgMargin(account.strategy);
                 const ddPercent = stgMargin > 0 ? (currentDD / stgMargin) * 100 : 0;
                 const formattedPercent = formatPercent(ddPercent);
-                
                 // Format combined value with percentage in brackets with smaller font and grey color
                 const formattedDD = currentDD === 0 ? '-' : '₹' + formatCurrency(currentDD) + '  <span style="font-size: 14px; color: #6b7280;">[' + formattedPercent + ']</span>';
-                const valueClass = currentDD < 0 ? 'negative' : currentDD > 0 ? 'positive' : '';
-                
-                console.log(`Creating card for ${account.strategy}: currentDD=${currentDD}, stgMargin=${stgMargin}, percent=${ddPercent.toFixed(2)}%`);
-                
-                const cardDiv = document.createElement('div');
+                const valueClass = currentDD < 0 ? 'negative' : currentDD > 0 ? 'positive' : '';const cardDiv = document.createElement('div');
                 cardDiv.className = 'summary-card drawdown-box broker-dd-card';
                 cardDiv.innerHTML = `
                     <div class="summary-card-label">${accountName} STG DD (₹)</div>
                     <div class="summary-card-value ${valueClass}">${formattedDD}</div>
                 `;
                 container.appendChild(cardDiv);
-            });
-            
-            console.log('📊 Added broker DD cards. Total cards in row:', container.children.length);
-        }
-
+            });        }
         function sortTable(column) {
             if (sortColumn === column) {
                 sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -2182,13 +1073,11 @@
             }
             applyFilters();
         }
-
         function handleSortSelect() {
             sortColumn = document.getElementById('sortSelect').value;
             sortDirection = sortColumn === 'strategy' ? 'asc' : 'desc';
             applyFilters();
         }
-
         function resetFilters() {
             hiddenStrategies.clear();
             document.getElementById('minDrawdownFilter').value = '';
@@ -2201,19 +1090,27 @@
             clearSavedFilters();
             applyFilters();
         }
-
         function populateStrategyOptions() {
             allStrategyNames = drawdownData.filter(d => d.isChild).map(d => d.strategy).sort();
             const container = document.getElementById('strategyOptions');
-            container.innerHTML = allStrategyNames.map(s => `
+            
+            container.innerHTML = allStrategyNames.map(s => {
+                // Format strategy name with space: ACAPRO 1 -> ACA PRO 1
+                let displayName = s;
+                const match = s.match(/^([A-Z]{2,3})(PRO\s*\d+)$/i);
+                if (match) {
+                    displayName = match[1] + ' ' + match[2];
+                }
+                
+                return `
                 <div class="dropdown-option" onclick="handleRowClick(event, '${s.replace(/'/g, "\\'")}')">
                     <input type="checkbox" id="strategy-${CSS.escape(s)}" value="${s}" ${!hiddenStrategies.has(s) ? 'checked' : ''} onchange="toggleStrategy('${s.replace(/'/g, "\\'")}')">
-                    <label for="strategy-${CSS.escape(s)}">${s}</label>
-                </div>
-            `).join('');
+                    <label for="strategy-${CSS.escape(s)}">${displayName}</label>
+                </div>`;
+            }).join('');
+            
             updateSelectedCount();
         }
-
         function handleRowClick(event, strategy) {
             // If clicking directly on checkbox, let the default behavior handle it
             if (event.target.tagName === 'INPUT') {
@@ -2231,53 +1128,45 @@
                 checkbox.dispatchEvent(new Event('change'));
             }
         }
-
-        function toggleStrategyDropdown() {
+        function toggleStrategyDropdown(event) {
+            if (event) event.stopPropagation();
             document.getElementById('strategyDropdownMenu').classList.toggle('show');
         }
-
         function toggleStrategy(strategy) {
             hiddenStrategies.has(strategy) ? hiddenStrategies.delete(strategy) : hiddenStrategies.add(strategy);
             updateSelectedCount();
             applyFilters();
         }
-
         function selectAllStrategies() {
             hiddenStrategies.clear();
             updateStrategyCheckboxes();
             updateSelectedCount();
             applyFilters();
         }
-
         function selectNoneStrategies() {
             allStrategyNames.forEach(s => hiddenStrategies.add(s));
             updateStrategyCheckboxes();
             updateSelectedCount();
             applyFilters();
         }
-
         function resetStrategySelection() {
             hiddenStrategies.clear();
             updateStrategyCheckboxes();
             updateSelectedCount();
             applyFilters();
         }
-
         function updateStrategyCheckboxes() {
             allStrategyNames.forEach(s => {
                 const cb = document.getElementById(`strategy-${CSS.escape(s)}`);
                 if (cb) cb.checked = !hiddenStrategies.has(s);
             });
         }
-
         function updateSelectedCount() {
             document.getElementById('selectedCount').textContent = allStrategyNames.length - hiddenStrategies.size;
         }
-
         function expandAll() {
             document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
         }
-
         function collapseAll() {
             document.querySelectorAll('tbody tr').forEach(row => {
                 if (row.classList.contains('child-row') || row.classList.contains('group-row')) {
@@ -2285,7 +1174,6 @@
                 }
             });
         }
-
         function loadSavedFilters() {
             try {
                 const saved = localStorage.getItem('drawdownFilters');
@@ -2301,7 +1189,6 @@
                 }
             } catch (e) {}
         }
-
         function saveFilters() {
             try {
                 localStorage.setItem('drawdownFilters', JSON.stringify({
@@ -2312,13 +1199,11 @@
                 }));
             } catch (e) {}
         }
-
         function clearSavedFilters() {
             try {
                 localStorage.removeItem('drawdownFilters');
             } catch (e) {}
         }
-
         function formatCurrency(val) {
             if (!val) return '-';
             const abs = Math.abs(val);
@@ -2331,15 +1216,12 @@
             }
             return sign + str;
         }
-
         function formatPercent(val) {
             return val ? val.toFixed(2) + '%' : '0.00%';
         }
-
         function formatNum(val, decimals = 2) {
             return val && val !== '-' ? val.toFixed(decimals) : '-';
         }
-
         function formatDate(dateStr) {
             if (!dateStr || dateStr === '-') return '-';
             try {
@@ -2352,45 +1234,73 @@
                 return dateStr;
             }
         }
-
         function getDisplayName(name) {
             // Handle specific mappings
             const displayNames = {
                 'B': 'All Broker'
             };
             
-            // Handle B1, B2, B3, etc. dynamically
-            if (name.match(/^B\d+$/)) {
-                const num = name.substring(1);
-                return `Broker ${num}`;
+            // If it's a special mapping, return mapped name
+            if (displayNames[name]) {
+                return displayNames[name];
             }
             
-            // Return mapped name or original name
-            return displayNames[name] || name;
+            // For strategy names with broker codes, remove the broker prefix
+            // Examples: ACAPRO 4 -> PRO 4, CEAPRO 8 -> PRO 8, ZEAPRO 1 -> PRO 1
+            const strategyMatch = name.match(/^[A-Z]{2,3}(PRO\s*\d+)$/i);
+            if (strategyMatch) {
+                return strategyMatch[1]; // Return just "PRO X" part
+            }
+            
+            // For all other names (including ACA, CEA, ZEA, etc.), return as-is
+            return name;
         }
-
         document.addEventListener('click', (e) => {
+            const menu = document.getElementById('strategyDropdownMenu');
             const selector = document.querySelector('.strategy-selector');
-            if (selector && !selector.contains(e.target)) {
-                document.getElementById('strategyDropdownMenu').classList.remove('show');
+            if (menu && selector && !selector.contains(e.target)) {
+                menu.classList.remove('show');
             }
         });
-
+        
+        // Close dropdown with 250ms delay when mouse leaves the strategy-selector area
+        let closeTimeout = null;
+        const strategySelector = document.querySelector('.strategy-selector');
+        if (strategySelector) {
+            strategySelector.addEventListener('mouseleave', () => {
+                closeTimeout = setTimeout(() => {
+                    const menu = document.getElementById('strategyDropdownMenu');
+                    if (menu) {
+                        menu.classList.remove('show');
+                    }
+                }, 250);
+            });
+            
+            // Cancel close if mouse re-enters before timeout
+            strategySelector.addEventListener('mouseenter', () => {
+                if (closeTimeout) {
+                    clearTimeout(closeTimeout);
+                    closeTimeout = null;
+                }
+            });
+        }
+        
+        // Prevent clicks inside dropdown from closing it
+        const dropdownMenu = document.getElementById('strategyDropdownMenu');
+        if (dropdownMenu) {
+            dropdownMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
         // Store trades data and calculated broker margins
         let tradesData = null;
         let calculatedBrokerMargins = {};
-
         // Calculate broker margin from trades data (same logic as strategy-performance.html)
         function calculateBrokerMarginFromTrades() {
             // tradesData is an array of trade objects
-            if (!tradesData || !Array.isArray(tradesData) || tradesData.length === 0) {
-                console.log('⚠️ No trades data available for broker margin calculation');
-                calculatedBrokerMargins = {};
+            if (!tradesData || !Array.isArray(tradesData) || tradesData.length === 0) {                calculatedBrokerMargins = {};
                 return;
-            }
-
-            console.log('💰 Calculating broker margins from', tradesData.length, 'trades');
-            
+            }            
             // Build list of all strategies from trades
             const strategiesSet = new Set();
             tradesData.forEach(trade => {
@@ -2400,28 +1310,19 @@
                     });
                 }
             });
-            
             const allStrategies = Array.from(strategiesSet);
-            const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
-            
-            console.log('📋 Found', allBrokerStrategies.length, 'broker strategies:', allBrokerStrategies.slice(0, 5));
-            
-            const brokerMarginsByDate = {};
-            
+            const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));const brokerMarginsByDate = {};
             // Collect margins by date and broker from trades
             tradesData.forEach(trade => {
                 const tradeDate = trade.date;
                 if (!brokerMarginsByDate[tradeDate]) {
                     brokerMarginsByDate[tradeDate] = {};
                 }
-                
                 if (trade.strategyDetails) {
                     allBrokerStrategies.forEach(brokerStrat => {
                         const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
-                        const brokerMatch = brokerStrat.match(/^(B\d+|C\d+|D\d+|E\d+)/);
-                        
-                        if (brokerMatch) {
-                            const brokerCode = brokerMatch[1];
+                        const brokerCode = extractBrokerCode(brokerStrat);
+                        if (brokerCode) {
                             if (!brokerMarginsByDate[tradeDate][brokerCode]) {
                                 brokerMarginsByDate[tradeDate][brokerCode] = {};
                             }
@@ -2433,7 +1334,6 @@
                     });
                 }
             });
-            
             // Build PnL Tax by date and broker
             const brokerPnlTaxByDate = {};
             tradesData.forEach(trade => {
@@ -2441,13 +1341,11 @@
                 if (!brokerPnlTaxByDate[tradeDate]) {
                     brokerPnlTaxByDate[tradeDate] = {};
                 }
-                
                 if (trade && trade.strategyPnlTax) {
                     Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
                         if (!stratName.startsWith('A.PRO')) {
-                            const brokerMatch = stratName.match(/^(B\d+|C\d+|D\d+|E\d+)/);
-                            if (brokerMatch) {
-                                const brokerCode = brokerMatch[1];
+                            const brokerCode = extractBrokerCode(stratName);
+                            if (brokerCode) {
                                 if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
                                     brokerPnlTaxByDate[tradeDate][brokerCode] = {};
                                 }
@@ -2460,7 +1358,6 @@
                     });
                 }
             });
-            
             // Get sorted dates (latest first) - proper full date comparison
             const sortedDates = Object.keys(brokerMarginsByDate).sort((a, b) => {
                 const parseDate = (dateStr) => {
@@ -2468,84 +1365,54 @@
                     return new Date(year, month - 1, day);
                 };
                 return parseDate(b) - parseDate(a); // Latest first
-            });
-            
-            console.log('📅 Date range in data:', sortedDates.length > 0 ? `${sortedDates[sortedDates.length - 1]} to ${sortedDates[0]}` : 'No dates');
-            
+            });            
             // Get all unique brokers
             const allBrokersInData = new Set();
             Object.values(brokerMarginsByDate).forEach(dateMargins => {
                 Object.keys(dateMargins).forEach(broker => allBrokersInData.add(broker));
             });
-            
             // For each broker, find the most recent day with non-zero margin and calculate total margin with PnL tax
             const brokerMaxMargins = {};
-            
             allBrokersInData.forEach(brokerCode => {
                 for (let i = 0; i < sortedDates.length; i++) {
                     const checkDate = sortedDates[i];
-                    
                     if (brokerMarginsByDate[checkDate] && brokerMarginsByDate[checkDate][brokerCode]) {
                         const strategyMargins = Object.entries(brokerMarginsByDate[checkDate][brokerCode]);
                         const margins = strategyMargins.map(([strat, margin]) => margin);
                         const maxMargin = margins.length > 0 ? Math.max(...margins) : 0;
-                        
                         if (maxMargin > 0) {
                             // Accumulate PnL Tax from this date FORWARD to the most recent date
                             let accumulatedPnlTax = 0;
                             for (let j = i; j >= 0; j--) {
                                 const dateToCheck = sortedDates[j];
-                                
                                 if (brokerPnlTaxByDate[dateToCheck] && brokerPnlTaxByDate[dateToCheck][brokerCode]) {
                                     Object.values(brokerPnlTaxByDate[dateToCheck][brokerCode]).forEach(pnlTax => {
                                         accumulatedPnlTax += pnlTax;
                                     });
                                 }
                             }
-                            
                             // Total margin = base margin + accumulated PnL tax
                             const totalMargin = maxMargin + accumulatedPnlTax;
-                            brokerMaxMargins[brokerCode] = totalMargin;
-                            console.log(`  ${brokerCode}: ₹${maxMargin.toLocaleString()} (margin) + ₹${accumulatedPnlTax.toLocaleString()} (PnL tax) = ₹${totalMargin.toLocaleString()} from date ${checkDate}`);
-                            
-                            // Store margin for each account (B1, B2, etc.)
+                            brokerMaxMargins[brokerCode] = totalMargin;// Store margin for each account (ACA, CEA, ZEA, etc.)
                             calculatedBrokerMargins[brokerCode] = totalMargin;
                             break;
                         }
                     }
                 }
-            });
-            
-            // Calculate total broker margin for each broker type (A, B, C, etc.)
-            // Group by first letter
-            const brokerTotals = {};
-            Object.entries(brokerMaxMargins).forEach(([code, margin]) => {
-                const brokerLetter = code.charAt(0); // Get 'B' from 'B1'
-                if (!brokerTotals[brokerLetter]) {
-                    brokerTotals[brokerLetter] = 0;
-                }
-                brokerTotals[brokerLetter] += margin;
-            });
-            
-            // Store totals for each broker type
-            Object.entries(brokerTotals).forEach(([letter, total]) => {
-                calculatedBrokerMargins[letter] = total;
-            });
-            
-            console.log('✅ Calculated Broker Margins (with PnL tax):', calculatedBrokerMargins);
-            console.log('📊 Individual account margins:', Object.entries(calculatedBrokerMargins).filter(([k,v]) => k.length > 1).reduce((acc, [k,v]) => ({...acc, [k]: v}), {}));
-            console.log('📊 Total broker margins:', Object.entries(calculatedBrokerMargins).filter(([k,v]) => k.length === 1).reduce((acc, [k,v]) => ({...acc, [k]: v}), {}));
-        }
-
+            });}
         // Helper function to get broker margin for an account
         function getBrokerMarginForAccount(accountCode) {
             return calculatedBrokerMargins[accountCode] || 0;
         }
-
         // Request trades data from parent on page load
-        window.addEventListener('load', function() {
-            console.log('🔄 Drawdown: Requesting data refresh from parent');
-            window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
+        window.addEventListener('load', function() {// Check if we're in an iframe
+            if (window.parent !== window) {window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
+            } else {drawdownData = sampleData;// Initialize sample broker margins for standalone mode
+                calculatedBrokerMargins = {
+                    'ACA': 63700658,  // Sample broker margin for ACA
+                    'CEA': 18181123   // Sample broker margin for CEA
+                };loadSavedFilters();
+                populateStrategyOptions();applyFilters();}
         });
     </script>
 </body>
