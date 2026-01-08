@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detailed Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f8fafc;
             color: #1a1a1a;
             overflow-x: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .main-content {
             padding: 16px 32px 32px 32px;
@@ -63,8 +68,8 @@
             color: #9ca3af;
         }
         .page-header { margin-bottom: 16px; }
-        .page-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
-        .page-subtitle { font-size: 12px; color: #6b7280; font-weight: 400; }
+        .page-title { font-size: 22px; font-weight: 600; color: #111827; margin-bottom: 4px; letter-spacing: -0.3px; }
+        .page-subtitle { font-size: 12px; color: #6b7280; font-weight: 400; letter-spacing: 0.1px; }
         
         .controls-section {
             display: flex;
@@ -74,7 +79,7 @@
             align-items: center;
         }
         .control-group { display: flex; align-items: center; gap: 8px; }
-        .control-label { font-size: 12px; color: #374151; font-weight: 600; }
+        .control-label { font-size: 12px; color: #374151; font-weight: 600; letter-spacing: 0.1px; }
         .strategy-filter-container { position: relative; display: inline-block; }
         .strategy-filter-button {
             display: flex;
@@ -291,7 +296,8 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 13px;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
         }
         .report-table thead { 
             position: sticky; 
@@ -306,7 +312,7 @@
             top: 0;
             background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
             z-index: 11;
-            font-size: 12px;
+            font-size: 11.5px;
             text-align: center;
             font-weight: 600;
             color: #1e40af;
@@ -326,7 +332,7 @@
             top: 28px;
             background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
             z-index: 10;
-            font-size: 11px;
+            font-size: 10.5px;
             text-align: center;
             font-weight: 600;
             color: #0f172a;
@@ -353,12 +359,12 @@
         }
         .report-table thead tr.header-row-2 th {
             padding: 4px 4px 4px 4px;
-            font-size: 10px;
+            font-size: 9.5px;
             position: sticky;
             top: 50px;
             background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
             z-index: 10;
-            font-weight: 500;
+            font-weight: 450;
             color: #475569;
             text-align: center;
             border-bottom: 1px solid #94a3b8;
@@ -384,13 +390,13 @@
             content: ' ↑'; 
             opacity: 1; 
             color: #1e40af;
-            font-weight: 900;
+            font-weight: 700;
         }
         .report-table th.sorted-desc::after { 
             content: ' ↓'; 
             opacity: 1; 
             color: #1e40af;
-            font-weight: 900;
+            font-weight: 700;
         }
         .report-table th.number-col { text-align: right; }
         
@@ -407,7 +413,7 @@
             opacity: 1;
     	    color: #ffffff;
             background: #dc2626;
-	    font-weight: 900;
+	    font-weight: 700;
         }
         
         .filter-popup-overlay {
@@ -541,20 +547,21 @@
             border-right: 1px solid #f0f0f0;
             color: #1f2937;
             white-space: nowrap;
-            font-size: 13px;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
             font-weight: 400;
             overflow: hidden;
             text-overflow: ellipsis;
             vertical-align: middle;
             box-sizing: border-box;
         }
-        .report-table td:nth-child(1) { text-align: center; color: #4b5563; font-weight: 400; font-size: 12px; }
-        .report-table td:nth-child(2) { font-weight: 400; color: #1f2937; font-size: 12px; }
-        .report-table td:nth-child(3) { font-weight: 400; color: #1f2937; font-size: 12px; }
-        .report-table td:nth-child(4) { font-size: 12px; }
-        .report-table td:nth-child(5) { font-weight: 400; color: #1f2937; font-size: 12px; }
-        .report-table td:nth-child(6) { font-size: 12px; }
-        .report-table td:nth-child(7), .report-table td:nth-child(8) { font-size: 12px; }
+        .report-table td:nth-child(1) { text-align: center; color: #4b5563; font-weight: 400; font-size: 11.5px; }
+        .report-table td:nth-child(2) { font-weight: 400; color: #1f2937; font-size: 11.5px; }
+        .report-table td:nth-child(3) { font-weight: 400; color: #1f2937; font-size: 11.5px; }
+        .report-table td:nth-child(4) { font-size: 11.5px; }
+        .report-table td:nth-child(5) { font-weight: 400; color: #1f2937; font-size: 11.5px; }
+        .report-table td:nth-child(6) { font-size: 11.5px; }
+        .report-table td:nth-child(7), .report-table td:nth-child(8) { font-size: 11.5px; }
         .report-table td:nth-child(9) { 
         }
         .report-table td:nth-child(11) { 
@@ -571,8 +578,8 @@
             font-variant-numeric: tabular-nums;
             font-weight: 400;
         }
-        .report-table td.positive { color: #15803d; font-weight: 500; }
-        .report-table td.negative { color: #b96060; font-weight: 500; }
+        .report-table td.positive { color: #15803d; font-weight: 450; }
+        .report-table td.negative { color: #b96060; font-weight: 450; }
         .buy-sell-column { display: none; }
         .buy-sell-column.visible { display: table-cell; }
         
@@ -617,7 +624,8 @@
             text-align: center; 
             color: #9ca3af; 
             padding: 60px 40px; 
-            font-size: 13px;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
             font-weight: 400;
             background: #f8fafc;
         }
@@ -640,8 +648,8 @@
             border-radius: 6px;
             background: white;
             color: #374151;
-            font-size: 11px;
-            font-weight: 500;
+            font-size: 10.5px;
+            font-weight: 450;
             cursor: pointer;
             transition: all 0.15s ease;
         }
@@ -868,7 +876,7 @@
         let sortColumn = null;
         let sortDirection = 'asc';
         let brokerStrategies = [];
-        let uniqueBrokers = []; // List of unique broker prefixes (B1, B2, etc.)
+        let uniqueBrokers = []; // List of unique broker codes (ACA, CEA, ZEA, etc.)
         let strategies = [];
         let hiddenBrokerStrategies = new Set();
         let manualHiddenBrokerStrategies = new Set(); // Tracks manual hides from "Hide Broker Columns"
@@ -1566,21 +1574,23 @@
                 const parts = trade.date.split('/');
                 if (parts.length !== 3) return;
                 const monthIndex = parseInt(parts[1]) - 1;
+                const year = parts[2];
                 const monthName = monthNames[monthIndex];
-                if (!dateStructure[monthName]) dateStructure[monthName] = [];
-                if (!dateStructure[monthName].includes(trade.date)) {
-                    dateStructure[monthName].push(trade.date);
+                const monthYear = `${monthName}-${year}`; // e.g., "January-25"
+                if (!dateStructure[monthYear]) dateStructure[monthYear] = [];
+                if (!dateStructure[monthYear].includes(trade.date)) {
+                    dateStructure[monthYear].push(trade.date);
                 }
             });
             
-            Object.keys(dateStructure).forEach(month => {
-                dateStructure[month].sort((a, b) => {
+            Object.keys(dateStructure).forEach(monthYear => {
+                dateStructure[monthYear].sort((a, b) => {
                     const dayA = parseInt(a.split('/')[0]);
                     const dayB = parseInt(b.split('/')[0]);
                     return dayA - dayB;
                 });
-                if (!collapsedMonths.has(month)) {
-                    collapsedMonths.add(month);
+                if (!collapsedMonths.has(monthYear)) {
+                    collapsedMonths.add(monthYear);
                 }
             });
         }
@@ -1594,44 +1604,111 @@
             
             const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 
                                'July', 'August', 'September', 'October', 'November', 'December'];
-            const sortedMonths = Object.keys(dateStructure).sort((a, b) => 
-                monthOrder.indexOf(a) - monthOrder.indexOf(b)
-            );
+            
+            // Group month-years by year
+            const yearGroups = {};
+            Object.keys(dateStructure).forEach(monthYear => {
+                const [monthName, year] = monthYear.split('-');
+                const fullYear = year.length === 2 ? (parseInt(year) > 50 ? `19${year}` : `20${year}`) : year;
+                if (!yearGroups[fullYear]) yearGroups[fullYear] = [];
+                yearGroups[fullYear].push(monthYear);
+            });
+            
+            // Sort years descending, months within year ascending
+            const sortedYears = Object.keys(yearGroups).sort((a, b) => b.localeCompare(a));
+            const sortedMonthYears = [];
+            sortedYears.forEach(year => {
+                yearGroups[year].sort((a, b) => {
+                    const monthA = a.split('-')[0];
+                    const monthB = b.split('-')[0];
+                    return monthOrder.indexOf(monthA) - monthOrder.indexOf(monthB);
+                });
+                sortedMonthYears.push(...yearGroups[year]);
+            });
             
             elements.dateFilterList.innerHTML = '';
             
-            sortedMonths.forEach((month) => {
-                const dates = dateStructure[month];
+            // Render with year headers
+            sortedYears.forEach(year => {
+                // Add year header
+                const yearHeader = document.createElement('div');
+                yearHeader.className = 'year-header';
+                yearHeader.style.cssText = 'padding: 8px 14px; font-weight: 600; font-size: 11px; color: #1f2937; background: #f3f4f6; border-bottom: 1px solid #d1d5db; display: flex; align-items: center; gap: 8px; cursor: pointer;';
+                
+                const yearCheckbox = document.createElement('input');
+                yearCheckbox.type = 'checkbox';
+                yearCheckbox.className = 'strategy-filter-checkbox year-checkbox';
+                yearCheckbox.id = `year_${year}`;
+                yearCheckbox.style.cssText = 'width: 14px; height: 14px; cursor: pointer;';
+                
+                // Check if all months in year are selected
+                const allYearMonthsSelected = yearGroups[year].every(monthYear => {
+                    const dates = dateStructure[monthYear];
+                    return dates.every(d => !hiddenDates.has(d));
+                });
+                yearCheckbox.checked = allYearMonthsSelected;
+                
+                yearCheckbox.onclick = (e) => {
+                    e.stopPropagation();
+                    const isChecked = e.target.checked;
+                    yearGroups[year].forEach(monthYear => {
+                        const dates = dateStructure[monthYear];
+                        dates.forEach(date => {
+                            if (isChecked) {
+                                hiddenDates.delete(date);
+                            } else {
+                                hiddenDates.add(date);
+                            }
+                        });
+                    });
+                    saveDateFilters();
+                    updateDateFilterList();
+                    filterAndDisplayData();
+                };
+                
+                const yearLabel = document.createElement('label');
+                yearLabel.style.cssText = 'cursor: pointer; user-select: none; flex: 1;';
+                yearLabel.textContent = year;
+                yearLabel.onclick = () => yearCheckbox.click();
+                
+                yearHeader.appendChild(yearCheckbox);
+                yearHeader.appendChild(yearLabel);
+                elements.dateFilterList.appendChild(yearHeader);
+                
+                // Add months for this year
+                yearGroups[year].forEach((monthYear) => {
+                const dates = dateStructure[monthYear];
                 const allDatesHidden = dates.every(d => hiddenDates.has(d));
                 const someDatesHidden = dates.some(d => hiddenDates.has(d)) && !allDatesHidden;
-                const isExpanded = !collapsedMonths.has(month);
+                const isExpanded = !collapsedMonths.has(monthYear);
                 
                 const monthItem = document.createElement('div');
                 monthItem.className = 'strategy-filter-item date-month-item';
-                monthItem.onclick = () => toggleMonth(month);
+                monthItem.style.paddingLeft = '28px'; // Indent months under year
+                monthItem.onclick = () => toggleMonth(monthYear);
                 
                 const expandIcon = document.createElement('span');
                 expandIcon.className = 'expand-icon' + (isExpanded ? ' expanded' : '');
                 expandIcon.textContent = '▶';
                 expandIcon.onclick = (e) => {
                     e.stopPropagation();
-                    toggleMonth(month);
+                    toggleMonth(monthYear);
                 };
                 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'strategy-filter-checkbox';
-                checkbox.id = `month_${month}`;
+                checkbox.id = `month_${monthYear}`;
                 checkbox.checked = !allDatesHidden;
                 if (someDatesHidden) checkbox.style.opacity = '0.5';
                 checkbox.onclick = (e) => {
                     e.stopPropagation();
-                    toggleMonthDatesRow(month);
+                    toggleMonthDatesRow(monthYear);
                 };
                 
                 const label = document.createElement('label');
                 label.className = 'strategy-filter-label';
-                label.textContent = month;
+                label.textContent = monthYear.split('-')[0]; // Show only month name
                 
                 monthItem.appendChild(expandIcon);
                 monthItem.appendChild(checkbox);
@@ -1672,6 +1749,7 @@
                 });
                 
                 elements.dateFilterList.appendChild(childrenDiv);
+            });
             });
             
             updateDateFilterBadge();
@@ -2068,11 +2146,11 @@
             allBtn.onclick = showAllBrokers;
             container.appendChild(allBtn);
             
-            // Create dynamic broker buttons (B1, B2, B3, etc.)
+            // Create dynamic broker buttons (ACA, CEA, ZEA, etc.)
             uniqueBrokers.forEach(broker => {
                 const btn = document.createElement('button');
                 btn.className = 'quick-date-btn';
-                btn.textContent = broker.replace('B', 'Broker ');
+                btn.textContent = broker;
                 btn.onclick = () => showSpecificBroker(broker);
                 container.appendChild(btn);
             });
@@ -2172,7 +2250,15 @@
 
         function formatStrategyName(strategyName) {
             if (!strategyName) return strategyName;
-            return strategyName.replace(/_/g, ' ').replace(/(\d)(PRO)/g, '$1 $2');
+            // First remove underscores
+            let formatted = strategyName.replace(/_/g, ' ');
+            // Extract broker code and add space before PRO (e.g., "ACAPRO 4" -> "ACA PRO 4")
+            const match = formatted.match(/^(.+?)PRO\s*(\d+)$/);
+            if (match) {
+                return `${match[1]} PRO ${match[2]}`;
+            }
+            // Fallback for other formats
+            return formatted.replace(/(\d)(PRO)/g, '$1 $2');
         }
 
         function extractBrokerStrategies() {
@@ -2186,8 +2272,9 @@
                     Object.keys(trade.strategyDetails).forEach(stratName => {
                         if (!stratName.startsWith('A.PRO')) {
                             strategiesSet.add(stratName);
-                            // Extract broker prefix (B1, B2, B3, etc.)
-                            const brokerMatch = stratName.match(/^(B\d+)/);
+                            // Extract broker code dynamically (e.g., ACAPRO 1 -> ACA, CEAPRO 2 -> CEA)
+                            const cleanName = stratName.replace(/\s+/g, '');
+                            const brokerMatch = cleanName.match(/^(.+?)PRO/);
                             if (brokerMatch) {
                                 brokersSet.add(brokerMatch[1]);
                             }
@@ -2197,8 +2284,13 @@
             });
             
             brokerStrategies = Array.from(strategiesSet).sort((a, b) => {
-                const aBroker = a.match(/^(B\d+)/)?.[1] || '';
-                const bBroker = b.match(/^(B\d+)/)?.[1] || '';
+                // Extract broker code and PRO number for sorting
+                const cleanA = a.replace(/\s+/g, '');
+                const cleanB = b.replace(/\s+/g, '');
+                const aBrokerMatch = cleanA.match(/^(.+?)PRO/);
+                const bBrokerMatch = cleanB.match(/^(.+?)PRO/);
+                const aBroker = aBrokerMatch ? aBrokerMatch[1] : '';
+                const bBroker = bBrokerMatch ? bBrokerMatch[1] : '';
                 const aPro = a.match(/PRO\s*(\d+)/i)?.[1] || '0';
                 const bPro = b.match(/PRO\s*(\d+)/i)?.[1] || '0';
                 if (aBroker !== bBroker) return aBroker.localeCompare(bBroker);
