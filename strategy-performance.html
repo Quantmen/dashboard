@@ -1890,20 +1890,64 @@ bodyHtml += `<td class="number-col drawdown-col"></td>`;
 bodyHtml += '</tr>';
 elements.tableBody.innerHTML = bodyHtml;
 globalTotalExpenses = totals.totalExpenses;
+// Restore previously expanded months
+restoreExpandState();
 }
 function toggleMonth(month) {
 const dayRows = document.querySelectorAll(`.day-row[data-month="${month}"]`);
 const icon = document.getElementById(`icon-${month}`);
+const isExpanded = icon?.classList.contains('expanded');
 dayRows.forEach(row => row.classList.toggle('expanded'));
 if (icon) icon.classList.toggle('expanded');
+// Save expand state to localStorage
+saveExpandState(month, !isExpanded);
 }
 function expandAll() {
 document.querySelectorAll('.day-row').forEach(row => row.classList.add('expanded'));
 document.querySelectorAll('.expand-icon').forEach(icon => icon.classList.add('expanded'));
+// Save all months as expanded
+const expandedMonths = new Set();
+document.querySelectorAll('.expand-icon').forEach(icon => {
+const monthKey = icon.id.replace('icon-', '');
+expandedMonths.add(monthKey);
+});
+localStorage.setItem('strategyPerformance_expandedMonths', JSON.stringify(Array.from(expandedMonths)));
 }
 function collapseAll() {
 document.querySelectorAll('.day-row').forEach(row => row.classList.remove('expanded'));
 document.querySelectorAll('.expand-icon').forEach(icon => icon.classList.remove('expanded'));
+// Clear all expanded months
+localStorage.setItem('strategyPerformance_expandedMonths', JSON.stringify([]));
+}
+function saveExpandState(month, isExpanded) {
+try {
+const saved = localStorage.getItem('strategyPerformance_expandedMonths');
+const expandedMonths = saved ? new Set(JSON.parse(saved)) : new Set();
+if (isExpanded) {
+expandedMonths.add(month);
+} else {
+expandedMonths.delete(month);
+}
+localStorage.setItem('strategyPerformance_expandedMonths', JSON.stringify(Array.from(expandedMonths)));
+} catch (e) {
+console.warn('Failed to save expand state:', e);
+}
+}
+function restoreExpandState() {
+try {
+const saved = localStorage.getItem('strategyPerformance_expandedMonths');
+if (saved) {
+const expandedMonths = new Set(JSON.parse(saved));
+expandedMonths.forEach(month => {
+const dayRows = document.querySelectorAll(`.day-row[data-month="${month}"]`);
+const icon = document.getElementById(`icon-${month}`);
+dayRows.forEach(row => row.classList.add('expanded'));
+if (icon) icon.classList.add('expanded');
+});
+}
+} catch (e) {
+console.warn('Failed to restore expand state:', e);
+}
 }
 function updateSummaryCards(trades) {
 const allMonthlyProfits = {}, allMonthlyNetProfits = {}, strategyTracking = {};
