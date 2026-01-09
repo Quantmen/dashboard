@@ -1662,7 +1662,8 @@ let netPnlPercent = 0;
 if (monthIdx === 0) {
 const monthTrades = allTrades.filter(trade => {
 const tradeParts = trade.date.split('/');
-return tradeParts[1] === month;
+const tradeMonthKey = `${tradeParts[1]}/${tradeParts[2]}`;
+return tradeMonthKey === month;
 });
 if (monthTrades.length > 0) {
 const tradesByDate = {};
@@ -1703,31 +1704,16 @@ if (margins.length > 0) {
 firstDateMargin += Math.max(...margins);
 }
 });
-let firstDatePnlTax = 0;
-const firstDatePnlTaxMap = {};
-firstDateTrades.forEach(trade => {
-if (trade && trade.strategyPnlTax) {
-Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
-if (!stratName.startsWith('A.PRO')) {
-if (!firstDatePnlTaxMap[stratName]) {
-firstDatePnlTaxMap[stratName] = 0;
-}
-firstDatePnlTaxMap[stratName] += pnlTax;
-}
-});
-}
-});
-firstDatePnlTax = Object.values(firstDatePnlTaxMap).reduce((sum, val) => sum + val, 0);
-const firstDateTotalMargin = firstDateMargin + firstDatePnlTax;
+const firstDateTotalMargin = firstDateMargin; // Use margin only, without PNL Tax
 if (firstDateTotalMargin !== 0) {
-netPnlPercent = (monthNetTotal / firstDateTotalMargin) * 100;
+netPnlPercent = (netPnlValue / firstDateTotalMargin) * 100;
 }
 }
 }
 } else if (previousMonthTotalMargin === 0) {
 netPnlPercent = 0;
 } else {
-netPnlPercent = (monthNetTotal / previousMonthTotalMargin) * 100;
+netPnlPercent = (netPnlValue / previousMonthTotalMargin) * 100;
 }
 bodyHtml += `<td class="number-col net-pnl-percent-col ${netPnlPercent >= 0 ? 'positive' : 'negative'}">${netPnlPercent !== 0 ? netPnlPercent.toFixed(2) + '%' : ''}</td>`;
 const monthExpensesData = monthlyExpensesAndMargins[month] || { expenses: 0, totalMargin: 0 };
@@ -1816,7 +1802,7 @@ const dayNetPnlValue = showPnlTax ? dayNetTotal : dayTotal;
 bodyHtml += `<td class="number-col total-net-col ${dayNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(dayNetPnlValue)}</td>`;
 let dayNetPnlPercent = 0;
 if (previousMonthTotalMargin !== 0) {
-dayNetPnlPercent = (dayNetTotal / previousMonthTotalMargin) * 100;
+dayNetPnlPercent = (dayNetPnlValue / previousMonthTotalMargin) * 100;
 }
 bodyHtml += `<td class="number-col net-pnl-percent-col ${dayNetPnlPercent >= 0 ? 'positive' : 'negative'}">${dayNetPnlPercent !== 0 ? dayNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
 const dayExpense = dailyExpenses[date] || 0;
@@ -1894,7 +1880,7 @@ bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnlValue >= 0 ? 'pos
 bodyHtml += `<td class="number-col total-net-col ${totals.totalAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalAmiPnl)}</td>`;
 const totalNetPnlValue = showPnlTax ? totals.netBrProfits : totals.totalProfits;
 bodyHtml += `<td class="number-col total-net-col ${totalNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(totalNetPnlValue)}</td>`;
-const totalNetPnlPercent = totals.totalMarginSum !== 0 ? (totals.netBrProfits / totals.totalMarginSum) * 100 : 0;
+const totalNetPnlPercent = totals.totalMarginSum !== 0 ? (totalNetPnlValue / totals.totalMarginSum) * 100 : 0;
 bodyHtml += `<td class="number-col net-pnl-percent-col ${totalNetPnlPercent >= 0 ? 'positive' : 'negative'}">${totalNetPnlPercent !== 0 ? totalNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
 bodyHtml += `<td class="number-col expenses-col ${totals.totalExpenses >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalExpenses)}</td>`;
 bodyHtml += `<td class="number-col total-net-col"></td>`;
