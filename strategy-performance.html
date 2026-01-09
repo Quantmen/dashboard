@@ -1468,7 +1468,7 @@ if (currentMargin > peakMargin) {
 peakMargin = currentMargin;
 }
 const drawdown = peakMargin - currentMargin, dateParts = dateKey.split('/');
-const monthKey = dateParts[1];
+const monthKey = `${dateParts[1]}/${dateParts[2]}`;  // Use MM/YY format
 if (!result[monthKey]) {
 result[monthKey] = {};
 }
