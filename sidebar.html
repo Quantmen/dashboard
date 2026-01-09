@@ -39,8 +39,6 @@
     .sidebar.expanded .sidebar-icon { margin-right: 14px; }
     .sidebar-text { opacity: 0; width: 0; overflow: hidden; transition: opacity 0.3s ease; }
     .sidebar.expanded .sidebar-text { opacity: 1; width: auto; }
-
-    #loadDriveBtn.disabled { opacity: 0.5; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -78,20 +76,9 @@
       <span class="sidebar-icon">🗂️</span>
       <span class="sidebar-text">Data Management</span>
     </div>
-
-    <div class="sidebar-item" onclick="handleSetGoogleDriveLink(event)">
-      <span class="sidebar-icon">🔗</span>
-      <span class="sidebar-text">Save Google Drive Link</span>
-    </div>
-
-    <div id="loadDriveBtn" class="sidebar-item" onclick="handleLoadFromGoogleDrive(event)">
-      <span class="sidebar-icon">☁️</span>
-      <span class="sidebar-text">Load from Google Drive</span>
-    </div>
   </div>
 
   <script>
-    const LS_KEY_DRIVE_URL = "driveXlsxUrl";
     const el = { sidebar: document.getElementById('sidebar') };
 
     (function init() {
@@ -99,7 +86,6 @@
       if (!collapsed) el.sidebar.classList.add('expanded');
       postMessage('SIDEBAR_TOGGLE', { collapsed });
       loadFiltersOnly();
-      updateDriveButtonVisibility();
     })();
 
     function postMessage(type, data = {}) {
@@ -134,48 +120,6 @@
       // Request parent to trigger file upload
       postMessage('TRIGGER_FILE_UPLOAD');
     }
-
-    function handleSetGoogleDriveLink(event) {
-      event.preventDefault();
-      // Request parent to handle Google Drive link setting
-      postMessage('TRIGGER_DRIVE_LINK_SET');
-    }
-
-    function handleLoadFromGoogleDrive(event) {
-      event.preventDefault();
-      const url = getDriveUrl();
-      if (!url) {
-        console.log('No Drive URL configured');
-        return;
-      }
-      // Request parent to load from Google Drive
-      postMessage('TRIGGER_DRIVE_LOAD');
-    }
-
-    function getDriveUrl() {
-      return localStorage.getItem(LS_KEY_DRIVE_URL) || "";
-    }
-
-    function updateDriveButtonVisibility() {
-      const btn = document.getElementById('loadDriveBtn');
-      if (!getDriveUrl()) {
-        btn.classList.add('disabled');
-      } else {
-        btn.classList.remove('disabled');
-      }
-    }
-
-    // Listen for messages from parent
-    window.addEventListener('message', function(event) {
-      const { type, url } = event.data;
-      
-      switch(type) {
-        case 'DRIVE_LINK_UPDATED':
-          // Parent notifies us that Drive link was updated
-          updateDriveButtonVisibility();
-          break;
-      }
-    });
   </script>
 </body>
 </html>
