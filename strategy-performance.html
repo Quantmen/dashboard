@@ -113,6 +113,7 @@ overflow-y: visible !important;
 -webkit-overflow-scrolling: touch;
 width: 100% !important;
 display: block !important;
+background: white !important;
 }
 .table-wrapper {
 overflow-x: scroll !important;
@@ -126,6 +127,7 @@ font-size: 11px;
 width: auto !important;
 min-width: 100% !important;
 display: table !important;
+border-collapse: separate !important;
 /* Disable problematic properties on mobile */
 isolation: auto !important;
 transform: none !important;
@@ -141,6 +143,7 @@ transform: none !important;
 .performance-table thead::after,
 .performance-table thead::before {
 display: none !important;
+content: none !important;
 }
 .performance-table thead tr {
 display: table-row !important;
@@ -176,11 +179,15 @@ display: table-row-group !important;
 visibility: visible !important;
 position: relative !important;
 transform: none !important;
+height: auto !important;
+min-height: 50px !important;
 }
+/* CRITICAL: Force specific row types to be visible */
 .performance-table tbody tr {
 display: table-row !important;
 visibility: visible !important;
 opacity: 1 !important;
+height: auto !important;
 /* Disable problematic properties */
 transform: none !important;
 }
@@ -190,35 +197,58 @@ visibility: visible !important;
 font-size: 11px;
 padding: 8px 6px;
 white-space: nowrap;
+height: auto !important;
 }
+/* Override display:none for year rows on mobile - ALWAYS show */
 .performance-table tbody tr.year-row {
 display: table-row !important;
+visibility: visible !important;
 transform: none !important;
+height: auto !important;
+opacity: 1 !important;
 }
+/* Show month rows only if expanded */
+.performance-table tbody tr.month-row[data-year]:not(.expanded) {
+display: none !important;
+}
+.performance-table tbody tr.month-row[data-year].expanded,
 .performance-table tbody tr.month-row {
 display: table-row !important;
 transform: none !important;
+height: auto !important;
 }
+/* ALWAYS show total row */
 .performance-table tbody tr.total-row {
 display: table-row !important;
+visibility: visible !important;
 transform: none !important;
+height: auto !important;
+opacity: 1 !important;
 }
+/* Day rows stay hidden unless expanded */
 .performance-table tbody tr.day-row {
+display: none !important;
+}
+.performance-table tbody tr.day-row.expanded {
 display: table-row !important;
 }
+/* NO DATA message - force visibility */
 .no-data {
 display: table-cell !important;
 visibility: visible !important;
 font-size: 13px !important;
-padding: 30px !important;
+padding: 30px 20px !important;
 color: #9ca3af !important;
 text-align: center !important;
+height: auto !important;
+min-height: 60px !important;
 }
 .performance-table tbody tr.month-row td,
 .performance-table tbody tr.total-row td,
 .performance-table tbody tr.year-row td {
 font-size: 11px;
 padding: 8px 6px;
+height: auto !important;
 }
 .performance-table tbody tr.day-row td {
 font-size: 10px;
@@ -243,6 +273,7 @@ height: 16px;
 font-size: 11px;
 line-height: 16px;
 margin-right: 6px;
+display: inline-block !important;
 }
 .expand-icon.expanded {
 transform: rotate(90deg) !important;
