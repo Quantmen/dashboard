@@ -918,7 +918,7 @@ headerRow2 += `<th class="number-col apro-pnl-col ${bgClass}${boundaryClass}">${
 });
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
-const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\s*/, ''), stratIndex = tempStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = tempStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
 headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
@@ -926,7 +926,7 @@ headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}<
 });
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
-const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\s*/, ''), stratIndex = tempStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = tempStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
 headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
@@ -978,7 +978,7 @@ brokerCode = match[1];
 }
 if (brokerCode && selectedBrokers.has(brokerCode)) {
 if (brokerCode !== 'A') {
-let baseStrategy = strategyName.replace(/^[A-Z]+/, '').trim();
+let baseStrategy = strategyName.replace(/^[A-Z]+\d*/, '').trim();
 baseStrategy = baseStrategy.replace(/\s+/g, '');
 if (baseStrategy) {
 selectedBaseStrategies.add(baseStrategy);
@@ -1596,7 +1596,7 @@ headerRow2 += `<th class="number-col apro-pnl-col ${bgClass}${boundaryClass}">${
 if (showLot) {
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
-const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
 headerRow2 += `<th class="number-col lot-col ${bgClass}${boundaryClass}">${displayName}</th>`;
@@ -1605,7 +1605,7 @@ headerRow2 += `<th class="number-col lot-col ${bgClass}${boundaryClass}">${displ
 }
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
-const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
 headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
@@ -1613,7 +1613,7 @@ headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}<
 });
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
-const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
+const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
 headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
@@ -1627,7 +1627,7 @@ const [monthB, yearB] = b.split('/');
 if (yearA !== yearB) return yearA.localeCompare(yearB);
 return monthA.localeCompare(monthB);
 });
-const totals = { strategies: {}, totalProfits: 0, netBrProfits: 0, totalAmiPnl: 0, totalExpenses: 0, totalMarginSum: 0 };
+const totals = { strategies: {}, totalProfits: 0, netBrProfits: 0, totalAmiPnl: 0, totalExpenses: 0, totalMarginSum: 0, monthCount: 0 };
 strategies.forEach(strat => {
 totals.strategies[strat] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
 });
@@ -1953,6 +1953,7 @@ const expenses = monthExpensesData.expenses;
 const totalMargin = monthExpensesData.totalMargin;
 totals.totalExpenses += expenses;
 totals.totalMarginSum += totalMargin;
+totals.monthCount += 1;
 globalLastTotalMargin = totalMargin;
 bodyHtml += `<td class="number-col expenses-col ${expenses >= 0 ? 'positive' : 'negative'}">${formatNumber(expenses)}</td>`;
 bodyHtml += `<td class="number-col total-net-col ${totalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(totalMargin)}</td>`;
@@ -2129,7 +2130,7 @@ bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnlValue >= 0 ? 'pos
 bodyHtml += `<td class="number-col total-net-col ${totals.totalAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalAmiPnl)}</td>`;
 const totalNetPnlValue = showPnlTax ? totals.netBrProfits : totals.totalProfits;
 bodyHtml += `<td class="number-col total-net-col ${totalNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(totalNetPnlValue)}</td>`;
-const totalNetPnlPercent = totals.totalMarginSum !== 0 ? (totalNetPnlValue / totals.totalMarginSum) * 100 : 0;
+const totalNetPnlPercent = globalLastTotalMargin !== 0 ? (totalNetPnlValue / globalLastTotalMargin) * 100 : 0;
 bodyHtml += `<td class="number-col net-pnl-percent-col ${totalNetPnlPercent >= 0 ? 'positive' : 'negative'}">${totalNetPnlPercent !== 0 ? totalNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
 bodyHtml += `<td class="number-col expenses-col ${totals.totalExpenses >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalExpenses)}</td>`;
 bodyHtml += `<td class="number-col total-net-col ${globalLastTotalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(globalLastTotalMargin)}</td>`;
