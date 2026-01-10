@@ -1238,7 +1238,7 @@ if (match) {
 brokerCode = match[1];
 }
 if (brokerCode && selectedBrokers.has(brokerCode)) {
-let baseStrategy = stratName.replace(/^[A-Z]+/, '').trim();
+let baseStrategy = stratName.replace(/^[A-Z0-9]+\s*PRO\s*/i, '').trim();
 baseStrategy = baseStrategy.replace(/\s+/g, '');
 if (baseStrategy) {
 selectedBaseStrategies.add(baseStrategy);
