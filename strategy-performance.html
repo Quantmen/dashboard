@@ -38,14 +38,10 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}.table-container{b
 .expand-icon.expanded{transform:rotate(90deg);}.no-data{text-align:center;color:#cbd5e1;padding:40px;font-size:14px;}.main-content::before{content:'';position:fixed;left:0;top:0;width:32px;height:100vh;background:#f8fafc;z-index:30;pointer-events:none;}.summary-cards{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:stretch;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:100;padding-right:16px;margin-right:-16px;}.summary-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);border:1px solid #e5e7eb;flex:1 1 0;min-width:140px;}.summary-card-title{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
 .summary-card-value{font-size:18px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#b96060;}.summary-card.net-profit-box{background:#f0fdf4;}.summary-card.total-expense-box{background:#fdf2f8;}.summary-card.running-margin-box{background:#fffbeb;}/* Tablet Layout - Dynamic columns based on card count */
 @media screen and (max-width: 768px) {
-/* Safari Mobile Fix - Simplified approach */
-* {
--webkit-transform: translateZ(0);
-}
+/* MOBILE RESET - Strip all complex CSS */
 html, body {
 overflow: auto !important;
 height: auto !important;
-min-height: 100vh !important;
 }
 body {
 font-size: 14px;
@@ -54,16 +50,14 @@ font-size: 14px;
 padding: 12px !important;
 overflow: auto !important;
 height: auto !important;
-min-height: 100vh !important;
 width: 100% !important;
--webkit-overflow-scrolling: touch !important;
 }
 .page-header {
 max-width: 100% !important;
 margin-bottom: 12px;
-padding-right: 0 !important;
+padding: 0 !important;
 margin-right: 0 !important;
-position: relative !important;
+position: static !important;
 }
 .page-title {
 font-size: 18px;
@@ -75,9 +69,9 @@ font-size: 11px;
 max-width: 100% !important;
 gap: 8px;
 margin-bottom: 12px;
-padding-right: 0 !important;
+padding: 0 !important;
 margin-right: 0 !important;
-position: relative !important;
+position: static !important;
 }
 .summary-card {
 min-width: calc(50% - 4px);
@@ -94,9 +88,9 @@ font-size: 16px;
 max-width: 100% !important;
 gap: 6px;
 margin-bottom: 12px;
-padding-right: 0 !important;
+padding: 0 !important;
 margin-right: 0 !important;
-position: relative !important;
+position: static !important;
 }
 select, button {
 font-size: 10px;
@@ -107,223 +101,177 @@ min-width: 80px;
 font-size: 10px;
 padding: 6px 10px;
 }
-/* Safari-specific table fixes */
+
+/* SIMPLIFIED TABLE - Remove ALL problematic properties */
 .table-container {
 margin: 0 !important;
+padding: 0 !important;
 border-radius: 8px;
 overflow: auto !important;
--webkit-overflow-scrolling: touch !important;
 width: 100% !important;
 display: block !important;
 background: white !important;
-height: auto !important;
-min-height: 300px !important;
+position: static !important;
 }
 .table-wrapper {
 overflow: auto !important;
--webkit-overflow-scrolling: touch !important;
 width: 100% !important;
 display: block !important;
-height: auto !important;
+position: static !important;
 }
 .performance-table {
-font-size: 11px;
-width: auto !important;
 display: table !important;
+width: 100% !important;
+font-size: 11px !important;
 border-collapse: collapse !important;
-table-layout: auto !important;
-/* Safari fixes */
+background: white !important;
+/* Remove ALL complex properties */
 isolation: auto !important;
 transform: none !important;
--webkit-transform: none !important;
-}
-.performance-table * {
-box-sizing: border-box !important;
+position: static !important;
 }
 .performance-table thead {
 display: table-header-group !important;
-position: relative !important;
+position: static !important;
+background: white !important;
+/* Remove ALL complex properties */
 isolation: auto !important;
 transform: none !important;
--webkit-transform: none !important;
 }
-/* Disable pseudo-elements */
+/* Disable all pseudo-elements */
 .performance-table thead::after,
 .performance-table thead::before {
 display: none !important;
-content: none !important;
 }
 .performance-table thead tr {
 display: table-row !important;
-height: auto !important;
 }
 .performance-table thead th {
 display: table-cell !important;
+padding: 8px 4px !important;
 font-size: 9px !important;
-padding: 8px 6px !important;
-white-space: nowrap !important;
-position: relative !important;
-contain: none !important;
-transform: none !important;
--webkit-transform: none !important;
-/* Force text visibility */
+background: #f3f4f6 !important;
 color: #1f2937 !important;
+border: 1px solid #e5e7eb !important;
 text-align: center !important;
 font-weight: 700 !important;
+white-space: nowrap !important;
+/* Remove ALL complex properties */
+position: static !important;
+contain: none !important;
+transform: none !important;
+isolation: auto !important;
 }
-/* SAFARI FIX: Force tbody to render */
+
+/* TBODY - Completely simplified */
 .performance-table tbody {
 display: table-row-group !important;
-visibility: visible !important;
-position: relative !important;
-transform: none !important;
--webkit-transform: none !important;
-height: auto !important;
-min-height: 100px !important;
 background: white !important;
+/* Remove ALL complex properties */
+position: static !important;
+transform: none !important;
+isolation: auto !important;
+visibility: visible !important;
 }
-/* SAFARI FIX: Force all rows to render */
 .performance-table tbody tr {
 display: table-row !important;
+background: white !important;
+/* Remove ALL complex properties */
+position: static !important;
+transform: none !important;
 visibility: visible !important;
 opacity: 1 !important;
-height: auto !important;
-min-height: 40px !important;
-transform: none !important;
--webkit-transform: none !important;
 }
-/* CRITICAL: Force text visibility in all cells */
 .performance-table tbody tr td {
 display: table-cell !important;
+padding: 8px 4px !important;
+font-size: 11px !important;
+color: #374151 !important;
+border: 1px solid #f3f4f6 !important;
+text-align: right !important;
+white-space: nowrap !important;
+background: white !important;
+/* Remove ALL complex properties */
+position: static !important;
 visibility: visible !important;
 opacity: 1 !important;
-font-size: 11px !important;
-padding: 8px 6px !important;
-white-space: nowrap !important;
-height: auto !important;
-min-height: 30px !important;
-/* Force text to show */
-color: #374151 !important;
-text-align: right !important;
-font-weight: 400 !important;
-line-height: 1.5 !important;
 }
-/* First column - left align */
-.performance-table tbody tr td:first-child {
+
+/* First column */
+.performance-table td:first-child,
+.performance-table th:first-child {
 text-align: left !important;
-color: #111827 !important;
-font-weight: 450 !important;
+background: white !important;
+position: static !important;
 }
-/* Positive/Negative colors - force visibility */
+
+/* Year rows */
+.performance-table tbody tr.year-row {
+display: table-row !important;
+background: #f1f3f5 !important;
+}
+.performance-table tbody tr.year-row td {
+background: #f1f3f5 !important;
+font-weight: 600 !important;
+color: #111827 !important;
+}
+
+/* Month rows */
+.performance-table tbody tr.month-row[data-year]:not(.expanded) {
+display: none !important;
+}
+.performance-table tbody tr.month-row {
+background: #f9fafb !important;
+}
+.performance-table tbody tr.month-row td {
+background: #f9fafb !important;
+}
+
+/* Total row */
+.performance-table tbody tr.total-row {
+display: table-row !important;
+background: #f9fafb !important;
+font-weight: 600 !important;
+}
+.performance-table tbody tr.total-row td {
+background: #f9fafb !important;
+color: #111827 !important;
+font-weight: 600 !important;
+}
+
+/* Colors */
 .performance-table td.positive {
 color: #059669 !important;
 }
 .performance-table td.negative {
 color: #dc2626 !important;
 }
-/* Force specific row types visible - Safari needs explicit rules */
-.performance-table tbody tr.year-row {
-display: table-row !important;
-visibility: visible !important;
-opacity: 1 !important;
-transform: none !important;
--webkit-transform: none !important;
-height: auto !important;
-min-height: 40px !important;
-background: #f1f3f5 !important;
-}
-.performance-table tbody tr.year-row td {
-display: table-cell !important;
-visibility: visible !important;
-opacity: 1 !important;
-color: #111827 !important;
-font-size: 12px !important;
-font-weight: 650 !important;
-}
-/* Month rows - respect expand/collapse */
-.performance-table tbody tr.month-row[data-year]:not(.expanded) {
-display: none !important;
-}
-.performance-table tbody tr.month-row[data-year].expanded,
-.performance-table tbody tr.month-row:not([data-year]) {
-display: table-row !important;
-visibility: visible !important;
-opacity: 1 !important;
-transform: none !important;
--webkit-transform: none !important;
-min-height: 40px !important;
-background: #f9fafb !important;
-}
-.performance-table tbody tr.month-row td {
-color: #374151 !important;
-font-size: 12px !important;
-font-weight: 450 !important;
-}
-/* Total row - always visible */
-.performance-table tbody tr.total-row {
-display: table-row !important;
-visibility: visible !important;
-opacity: 1 !important;
-transform: none !important;
--webkit-transform: none !important;
-height: auto !important;
-min-height: 40px !important;
-background: #f9fafb !important;
-}
-.performance-table tbody tr.total-row td {
-display: table-cell !important;
-visibility: visible !important;
-opacity: 1 !important;
-color: #111827 !important;
-font-size: 12px !important;
-font-weight: 450 !important;
-}
-/* No data message */
+
+/* No data */
 .no-data {
 display: table-cell !important;
-visibility: visible !important;
-opacity: 1 !important;
-font-size: 14px !important;
 padding: 40px 20px !important;
-color: #6b7280 !important;
 text-align: center !important;
-height: auto !important;
-min-height: 100px !important;
-background: white !important;
-font-weight: 400 !important;
+color: #6b7280 !important;
+font-size: 14px !important;
 }
-.performance-table th:first-child,
-.performance-table td:first-child {
-position: -webkit-sticky !important;
-position: sticky !important;
-left: 0 !important;
-z-index: 10 !important;
-background: white !important;
-}
-.performance-table tbody tr.year-row td:first-child {
-background: #f1f3f5 !important;
-}
-.performance-table tbody tr.month-row td:first-child {
-background: #f9fafb !important;
-}
-.performance-table tbody tr.total-row td:first-child {
-background: #f9fafb !important;
-}
+
+/* Disable decorative element */
 .main-content::before {
 display: none !important;
 }
+
+/* Expand icon */
 .expand-icon {
+display: inline-block !important;
 width: 16px;
 height: 16px;
 font-size: 11px;
-line-height: 16px;
 margin-right: 6px;
-display: inline-block !important;
 color: #6b7280 !important;
 }
 .expand-icon.expanded {
 transform: rotate(90deg) !important;
--webkit-transform: rotate(90deg) !important;
 }
 }
 </style></head><body><div class="main-content"><div class="page-header"><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><button onclick="toggleFilteredTotalsButton()" id="filteredTotalsButton">Show Filtered Totals</button><button onclick="toggleTradeCountButton()" id="tradeCountButton">Show Trade Count</button><button onclick="toggleDrawdownButton()" id="drawdownButton">Show Drawdown</button><button onclick="toggleLotButton()" id="lotButton">Show Lot</button><button onclick="toggleLotPnlButton()" id="lotPnlButton">Show Lot PNL</button><button onclick="togglePnlTaxModeButton()" id="pnlTaxButton">Show Tax PNL</button><button onclick="expandAll()">Expand All</button><button onclick="collapseAll()">Collapse All</button><button onclick="exportToCSV()">Export to csv</button><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
