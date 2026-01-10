@@ -111,18 +111,48 @@ overflow: visible !important;
 overflow-x: auto !important;
 -webkit-overflow-scrolling: touch;
 width: 100%;
+min-height: 200px !important;
 }
 .table-wrapper {
 overflow: visible !important;
 overflow-x: auto !important;
 -webkit-overflow-scrolling: touch;
 width: 100%;
+min-height: 200px !important;
 }
 .performance-table {
 font-size: 11px;
 min-width: 100%;
 display: table !important;
 width: max-content;
+}
+.performance-table tbody {
+display: table-row-group !important;
+visibility: visible !important;
+}
+.performance-table tbody tr {
+display: table-row !important;
+visibility: visible !important;
+}
+.performance-table tbody tr td {
+display: table-cell !important;
+visibility: visible !important;
+}
+.performance-table tbody tr.year-row {
+display: table-row !important;
+}
+.performance-table tbody tr.month-row {
+display: table-row !important;
+}
+.performance-table tbody tr.total-row {
+display: table-row !important;
+}
+.no-data {
+display: table-cell !important;
+visibility: visible !important;
+font-size: 13px !important;
+padding: 30px !important;
+color: #9ca3af !important;
 }
 .performance-table th {
 font-size: 9px;
@@ -137,6 +167,7 @@ white-space: nowrap;
 .performance-table thead {
 position: sticky;
 top: 0;
+display: table-header-group !important;
 }
 .performance-table thead tr.header-row-1 th {
 font-size: 9px;
