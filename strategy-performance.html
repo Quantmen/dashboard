@@ -89,11 +89,29 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}.table-container{b
   .controls-section {
     position: relative !important;
     max-width: none !important;
+    z-index: 99999 !important;
+  }
+  
+  /* Fix dropdowns to appear in front */
+  .strategy-filter-container {
+    position: relative !important;
+    z-index: 99999 !important;
+  }
+  
+  .strategy-filter-dropdown {
+    position: absolute !important;
+    z-index: 999999 !important;
+  }
+  
+  .strategy-filter-dropdown.active {
+    display: block !important;
+    z-index: 999999 !important;
   }
   
   .table-container {
     overflow: visible !important;
     width: auto !important;
+    z-index: 1 !important;
   }
   
   .table-wrapper {
@@ -146,6 +164,23 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}.table-container{b
   .performance-table tbody tr.total-row {
     display: table-row !important;
     transform: none !important;
+  }
+  
+  /* Fix expand/collapse - month rows hidden by default, shown when expanded */
+  .performance-table tbody tr.month-row[data-year] {
+    display: none !important;
+  }
+  
+  .performance-table tbody tr.month-row[data-year].expanded {
+    display: table-row !important;
+  }
+  
+  .performance-table tbody tr.day-row {
+    display: none !important;
+  }
+  
+  .performance-table tbody tr.day-row.expanded {
+    display: table-row !important;
   }
   
   .performance-table tbody td {
