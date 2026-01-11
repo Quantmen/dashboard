@@ -36,69 +36,125 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}.table-container{b
 .performance-table tbody tr.day-row[data-year]:not(.expanded){display:none;}
 .performance-table tbody tr.day-row.expanded{display:table-row;}.performance-table tbody tr.day-row td{padding:7px 8px;font-size:12px;}.performance-table tbody tr.day-row td:first-child{padding-left:40px;padding-top:7px;padding-bottom:7px;font-weight:450;color:#6b7280;min-width:110px;max-width:110px;font-size:12px;border-right:2px solid #cbd5e1;background:white !important;}.performance-table tbody tr.day-row td.apro-pnl-col{width:85px;min-width:75px;}.expand-icon{display:inline-block;width:18px;height:18px;margin-right:10px;text-align:center;font-weight:600;color:#6b7280;transition:transform 0.2s ease;font-size:12px;line-height:18px;}
 .expand-icon.expanded{transform:rotate(90deg);}.no-data{text-align:center;color:#cbd5e1;padding:40px;font-size:14px;}.main-content::before{content:'';position:fixed;left:0;top:0;width:32px;height:100vh;background:#f8fafc;z-index:30;pointer-events:none;}.summary-cards{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:stretch;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:100;padding-right:16px;margin-right:-16px;}.summary-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);border:1px solid #e5e7eb;flex:1 1 0;min-width:140px;}.summary-card-title{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
-.summary-card-value{font-size:18px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#b96060;}.summary-card.net-profit-box{background:#f0fdf4;}.summary-card.total-expense-box{background:#fdf2f8;}.summary-card.running-margin-box{background:#fffbeb;}/* Tablet Layout - Dynamic columns based on card count */
+.summary-card-value{font-size:18px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#b96060;}.summary-card.net-profit-box{background:#f0fdf4;}.summary-card.total-expense-box{background:#fdf2f8;}.summary-card.running-margin-box{background:#fffbeb;}
 
-/* Mobile Safari Fix */
+/* Mobile Safari Critical Fix */
+@supports (-webkit-touch-callout: none) {
+  /* Safari-only styles */
+  .performance-table {
+    isolation: auto !important;
+  }
+  .performance-table thead {
+    transform: none !important;
+    -webkit-transform: none !important;
+  }
+  .performance-table thead::after {
+    display: none !important;
+  }
+}
+
 @media screen and (max-width: 1024px) {
   html, body {
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    width: 100%;
   }
   
   .main-content {
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    height: auto;
+    overflow: visible !important;
+    height: auto !important;
     min-height: 100vh;
+    padding: 16px;
+    width: max-content;
+    min-width: 100%;
+  }
+  
+  .main-content::before {
+    display: none !important;
+  }
+  
+  .page-header {
+    position: relative !important;
+    max-width: none !important;
+  }
+  
+  .summary-cards {
+    position: relative !important;
+    max-width: none !important;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  
+  .controls-section {
+    position: relative !important;
+    max-width: none !important;
   }
   
   .table-container {
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible !important;
+    width: auto !important;
   }
   
   .table-wrapper {
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible !important;
+    width: auto !important;
   }
   
   .performance-table {
-    isolation: auto;
+    isolation: auto !important;
+    min-width: 800px;
   }
   
   .performance-table thead {
-    position: relative;
-    top: auto;
-    isolation: auto;
-    transform: none;
-    -webkit-transform: none;
+    position: relative !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    isolation: auto !important;
+  }
+  
+  .performance-table thead::after,
+  .performance-table thead::before {
+    display: none !important;
+    content: none !important;
+    height: 0 !important;
   }
   
   .performance-table thead tr.header-row-1 th,
-  .performance-table thead tr.header-row-2 th {
-    position: relative;
-    top: auto;
-    contain: none;
-  }
-  
-  .performance-table thead tr.header-row-1 th:first-child {
-    position: relative;
-    left: auto;
+  .performance-table thead tr.header-row-2 th,
+  .performance-table th:first-child,
+  .performance-table td:first-child {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    contain: none !important;
   }
   
   .performance-table tbody {
-    position: relative;
-    z-index: auto;
-    display: table-row-group;
+    display: table-row-group !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
-  .performance-table th:first-child,
-  .performance-table td:first-child {
-    position: relative;
-    left: auto;
+  .performance-table tbody tr {
+    display: table-row !important;
+    visibility: visible !important;
+    height: auto !important;
+  }
+  
+  .performance-table tbody tr.year-row,
+  .performance-table tbody tr.total-row {
+    display: table-row !important;
+    transform: none !important;
+  }
+  
+  .performance-table tbody td {
+    display: table-cell !important;
+    visibility: visible !important;
   }
 }
+
+/* Tablet Layout - Dynamic columns based on card count */
 </style></head><body><div class="main-content"><div class="page-header"><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><button onclick="toggleFilteredTotalsButton()" id="filteredTotalsButton">Show Filtered Totals</button><button onclick="toggleTradeCountButton()" id="tradeCountButton">Show Trade Count</button><button onclick="toggleDrawdownButton()" id="drawdownButton">Show Drawdown</button><button onclick="toggleLotButton()" id="lotButton">Show Lot</button><button onclick="toggleLotPnlButton()" id="lotPnlButton">Show Lot PNL</button><button onclick="togglePnlTaxModeButton()" id="pnlTaxButton">Show Tax PNL</button><button onclick="expandAll()">Expand All</button><button onclick="collapseAll()">Collapse All</button><button onclick="exportToCSV()">Export to csv</button><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
 const elements = {
 startingCapital: document.getElementById('startingCapital'),
@@ -136,6 +192,32 @@ return match ? match[1] : null;
 }
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 window.addEventListener('DOMContentLoaded', () => {
+// Mobile Safari fix - force tbody visibility
+if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome'))) {
+  const fixMobileSafari = () => {
+    const table = document.querySelector('.performance-table');
+    const thead = document.querySelector('.performance-table thead');
+    const tbody = document.querySelector('.performance-table tbody');
+    if (table) {
+      table.style.isolation = 'auto';
+    }
+    if (thead) {
+      thead.style.position = 'relative';
+      thead.style.transform = 'none';
+      thead.style.webkitTransform = 'none';
+    }
+    if (tbody) {
+      tbody.style.display = 'table-row-group';
+      tbody.style.visibility = 'visible';
+      // Force reflow
+      tbody.offsetHeight;
+    }
+  };
+  fixMobileSafari();
+  // Run again after a short delay to catch dynamically loaded content
+  setTimeout(fixMobileSafari, 100);
+  setTimeout(fixMobileSafari, 500);
+}
 loadSavedFilters();
 initializeHeadersOnly(); // Initialize headers only on page load
 // Set up event delegation for strategy filter checkboxes
@@ -2201,6 +2283,12 @@ bodyHtml += `<td class="number-col drawdown-col"></td>`;
 }
 bodyHtml += '</tr>';
 elements.tableBody.innerHTML = bodyHtml;
+// Mobile Safari fix after render
+if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome'))) {
+  elements.tableBody.style.display = 'table-row-group';
+  elements.tableBody.style.visibility = 'visible';
+  elements.tableBody.offsetHeight; // Force reflow
+}
 globalTotalExpenses = totals.totalExpenses;
 // Restore previously expanded months
 restoreExpandState();
