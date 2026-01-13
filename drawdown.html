@@ -14,7 +14,7 @@
     <div class="container">
         <div class="header">
             <h1>Drawdown Analysis</h1>
-            <p>Strategy-wise maximum and current drawdown metrics</p>
+            <p>Detailed drawdown analysis with broker, account, and strategy hierarchy</p>
         </div>
         <div class="summary-cards">
             <div class="summary-card broker-margin-box">
@@ -136,7 +136,7 @@
         <div class="table-container">
             <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e5e7eb;">
                 <h3 style="font-size: 14px; font-weight: 600; color: #374151; margin: 0;">Strategy Level Metrics</h3>
-                <p style="font-size: 11px; color: #6b7280; margin: 4px 0 0 0;">Detailed drawdown analysis with broker, account, and strategy hierarchy</p>
+                <p style="font-size: 11px; color: #6b7280; margin: 4px 0 0 0;">Detailed drawdown analysis with broker, account, and strategy hierarchy. Drawdown calculated based on daily PNL, not individual trades.</p>
             </div>
             <table>
                 <thead>
@@ -216,6 +216,11 @@
             sortedTrades.forEach(trade => {
                 if (trade.strategyPnlTax) {
                     Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                        // Skip if pnlTax is null, undefined, empty string, or zero
+                        if (pnlTax === null || pnlTax === undefined || pnlTax === '' || pnlTax === 0) {
+                            return;
+                        }
+                        
                         // Process A.PRO strategies separately - store them but don't add to broker/account hierarchy
                         if (stratName.startsWith('A.PRO')) {
                             if (!strategyMap[stratName]) {
@@ -225,21 +230,23 @@
                                     dates: [],
                                     broker: 'A',
                                     account: 'A.PRO',
-                                    startingCapital: 0,
                                     lotSize: '-',
                                     isAPro: true
                                 };
                             }
                             if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                                 const details = trade.strategyDetails[stratName];
-                                if (details.margin && details.margin > strategyMap[stratName].startingCapital) {
-                                    strategyMap[stratName].startingCapital = details.margin;
-                                }
                                 if (details.lot && details.lot > 0) {
                                     strategyMap[stratName].lotSize = details.lot;
                                 }
                             }
-                            strategyMap[stratName].pnls.push(pnlTax || 0);
+                            // Convert pnlTax to number and validate
+                            const pnlValue = Number(pnlTax);
+                            if (isNaN(pnlValue)) {
+                                console.warn(`Invalid PNL value for ${stratName} on ${trade.date}:`, pnlTax);
+                                return;
+                            }
+                            strategyMap[stratName].pnls.push(pnlValue);
                             strategyMap[stratName].dates.push(trade.date);
                             return; // Don't process A.PRO as broker strategies
                         }
@@ -254,45 +261,61 @@
                                 dates: [],
                                 broker: brokerCode,
                                 account: accountCode,
-                                startingCapital: 0,
                                 lotSize: '-'
                             };
                         }
                         if (trade.strategyDetails && trade.strategyDetails[stratName]) {
                             const details = trade.strategyDetails[stratName];
-                            if (details.margin && details.margin > strategyMap[stratName].startingCapital) {
-                                strategyMap[stratName].startingCapital = details.margin;
-                            }
                             if (details.lot && details.lot > 0) {
                                 strategyMap[stratName].lotSize = details.lot;
                             }
                         }
-                        strategyMap[stratName].pnls.push(pnlTax || 0);
+                        // Convert pnlTax to number and validate
+                        const pnlValue = Number(pnlTax);
+                        if (isNaN(pnlValue)) {
+                            console.warn(`Invalid PNL value for ${stratName} on ${trade.date}:`, pnlTax);
+                            return;
+                        }
+                        strategyMap[stratName].pnls.push(pnlValue);
                         strategyMap[stratName].dates.push(trade.date);
                         if (!accountMap[accountCode]) {
                             accountMap[accountCode] = {
                                 name: accountCode,
                                 pnls: [],
                                 dates: [],
-                                broker: brokerCode,
-                                startingCapital: 0
+                                broker: brokerCode
                             };
                         }
-                        accountMap[accountCode].pnls.push(pnlTax || 0);
+                        accountMap[accountCode].pnls.push(pnlValue);
                         accountMap[accountCode].dates.push(trade.date);
-                        if (trade.strategyDetails && trade.strategyDetails[stratName]) {
-                            const margin = trade.strategyDetails[stratName].margin || 0;
-                            if (margin > accountMap[accountCode].startingCapital) {
-                                accountMap[accountCode].startingCapital = margin;
-                            }
-                        }
                     });
                 }
             });
-            function calculateDrawdown(pnls, dates, startingCapital = 10000) {
+            function calculateDrawdown(pnls, dates) {
+                // If no PNLs or dates, return zero values
+                if (!pnls || !dates || pnls.length === 0 || dates.length === 0) {
+                    return {
+                        maxDD: 0,
+                        maxDDPercent: 0,
+                        currentDD: 0,
+                        currentDDPercent: 0,
+                        currentDDDuration: 0,
+                        ddCount: 0,
+                        ddDuration: 0,
+                        recoveryTime: 0,
+                        ddStartDate: '-',
+                        ddEndDate: '-',
+                        finalPnl: 0,
+                        finalEquity: 0,
+                        peak: 0,
+                        underwaterPeriod: 0
+                    };
+                }
+                
+                // Start from 0, not from startingCapital - to match strategy-performance.html
                 let cumPnl = 0;
-                let equity = startingCapital;
-                let peak = startingCapital;
+                let equity = 0;
+                let peak = 0;
                 let maxDD = 0;
                 let maxDDPercent = 0;
                 let maxDDStartDate = '-';
@@ -310,9 +333,12 @@
                 let recoveryCount = 0;
                 let totalUnderwaterDays = 0;
                 let underwaterStartDate = null;
+                
                 pnls.forEach((pnl, index) => {
+                    // Accumulate PNL (each pnl is the daily PNL tax)
                     cumPnl += pnl;
-                    equity = startingCapital + cumPnl;
+                    equity = cumPnl;  // Just use cumulative PNL, no starting capital
+                    
                     if (equity > peak) {
                         if (inDrawdown && ddStartDate) {
                             const recoveryDays = calculateDateDiff(ddStartDate, dates[index]);
@@ -351,11 +377,15 @@
                         }
                     }
                 });
+                
                 if (underwaterStartDate && dates.length > 0) {
                     totalUnderwaterDays += calculateDateDiff(underwaterStartDate, dates[dates.length - 1]);
                 }
+                
+                // Final current DD calculation: equity at last date minus peak achieved
                 currentDD = equity - peak;
                 currentDDPercent = peak > 0 ? (currentDD / peak) * 100 : 0;
+                
                 // Calculate current DD duration and end date (if currently in drawdown)
                 let currentDDEndDate = '-';
                 if (currentDD < 0 && currentDDStartDate && dates.length > 0) {
@@ -365,7 +395,9 @@
                     currentDDDuration = 0;
                     currentDDStartDate = null;
                 }
+                
                 const avgRecoveryTime = recoveryCount > 0 ? Math.round(totalRecoveryDays / recoveryCount) : 0;
+                
                 return {
                     maxDD,
                     maxDDPercent,
@@ -375,8 +407,8 @@
                     ddCount,
                     ddDuration: maxDDDays,
                     recoveryTime: avgRecoveryTime,
-                    ddStartDate: formatDate(currentDDStartDate || '-'),
-                    ddEndDate: formatDate(currentDDEndDate),
+                    ddStartDate: currentDDStartDate || '-',  // Keep full DD/MM/YYYY format
+                    ddEndDate: currentDDEndDate,  // Keep full DD/MM/YYYY format
                     finalPnl: cumPnl,
                     finalEquity: equity,
                     peak,
@@ -418,7 +450,28 @@
             Object.entries(strategyMap).forEach(([stratName, stratData]) => {
                 // Skip A.PRO strategies - they're only for lookup, not for display
                 if (stratData.isAPro) return;
-                const metrics = calculateDrawdown(stratData.pnls, stratData.dates, stratData.startingCapital);
+                
+                // Aggregate PNL by date - sum all trades on the same date
+                const dailyPnlMap = {};
+                stratData.pnls.forEach((pnl, idx) => {
+                    const date = stratData.dates[idx];
+                    if (!dailyPnlMap[date]) {
+                        dailyPnlMap[date] = 0;
+                    }
+                    dailyPnlMap[date] += pnl;
+                });
+                
+                // Convert back to arrays, sorted by date
+                const sortedDates = Object.keys(dailyPnlMap).sort((a, b) => {
+                    const dateA = a.split('/').reverse().join('');
+                    const dateB = b.split('/').reverse().join('');
+                    return dateA.localeCompare(dateB);
+                });
+                
+                const aggregatedPnls = sortedDates.map(date => dailyPnlMap[date]);
+                
+                const metrics = calculateDrawdown(aggregatedPnls, sortedDates);
+                
                 drawdownData.push({
                     strategy: stratName,
                     parentAccount: stratData.account,
@@ -444,7 +497,7 @@
             });
             // Process accounts with aggregated PnL data
             Object.entries(accountMap).forEach(([accountCode, accountData]) => {
-                const metrics = calculateDrawdown(accountData.pnls, accountData.dates, accountData.startingCapital);
+                const metrics = calculateDrawdown(accountData.pnls, accountData.dates);
                 const accountStrategies = Object.values(strategyMap).filter(s => s.account === accountCode && !s.isAPro);
                 const totalLotSize = calculateTotalLotSize(accountStrategies);
                 drawdownData.push({
@@ -577,18 +630,29 @@
                 if (aproNumber === proNumber) {
                     // Calculate drawdown using the same logic as other strategies
                     if (aproStrategy.pnls && aproStrategy.dates && aproStrategy.pnls.length > 0) {
-                        const startingCapital = aproStrategy.startingCapital || 10000;
+                        // Aggregate PNL by date - sum all trades on the same date
+                        const dailyPnlMap = {};
+                        aproStrategy.pnls.forEach((pnl, idx) => {
+                            const date = aproStrategy.dates[idx];
+                            if (!dailyPnlMap[date]) {
+                                dailyPnlMap[date] = 0;
+                            }
+                            dailyPnlMap[date] += pnl;
+                        });
+                        
+                        // Convert to array of daily PNLs
+                        const aggregatedPnls = Object.values(dailyPnlMap);
+                        
+                        // Calculate drawdown starting from 0, not from starting capital
                         let cumPnl = 0;
-                        let peak = startingCapital;
-                        aproStrategy.pnls.forEach(pnl => {
+                        let peak = 0;
+                        aggregatedPnls.forEach(pnl => {
                             cumPnl += pnl;
-                            const equity = startingCapital + cumPnl;
-                            if (equity > peak) {
-                                peak = equity;
+                            if (cumPnl > peak) {
+                                peak = cumPnl;
                             }
                         });
-                        const finalEquity = startingCapital + cumPnl;
-                        const currentDD = finalEquity - peak;
+                        const currentDD = cumPnl - peak;
                         // Multiply A.PRO DD by the broker strategy's lot size
                         return currentDD * lotSize;
                     }
@@ -614,36 +678,15 @@
                         .map(s => s.ddStartDate)
                         .filter(d => d && d !== '-');
                     if (validDates.length === 0) return '-';
-                    // Parse dates in DD-MMM format (e.g., "09-Jan", "27-Oct")
-                    const parsedDates = validDates.map(dateStr => {
-                        try {
-                            const monthMap = {
-                                'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-                                'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-                            };
-                            const parts = dateStr.split('-');
-                            if (parts.length !== 2) {
-                                // Try DD/MM/YYYY format as fallback
-                                const [day, month, year] = dateStr.split('/').map(Number);
-                                return { str: dateStr, date: new Date(year, month - 1, day) };
-                            }
-                            const day = parseInt(parts[0]);
-                            const monthName = parts[1];
-                            const month = monthMap[monthName];
-                            if (month === undefined) return null;
-                            // Use current year as default (since year is not in DD-MMM format)
-                            // But for comparison, we need to assume dates are in the same year context
-                            const year = 2024; // Use a reference year for comparison
-                            return { str: dateStr, date: new Date(year, month, day) };
-                        } catch {
-                            return null;
-                        }
-                    }).filter(d => d !== null);
-                    if (parsedDates.length === 0) return validDates[0];
-                    const earliest = parsedDates.reduce((min, curr) => 
-                        curr.date < min.date ? curr : min
-                    );
-                    return earliest.str;
+                    
+                    // Dates are now in DD/MM/YYYY format, sort them properly
+                    const sortedDates = validDates.sort((a, b) => {
+                        const dateA = a.split('/').reverse().join(''); // YYYYMMDD
+                        const dateB = b.split('/').reverse().join(''); // YYYYMMDD
+                        return dateA.localeCompare(dateB);
+                    });
+                    
+                    return sortedDates[0]; // Return earliest date in DD/MM/YYYY format
                 }
                 const sums = {
                     lotSize: children.reduce((sum, c) => sum + (c.lotSize || 0), 0),
@@ -737,70 +780,23 @@
                 .map(s => s.ddEndDate)
                 .filter(d => d && d !== '-');
             
-            // Helper function to parse DD-MMM format with intelligent year detection
-            function parseDDMMMWithYear(dateStr) {
-                try {
-                    const monthMap = {
-                        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-                        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-                    };
-                    const parts = dateStr.split('-');
-                    if (parts.length === 2) {
-                        const day = parseInt(parts[0]);
-                        const monthName = parts[1];
-                        const month = monthMap[monthName];
-                        if (month !== undefined) {
-                            const currentDate = new Date();
-                            const currentYear = currentDate.getFullYear();
-                            const currentMonth = currentDate.getMonth();
-                            
-                            // Current date is January 2026 (from system info)
-                            // If month is Jan-March, assume 2026
-                            // If month is Oct-Dec, assume 2024
-                            // If month is Apr-Sep, need more logic
-                            let year;
-                            if (month >= 0 && month <= 2) {
-                                // Jan, Feb, Mar -> likely 2026 or 2025
-                                year = currentYear;
-                            } else if (month >= 9 && month <= 11) {
-                                // Oct, Nov, Dec -> likely 2024
-                                year = currentYear - 1;
-                            } else {
-                                // Apr-Sep -> could be 2025
-                                year = currentYear - 1;
-                            }
-                            
-                            return { str: dateStr, date: new Date(year, month, day) };
-                        }
-                    }
-                    return null;
-                } catch {
-                    return null;
-                }
-            }
-            
+            // Dates are in DD/MM/YYYY format, sort by converting to YYYYMMDD
             if (allDDStartDates.length > 0) {
-                // Parse dates and find earliest
-                const parsedStartDates = allDDStartDates.map(parseDDMMMWithYear).filter(d => d !== null);
-                
-                if (parsedStartDates.length > 0) {
-                    const earliest = parsedStartDates.reduce((min, curr) => 
-                        curr.date < min.date ? curr : min
-                    );
-                    allBrokerDDStartDate = earliest.str;
-                }
+                const sortedStartDates = allDDStartDates.sort((a, b) => {
+                    const dateA = a.split('/').reverse().join(''); // YYYYMMDD
+                    const dateB = b.split('/').reverse().join(''); // YYYYMMDD
+                    return dateA.localeCompare(dateB);
+                });
+                allBrokerDDStartDate = sortedStartDates[0]; // Earliest date
             }
             
             if (allDDEndDates.length > 0) {
-                // Parse dates and find latest
-                const parsedEndDates = allDDEndDates.map(parseDDMMMWithYear).filter(d => d !== null);
-                
-                if (parsedEndDates.length > 0) {
-                    const latest = parsedEndDates.reduce((max, curr) => 
-                        curr.date > max.date ? curr : max
-                    );
-                    allBrokerDDEndDate = latest.str;
-                }
+                const sortedEndDates = allDDEndDates.sort((a, b) => {
+                    const dateA = a.split('/').reverse().join(''); // YYYYMMDD
+                    const dateB = b.split('/').reverse().join(''); // YYYYMMDD
+                    return dateB.localeCompare(dateA); // Descending order
+                });
+                allBrokerDDEndDate = sortedEndDates[0]; // Latest date
             }
             
             const extraMarginClass = allBrokerExtraMargin > 0 ? 'positive' : (allBrokerExtraMargin < 0 ? 'negative' : 'neutral');
@@ -819,8 +815,8 @@
                 <td class="${allBrokerAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(allBrokerAProDD)}</td>
                 <td class="${allBrokerAProDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerAProDDPercent)}</td>
                 <td>${allBrokerMaxDDDuration > 0 ? allBrokerMaxDDDuration + ' days' : '-'}</td>
-                <td>${allBrokerDDStartDate}</td>
-                <td>${allBrokerDDEndDate}</td>
+                <td>${formatDate(allBrokerDDStartDate)}</td>
+                <td>${formatDate(allBrokerDDEndDate)}</td>
                 <td class="negative">${formatCurrency(allBrokerMaxDD)}</td>
                 <td class="negative">${formatPercent(allBrokerMaxDDPercent)}</td>
             </tr>`;
@@ -866,8 +862,8 @@
                     <td class="${totalAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDD)}</td>
                     <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                     <td>${displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
-                    <td>${displayData.ddStartDate}</td>
-                    <td>${displayData.ddEndDate}</td>
+                    <td>${formatDate(displayData.ddStartDate)}</td>
+                    <td>${formatDate(displayData.ddEndDate)}</td>
                     <td class="negative">${formatCurrency(displayData.maxDD)}</td>
                     <td class="negative">${formatPercent(displayData.maxDDPercent)}</td>
                 </tr>`;
@@ -893,8 +889,8 @@
                             <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
                             <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                             <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
-                            <td>${strategy.ddStartDate}</td>
-                            <td>${strategy.ddEndDate}</td>
+                            <td>${formatDate(strategy.ddStartDate)}</td>
+                            <td>${formatDate(strategy.ddEndDate)}</td>
                             <td class="negative">${formatCurrency(strategy.maxDD)}</td>
                             <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
                         </tr>`;
@@ -909,8 +905,8 @@
                             <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
                             <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
                             <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
-                            <td>${strategy.ddStartDate}</td>
-                            <td>${strategy.ddEndDate}</td>
+                            <td>${formatDate(strategy.ddStartDate)}</td>
+                            <td>${formatDate(strategy.ddEndDate)}</td>
                             <td class="negative">${formatCurrency(strategy.maxDD)}</td>
                             <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
                         </tr>`;
