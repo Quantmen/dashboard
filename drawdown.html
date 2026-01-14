@@ -1257,8 +1257,8 @@
                 calculatedStgDD = totalCurrentDDRupees; // fallback
             }
             
-            // Calculate ALL ACCOUNT DD percentage
-            const allAccountDDPercent = currentTotalMargin > 0 ? (calculatedStgDD / currentTotalMargin) * 100 : 0;
+            // Calculate ALL ACCOUNT DD percentage = (DD ₹ / Peak Total Margin) × 100
+            const allAccountDDPercent = peakTotalMargin > 0 ? (calculatedStgDD / peakTotalMargin) * 100 : 0;
             
             // Update ALL ACCOUNT DD(₹) with percentage in brackets
             if (calculatedStgDD === 0) {
@@ -1316,8 +1316,8 @@
                     currentDD = account.currentDD || 0;
                 }
                 
-                // Calculate percentage using current account margin (same as table)
-                const ddPercent = currentAccountMargin > 0 ? (currentDD / currentAccountMargin) * 100 : 0;
+                // Calculate percentage using peak account margin = (DD ₹ / Peak Margin) × 100
+                const ddPercent = accountPeak > 0 ? (currentDD / accountPeak) * 100 : 0;
                 const formattedPercent = formatPercent(ddPercent);
                 // Format combined value with percentage in brackets with smaller font and grey color
                 const formattedDD = currentDD === 0 ? '-' : '₹' + formatCurrency(currentDD) + '  <span style="font-size: 14px; color: #6b7280;">[' + formattedPercent + ']</span>';
