@@ -521,13 +521,15 @@
                     underwaterPeriod: metrics.underwaterPeriod
                 });
             });
-            // Recalculate Current DD % based on STG Margin instead of peak
+            // Recalculate Current DD % and Max DD % based on STG Margin instead of peak
             drawdownData.forEach(row => {
                 const stgMargin = (row.lotSize && row.lotSize !== '-') ? row.lotSize * 400000 : 0;
                 if (stgMargin > 0) {
                     row.currentDDPercent = (row.currentDD / stgMargin) * 100;
+                    row.maxDDPercent = (row.maxDD / stgMargin) * 100;
                 } else {
                     row.currentDDPercent = 0;
+                    row.maxDDPercent = 0;
                 }
             });}
         function applyFilters() {
@@ -1117,8 +1119,37 @@
                 const ddEndDate = formatDateForDisplay(getAccountDDEndDate(code));
                 // Calculate DD Expense (sum of expenses from DD start date)
                 const ddExpense = getAccountDDExpense(code);
-                // Get Max DD % from original data (already correctly calculated during drawdown analysis)
-                const maxDDPercent = item.maxDDPercent || 0;
+                
+                // Calculate Max DD % using historical margin data (same method as All Broker)
+                let maxDDPercent = 0;
+                if (accountDailyMargins[code] && Object.keys(accountDailyMargins[code]).length > 0) {
+                    const accountPeak = accountPeakMargins[code] || 0;
+                    if (accountPeak > 0) {
+                        let maxDD = 0;
+                        let peakAtMaxDD = accountPeak;
+                        let currentPeak = 0;
+                        
+                        const sortedDates = Object.keys(accountDailyMargins[code]).sort((a, b) => {
+                            const dateA = a.split('/').reverse().join('');
+                            const dateB = b.split('/').reverse().join('');
+                            return dateA.localeCompare(dateB);
+                        });
+                        
+                        sortedDates.forEach(date => {
+                            const margin = accountDailyMargins[code][date];
+                            if (margin > currentPeak) {
+                                currentPeak = margin;
+                            }
+                            const dd = margin - currentPeak;
+                            if (dd < maxDD) {
+                                maxDD = dd;
+                                peakAtMaxDD = currentPeak;
+                            }
+                        });
+                        
+                        maxDDPercent = peakAtMaxDD > 0 ? (maxDD / peakAtMaxDD) * 100 : 0;
+                    }
+                }
                 
                 // Account-level styling (no separate brokers)
                 const icon = '├─';
