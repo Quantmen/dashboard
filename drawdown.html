@@ -1070,14 +1070,14 @@
                 <td>${formatCurrency(allBrokerMargin)}</td>
                 <td class="${extraMarginClass}">${formatCurrency(allBrokerExtraMargin)}</td>
                 <td class="${extraMarginPercentClass}">${formatPercent(allBrokerExtraMarginPercent)}</td>
-                <td class="${allBrokerCurrentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(allBrokerCurrentDD)}</td>
-                <td class="${allBrokerCurrentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerCurrentDDPercent)}</td>
+                <td class="${allBrokerCurrentDD < 0 ? 'negative' : 'neutral'}">${allBrokerCurrentDD < 0 ? formatCurrency(allBrokerCurrentDD) : '-'}</td>
+                <td class="${allBrokerCurrentDDPercent < 0 ? 'negative' : 'neutral'}">${allBrokerCurrentDD < 0 ? formatPercent(allBrokerCurrentDDPercent) : '0.00%'}</td>
                 <td class="${allBrokerExpense < 0 ? 'negative' : (allBrokerExpense > 0 ? 'positive' : 'neutral')}">${formatCurrency(allBrokerExpense)}</td>
                 <td class="${allBrokerExpensePercent < 0 ? 'negative' : (allBrokerExpensePercent > 0 ? 'positive' : 'neutral')}">${formatPercent(allBrokerExpensePercent)}</td>
-                <td>${allBrokerDDDur > 0 ? allBrokerDDDur + ' days' : '-'}</td>
-                <td>${allBrokerDDStart}</td>
-                <td>${allBrokerDDEnd}</td>
-                <td class="${allBrokerDDExp < 0 ? 'negative' : (allBrokerDDExp > 0 ? 'positive' : 'neutral')}">${allBrokerDDExp !== 0 ? formatCurrency(allBrokerDDExp) : '-'}</td>
+                <td>${allBrokerCurrentDD < 0 && allBrokerDDDur > 0 ? allBrokerDDDur + ' days' : '-'}</td>
+                <td>${allBrokerCurrentDD < 0 ? allBrokerDDStart : '-'}</td>
+                <td>${allBrokerCurrentDD < 0 ? allBrokerDDEnd : '-'}</td>
+                <td class="${allBrokerDDExp < 0 ? 'negative' : (allBrokerDDExp > 0 ? 'positive' : 'neutral')}">${allBrokerCurrentDD < 0 && allBrokerDDExp !== 0 ? formatCurrency(allBrokerDDExp) : '-'}</td>
                 <td class="negative">${formatPercent(allBrokerMaxDDPercent)}</td>
             </tr>`;
             
@@ -1163,14 +1163,14 @@
                     <td>${formatCurrency(brokerMargin)}</td>
                     <td class="${addFundClass}">${formatCurrency(addFund)}</td>
                     <td class="${addFundPercentClass}">${formatPercent(addFundPercent)}</td>
-                    <td class="${currentDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(currentDD)}</td>
-                    <td class="${currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(currentDDPercent)}</td>
+                    <td class="${currentDD < 0 ? 'negative' : 'neutral'}">${currentDD < 0 ? formatCurrency(currentDD) : '-'}</td>
+                    <td class="${currentDDPercent < 0 ? 'negative' : 'neutral'}">${currentDD < 0 ? formatPercent(currentDDPercent) : '0.00%'}</td>
                     <td class="${accountExpense < 0 ? 'negative' : (accountExpense > 0 ? 'positive' : 'neutral')}">${formatCurrency(accountExpense)}</td>
                     <td class="${expensePercent < 0 ? 'negative' : (expensePercent > 0 ? 'positive' : 'neutral')}">${formatPercent(expensePercent)}</td>
-                    <td>${ddDuration > 0 ? ddDuration + ' days' : '-'}</td>
-                    <td>${ddStartDate}</td>
-                    <td>${ddEndDate}</td>
-                    <td class="${ddExpense < 0 ? 'negative' : (ddExpense > 0 ? 'positive' : 'neutral')}">${ddExpense !== 0 ? formatCurrency(ddExpense) : '-'}</td>
+                    <td>${currentDD < 0 && ddDuration > 0 ? ddDuration + ' days' : '-'}</td>
+                    <td>${currentDD < 0 ? ddStartDate : '-'}</td>
+                    <td>${currentDD < 0 ? ddEndDate : '-'}</td>
+                    <td class="${ddExpense < 0 ? 'negative' : (ddExpense > 0 ? 'positive' : 'neutral')}">${currentDD < 0 && ddExpense !== 0 ? formatCurrency(ddExpense) : '-'}</td>
                     <td class="negative">${formatPercent(maxDDPercent)}</td>
                 </tr>`;
             });
