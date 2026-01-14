@@ -816,9 +816,9 @@
                 <td class="${allBrokerCurrentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerCurrentDDPercent)}</td>
                 <td class="${allBrokerAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(allBrokerAProDD)}</td>
                 <td class="${allBrokerAProDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(allBrokerAProDDPercent)}</td>
-                <td>${allBrokerMaxDDDuration > 0 ? allBrokerMaxDDDuration + ' days' : '-'}</td>
-                <td>${formatDate(allBrokerDDStartDate)}</td>
-                <td>${formatDate(allBrokerDDEndDate)}</td>
+                <td>${allBrokerCurrentDD < 0 && allBrokerMaxDDDuration > 0 ? allBrokerMaxDDDuration + ' days' : '-'}</td>
+                <td>${allBrokerCurrentDD < 0 ? formatDate(allBrokerDDStartDate) : '-'}</td>
+                <td>${allBrokerCurrentDD < 0 ? formatDate(allBrokerDDEndDate) : '-'}</td>
                 <td class="negative">${formatCurrency(allBrokerMaxDD)}</td>
                 <td class="negative">${formatPercent(allBrokerMaxDDPercent)}</td>
             </tr>`;
@@ -863,9 +863,9 @@
                     <td class="${displayData.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(displayData.currentDDPercent)}</td>
                     <td class="${totalAProDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(totalAProDD)}</td>
                     <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
-                    <td>${displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
-                    <td>${formatDate(displayData.ddStartDate)}</td>
-                    <td>${formatDate(displayData.ddEndDate)}</td>
+                    <td>${displayData.currentDD < 0 && displayData.currentDDDuration > 0 ? displayData.currentDDDuration + ' days' : '-'}</td>
+                    <td>${displayData.currentDD < 0 ? formatDate(displayData.ddStartDate) : '-'}</td>
+                    <td>${displayData.currentDD < 0 ? formatDate(displayData.ddEndDate) : '-'}</td>
                     <td class="negative">${formatCurrency(displayData.maxDD)}</td>
                     <td class="negative">${formatPercent(displayData.maxDDPercent)}</td>
                 </tr>`;
@@ -890,9 +890,9 @@
                             <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                             <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
                             <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
-                            <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
-                            <td>${formatDate(strategy.ddStartDate)}</td>
-                            <td>${formatDate(strategy.ddEndDate)}</td>
+                            <td>${strategy.currentDD < 0 && strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
+                            <td>${strategy.currentDD < 0 ? formatDate(strategy.ddStartDate) : '-'}</td>
+                            <td>${strategy.currentDD < 0 ? formatDate(strategy.ddEndDate) : '-'}</td>
                             <td class="negative">${formatCurrency(strategy.maxDD)}</td>
                             <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
                         </tr>`;
@@ -906,9 +906,9 @@
                             <td class="${strategy.currentDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(strategy.currentDDPercent)}</td>
                             <td class="${aproDD < 0 ? 'negative' : 'neutral'}">${formatCurrency(aproDD)}</td>
                             <td class="${aproDDPercent < 0 ? 'negative' : 'neutral'}">${formatPercent(aproDDPercent)}</td>
-                            <td>${strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
-                            <td>${formatDate(strategy.ddStartDate)}</td>
-                            <td>${formatDate(strategy.ddEndDate)}</td>
+                            <td>${strategy.currentDD < 0 && strategy.currentDDDuration > 0 ? strategy.currentDDDuration + ' days' : '-'}</td>
+                            <td>${strategy.currentDD < 0 ? formatDate(strategy.ddStartDate) : '-'}</td>
+                            <td>${strategy.currentDD < 0 ? formatDate(strategy.ddEndDate) : '-'}</td>
                             <td class="negative">${formatCurrency(strategy.maxDD)}</td>
                             <td class="negative">${formatPercent(strategy.maxDDPercent)}</td>
                         </tr>`;
