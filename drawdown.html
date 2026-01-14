@@ -973,8 +973,8 @@
             
             const allBrokerExtraMargin = allBrokerMargin - allBrokerStgMargin;
             const allBrokerExtraMarginPercent = allBrokerStgMargin > 0 ? (allBrokerExtraMargin / allBrokerStgMargin) * 100 : 0;
-            // Calculate Current DD % based on broker margin
-            const allBrokerCurrentDDPercent = allBrokerMargin > 0 ? (allBrokerCurrentDD / allBrokerMargin) * 100 : 0;
+            // Calculate A/C DD % = (A/C DD ₹ / Peak Total Margin) × 100
+            const allBrokerCurrentDDPercent = peakTotalMarginForAllBroker > 0 ? (allBrokerCurrentDD / peakTotalMarginForAllBroker) * 100 : 0;
             const allBrokerExpensePercent = allBrokerMargin > 0 ? (allBrokerExpense / allBrokerMargin) * 100 : 0;
             
             // Calculate All Broker Max DD % using historical margin data
@@ -1112,7 +1112,8 @@
                 const currentAccountMargin = getCurrentAccountMargin(code) || brokerMargin;
                 const accountPeak = getAccountPeakMargin(code) || currentAccountMargin;
                 const currentDD = currentAccountMargin - accountPeak;
-                const currentDDPercent = currentAccountMargin > 0 ? (currentDD / currentAccountMargin) * 100 : 0;
+                // A/C DD % = (A/C DD ₹ / Peak Account Margin) × 100
+                const currentDDPercent = accountPeak > 0 ? (currentDD / accountPeak) * 100 : 0;
                 // Get DD duration, start, and end from calculated values
                 const ddDuration = getAccountDDDuration(code);
                 const ddStartDate = formatDateForDisplay(getAccountDDStartDate(code));
