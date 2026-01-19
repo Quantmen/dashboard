@@ -157,10 +157,10 @@
         </div>
         
         <div class="charts-grid">
-            <!-- Net PNL Equity Chart -->
+            <!-- Cumulative P&L Chart -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Net PNL Equity</div>
+                    <div class="chart-title">Cumulative P&L</div>
                     <div class="chart-controls">
                         <div class="chart-toggles">
                             <button class="toggle-btn active" data-chart="pnl" data-type="value">Value</button>
@@ -199,10 +199,10 @@
                 </div>
             </div>
             
-            <!-- PNL Bar Chart -->
+            <!-- Periodic Returns Chart -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">PNL</div>
+                    <div class="chart-title">Periodic Returns</div>
                     <div class="chart-controls">
                         <div class="chart-toggles">
                             <button class="toggle-btn active" data-chart="pnlbar" data-type="value">Value</button>
@@ -350,6 +350,110 @@
             }
         }
 
+        // Calculate daily total margins using the exact same logic as Strategy Performance
+        function calculateDailyTotalMargins(sortedTrades, allStrategiesParam) {
+            const result = {};
+            const tradesByDate = {};
+            sortedTrades.forEach(trade => {
+                const dateKey = trade.date;
+                if (!tradesByDate[dateKey]) {
+                    tradesByDate[dateKey] = [];
+                }
+                tradesByDate[dateKey].push(trade);
+            });
+            const sortedDates = Object.keys(tradesByDate).sort((a, b) => {
+                const dateA = a.split('/').reverse().join('');
+                const dateB = b.split('/').reverse().join('');
+                return dateA.localeCompare(dateB);
+            });
+            const brokerPnlTaxByDate = {};
+            sortedTrades.forEach(trade => {
+                const tradeDate = trade.date;
+                if (!brokerPnlTaxByDate[tradeDate]) {
+                    brokerPnlTaxByDate[tradeDate] = {};
+                }
+                if (trade && trade.strategyPnlTax) {
+                    Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                        if (!stratName.startsWith('A.PRO')) {
+                            const cleanName = stratName.replace(/\s+/g, '');
+                            const brokerMatch = cleanName.match(/^(.+?)PRO/);
+                            if (brokerMatch) {
+                                const brokerCode = brokerMatch[1];
+                                if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
+                                    brokerPnlTaxByDate[tradeDate][brokerCode] = {};
+                                }
+                                if (!brokerPnlTaxByDate[tradeDate][brokerCode][stratName]) {
+                                    brokerPnlTaxByDate[tradeDate][brokerCode][stratName] = 0;
+                                }
+                                brokerPnlTaxByDate[tradeDate][brokerCode][stratName] += pnlTax;
+                            }
+                        }
+                    });
+                }
+            });
+            let previousDayBrokerMaxMargins = {};
+            const brokerMarginDates = {}; // Track which date each broker's margin comes from
+            sortedDates.forEach((dateKey, dateIndex) => {
+                const dayTrades = tradesByDate[dateKey];
+                const dayBrokerMargins = {};
+                dayTrades.forEach(trade => {
+                    if (trade.strategyDetails) {
+                        Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
+                            if (!stratName.startsWith('A.PRO')) {
+                                const margin = details.margin || 0, cleanName = stratName.replace(/\s+/g, '');
+                                const brokerMatch = cleanName.match(/^(.+?)PRO/);
+                                if (brokerMatch) {
+                                    const brokerCode = brokerMatch[1];
+                                    if (!dayBrokerMargins[brokerCode]) {
+                                        dayBrokerMargins[brokerCode] = {};
+                                    }
+                                    if (!dayBrokerMargins[brokerCode][stratName] || margin > dayBrokerMargins[brokerCode][stratName]) {
+                                        dayBrokerMargins[brokerCode][stratName] = margin;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                const currentDayBrokerMaxMargins = {};
+                let dayTotalMargin = 0;
+                const allBrokers = new Set([...Object.keys(dayBrokerMargins), ...Object.keys(previousDayBrokerMaxMargins)]);
+                allBrokers.forEach(brokerCode => {
+                    let brokerMaxMargin = 0;
+                    let marginDate = dateKey;
+                    if (dayBrokerMargins[brokerCode]) {
+                        const margins = Object.values(dayBrokerMargins[brokerCode]);
+                        if (margins.length > 0) {
+                            brokerMaxMargin = Math.max(...margins);
+                        }
+                    }
+                    if (brokerMaxMargin === 0 && previousDayBrokerMaxMargins[brokerCode]) {
+                        brokerMaxMargin = previousDayBrokerMaxMargins[brokerCode];
+                        marginDate = brokerMarginDates[brokerCode] || dateKey;
+                    }
+                    currentDayBrokerMaxMargins[brokerCode] = brokerMaxMargin;
+                    brokerMarginDates[brokerCode] = marginDate;
+                    dayTotalMargin += brokerMaxMargin;
+                });
+                let dayPnlTax = 0;
+                allBrokers.forEach(brokerCode => {
+                    const marginDate = brokerMarginDates[brokerCode];
+                    const marginDateIndex = sortedDates.indexOf(marginDate);
+                    for (let i = marginDateIndex; i <= dateIndex; i++) {
+                        const checkDate = sortedDates[i];
+                        if (brokerPnlTaxByDate[checkDate] && brokerPnlTaxByDate[checkDate][brokerCode]) {
+                            Object.values(brokerPnlTaxByDate[checkDate][brokerCode]).forEach(pnlTax => {
+                                dayPnlTax += pnlTax;
+                            });
+                        }
+                    }
+                });
+                result[dateKey] = dayTotalMargin + dayPnlTax;
+                previousDayBrokerMaxMargins = { ...currentDayBrokerMaxMargins };
+            });
+            return result;
+        }
+
         // Data aggregation functions
         function aggregateByPeriod(trades, period) {
             if (!trades || trades.length === 0) {
@@ -359,6 +463,9 @@
             const sortedTrades = [...trades].sort((a, b) => {
                 return compareDates(a.date, b.date);
             });
+            
+            // Calculate daily total margins using the same logic as Strategy Performance
+            const dailyTotalMargins = calculateDailyTotalMargins(sortedTrades, []);
             
             const aggregated = new Map();
             
@@ -387,19 +494,11 @@
                 agg.lastTradeIndex = idx;
                 agg.lastCumPnl = trade.cumPnl !== undefined ? trade.cumPnl : 0;
                 
-                // Extract margin from strategyDetails
-                if (trade.strategyDetails) {
-                    let tradeMargin = 0;
-                    // strategyDetails is an object with strategy names as keys
-                    Object.values(trade.strategyDetails).forEach(detail => {
-                        if (detail && detail.margin) {
-                            tradeMargin += detail.margin;
-                        }
-                    });
-                    if (tradeMargin > 0) {
-                        agg.lastMargin = tradeMargin;
-                        agg.totalMargin = tradeMargin;
-                    }
+                // Use pre-calculated daily total margin from Strategy Performance logic
+                const tradeDate = trade.date;
+                if (dailyTotalMargins[tradeDate]) {
+                    agg.totalMargin = dailyTotalMargins[tradeDate];
+                    agg.lastMargin = dailyTotalMargins[tradeDate];
                 }
             });
             
@@ -414,34 +513,45 @@
             
             let peak = 0;
             let prevCumPnl = 0;
-            
-            // Get the starting cumPnl offset (cumPnl at the beginning of our data range)
-            let cumPnlOffset = 0;
-            if (result.length > 0 && (period === 'week' || period === 'month')) {
-                // Find the first period with trades to get the starting cumPnl
-                const firstPeriodWithTrades = result.find(item => item.trades.length > 0);
-                if (firstPeriodWithTrades && firstPeriodWithTrades.trades.length > 0) {
-                    // Get cumPnl from the first trade in the first period
-                    const firstTrade = firstPeriodWithTrades.trades[0];
-                    if (firstTrade.cumPnl !== undefined) {
-                        // Subtract the profit of the first trade to get the starting point
-                        cumPnlOffset = firstTrade.cumPnl - (firstTrade.profit || 0);
-                    }
-                }
-            }
+            let startingCapital = 0;  // Will be set from first period
+            let cumulativeExpenses = 0;  // Track expenses/withdrawals (negative of margin additions)
             
             result.forEach((item, index) => {
                 // Use the lastCumPnl from the last trade in this period
-                // This preserves the cumulative nature from daily trades
-                if (item.trades.length > 0 && item.lastCumPnl !== undefined && item.lastCumPnl !== 0) {
-                    item.cumPnl = item.lastCumPnl - cumPnlOffset;
+                if (item.trades.length > 0) {
+                    if (item.lastCumPnl !== undefined) {
+                        item.cumPnl = item.lastCumPnl;
+                    } else {
+                        item.cumPnl = prevCumPnl + item.profit;
+                    }
                 } else {
-                    // No trades in this period - carry forward previous cumPnl
                     item.cumPnl = prevCumPnl;
                 }
                 
-                // Use totalMargin (last margin value for the period)
-                item.cumMargin = item.totalMargin || item.lastMargin || 0;
+                // The totalMargin from trades already includes cumPnl (see calculateDailyTotalMargins line 1679)
+                // So we need to extract the base margin WITHOUT cumPnl
+                const totalMarginWithPnl = item.totalMargin || item.lastMargin || 0;
+                
+                if (index === 0) {
+                    // First period: extract starting capital = totalMargin - cumPnl
+                    startingCapital = totalMarginWithPnl - (item.cumPnl || 0);
+                    cumulativeExpenses = 0;
+                    console.log('First period - startingCapital:', startingCapital, 'totalMargin:', totalMarginWithPnl, 'cumPnl:', item.cumPnl);
+                } else {
+                    // Calculate expected total margin = startingCapital + cumPnl - cumulativeExpenses
+                    const expectedTotalMargin = startingCapital + (item.cumPnl || 0) - cumulativeExpenses;
+                    
+                    // Calculate expenses for this period = expectedTotalMargin - actualTotalMargin
+                    const periodExpense = expectedTotalMargin - totalMarginWithPnl;
+                    cumulativeExpenses += periodExpense;
+                    
+                    if (index < 3 || Math.abs(periodExpense) > 1000) {
+                        console.log(`Period ${item.date}: totalMargin=${totalMarginWithPnl}, cumPnl=${item.cumPnl}, expected=${expectedTotalMargin}, expense=${periodExpense}, cumExpenses=${cumulativeExpenses}`);
+                    }
+                }
+                
+                // cumMargin is simply the totalMargin (which already includes cumPnl)
+                item.cumMargin = totalMarginWithPnl;
                 
                 item.periodProfit = item.cumPnl - prevCumPnl;
                 
@@ -751,7 +861,7 @@
                 }
             };
 
-            // Net PNL Equity Chart
+            // Cumulative P&L Chart
             charts.pnl = new Chart(elements.pnlChart, {
                 type: 'line',
                 data: { labels: [], datasets: [{ data: [], borderColor: '#059669', backgroundColor: createGradient(elements.pnlChart, '#059669'), borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#059669', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, fill: true, tension: 0.4 }] },
@@ -791,7 +901,7 @@
                 }
             });
 
-            // PNL Bar Chart
+            // Periodic Returns Chart
             charts.pnlbar = new Chart(elements.pnlBarChart, {
                 type: 'bar',
                 data: { 
@@ -1263,7 +1373,7 @@
                         });
                     }
                     
-                    console.log('Net PNL Equity - Starting Capital:', startingCapital);
+                    console.log('Cumulative P&L - Starting Capital:', startingCapital);
                     
                     data = aggregatedData.map(d => {
                         if (startingCapital === 0) return 0;
@@ -1399,82 +1509,116 @@
                 let profitData;
                 
                 if (displayType === 'percentage') {
-                    // Calculate NET PNL% for period = (periodProfit / previousPeriodMargin) * 100
                     const period = activePeriods[chartType];
+                    console.log('=== Percentage Calculation ===');
+                    console.log('Period:', period);
+                    console.log('First 3 items:', aggregatedData.slice(0, 3).map(d => ({
+                        date: d.date,
+                        cumMargin: d.cumMargin,
+                        periodProfit: d.periodProfit,
+                        cumPnl: d.cumPnl,
+                        percent: d.cumMargin > 0 ? ((d.periodProfit / d.cumMargin) * 100).toFixed(2) + '%' : '0%'
+                    })));
                     
-                    // Get starting capital (same for all periods)
-                    let startingCapital = 0;
-                    if (allTrades.length > 0) {
-                        const brokerDates = {};
+                    if (period === 'day') {
+                        // Build month boundaries
+                        const monthLastDayMargins = new Map();
+                        let currentMonth = null;
+                        let currentMonthDays = [];
+                        let firstMonthStartMargin = 0;
                         
-                        allTrades.forEach(trade => {
-                            if (trade.strategyDetails) {
-                                Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                    const cleanName = strategyName.replace(/\s+/g, '');
-                                    const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                    
-                                    if (brokerMatch) {
-                                        const brokerCode = brokerMatch[1];
-                                        const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                        
-                                        if (margin > 0) {
-                                            if (!brokerDates[brokerCode]) {
-                                                brokerDates[brokerCode] = [];
-                                            }
-                                            if (!brokerDates[brokerCode].includes(trade.date)) {
-                                                brokerDates[brokerCode].push(trade.date);
-                                            }
-                                        }
-                                    }
-                                });
+                        aggregatedData.forEach((d, index) => {
+                            const dateParts = d.date.split('/');
+                            const month = dateParts.length >= 2 ? (dateParts[1] + '/' + dateParts[2]) : d.date;
+                            
+                            if (month !== currentMonth) {
+                                if (currentMonth !== null && currentMonthDays.length > 0) {
+                                    const lastDay = currentMonthDays[currentMonthDays.length - 1];
+                                    monthLastDayMargins.set(currentMonth, lastDay.cumMargin || 0);
+                                }
+                                currentMonth = month;
+                                currentMonthDays = [];
+                                
+                                // Store first month's starting margin
+                                if (index === 0) {
+                                    firstMonthStartMargin = d.cumMargin - (d.cumPnl || 0);
+                                }
+                            }
+                            
+                            currentMonthDays.push(d);
+                            
+                            if (index === aggregatedData.length - 1 && currentMonthDays.length > 0) {
+                                const lastDay = currentMonthDays[currentMonthDays.length - 1];
+                                monthLastDayMargins.set(currentMonth, lastDay.cumMargin || 0);
                             }
                         });
                         
-                        Object.keys(brokerDates).forEach(brokerCode => {
-                            const dates = brokerDates[brokerCode].sort((a, b) => compareDates(a, b));
-                            const brokerFirstDate = dates[0];
+                        // Calculate percentages - matching Strategy Performance % logic exactly
+                        // First day of month: use month's starting margin
+                        // Subsequent days: use previous day's cumMargin
+                        
+                        currentMonth = null; // Reset the existing variable
+                        let monthStartMargin = 0;
+                        
+                        profitData = aggregatedData.map((d, index) => {
+                            const dateParts = d.date.split('/');
+                            const month = dateParts.length >= 2 ? (dateParts[1] + '/' + dateParts[2]) : d.date;
                             
-                            const brokerMargins = [];
-                            allTrades.filter(t => t.date === brokerFirstDate).forEach(trade => {
-                                if (trade.strategyDetails) {
-                                    Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                        const cleanName = strategyName.replace(/\s+/g, '');
-                                        const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                        
-                                        if (brokerMatch && brokerMatch[1] === brokerCode) {
-                                            const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                            if (margin > 0) {
-                                                brokerMargins.push(margin);
-                                            }
-                                        }
-                                    });
+                            // Check if this is the first day of a new month
+                            const isFirstDayOfMonth = (month !== currentMonth);
+                            
+                            if (isFirstDayOfMonth) {
+                                // First day of month: use starting margin
+                                currentMonth = month;
+                                if (index === 0) {
+                                    // Very first day in dataset: starting capital
+                                    monthStartMargin = (d.cumMargin || 0) - (d.cumPnl || 0);
+                                } else {
+                                    // First day of subsequent month: use previous day's cumMargin (which is previous month's ending)
+                                    const prevDay = aggregatedData[index - 1];
+                                    monthStartMargin = prevDay.cumMargin || 0;
                                 }
-                            });
-                            
-                            if (brokerMargins.length > 0) {
-                                startingCapital += Math.max(...brokerMargins);
+                                
+                                if (monthStartMargin === 0) {
+                                    return 0;
+                                } else {
+                                    return ((d.periodProfit || 0) / monthStartMargin) * 100;
+                                }
+                            } else {
+                                // Subsequent days in month: use previous day's cumMargin
+                                const prevDay = aggregatedData[index - 1];
+                                const previousDayMargin = prevDay.cumMargin || 0;
+                                
+                                if (previousDayMargin === 0) {
+                                    return 0;
+                                } else {
+                                    return ((d.periodProfit || 0) / previousDayMargin) * 100;
+                                }
+                            }
+                        });
+                    } else if (period === 'week' || period === 'month') {
+                        profitData = aggregatedData.map((d, index) => {
+                            if (index === 0) {
+                                // First period: use starting capital = cumMargin - cumPnl
+                                const startingCapital = (d.cumMargin || 0) - (d.cumPnl || 0);
+                                if (startingCapital === 0) {
+                                    return 0;
+                                } else {
+                                    return ((d.periodProfit || 0) / startingCapital) * 100;
+                                }
+                            } else {
+                                // Subsequent periods: use previous period's cumMargin
+                                const prevPeriod = aggregatedData[index - 1];
+                                const previousMargin = prevPeriod.cumMargin || 0;
+                                if (previousMargin === 0) {
+                                    return 0;
+                                } else {
+                                    return ((d.periodProfit || 0) / previousMargin) * 100;
+                                }
                             }
                         });
                     }
-                    
-                    console.log('PNL Bar - Starting Capital:', startingCapital);
-                    
-                    // For each period, calculate % based on previous period's margin
-                    profitData = aggregatedData.map((d, index) => {
-                        if (index === 0) {
-                            // First period: use starting capital
-                            if (startingCapital === 0) return 0;
-                            return ((d.periodProfit || 0) / startingCapital) * 100;
-                        } else {
-                            // Use previous period's ending margin
-                            const prevCumPnl = aggregatedData[index - 1].cumPnl;
-                            const previousMargin = startingCapital + prevCumPnl;
-                            if (previousMargin === 0) return 0;
-                            return ((d.periodProfit || 0) / previousMargin) * 100;
-                        }
-                    });
                 } else {
-                    // Show period profits (change in cumPnl for each period)
                     profitData = aggregatedData.map(d => d.periodProfit || 0);
                 }
                 
