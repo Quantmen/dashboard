@@ -2158,7 +2158,8 @@ const dateA = a.split('/').reverse().join('');
 const dateB = b.split('/').reverse().join('');
 return dateA.localeCompare(dateB);
 });
-sortedDays.forEach(date => {
+let previousDayMargin = previousMonthTotalMargin; // Initialize with month's starting margin
+sortedDays.forEach((date, dayIndex) => {
 const dateParts = date.split('/');
 const displayDate = `${dateParts[0]}-${monthNames[parseInt(dateParts[1]) - 1]}`;
 const dataYearAttr = hasMultipleYears ? ` data-year="${fullYear}"` : '';
@@ -2214,8 +2215,8 @@ bodyHtml += `<td class="number-col total-net-col ${dayAmiPnl >= 0 ? 'positive' :
 const dayNetPnlValue = showPnlTax ? dayNetTotal : dayTotal;
 bodyHtml += `<td class="number-col total-net-col ${dayNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(dayNetPnlValue)}</td>`;
 let dayNetPnlPercent = 0;
-if (previousMonthTotalMargin !== 0) {
-dayNetPnlPercent = (dayNetPnlValue / previousMonthTotalMargin) * 100;
+if (previousDayMargin !== 0) {
+dayNetPnlPercent = (dayNetPnlValue / previousDayMargin) * 100;
 }
 bodyHtml += `<td class="number-col net-pnl-percent-col ${dayNetPnlPercent >= 0 ? 'positive' : 'negative'}">${dayNetPnlPercent !== 0 ? dayNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
 const dayExpense = dailyExpenses[date] || 0;
@@ -2228,6 +2229,8 @@ const drawdownDisplay = dayMarginDrawdown > 0 ? `-${formatNumber(dayMarginDrawdo
 bodyHtml += `<td class="number-col drawdown-col negative">${drawdownDisplay}</td>`;
 }
 bodyHtml += '</tr>';
+// Update previousDayMargin for the next day
+previousDayMargin = dayTotalMargin;
 });
 }
 monthIdx++;
