@@ -2215,7 +2215,39 @@ bodyHtml += `<td class="number-col total-net-col ${dayAmiPnl >= 0 ? 'positive' :
 const dayNetPnlValue = showPnlTax ? dayNetTotal : dayTotal;
 bodyHtml += `<td class="number-col total-net-col ${dayNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(dayNetPnlValue)}</td>`;
 let dayNetPnlPercent = 0;
-if (previousDayMargin !== 0) {
+// For the first day of the first month, calculate starting capital from first date trades
+if ((monthIdx === 0 || isFirstMonthOfYear) && dayIndex === 0) {
+// Calculate starting capital from first date trades
+let firstDayStartingCapital = 0;
+const firstDayTrades = allTrades.filter(t => t.date === date);
+const firstDateBrokerMargins = {};
+const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+firstDayTrades.forEach(trade => {
+if (trade.strategyDetails) {
+allBrokerStrategies.forEach(brokerStrat => {
+const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+const cleanName = brokerStrat.replace(/\s+/g, '');
+const brokerMatch = cleanName.match(/^(.+?)PRO/);
+if (brokerMatch && margin > 0) {
+const brokerCode = brokerMatch[1];
+if (!firstDateBrokerMargins[brokerCode]) {
+firstDateBrokerMargins[brokerCode] = {};
+}
+firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+}
+});
+}
+});
+Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
+const margins = Object.values(firstDateBrokerMargins[brokerCode]);
+if (margins.length > 0) {
+firstDayStartingCapital += Math.max(...margins);
+}
+});
+if (firstDayStartingCapital !== 0) {
+dayNetPnlPercent = (dayNetPnlValue / firstDayStartingCapital) * 100;
+}
+} else if (previousDayMargin !== 0) {
 dayNetPnlPercent = (dayNetPnlValue / previousDayMargin) * 100;
 }
 bodyHtml += `<td class="number-col net-pnl-percent-col ${dayNetPnlPercent >= 0 ? 'positive' : 'negative'}">${dayNetPnlPercent !== 0 ? dayNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
