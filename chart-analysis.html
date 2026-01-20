@@ -553,7 +553,13 @@
                 // cumMargin is simply the totalMargin (which already includes cumPnl)
                 item.cumMargin = totalMarginWithPnl;
                 
-                item.periodProfit = item.cumPnl - prevCumPnl;
+                // For the first period with actual trades, periodProfit should equal cumPnl
+                // since there's no previous period to subtract from
+                if (index === 0 && item.trades.length > 0) {
+                    item.periodProfit = item.cumPnl;
+                } else {
+                    item.periodProfit = item.cumPnl - prevCumPnl;
+                }
                 
                 prevCumPnl = item.cumPnl;
                 
@@ -563,6 +569,16 @@
                 item.peak = peak;
                 item.drawdown = item.cumPnl - peak;
             });
+            
+            // Filter out leading empty periods (periods with no trades at the start)
+            let firstNonEmptyIndex = result.findIndex(item => item.trades.length > 0);
+            if (firstNonEmptyIndex > 0) {
+                result = result.slice(firstNonEmptyIndex);
+                // Recalculate periodProfit for the new first period
+                if (result.length > 0 && result[0].trades.length > 0) {
+                    result[0].periodProfit = result[0].cumPnl;
+                }
+            }
             
             return result;
         }
@@ -578,20 +594,12 @@
             // Convert period key back to date for iteration
             const periodToDate = (periodStr) => {
                 if (periodStr.startsWith('W')) {
-                    // Week format: W23-23 or W23-2023
+                    // Week format: W23-23 or W23-2023 (ISO week-year format)
                     const parts = periodStr.substring(1).split('-');
                     const week = parseInt(parts[0]);
                     const year = parseInt(parts[1]);
                     const fullYear = year < 100 ? 2000 + year : year;
-                    // Get first day of the year, then add weeks
-                    const date = new Date(fullYear, 0, 1);
-                    // Adjust to first day of first week (Monday)
-                    const dayOfWeek = date.getDay();
-                    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-                    date.setDate(date.getDate() + daysToMonday);
-                    // Add weeks
-                    date.setDate(date.getDate() + (week - 1) * 7);
-                    return date;
+                    return getISOWeekDate(fullYear, week);
                 } else if (periodStr.includes('-')) {
                     // Month format: Jan-23 or Jan-2023
                     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -663,10 +671,10 @@
             if (period === 'day') {
                 return dateStr; // Keep original format
             } else if (period === 'week') {
-                // Get week number
-                const weekNum = getWeekNumber(date);
+                // Get week number and the ISO week-year
+                const { weekNum, weekYear } = getWeekNumberAndYear(date);
                 // Format year consistently (2-digit)
-                const yearSuffix = year < 100 ? String(year).padStart(2, '0') : String(year).slice(-2);
+                const yearSuffix = String(weekYear).slice(-2);
                 return `W${weekNum}-${yearSuffix}`;
             } else if (period === 'month') {
                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -678,21 +686,42 @@
         }
 
         function getWeekNumber(date) {
+            const result = getWeekNumberAndYear(date);
+            return result.weekNum;
+        }
+        
+        function getWeekNumberAndYear(date) {
             const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
             const dayNum = d.getUTCDay() || 7;
             d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            const weekYear = d.getUTCFullYear(); // This is the ISO week-year
+            const yearStart = new Date(Date.UTC(weekYear, 0, 1));
+            const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return { weekNum, weekYear };
+        }
+        
+        function getISOWeekDate(year, week) {
+            // Get the Thursday of week 1 (which defines week 1)
+            const jan4 = new Date(Date.UTC(year, 0, 4));
+            const jan4Day = jan4.getUTCDay() || 7; // Monday=1, Sunday=7
+            // Get Monday of week 1
+            const week1Monday = new Date(jan4);
+            week1Monday.setUTCDate(jan4.getUTCDate() - jan4Day + 1);
+            // Add weeks to get to target week
+            const targetMonday = new Date(week1Monday);
+            targetMonday.setUTCDate(week1Monday.getUTCDate() + (week - 1) * 7);
+            return new Date(targetMonday.getUTCFullYear(), targetMonday.getUTCMonth(), targetMonday.getUTCDate());
         }
 
         function compareDates(dateStr1, dateStr2) {
             // Handle different formats
             const parseDate = (str) => {
                 if (str.startsWith('W')) {
-                    // Week format: W23-23 or W23-2023
+                    // Week format: W23-23 or W23-2023 (ISO week-year format)
                     const [week, year] = str.substring(1).split('-').map(Number);
                     const fullYear = year < 100 ? 2000 + year : year;
-                    return new Date(fullYear, 0, 1 + (week - 1) * 7);
+                    // Get the Monday of this ISO week
+                    return getISOWeekDate(fullYear, week);
                 } else if (str.includes('-') && str.length <= 10) {
                     // Month format: Jan-23 or Jan-2023
                     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
