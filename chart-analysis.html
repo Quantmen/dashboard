@@ -101,6 +101,47 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
+        .month-navigation {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        
+        .nav-btn {
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            background: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .nav-btn:hover {
+            background: #f8fafc;
+            color: #1e40af;
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .current-month {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            padding: 0 8px;
+            min-width: 80px;
+            text-align: center;
+        }
+        
         .chart-container {
             flex: 1;
             position: relative;
@@ -220,14 +261,24 @@
                 </div>
             </div>
             
-            <!-- Strategy Comparison Chart -->
+            <!-- Breakdown (Waterfall) -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Strategy Comparison</div>
-                    <div class="chart-toggles">
-                        <button class="toggle-btn" data-chart="compare" data-period="day">Day</button>
-                        <button class="toggle-btn" data-chart="compare" data-period="week">Week</button>
-                        <button class="toggle-btn active" data-chart="compare" data-period="month">Month</button>
+                    <div class="chart-title">Breakdown</div>
+                    <div class="chart-controls">
+                        <div class="chart-toggles">
+                            <button class="toggle-btn active" data-chart="waterfall" data-type="value">Value</button>
+                            <button class="toggle-btn" data-chart="waterfall" data-type="percentage">%</button>
+                        </div>
+                        <div class="chart-toggles">
+                            <button class="toggle-btn active" data-chart="waterfall" data-view="monthly">Monthly</button>
+                            <button class="toggle-btn" data-chart="waterfall" data-view="overall">Overall</button>
+                        </div>
+                        <div class="month-navigation">
+                            <button class="nav-btn" id="prevMonth">◄ Prev</button>
+                            <span class="current-month" id="currentMonth">JAN-26</span>
+                            <button class="nav-btn" id="nextMonth">Next ►</button>
+                        </div>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -274,6 +325,12 @@
             return (isNegative ? '-' : '') + formatted;
         }
         
+        // Format strategy name with space before PRO
+        function formatStrategyName(name) {
+            // Add space before PRO if not already present
+            return name.replace(/([A-Z0-9]+)(PRO\s*\d+)/i, '$1 $2').trim();
+        }
+        
         // Global state
         let allTrades = [];
         const charts = {
@@ -292,8 +349,13 @@
         const displayTypes = {
             pnl: 'value',
             drawdown: 'value',
-            pnlbar: 'value'
+            pnlbar: 'value',
+            waterfall: 'value'
         };
+        
+        window.waterfallView = 'monthly'; // 'monthly' or 'overall'
+        let currentMonthIndex = 0;
+        let availableMonths = [];
 
         // Elements
         const elements = {
@@ -324,6 +386,7 @@
                     const chartType = this.dataset.chart;
                     const period = this.dataset.period;
                     const type = this.dataset.type;
+                    const view = this.dataset.view;
                     
                     // Handle period toggle
                     if (period) {
@@ -350,8 +413,66 @@
                         displayTypes[chartType] = type;
                         updateChart(chartType);
                     }
+                    
+                    // Handle view toggle (for waterfall)
+                    if (view) {
+                        // Update active state for view toggles
+                        document.querySelectorAll(`.toggle-btn[data-chart="${chartType}"][data-view]`).forEach(b => {
+                            b.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                        
+                        // Update view and refresh chart
+                        if (chartType === 'waterfall') {
+                            window.waterfallView = view;
+                            updateChart('compare'); // compare is the chart instance for waterfall
+                        }
+                    }
                 });
             });
+            
+            // Month navigation listeners
+            const prevBtn = document.getElementById('prevMonth');
+            const nextBtn = document.getElementById('nextMonth');
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (currentMonthIndex > 0) {
+                        currentMonthIndex--;
+                        updateMonthDisplay();
+                        updateChart('compare');
+                    }
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (currentMonthIndex < availableMonths.length - 1) {
+                        currentMonthIndex++;
+                        updateMonthDisplay();
+                        updateChart('compare');
+                    }
+                });
+            }
+        }
+        
+        function updateMonthDisplay() {
+            const monthDisplay = document.getElementById('currentMonth');
+            const prevBtn = document.getElementById('prevMonth');
+            const nextBtn = document.getElementById('nextMonth');
+            
+            if (monthDisplay && availableMonths.length > 0) {
+                const currentMonth = availableMonths[currentMonthIndex];
+                monthDisplay.textContent = currentMonth;
+            }
+            
+            // Enable/disable navigation buttons
+            if (prevBtn) {
+                prevBtn.disabled = currentMonthIndex <= 0;
+            }
+            if (nextBtn) {
+                nextBtn.disabled = currentMonthIndex >= availableMonths.length - 1;
+            }
         }
 
         function handleParentMessage(event) {
@@ -1027,7 +1148,7 @@
                             // Style
                             ctx.save();
                             ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
-                            ctx.fillStyle = value >= 0 ? '#059669' : '#dc2626';
+                            ctx.fillStyle = value >= 0 ? '#059669' : '#c2410c';
                             ctx.textAlign = 'center';
                             
                             // Position above bar for positive, below bar for negative
@@ -1047,14 +1168,21 @@
                     }
                 }]
             });
-
-
-            // Strategy Comparison Chart
+            // Monthly Contribution Breakdown (Waterfall) Chart
             charts.compare = new Chart(elements.compareChart, {
-                type: 'line',
+                type: 'bar',
                 data: { 
                     labels: [], 
-                    datasets: [] // Will be populated dynamically based on strategies
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8,
+                        // Enable floating bars
+                        barThickness: 'flex'
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -1062,94 +1190,102 @@
                     plugins: {
                         legend: { 
                             display: true,
-                            position: 'top',
-                            align: 'start',
-                            onClick: (e, legendItem, legend) => {
-                                const index = legendItem.datasetIndex;
-                                const chart = legend.chart;
-                                const meta = chart.getDatasetMeta(index);
-                                
-                                // Toggle visibility - true = hidden, false/null = visible
-                                if (meta.hidden === true) {
-                                    meta.hidden = null; // Show
-                                } else {
-                                    meta.hidden = true; // Hide
-                                }
-                                
-                                // Update chart
-                                chart.update();
-                            },
+                            position: 'bottom',
+                            align: 'center',
                             labels: {
-                                boxWidth: 20,
-                                boxHeight: 10,
-                                padding: 8,
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                padding: 15,
                                 font: { 
                                     size: 10, 
-                                    weight: '600',
+                                    weight: '500',
                                     family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
                                 },
-                                color: '#475569',
+                                color: '#94a3b8',
                                 usePointStyle: false,
                                 generateLabels: (chart) => {
-                                    // Custom label generation with strikethrough support
-                                    return chart.data.datasets.map((dataset, i) => {
-                                        const meta = chart.getDatasetMeta(i);
-                                        const isHidden = meta.hidden === true;
-                                        
-                                        return {
-                                            text: dataset.label,
-                                            fillStyle: isHidden ? '#cbd5e1' : dataset.borderColor,
-                                            strokeStyle: isHidden ? '#cbd5e1' : dataset.borderColor,
-                                            lineWidth: 0,
-                                            hidden: isHidden,
-                                            datasetIndex: i,
-                                            lineDash: [],
-                                            fontColor: isHidden ? '#cbd5e1' : '#475569',
-                                            textDecoration: isHidden ? 'line-through' : 'none'
-                                        };
+                                    // Create custom legend for waterfall - only show strategy names, not Start/Total
+                                    const labels = chart.data.labels || [];
+                                    const colors = chart.data.datasets[0].backgroundColor || [];
+                                    const legendItems = [];
+                                    
+                                    // Helper function to add transparency to color
+                                    const addTransparency = (color, opacity = 0.7) => {
+                                        if (color.startsWith('#')) {
+                                            const r = parseInt(color.slice(1, 3), 16);
+                                            const g = parseInt(color.slice(3, 5), 16);
+                                            const b = parseInt(color.slice(5, 7), 16);
+                                            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                                        }
+                                        return color;
+                                    };
+                                    
+                                    labels.forEach((label, i) => {
+                                        if (label !== 'Start' && label !== 'Total') {
+                                            const originalColor = colors[i] || '#94a3b8';
+                                            legendItems.push({
+                                                text: label,
+                                                fillStyle: addTransparency(originalColor, 0.7),
+                                                strokeStyle: 'transparent',
+                                                lineWidth: 0,
+                                                hidden: false,
+                                                fontColor: '#94a3b8'
+                                            });
+                                        }
                                     });
+                                    
+                                    return legendItems;
                                 }
-                            },
-                            onHover: (event, legendItem) => {
-                                event.native.target.style.cursor = 'pointer';
-                            },
-                            onLeave: (event, legendItem) => {
-                                event.native.target.style.cursor = 'default';
                             }
                         },
                         tooltip: {
                             backgroundColor: 'white',
                             borderWidth: 2,
+                            borderColor: '#e5e7eb',
                             padding: 14,
-                            displayColors: true,
+                            displayColors: false,
                             titleFont: { 
                                 size: 12, 
                                 weight: '600',
                                 family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
                             },
                             bodyFont: { 
-                                size: 13, 
-                                weight: '600',
+                                size: 14, 
+                                weight: '700',
                                 family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
                             },
                             cornerRadius: 8,
                             caretSize: 6,
                             titleColor: '#64748b',
                             bodyColor: '#1e293b',
-                            boxPadding: 6,
                             callbacks: {
                                 title: ctx => ctx[0].label,
                                 label: ctx => {
-                                    const label = ctx.dataset.label; // Strategy name only
-                                    const value = ctx.parsed.y;
-                                    return `${label}: ₹${formatIndianNumber(value, 0)}`;
-                                },
-                                labelColor: ctx => ({
-                                    borderColor: ctx.dataset.borderColor,
-                                    backgroundColor: ctx.dataset.borderColor,
-                                    borderWidth: 2,
-                                    borderRadius: 2
-                                })
+                                    // Use stored contribution if available, otherwise calculate
+                                    let value;
+                                    let total;
+                                    if (charts.compare && charts.compare._contributions) {
+                                        value = charts.compare._contributions[ctx.dataIndex];
+                                        total = charts.compare._totalValue;
+                                    } else {
+                                        value = Array.isArray(ctx.parsed.y) 
+                                            ? ctx.parsed.y[1] - ctx.parsed.y[0]
+                                            : ctx.parsed.y;
+                                        total = value; // Fallback
+                                    }
+                                    
+                                    if (displayTypes.waterfall === 'percentage') {
+                                        // Calculate percentage of total
+                                        if (!total || total === 0) {
+                                            return '0.00%';
+                                        }
+                                        const percentValue = (value / Math.abs(total)) * 100;
+                                        const sign = percentValue < 0 ? '-' : '';
+                                        return `${sign}${Math.abs(percentValue).toFixed(2)}%`;
+                                    }
+                                    const sign = value < 0 ? '-' : '';
+                                    return `${sign}₹${formatIndianNumber(Math.abs(value), 2)}`;
+                                }
                             }
                         }
                     },
@@ -1157,6 +1293,7 @@
                         y: {
                             display: true,
                             position: 'right',
+                            beginAtZero: true,
                             grid: { 
                                 color: 'rgba(148, 163, 184, 0.08)',
                                 lineWidth: 1,
@@ -1176,6 +1313,9 @@
                                 padding: 8,
                                 maxTicksLimit: 8,
                                 callback: value => {
+                                    if (displayTypes.waterfall === 'percentage') {
+                                        return value.toFixed(1) + '%';
+                                    }
                                     if (value === 0) return '₹0';
                                     if (Math.abs(value) >= 100000) return `₹${Math.round(value / 100000)}L`;
                                     if (Math.abs(value) >= 1000) return `₹${Math.round(value / 1000)}K`;
@@ -1199,7 +1339,6 @@
                                     family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
                                 },
                                 color: '#94a3b8',
-                                maxTicksLimit: 10,
                                 padding: 6
                             }
                         }
@@ -1207,61 +1346,8 @@
                     interaction: { 
                         intersect: false, 
                         mode: 'index' 
-                    },
-                    elements: {
-                        line: {
-                            borderCapStyle: 'round',
-                            borderJoinStyle: 'round'
-                        }
                     }
-                },
-                plugins: [{
-                    id: 'customLegendStrikethrough',
-                    afterUpdate: (chart) => {
-                        // Store legend item positions for strikethrough rendering
-                        const legend = chart.legend;
-                        if (legend && legend.legendHitBoxes) {
-                            chart._legendHitBoxes = legend.legendHitBoxes;
-                        }
-                    },
-                    afterDraw: (chart) => {
-                        const ctx = chart.ctx;
-                        const legend = chart.legend;
-                        
-                        if (!legend || !chart._legendHitBoxes) return;
-                        
-                        ctx.save();
-                        
-                        // Iterate through each dataset
-                        chart.data.datasets.forEach((dataset, i) => {
-                            const meta = chart.getDatasetMeta(i);
-                            const isHidden = meta.hidden === true;
-                            
-                            if (isHidden) {
-                                const hitBox = chart._legendHitBoxes[i];
-                                if (!hitBox) return;
-                                
-                                // Calculate text position
-                                const textX = hitBox.left + hitBox.width - (hitBox.width - legend.options.labels.boxWidth - legend.options.labels.padding);
-                                const textY = hitBox.top + (hitBox.height / 2);
-                                
-                                // Measure text width
-                                ctx.font = '600 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
-                                const textWidth = ctx.measureText(dataset.label).width;
-                                
-                                // Draw strikethrough line
-                                ctx.strokeStyle = '#94a3b8';
-                                ctx.lineWidth = 1.3;
-                                ctx.beginPath();
-                                ctx.moveTo(textX, textY);
-                                ctx.lineTo(textX + textWidth, textY);
-                                ctx.stroke();
-                            }
-                        });
-                        
-                        ctx.restore();
-                    }
-                }]
+                }
             });
         }
 
@@ -1682,8 +1768,8 @@
                     profitData = aggregatedData.map(d => d.periodProfit || 0);
                 }
                 
-                // Create color array - green for positive, red for negative
-                const colors = profitData.map(val => val >= 0 ? '#10b981' : '#ef4444');
+                // Create color array - green for positive, brown for negative
+                const colors = profitData.map(val => val >= 0 ? '#10b981' : '#c2410c');
                 
                 charts.pnlbar.data.labels = labels;
                 charts.pnlbar.data.datasets[0].data = profitData;
@@ -1707,88 +1793,220 @@
                 
                 charts.pnlbar.update('none');
             } else if (chartType === 'compare') {
-                // Use strategy aggregation
-                const strategyData = aggregateByStrategyAndPeriod(allTrades, period);
-                const labels = strategyData.labels.map(d => formatLabel(d, period));
+                // Waterfall Chart Logic
+                const isMonthly = !window.waterfallView || window.waterfallView === 'monthly';
                 
-                // Premium professional color palette with better differentiation
-                const premiumColors = [
-                    { solid: '#2563eb', gradient: 'rgba(37, 99, 235, 0.1)' },   // Royal Blue
-                    { solid: '#059669', gradient: 'rgba(5, 150, 105, 0.1)' },   // Emerald
-                    { solid: '#dc2626', gradient: 'rgba(220, 38, 38, 0.1)' },   // Crimson
-                    { solid: '#7c3aed', gradient: 'rgba(124, 58, 237, 0.1)' },  // Purple
-                    { solid: '#ea580c', gradient: 'rgba(234, 88, 12, 0.1)' },   // Orange
-                    { solid: '#0891b2', gradient: 'rgba(8, 145, 178, 0.1)' },   // Cyan
-                    { solid: '#d946ef', gradient: 'rgba(217, 70, 239, 0.1)' },  // Magenta
-                    { solid: '#65a30d', gradient: 'rgba(101, 163, 13, 0.1)' }   // Lime
-                ];
-                
-                // Line style variations for better distinction
-                const lineStyles = [
-                    [],           // Solid
-                    [5, 5],       // Dashed
-                    [2, 3],       // Dotted
-                    [10, 5, 2, 5], // Dash-dot
-                    [],           // Solid
-                    [8, 4],       // Long dash
-                    [3, 3],       // Short dash
-                    [15, 3, 3, 3] // Long dash-dot
-                ];
-                
-                // Calculate final PnL for each strategy to rank them
-                const strategyPerformance = [];
-                for (const [strategyName, data] of Object.entries(strategyData.strategies)) {
-                    const finalPnl = data[data.length - 1] || 0;
-                    strategyPerformance.push({ name: strategyName, pnl: finalPnl, data: data });
-                }
-                
-                // Sort by performance (descending)
-                strategyPerformance.sort((a, b) => b.pnl - a.pnl);
-                
-                // Create datasets with enhanced styling
-                const datasets = [];
-                
-                strategyPerformance.forEach((strategy, index) => {
-                    const colorSet = premiumColors[index % premiumColors.length];
-                    const lineStyle = lineStyles[index % lineStyles.length];
-                    const isTopPerformer = index < 3; // Top 3 strategies
-                    
-                    // Create gradient
-                    const ctx = elements.compareChart.getContext('2d');
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                    gradient.addColorStop(0, colorSet.gradient.replace('0.1', isTopPerformer ? '0.15' : '0.08'));
-                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    
-                    // spanGaps: false means null values create gaps in the line
-                    // Day view: no nulls, line continues (no gaps)
-                    // Week/Month view: nulls for missing periods, line stops (gaps shown)
-                    datasets.push({
-                        label: strategy.name, // Only strategy name, no PnL or indicators
-                        data: strategy.data,
-                        borderColor: colorSet.solid,
-                        backgroundColor: gradient,
-                        borderWidth: isTopPerformer ? 3 : 2.5,
-                        borderDash: lineStyle,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: colorSet.solid,
-                        pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        spanGaps: false, // Don't connect lines across gaps (null values)
-                        order: isTopPerformer ? 0 : 1 // Top performers drawn last (on top)
-                    });
+                // Get all unique months from trades
+                const monthsSet = new Set();
+                allTrades.forEach(trade => {
+                    if (trade.date) {
+                        const parts = trade.date.split('/');
+                        if (parts.length >= 3) {
+                            const monthNames = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                              'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                            const monthNum = parseInt(parts[1]);
+                            const year = parts[2].slice(-2); // Last 2 digits of year
+                            const monthName = monthNames[monthNum];
+                            const displayMonth = `${monthName}-${year}`;
+                            monthsSet.add(displayMonth);
+                        }
+                    }
                 });
                 
-                charts.compare.data.labels = labels;
-                charts.compare.data.datasets = datasets;
+                availableMonths = Array.from(monthsSet).sort((a, b) => {
+                    // Sort by date
+                    const [aMonth, aYear] = a.split('-');
+                    const [bMonth, bYear] = b.split('-');
+                    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                    const aMonthIdx = monthNames.indexOf(aMonth);
+                    const bMonthIdx = monthNames.indexOf(bMonth);
+                    return parseInt(aYear) === parseInt(bYear) ? aMonthIdx - bMonthIdx : parseInt(aYear) - parseInt(bYear);
+                });
                 
-                // Update chart options for professional look
-                charts.compare.options.plugins.legend.labels.font.size = 10;
-                charts.compare.options.plugins.legend.labels.padding = 8;
-                charts.compare.options.plugins.legend.labels.boxWidth = 20;
-                charts.compare.options.plugins.legend.labels.boxHeight = 10;
+                // Set current month to latest if not set
+                if (availableMonths.length > 0 && currentMonthIndex >= availableMonths.length) {
+                    currentMonthIndex = availableMonths.length - 1;
+                }
+                
+                updateMonthDisplay();
+                
+                let labels = [];
+                let data = [];
+                let colors = [];
+                let strategyContributions = {};
+                
+                if (isMonthly && availableMonths.length > 0) {
+                    // Monthly view - show contributions for selected month
+                    const selectedMonth = availableMonths[currentMonthIndex];
+                    const [monthName, year] = selectedMonth.split('-');
+                    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                    const monthNum = monthNames.indexOf(monthName) + 1;
+                    const fullYear = '20' + year; // Convert 25 to 2025
+                    
+                    // Get trades for this month
+                    const monthTrades = allTrades.filter(trade => {
+                        if (!trade.date) return false;
+                        const parts = trade.date.split('/');
+                        if (parts.length < 3) return false;
+                        return parseInt(parts[1]) === monthNum && parts[2] === fullYear;
+                    });
+                    
+                    // Calculate strategy contributions for the month
+                    monthTrades.forEach(trade => {
+                        if (trade.strategyPnlTax) {
+                            Object.entries(trade.strategyPnlTax).forEach(([stratName, pnl]) => {
+                                if (!stratName.startsWith('A.PRO')) {
+                                    if (!strategyContributions[stratName]) {
+                                        strategyContributions[stratName] = 0;
+                                    }
+                                    strategyContributions[stratName] += pnl;
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    // Overall view - show contributions across all time
+                    allTrades.forEach(trade => {
+                        if (trade.strategyPnlTax) {
+                            Object.entries(trade.strategyPnlTax).forEach(([stratName, pnl]) => {
+                                if (!stratName.startsWith('A.PRO')) {
+                                    if (!strategyContributions[stratName]) {
+                                        strategyContributions[stratName] = 0;
+                                    }
+                                    strategyContributions[stratName] += pnl;
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                // Sort strategies by broker code and PRO number
+                // Filter out strategies with zero contribution
+                const sortedStrategies = Object.entries(strategyContributions)
+                    .filter(([stratName, contribution]) => contribution !== 0) // Exclude zero contributions
+                    .sort((a, b) => {
+                        // Extract broker code and PRO number from strategy names
+                        const extractParts = (name) => {
+                            const match = name.match(/([A-Z0-9]+)\s*PRO\s*(\d+)/i);
+                            if (match) {
+                                return {
+                                    broker: match[1],
+                                    pro: parseInt(match[2])
+                                };
+                            }
+                            return { broker: name, pro: 0 };
+                        };
+                        
+                        const partsA = extractParts(a[0]);
+                        const partsB = extractParts(b[0]);
+                        
+                        // Sort by broker code first
+                        if (partsA.broker !== partsB.broker) {
+                            return partsA.broker.localeCompare(partsB.broker);
+                        }
+                        
+                        // Then by PRO number
+                        return partsA.pro - partsB.pro;
+                    })
+                    .slice(0, 10); // Top 10 strategies
+                
+                // Predefined colors matching the image
+                const strategyColors = {
+                    'PRO 4': '#2563eb',
+                    'PRO 5': '#059669',
+                    'PRO 8': '#ef4444',
+                    'PRO 6': '#7c3aed',
+                    'PRO 7': '#ea580c'
+                };
+                const defaultColors = ['#8b5cf6', '#06b6d4', '#f59e0b', '#ec4899', '#10b981'];
+                
+                // Helper function to extract PRO number for color matching
+                const getColorForStrategy = (stratName) => {
+                    const match = stratName.match(/PRO\s*(\d+)/i);
+                    if (match) {
+                        const proKey = `PRO ${match[1]}`;
+                        return strategyColors[proKey];
+                    }
+                    return null;
+                };
+                
+                // Calculate total first for percentage calculations
+                const totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
+                const isPercentageMode = displayTypes.waterfall === 'percentage';
+                
+                // Build waterfall data with floating bars [start, end]
+                // Start from 0, no "Start" bar needed
+                
+                let cumulative = 0;
+                const contributions = []; // Store actual contribution values for tooltips
+                
+                sortedStrategies.forEach(([stratName, contribution], index) => {
+                    labels.push(formatStrategyName(stratName));
+                    contributions.push(contribution); // Always store actual value for tooltip
+                    
+                    // Calculate display value (percentage or actual)
+                    let displayValue = contribution;
+                    if (isPercentageMode && totalValue !== 0) {
+                        displayValue = (contribution / Math.abs(totalValue)) * 100;
+                    }
+                    
+                    const start = cumulative;
+                    const end = cumulative + displayValue;
+                    
+                    // For floating bars, always use [min, max] for proper display
+                    data.push([Math.min(start, end), Math.max(start, end)]);
+                    
+                    // Color based on positive/negative contribution
+                    const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
+                    colors.push(contribution >= 0 ? baseColor : '#c2410c');
+                    
+                    cumulative += displayValue;
+                });
+                
+                // Add Total
+                labels.push('Total');
+                contributions.push(totalValue); // Store actual total value
+                
+                // Total bar display value
+                const totalDisplayValue = isPercentageMode ? (totalValue >= 0 ? 100 : -100) : totalValue;
+                
+                // Total bar from 0 to cumulative (can be negative)
+                if (totalDisplayValue >= 0) {
+                    data.push([0, totalDisplayValue]);
+                } else {
+                    data.push([totalDisplayValue, 0]);
+                }
+                colors.push('#94a3b8'); // Gray for total
+                
+                // Update chart
+                charts.compare.data.labels = labels;
+                charts.compare.data.datasets[0].data = data;
+                charts.compare.data.datasets[0].backgroundColor = colors;
+                
+                // Store contributions and total for tooltip access
+                charts.compare._contributions = contributions;
+                charts.compare._totalValue = totalValue;
+                
+                // Update tooltip callbacks
+                charts.compare.options.plugins.tooltip.callbacks.label = function(ctx) {
+                    // Use stored contribution value instead of calculating from bar
+                    const value = charts.compare._contributions[ctx.dataIndex];
+                    const total = charts.compare._totalValue;
+                    
+                    if (displayTypes.waterfall === 'percentage') {
+                        // Calculate percentage of total
+                        if (total === 0) {
+                            return '0.00%';
+                        }
+                        const percentValue = (value / Math.abs(total)) * 100;
+                        const sign = percentValue < 0 ? '-' : '';
+                        return `${sign}${Math.abs(percentValue).toFixed(2)}%`;
+                    }
+                    const sign = value < 0 ? '-' : '';
+                    return `${sign}₹${formatIndianNumber(Math.abs(value), 2)}`;
+                };
                 
                 charts.compare.update('none');
             }
