@@ -243,6 +243,37 @@
     </div>
 
     <script>
+        // Indian Number Formatting Function
+        function formatIndianNumber(num, decimals = 0) {
+            const isNegative = num < 0;
+            const absNum = Math.abs(num);
+            
+            // Round to specified decimals
+            const rounded = decimals > 0 ? absNum.toFixed(decimals) : Math.round(absNum).toString();
+            const parts = rounded.split('.');
+            let intPart = parts[0];
+            const decPart = parts[1];
+            
+            // Indian formatting: x,xx,xxx
+            let formatted = '';
+            if (intPart.length <= 3) {
+                formatted = intPart;
+            } else {
+                const lastThree = intPart.substring(intPart.length - 3);
+                const remaining = intPart.substring(0, intPart.length - 3);
+                
+                // Add commas every 2 digits for remaining part
+                formatted = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+            }
+            
+            // Add decimal part if exists
+            if (decPart) {
+                formatted += '.' + decPart;
+            }
+            
+            return (isNegative ? '-' : '') + formatted;
+        }
+        
         // Global state
         let allTrades = [];
         const charts = {
@@ -903,7 +934,7 @@
                             borderColor: '#059669',
                             callbacks: {
                                 title: ctx => ctx[0].label,
-                                label: ctx => `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                                label: ctx => `₹${formatIndianNumber(ctx.parsed.y, 2)}`
                             }
                         }
                     }
@@ -923,7 +954,7 @@
                             borderColor: '#dc2626',
                             callbacks: {
                                 title: ctx => ctx[0].label,
-                                label: ctx => `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                                label: ctx => `₹${formatIndianNumber(ctx.parsed.y, 2)}`
                             }
                         }
                     }
@@ -953,7 +984,7 @@
                             borderColor: '#059669',
                             callbacks: {
                                 title: ctx => ctx[0].label,
-                                label: ctx => `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                                label: ctx => `₹${formatIndianNumber(ctx.parsed.y, 2)}`
                             }
                         }
                     },
@@ -1111,7 +1142,7 @@
                                 label: ctx => {
                                     const label = ctx.dataset.label; // Strategy name only
                                     const value = ctx.parsed.y;
-                                    return `${label}: ₹${value.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+                                    return `${label}: ₹${formatIndianNumber(value, 0)}`;
                                 },
                                 labelColor: ctx => ({
                                     borderColor: ctx.dataset.borderColor,
@@ -1426,7 +1457,7 @@
                     if (displayTypes.pnl === 'percentage') {
                         return value.toFixed(2) + '%';
                     }
-                    return '₹' + value.toLocaleString();
+                    return '₹' + formatIndianNumber(value);
                 };
                 
                 // Update tooltip callback
@@ -1434,7 +1465,7 @@
                     if (displayTypes.pnl === 'percentage') {
                         return ctx.parsed.y.toFixed(2) + '%';
                     }
-                    return `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    return `₹${formatIndianNumber(ctx.parsed.y, 2)}`;
                 };
                 
                 charts.pnl.update('none');
@@ -1521,7 +1552,7 @@
                     if (displayTypes.drawdown === 'percentage') {
                         return value.toFixed(2) + '%';
                     }
-                    return '₹' + value.toLocaleString();
+                    return '₹' + formatIndianNumber(value);
                 };
                 
                 // Update tooltip callback
@@ -1529,7 +1560,7 @@
                     if (displayTypes.drawdown === 'percentage') {
                         return ctx.parsed.y.toFixed(2) + '%';
                     }
-                    return `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    return `₹${formatIndianNumber(ctx.parsed.y, 2)}`;
                 };
                 
                 charts.drawdown.update('none');
@@ -1663,7 +1694,7 @@
                     if (displayTypes.pnlbar === 'percentage') {
                         return value.toFixed(2) + '%';
                     }
-                    return '₹' + value.toLocaleString();
+                    return '₹' + formatIndianNumber(value);
                 };
                 
                 // Update tooltip callback
@@ -1671,7 +1702,7 @@
                     if (displayTypes.pnlbar === 'percentage') {
                         return ctx.parsed.y.toFixed(2) + '%';
                     }
-                    return `₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    return `₹${formatIndianNumber(ctx.parsed.y, 2)}`;
                 };
                 
                 charts.pnlbar.update('none');
