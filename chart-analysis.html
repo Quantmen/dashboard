@@ -1966,10 +1966,66 @@
                             }
                         });
                     } else if (period === 'week' || period === 'month') {
+                        // Calculate starting capital same way as Cumulative P&L
+                        let startingCapital = 0;
+                        if (allTrades.length > 0) {
+                            const brokerDates = {};
+                            
+                            allTrades.forEach(trade => {
+                                if (trade.strategyDetails) {
+                                    Object.keys(trade.strategyDetails).forEach(strategyName => {
+                                        const cleanName = strategyName.replace(/\s+/g, '');
+                                        const brokerMatch = cleanName.match(/^(.+?)PRO/);
+                                        
+                                        if (brokerMatch) {
+                                            const brokerCode = brokerMatch[1];
+                                            const margin = trade.strategyDetails[strategyName]?.margin || 0;
+                                            
+                                            if (margin > 0) {
+                                                if (!brokerDates[brokerCode]) {
+                                                    brokerDates[brokerCode] = [];
+                                                }
+                                                if (!brokerDates[brokerCode].includes(trade.date)) {
+                                                    brokerDates[brokerCode].push(trade.date);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                            
+                            Object.keys(brokerDates).forEach(brokerCode => {
+                                const dates = brokerDates[brokerCode].sort((a, b) => compareDates(a, b));
+                                const brokerFirstDate = dates[0];
+                                
+                                const brokerMargins = [];
+                                allTrades.filter(t => t.date === brokerFirstDate).forEach(trade => {
+                                    if (trade.strategyDetails) {
+                                        Object.keys(trade.strategyDetails).forEach(strategyName => {
+                                            const cleanName = strategyName.replace(/\s+/g, '');
+                                            const brokerMatch = cleanName.match(/^(.+?)PRO/);
+                                            
+                                            if (brokerMatch && brokerMatch[1] === brokerCode) {
+                                                const margin = trade.strategyDetails[strategyName]?.margin || 0;
+                                                if (margin > 0) {
+                                                    brokerMargins.push(margin);
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                
+                                if (brokerMargins.length > 0) {
+                                    startingCapital += Math.max(...brokerMargins);
+                                }
+                            });
+                        }
+                        
+                        console.log('Periodic Returns - Starting Capital:', startingCapital);
+                        
                         profitData = aggregatedData.map((d, index) => {
                             if (index === 0) {
-                                // First period: use starting capital = cumMargin - cumPnl
-                                const startingCapital = (d.cumMargin || 0) - (d.cumPnl || 0);
+                                // First period: use starting capital (same as Cumulative P&L)
                                 if (startingCapital === 0) {
                                     return 0;
                                 } else {
@@ -2015,6 +2071,11 @@
                 };
                 
                 charts.pnlbar.update('none');
+                
+                // Force immediate render to display labels without delay
+                requestAnimationFrame(() => {
+                    charts.pnlbar.render();
+                });
             } else if (chartType === 'compare') {
                 // Waterfall Chart Logic
                 const isMonthly = !window.waterfallView || window.waterfallView === 'monthly';
@@ -2239,6 +2300,11 @@
                 };
                 
                 charts.compare.update('none');
+                
+                // Force immediate render to display labels without delay
+                requestAnimationFrame(() => {
+                    charts.compare.render();
+                });
             }
         }
     </script>
