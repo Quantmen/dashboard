@@ -190,12 +190,29 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Tablet Responsive */
+        @media (max-width: 1024px) {
+            .charts-grid {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                grid-template-rows: auto !important;
+                height: auto !important;
+                gap: 16px !important;
+            }
+            
+            .chart-card {
+                height: 450px;
+            }
+        }
+        
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .charts-grid {
-                grid-template-columns: 1fr;
-                height: auto;
-                gap: 16px;
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                grid-template-rows: auto !important;
+                height: auto !important;
+                gap: 16px !important;
             }
             
             .chart-card {
