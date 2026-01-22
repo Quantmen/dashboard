@@ -189,6 +189,71 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 16px;
+            }
+            
+            .chart-card {
+                height: 400px;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .chart-controls {
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            
+            .chart-toggles {
+                flex-shrink: 0;
+            }
+            
+            .month-navigation {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .page-title {
+                font-size: 18px;
+            }
+            
+            .page-subtitle {
+                font-size: 11px;
+            }
+            
+            .chart-title {
+                font-size: 13px;
+            }
+            
+            .toggle-btn {
+                padding: 5px 10px;
+                font-size: 10px;
+            }
+            
+            .nav-btn {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+            
+            .current-month {
+                font-size: 11px;
+                min-width: 70px;
+            }
+        }
     </style>
 </head>
 <body>
