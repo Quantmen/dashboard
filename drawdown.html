@@ -119,12 +119,12 @@
                         <th>Add Fund(%)</th>
                         <th>A/C DD (₹)</th>
                         <th>A/C DD %</th>
-                        <th>Expense (₹)</th>
-                        <th>Expense(%)</th>
+                        <th>DD Expense (₹)</th>
+                        <th>DD Expense(%)</th>
                         <th>DD Duration</th>
                         <th>A/C DD Start</th>
                         <th>A/C DD End</th>
-                        <th>DD Expense (₹)</th>
+                        <th>Expense (₹)</th>
                         <th>Max DD %</th>
                     </tr>
                 </thead>
@@ -1032,6 +1032,9 @@
                 }
             }
             
+            // Calculate DD Expense % for All Broker using Peak Total Margin
+            const allBrokerDDExpensePercent = peakTotalMarginForAllBroker > 0 ? (allBrokerDDExp / peakTotalMarginForAllBroker) * 100 : 0;
+            
             // Calculate combined DD duration, start and end for selected brokers
             let earliestDDStart = null;
             let latestDDEnd = null;
@@ -1072,12 +1075,12 @@
                 <td class="${extraMarginPercentClass}">${formatPercent(allBrokerExtraMarginPercent)}</td>
                 <td class="${allBrokerCurrentDD < 0 ? 'negative' : 'neutral'}">${allBrokerCurrentDD < 0 ? formatCurrency(allBrokerCurrentDD) : '-'}</td>
                 <td class="${allBrokerCurrentDDPercent < 0 ? 'negative' : 'neutral'}">${allBrokerCurrentDD < 0 ? formatPercent(allBrokerCurrentDDPercent) : '0.00%'}</td>
-                <td class="${allBrokerExpense < 0 ? 'negative' : (allBrokerExpense > 0 ? 'positive' : 'neutral')}">${formatCurrency(allBrokerExpense)}</td>
-                <td class="${allBrokerExpensePercent < 0 ? 'negative' : (allBrokerExpensePercent > 0 ? 'positive' : 'neutral')}">${formatPercent(allBrokerExpensePercent)}</td>
+                <td class="${allBrokerDDExp < 0 ? 'negative' : (allBrokerDDExp > 0 ? 'positive' : 'neutral')}">${allBrokerCurrentDD < 0 && allBrokerDDExp !== 0 ? formatCurrency(allBrokerDDExp) : '-'}</td>
+                <td class="${allBrokerDDExpensePercent < 0 ? 'negative' : (allBrokerDDExpensePercent > 0 ? 'positive' : 'neutral')}">${allBrokerCurrentDD < 0 && allBrokerDDExp !== 0 ? formatPercent(allBrokerDDExpensePercent) : '-'}</td>
                 <td>${allBrokerCurrentDD < 0 && allBrokerDDDur > 0 ? allBrokerDDDur + ' days' : '-'}</td>
                 <td>${allBrokerCurrentDD < 0 ? allBrokerDDStart : '-'}</td>
                 <td>${allBrokerCurrentDD < 0 ? allBrokerDDEnd : '-'}</td>
-                <td class="${allBrokerDDExp < 0 ? 'negative' : (allBrokerDDExp > 0 ? 'positive' : 'neutral')}">${allBrokerCurrentDD < 0 && allBrokerDDExp !== 0 ? formatCurrency(allBrokerDDExp) : '-'}</td>
+                <td class="${allBrokerExpense < 0 ? 'negative' : (allBrokerExpense > 0 ? 'positive' : 'neutral')}">${formatCurrency(allBrokerExpense)}</td>
                 <td class="negative">${formatPercent(allBrokerMaxDDPercent)}</td>
             </tr>`;
             
@@ -1120,6 +1123,8 @@
                 const ddEndDate = formatDateForDisplay(getAccountDDEndDate(code));
                 // Calculate DD Expense (sum of expenses from DD start date)
                 const ddExpense = getAccountDDExpense(code);
+                // Calculate DD Expense % using Peak Account Margin
+                const ddExpensePercent = accountPeak > 0 ? (ddExpense / accountPeak) * 100 : 0;
                 
                 // Calculate Max DD % using historical margin data (same method as All Broker)
                 let maxDDPercent = 0;
@@ -1165,12 +1170,12 @@
                     <td class="${addFundPercentClass}">${formatPercent(addFundPercent)}</td>
                     <td class="${currentDD < 0 ? 'negative' : 'neutral'}">${currentDD < 0 ? formatCurrency(currentDD) : '-'}</td>
                     <td class="${currentDDPercent < 0 ? 'negative' : 'neutral'}">${currentDD < 0 ? formatPercent(currentDDPercent) : '0.00%'}</td>
-                    <td class="${accountExpense < 0 ? 'negative' : (accountExpense > 0 ? 'positive' : 'neutral')}">${formatCurrency(accountExpense)}</td>
-                    <td class="${expensePercent < 0 ? 'negative' : (expensePercent > 0 ? 'positive' : 'neutral')}">${formatPercent(expensePercent)}</td>
+                    <td class="${ddExpense < 0 ? 'negative' : (ddExpense > 0 ? 'positive' : 'neutral')}">${currentDD < 0 && ddExpense !== 0 ? formatCurrency(ddExpense) : '-'}</td>
+                    <td class="${ddExpensePercent < 0 ? 'negative' : (ddExpensePercent > 0 ? 'positive' : 'neutral')}">${currentDD < 0 && ddExpense !== 0 ? formatPercent(ddExpensePercent) : '-'}</td>
                     <td>${currentDD < 0 && ddDuration > 0 ? ddDuration + ' days' : '-'}</td>
                     <td>${currentDD < 0 ? ddStartDate : '-'}</td>
                     <td>${currentDD < 0 ? ddEndDate : '-'}</td>
-                    <td class="${ddExpense < 0 ? 'negative' : (ddExpense > 0 ? 'positive' : 'neutral')}">${currentDD < 0 && ddExpense !== 0 ? formatCurrency(ddExpense) : '-'}</td>
+                    <td class="${accountExpense < 0 ? 'negative' : (accountExpense > 0 ? 'positive' : 'neutral')}">${formatCurrency(accountExpense)}</td>
                     <td class="negative">${formatPercent(maxDDPercent)}</td>
                 </tr>`;
             });
@@ -1633,7 +1638,7 @@
             
             // Export Broker Level Metrics
             csvContent += 'BROKER LEVEL METRICS\n';
-            csvContent += 'Strategy,STG COUNT,STG Margin,A/C Margin,Add Fund,Add Fund(%),A/C DD (₹),A/C DD %,Expense (₹),Expense(%),DD Duration,A/C DD Start,A/C DD End,DD Expense (₹),Max DD %\n';
+            csvContent += 'Strategy,STG COUNT,STG Margin,A/C Margin,Add Fund,Add Fund(%),A/C DD (₹),A/C DD %,DD Expense (₹),DD Expense(%),DD Duration,A/C DD Start,A/C DD End,Expense (₹),Max DD %\n';
             
             const brokerTableBody = document.getElementById('brokerLevelTableBody');
             if (brokerTableBody) {
