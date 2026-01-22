@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chart Analysis</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -246,6 +247,10 @@
                     <div class="chart-title">Periodic Returns</div>
                     <div class="chart-controls">
                         <div class="chart-toggles">
+                            <button class="toggle-btn" id="showPnlBarValues">Show</button>
+                            <button class="toggle-btn active" id="hidePnlBarValues">Hide</button>
+                        </div>
+                        <div class="chart-toggles">
                             <button class="toggle-btn active" data-chart="pnlbar" data-type="value">Value</button>
                             <button class="toggle-btn" data-chart="pnlbar" data-type="percentage">%</button>
                         </div>
@@ -266,6 +271,10 @@
                 <div class="chart-header">
                     <div class="chart-title">Breakdown</div>
                     <div class="chart-controls">
+                        <div class="chart-toggles">
+                            <button class="toggle-btn" id="showWaterfallValues">Show</button>
+                            <button class="toggle-btn active" id="hideWaterfallValues">Hide</button>
+                        </div>
                         <div class="chart-toggles">
                             <button class="toggle-btn active" data-chart="waterfall" data-type="value">Value</button>
                             <button class="toggle-btn" data-chart="waterfall" data-type="percentage">%</button>
@@ -325,6 +334,25 @@
             return (isNegative ? '-' : '') + formatted;
         }
         
+        // Short Indian Number Format (5L, 50K, 2.5Cr)
+        function formatIndianShort(num) {
+            const isNegative = num < 0;
+            const absNum = Math.abs(num);
+            
+            if (absNum >= 10000000) {
+                // Crores
+                return (isNegative ? '-' : '') + (absNum / 10000000).toFixed(1) + 'Cr';
+            } else if (absNum >= 100000) {
+                // Lakhs
+                return (isNegative ? '-' : '') + (absNum / 100000).toFixed(1) + 'L';
+            } else if (absNum >= 1000) {
+                // Thousands
+                return (isNegative ? '-' : '') + (absNum / 1000).toFixed(1) + 'K';
+            } else {
+                return (isNegative ? '-' : '') + absNum.toFixed(0);
+            }
+        }
+        
         // Format strategy name with space before PRO
         function formatStrategyName(name) {
             // Add space before PRO if not already present
@@ -351,6 +379,11 @@
             drawdown: 'value',
             pnlbar: 'value',
             waterfall: 'value'
+        };
+        
+        const showValues = {
+            pnlbar: false,
+            waterfall: false
         };
         
         window.waterfallView = 'monthly'; // 'monthly' or 'overall'
@@ -452,6 +485,44 @@
                         updateMonthDisplay();
                         updateChart('compare');
                     }
+                });
+            }
+            
+            // Show/Hide Values toggle buttons
+            const showPnlBarValues = document.getElementById('showPnlBarValues');
+            const hidePnlBarValues = document.getElementById('hidePnlBarValues');
+            const showWaterfallValues = document.getElementById('showWaterfallValues');
+            const hideWaterfallValues = document.getElementById('hideWaterfallValues');
+            
+            if (showPnlBarValues && hidePnlBarValues) {
+                showPnlBarValues.addEventListener('click', () => {
+                    showValues.pnlbar = true;
+                    showPnlBarValues.classList.add('active');
+                    hidePnlBarValues.classList.remove('active');
+                    updateChart('pnlbar');
+                });
+                
+                hidePnlBarValues.addEventListener('click', () => {
+                    showValues.pnlbar = false;
+                    hidePnlBarValues.classList.add('active');
+                    showPnlBarValues.classList.remove('active');
+                    updateChart('pnlbar');
+                });
+            }
+            
+            if (showWaterfallValues && hideWaterfallValues) {
+                showWaterfallValues.addEventListener('click', () => {
+                    showValues.waterfall = true;
+                    showWaterfallValues.classList.add('active');
+                    hideWaterfallValues.classList.remove('active');
+                    updateChart('compare');
+                });
+                
+                hideWaterfallValues.addEventListener('click', () => {
+                    showValues.waterfall = false;
+                    hideWaterfallValues.classList.add('active');
+                    showWaterfallValues.classList.remove('active');
+                    updateChart('compare');
                 });
             }
         }
@@ -1121,8 +1192,8 @@
                 plugins: [{
                     id: 'barLabels',
                     afterDatasetsDraw(chart) {
-                        // Only show labels in month view
-                        if (activePeriods.pnlbar !== 'month') {
+                        // Only show labels if showValues.pnlbar is true
+                        if (!showValues.pnlbar) {
                             return;
                         }
                         
@@ -1135,14 +1206,7 @@
                             if (displayTypes.pnlbar === 'percentage') {
                                 label = value.toFixed(2) + '%';
                             } else {
-                                const absValue = Math.abs(value);
-                                if (absValue >= 100000) {
-                                    label = `₹${(value / 100000).toFixed(1)}L`;
-                                } else if (absValue >= 1000) {
-                                    label = `₹${(value / 1000).toFixed(1)}K`;
-                                } else {
-                                    label = `₹${Math.round(value)}`;
-                                }
+                                label = formatIndianShort(value);
                             }
                             
                             // Style
@@ -1347,7 +1411,84 @@
                         intersect: false, 
                         mode: 'index' 
                     }
-                }
+                },
+                plugins: [{
+                    id: 'waterfallLabels',
+                    afterDatasetsDraw(chart) {
+                        // Only show labels if showValues.waterfall is true
+                        if (!showValues.waterfall) {
+                            return;
+                        }
+                        
+                        const { ctx, data, scales } = chart;
+                        const meta = chart.getDatasetMeta(0);
+                        
+                        meta.data.forEach((bar, index) => {
+                            // Get the actual value from stored contributions
+                            let value;
+                            if (charts.compare && charts.compare._contributions) {
+                                value = charts.compare._contributions[index];
+                            } else {
+                                const dataValue = data.datasets[0].data[index];
+                                value = Array.isArray(dataValue) 
+                                    ? dataValue[1] - dataValue[0]
+                                    : dataValue;
+                            }
+                            
+                            // Format value based on display type
+                            let label;
+                            if (displayTypes.waterfall === 'percentage') {
+                                const total = charts.compare._totalValue || 1;
+                                const percentValue = (value / Math.abs(total)) * 100;
+                                label = percentValue.toFixed(1) + '%';
+                            } else {
+                                label = formatIndianShort(value);
+                            }
+                            
+                            // Style
+                            ctx.save();
+                            ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                            ctx.fillStyle = value >= 0 ? '#10b981' : '#c2410c';
+                            ctx.textAlign = 'center';
+                            
+                            // Position label based on value
+                            const x = bar.x;
+                            let y;
+                            
+                            // Get the bar data array [min, max]
+                            const barData = data.datasets[0].data[index];
+                            const yScale = scales.y;
+                            
+                            if (Array.isArray(barData)) {
+                                // Floating bar - use the max value (top of bar)
+                                const topValue = Math.max(barData[0], barData[1]);
+                                const bottomValue = Math.min(barData[0], barData[1]);
+                                
+                                if (value >= 0) {
+                                    // Positive: label above the bar (above topValue)
+                                    ctx.textBaseline = 'bottom';
+                                    y = yScale.getPixelForValue(topValue) - 5;
+                                } else {
+                                    // Negative: label below the bar (below bottomValue)
+                                    ctx.textBaseline = 'top';
+                                    y = yScale.getPixelForValue(bottomValue) + 5;
+                                }
+                            } else {
+                                // Regular bar
+                                if (value >= 0) {
+                                    ctx.textBaseline = 'bottom';
+                                    y = bar.y - 5;
+                                } else {
+                                    ctx.textBaseline = 'top';
+                                    y = bar.y + 5;
+                                }
+                            }
+                            
+                            ctx.fillText(label, x, y);
+                            ctx.restore();
+                        });
+                    }
+                }]
             });
         }
 
