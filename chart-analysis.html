@@ -1912,15 +1912,15 @@
                     })
                     .slice(0, 10); // Top 10 strategies
                 
-                // Predefined colors matching the image
+                // Modern Vibrant color palette (green reserved for Total)
                 const strategyColors = {
-                    'PRO 4': '#2563eb',
-                    'PRO 5': '#059669',
-                    'PRO 8': '#ef4444',
-                    'PRO 6': '#7c3aed',
-                    'PRO 7': '#ea580c'
+                    'PRO 4': '#3b82f6',
+                    'PRO 5': '#ec4899',
+                    'PRO 8': '#8b5cf6',
+                    'PRO 6': '#06b6d4',
+                    'PRO 7': '#f59e0b'
                 };
-                const defaultColors = ['#8b5cf6', '#06b6d4', '#f59e0b', '#ec4899', '#10b981'];
+                const defaultColors = ['#3b82f6', '#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b'];
                 
                 // Helper function to extract PRO number for color matching
                 const getColorForStrategy = (stratName) => {
@@ -1959,8 +1959,14 @@
                     data.push([Math.min(start, end), Math.max(start, end)]);
                     
                     // Color based on positive/negative contribution
-                    const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
-                    colors.push(contribution >= 0 ? baseColor : '#c2410c');
+                    if (contribution < 0) {
+                        // Use red/brown only for negative values
+                        colors.push('#c2410c');
+                    } else {
+                        // Use predefined or default colors for positive values
+                        const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
+                        colors.push(baseColor);
+                    }
                     
                     cumulative += displayValue;
                 });
@@ -1978,7 +1984,8 @@
                 } else {
                     data.push([totalDisplayValue, 0]);
                 }
-                colors.push('#94a3b8'); // Gray for total
+                // Use red/brown for negative total, green for positive
+                colors.push(totalValue < 0 ? '#c2410c' : '#10b981');
                 
                 // Update chart
                 charts.compare.data.labels = labels;
