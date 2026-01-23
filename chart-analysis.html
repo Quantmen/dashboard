@@ -358,12 +358,12 @@
                             <button class="toggle-btn active" id="hideWaterfallValues">Hide</button>
                         </div>
                         <div class="chart-toggles">
-                            <button class="toggle-btn active" data-chart="waterfall" data-type="value">Value</button>
-                            <button class="toggle-btn" data-chart="waterfall" data-type="percentage">%</button>
+                            <button class="toggle-btn active" data-chart="compare" data-type="value">Value</button>
+                            <button class="toggle-btn" data-chart="compare" data-type="percentage">%</button>
                         </div>
                         <div class="chart-toggles">
-                            <button class="toggle-btn active" data-chart="waterfall" data-view="monthly">Monthly</button>
-                            <button class="toggle-btn" data-chart="waterfall" data-view="overall">Overall</button>
+                            <button class="toggle-btn active" data-chart="compare" data-view="monthly">Monthly</button>
+                            <button class="toggle-btn" data-chart="compare" data-view="overall">Overall</button>
                         </div>
                         <div class="month-navigation">
                             <button class="nav-btn" id="prevMonth">◄ Prev</button>
@@ -460,12 +460,12 @@
             pnl: 'value',
             drawdown: 'value',
             pnlbar: 'value',
-            waterfall: 'value'
+            compare: 'value'
         };
         
         const showValues = {
             pnlbar: false,
-            waterfall: false
+            compare: false
         };
         
         window.waterfallView = 'monthly'; // 'monthly' or 'overall'
@@ -488,11 +488,62 @@
             initializeCharts();
             window.addEventListener('message', handleParentMessage);
             
+            // Listen for storage changes (when parent updates localStorage)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'dashboardData' && e.newValue) {
+                    try {
+                        const data = JSON.parse(e.newValue);
+                        allTrades = data.tradesData || data || [];
+                        if (allTrades.length > 0) {
+                            refreshAllCharts();
+                        }
+                    } catch (err) {
+                        // Ignore parse errors
+                    }
+                }
+            });
+            
+            // Periodic check for data changes (every 2 seconds)
+            let lastDataLength = allTrades.length;
+            let lastDataChecksum = getDataChecksum(allTrades);
+            
+            setInterval(() => {
+                try {
+                    const stored = localStorage.getItem('dashboardData');
+                    if (stored) {
+                        const data = JSON.parse(stored);
+                        const newTrades = data.tradesData || data || [];
+                        const newChecksum = getDataChecksum(newTrades);
+                        
+                        // Check if data has changed
+                        if (newTrades.length !== lastDataLength || newChecksum !== lastDataChecksum) {
+                            allTrades = newTrades;
+                            lastDataLength = newTrades.length;
+                            lastDataChecksum = newChecksum;
+                            refreshAllCharts();
+                        }
+                    }
+                } catch (e) {
+                    // Ignore errors
+                }
+            }, 2000);
+            
             // Request data from parent on load
             setTimeout(() => {
                 window.parent.postMessage({ type: 'REQUEST_DATA_REFRESH' }, '*');
             }, 100);
         })();
+        
+        // Simple checksum function to detect data changes
+        function getDataChecksum(trades) {
+            if (!trades || trades.length === 0) return 0;
+            let sum = 0;
+            for (let i = 0; i < Math.min(trades.length, 10); i++) {
+                const trade = trades[i];
+                sum += (trade.profit || 0) + (trade.cumPnl || 0);
+            }
+            return sum;
+        }
 
         function setupEventListeners() {
             // Toggle button listeners
@@ -538,9 +589,9 @@
                         this.classList.add('active');
                         
                         // Update view and refresh chart
-                        if (chartType === 'waterfall') {
+                        if (chartType === 'compare') {
                             window.waterfallView = view;
-                            updateChart('compare'); // compare is the chart instance for waterfall
+                            updateChart('compare');
                         }
                     }
                 });
@@ -594,14 +645,14 @@
             
             if (showWaterfallValues && hideWaterfallValues) {
                 showWaterfallValues.addEventListener('click', () => {
-                    showValues.waterfall = true;
+                    showValues.compare = true;
                     showWaterfallValues.classList.add('active');
                     hideWaterfallValues.classList.remove('active');
                     updateChart('compare');
                 });
                 
                 hideWaterfallValues.addEventListener('click', () => {
-                    showValues.waterfall = false;
+                    showValues.compare = false;
                     hideWaterfallValues.classList.add('active');
                     showWaterfallValues.classList.remove('active');
                     updateChart('compare');
@@ -633,12 +684,41 @@
             
             if (type === 'TRADES_DATA' && data) {
                 allTrades = data;
-                updateAllCharts();
+                // Store updated data
+                try {
+                    localStorage.setItem('dashboardData', JSON.stringify({ tradesData: allTrades }));
+                } catch (e) {
+                    // Ignore storage errors
+                }
+                // Force refresh all charts
+                refreshAllCharts();
             } else if (type === 'UPDATE_DATA' && data) {
-                const tradesCount = data.tradesData ? data.tradesData.length : 0;
                 allTrades = data.tradesData || [];
-                updateAllCharts();
+                // Store updated data
+                try {
+                    localStorage.setItem('dashboardData', JSON.stringify({ tradesData: allTrades }));
+                } catch (e) {
+                    // Ignore storage errors
+                }
+                // Force refresh all charts
+                refreshAllCharts();
             }
+        }
+        
+        function refreshAllCharts() {
+            // Clear any cached data in charts
+            if (charts.compare) {
+                charts.compare._cacheKey = null;
+                charts.compare._cachedStrategies = null;
+                charts.compare._cachedTotalValue = null;
+            }
+            
+            // Reset available months for waterfall chart
+            availableMonths = [];
+            currentMonthIndex = 0;
+            
+            // Update all charts
+            updateAllCharts();
         }
 
         function loadStoredData() {
@@ -648,10 +728,11 @@
                     const data = JSON.parse(stored);
                     allTrades = data.tradesData || data || [];
                     if (allTrades.length > 0) {
-                        updateAllCharts();
+                        refreshAllCharts();
                     }
                 }
             } catch (e) {
+                // Ignore parse errors
             }
         }
 
@@ -841,7 +922,6 @@
                     // First period: extract starting capital = totalMargin - cumPnl
                     startingCapital = totalMarginWithPnl - (item.cumPnl || 0);
                     cumulativeExpenses = 0;
-                    console.log('First period - startingCapital:', startingCapital, 'totalMargin:', totalMarginWithPnl, 'cumPnl:', item.cumPnl);
                 } else {
                     // Calculate expected total margin = startingCapital + cumPnl - cumulativeExpenses
                     const expectedTotalMargin = startingCapital + (item.cumPnl || 0) - cumulativeExpenses;
@@ -849,10 +929,6 @@
                     // Calculate expenses for this period = expectedTotalMargin - actualTotalMargin
                     const periodExpense = expectedTotalMargin - totalMarginWithPnl;
                     cumulativeExpenses += periodExpense;
-                    
-                    if (index < 3 || Math.abs(periodExpense) > 1000) {
-                        console.log(`Period ${item.date}: totalMargin=${totalMarginWithPnl}, cumPnl=${item.cumPnl}, expected=${expectedTotalMargin}, expense=${periodExpense}, cumExpenses=${cumulativeExpenses}`);
-                    }
                 }
                 
                 // cumMargin is simply the totalMargin (which already includes cumPnl)
@@ -1420,7 +1496,7 @@
                                         total = value; // Fallback
                                     }
                                     
-                                    if (displayTypes.waterfall === 'percentage') {
+                                    if (displayTypes.compare === 'percentage') {
                                         // Calculate percentage of total
                                         if (!total || total === 0) {
                                             return '0.00%';
@@ -1459,7 +1535,7 @@
                                 padding: 8,
                                 maxTicksLimit: 8,
                                 callback: value => {
-                                    if (displayTypes.waterfall === 'percentage') {
+                                    if (displayTypes.compare === 'percentage') {
                                         return value.toFixed(1) + '%';
                                     }
                                     if (value === 0) return '₹0';
@@ -1497,35 +1573,22 @@
                 plugins: [{
                     id: 'waterfallLabels',
                     afterDatasetsDraw(chart) {
-                        // Only show labels if showValues.waterfall is true
-                        if (!showValues.waterfall) {
+                        // Only show labels if showValues.compare is true
+                        if (!showValues.compare) {
                             return;
                         }
                         
                         const { ctx, data, scales } = chart;
                         const meta = chart.getDatasetMeta(0);
+                        const yScale = scales.y;
+                        
+                        // Use pre-calculated labels if available
+                        const labels = chart._preCalculatedLabels || [];
                         
                         meta.data.forEach((bar, index) => {
-                            // Get the actual value from stored contributions
-                            let value;
-                            if (charts.compare && charts.compare._contributions) {
-                                value = charts.compare._contributions[index];
-                            } else {
-                                const dataValue = data.datasets[0].data[index];
-                                value = Array.isArray(dataValue) 
-                                    ? dataValue[1] - dataValue[0]
-                                    : dataValue;
-                            }
+                            if (!labels[index]) return;
                             
-                            // Format value based on display type
-                            let label;
-                            if (displayTypes.waterfall === 'percentage') {
-                                const total = charts.compare._totalValue || 1;
-                                const percentValue = (value / Math.abs(total)) * 100;
-                                label = percentValue.toFixed(1) + '%';
-                            } else {
-                                label = formatIndianShort(value);
-                            }
+                            const { label, value } = labels[index];
                             
                             // Style
                             ctx.save();
@@ -1539,7 +1602,6 @@
                             
                             // Get the bar data array [min, max]
                             const barData = data.datasets[0].data[index];
-                            const yScale = scales.y;
                             
                             if (Array.isArray(barData)) {
                                 // Floating bar - use the max value (top of bar)
@@ -1742,8 +1804,6 @@
                         });
                     }
                     
-                    console.log('Cumulative P&L - Starting Capital:', startingCapital);
-                    
                     data = aggregatedData.map(d => {
                         if (startingCapital === 0) return 0;
                         return ((d.cumPnl / startingCapital) * 100);
@@ -1841,8 +1901,6 @@
                         });
                     }
                     
-                    console.log('Drawdown - Starting Capital:', startingCapital);
-                    
                     data = aggregatedData.map(d => {
                         // peakMargin = startingCapital + peak cumPnl
                         const peakMargin = startingCapital + d.peak;
@@ -1879,15 +1937,6 @@
                 
                 if (displayType === 'percentage') {
                     const period = activePeriods[chartType];
-                    console.log('=== Percentage Calculation ===');
-                    console.log('Period:', period);
-                    console.log('First 3 items:', aggregatedData.slice(0, 3).map(d => ({
-                        date: d.date,
-                        cumMargin: d.cumMargin,
-                        periodProfit: d.periodProfit,
-                        cumPnl: d.cumPnl,
-                        percent: d.cumMargin > 0 ? ((d.periodProfit / d.cumMargin) * 100).toFixed(2) + '%' : '0%'
-                    })));
                     
                     if (period === 'day') {
                         // Build month boundaries
@@ -2021,8 +2070,6 @@
                             });
                         }
                         
-                        console.log('Periodic Returns - Starting Capital:', startingCapital);
-                        
                         profitData = aggregatedData.map((d, index) => {
                             if (index === 0) {
                                 // First period: use starting capital (same as Cumulative P&L)
@@ -2070,57 +2117,68 @@
                     return `₹${formatIndianNumber(ctx.parsed.y, 2)}`;
                 };
                 
+                // Update with immediate rendering
                 charts.pnlbar.update('none');
-                
-                // Force immediate render to display labels without delay
-                requestAnimationFrame(() => {
-                    charts.pnlbar.render();
-                });
+                charts.pnlbar.render();
             } else if (chartType === 'compare') {
                 // Waterfall Chart Logic
                 const isMonthly = !window.waterfallView || window.waterfallView === 'monthly';
                 
-                // Get all unique months from trades
-                const monthsSet = new Set();
-                allTrades.forEach(trade => {
-                    if (trade.date) {
-                        const parts = trade.date.split('/');
-                        if (parts.length >= 3) {
-                            const monthNames = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                // Check if we have cached data and only display type changed
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}`;
+                const useCache = charts.compare._cacheKey === cacheKey && 
+                                charts.compare._cachedStrategies && 
+                                charts.compare._cachedTotalValue !== undefined;
+                
+                let sortedStrategies, totalValue;
+                
+                if (useCache) {
+                    // Use cached calculations
+                    sortedStrategies = charts.compare._cachedStrategies;
+                    totalValue = charts.compare._cachedTotalValue;
+                } else {
+                    // Perform full calculation
+                    // Get all unique months from trades (only if needed)
+                    if (!isMonthly || availableMonths.length === 0) {
+                        const monthsSet = new Set();
+                        allTrades.forEach(trade => {
+                            if (trade.date) {
+                                const parts = trade.date.split('/');
+                                if (parts.length >= 3) {
+                                    const monthNames = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                                      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                                    const monthNum = parseInt(parts[1]);
+                                    const year = parts[2].slice(-2);
+                                    const monthName = monthNames[monthNum];
+                                    const displayMonth = `${monthName}-${year}`;
+                                    monthsSet.add(displayMonth);
+                                }
+                            }
+                        });
+                        
+                        availableMonths = Array.from(monthsSet).sort((a, b) => {
+                            const [aMonth, aYear] = a.split('-');
+                            const [bMonth, bYear] = b.split('-');
+                            const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
                                               'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-                            const monthNum = parseInt(parts[1]);
-                            const year = parts[2].slice(-2); // Last 2 digits of year
-                            const monthName = monthNames[monthNum];
-                            const displayMonth = `${monthName}-${year}`;
-                            monthsSet.add(displayMonth);
+                            const aMonthIdx = monthNames.indexOf(aMonth);
+                            const bMonthIdx = monthNames.indexOf(bMonth);
+                            return parseInt(aYear) === parseInt(bYear) ? aMonthIdx - bMonthIdx : parseInt(aYear) - parseInt(bYear);
+                        });
+                        
+                        if (availableMonths.length > 0 && currentMonthIndex >= availableMonths.length) {
+                            currentMonthIndex = availableMonths.length - 1;
                         }
                     }
-                });
-                
-                availableMonths = Array.from(monthsSet).sort((a, b) => {
-                    // Sort by date
-                    const [aMonth, aYear] = a.split('-');
-                    const [bMonth, bYear] = b.split('-');
-                    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
-                                      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-                    const aMonthIdx = monthNames.indexOf(aMonth);
-                    const bMonthIdx = monthNames.indexOf(bMonth);
-                    return parseInt(aYear) === parseInt(bYear) ? aMonthIdx - bMonthIdx : parseInt(aYear) - parseInt(bYear);
-                });
-                
-                // Set current month to latest if not set
-                if (availableMonths.length > 0 && currentMonthIndex >= availableMonths.length) {
-                    currentMonthIndex = availableMonths.length - 1;
-                }
-                
-                updateMonthDisplay();
-                
-                let labels = [];
-                let data = [];
-                let colors = [];
-                let strategyContributions = {};
-                
-                if (isMonthly && availableMonths.length > 0) {
+                    
+                    // Only update month display if not using cache
+                    if (!useCache) {
+                        updateMonthDisplay();
+                    }
+                    
+                    let strategyContributions = {};
+                    
+                    if (isMonthly && availableMonths.length > 0) {
                     // Monthly view - show contributions for selected month
                     const selectedMonth = availableMonths[currentMonthIndex];
                     const [monthName, year] = selectedMonth.split('-');
@@ -2168,10 +2226,9 @@
                 
                 // Sort strategies by broker code and PRO number
                 // Filter out strategies with zero contribution
-                const sortedStrategies = Object.entries(strategyContributions)
-                    .filter(([stratName, contribution]) => contribution !== 0) // Exclude zero contributions
+                sortedStrategies = Object.entries(strategyContributions)
+                    .filter(([stratName, contribution]) => contribution !== 0)
                     .sort((a, b) => {
-                        // Extract broker code and PRO number from strategy names
                         const extractParts = (name) => {
                             const match = name.match(/([A-Z0-9]+)\s*PRO\s*(\d+)/i);
                             if (match) {
@@ -2186,15 +2243,27 @@
                         const partsA = extractParts(a[0]);
                         const partsB = extractParts(b[0]);
                         
-                        // Sort by broker code first
                         if (partsA.broker !== partsB.broker) {
                             return partsA.broker.localeCompare(partsB.broker);
                         }
                         
-                        // Then by PRO number
                         return partsA.pro - partsB.pro;
                     })
-                    .slice(0, 10); // Top 10 strategies
+                    .slice(0, 10);
+                
+                // Calculate total
+                totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
+                
+                // Cache the calculated values
+                charts.compare._cacheKey = cacheKey;
+                charts.compare._cachedStrategies = sortedStrategies;
+                charts.compare._cachedTotalValue = totalValue;
+            }
+                
+                // Now build display data (this is fast)
+                let labels = [];
+                let data = [];
+                let colors = [];
                 
                 // Modern Vibrant color palette (green reserved for Total)
                 const strategyColors = {
@@ -2216,9 +2285,8 @@
                     return null;
                 };
                 
-                // Calculate total first for percentage calculations
-                const totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
-                const isPercentageMode = displayTypes.waterfall === 'percentage';
+                // Use cached or calculated totalValue
+                const isPercentageMode = displayTypes.compare === 'percentage';
                 
                 // Build waterfall data with floating bars [start, end]
                 // Start from 0, no "Start" bar needed
@@ -2280,13 +2348,25 @@
                 charts.compare._contributions = contributions;
                 charts.compare._totalValue = totalValue;
                 
+                // Pre-calculate labels for fast rendering
+                charts.compare._preCalculatedLabels = contributions.map(value => {
+                    let label;
+                    if (displayTypes.compare === 'percentage') {
+                        const percentValue = (value / Math.abs(totalValue || 1)) * 100;
+                        label = percentValue.toFixed(1) + '%';
+                    } else {
+                        label = formatIndianShort(value);
+                    }
+                    return { label, value };
+                });
+                
                 // Update tooltip callbacks
                 charts.compare.options.plugins.tooltip.callbacks.label = function(ctx) {
                     // Use stored contribution value instead of calculating from bar
                     const value = charts.compare._contributions[ctx.dataIndex];
                     const total = charts.compare._totalValue;
                     
-                    if (displayTypes.waterfall === 'percentage') {
+                    if (displayTypes.compare === 'percentage') {
                         // Calculate percentage of total
                         if (total === 0) {
                             return '0.00%';
@@ -2299,12 +2379,14 @@
                     return `${sign}₹${formatIndianNumber(Math.abs(value), 2)}`;
                 };
                 
+                // Force scale reset for proper percentage/value switching
+                charts.compare.options.scales.y.min = undefined;
+                charts.compare.options.scales.y.max = undefined;
+                
+                // Update with scale recalculation
                 charts.compare.update('none');
                 
-                // Force immediate render to display labels without delay
-                requestAnimationFrame(() => {
-                    charts.compare.render();
-                });
+                charts.compare.render();
             }
         }
     </script>
