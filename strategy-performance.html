@@ -429,7 +429,8 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}.table-container{b
 }
 
 /* Mobile Responsive Styles */
-@media (max-width: 768px) {
+/* Mobile Responsive Styles - Tablets and Phones (≤1024px) */
+@media (max-width: 1024px) {
     html, body {
         overflow: auto;
         overflow-x: hidden !important;
@@ -608,6 +609,7 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}.table-container{b
     }
 }
 
+/* Small Phone Responsive Styles (≤480px) */
 @media (max-width: 480px) {
     .page-header {
         padding: 14px 10px 10px 10px !important;
@@ -733,7 +735,7 @@ let monthsCleared = false;
 
 // Mobile View Functions - Defined Early
 function populateMobileView() {
-    if (window.innerWidth > 768) return; // Only populate on mobile
+    if (window.innerWidth > 1024) return; // Only populate on mobile/tablet
     
     const mobileContainer = document.getElementById('mobileDaysContainer');
     if (!mobileContainer) return;
@@ -3684,7 +3686,7 @@ document.body.removeChild(link);
 
 // Mobile view updates on window resize
 window.addEventListener('resize', function() {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 1024) {
         setTimeout(populateMobileView, 100);
     }
 });
