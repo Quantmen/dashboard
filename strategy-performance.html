@@ -1,4 +1,42 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Strategy Performance</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Strategy Performance</title>
+
+<!-- Optimized Font Loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ========================================
+   INTER FONT OPTIMIZATIONS
+   ======================================== */
+
+/* Smooth font rendering for better readability */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Tabular numbers for perfect alignment in financial data */
+body {
+    font-feature-settings: 'tnum' 1, 'cv05' 1;
+}
+
+/* Apply tabular numbers to all numeric elements */
+.performance-table,
+.mobile-pnl-amount,
+.mobile-strategy-value,
+.summary-card-value,
+.mobile-month-value,
+.mobile-pnl-percent {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
 *{margin:0;padding:0;box-sizing:border-box;}html, body{width:100%;height:100%;overflow:hidden;}body{font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;background:#f8fafc;color:#1e293b;}.main-content{overflow-y:auto;overflow-x:auto;padding:16px 16px 32px 32px;background:#f8fafc;height:100vh;width:100%;}.page-header{margin-bottom:16px;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:100;padding-right:16px;margin-right:-16px;}.page-title{font-size:20px;font-weight:700;color:#111827;margin-bottom:4px;letter-spacing:-0.5px;}.page-subtitle{font-size:12px;color:#6b7280;font-weight:400;}
 .controls-section{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:1000;padding-right:16px;margin-right:-16px;}.controls-section > *{flex:1 1 auto;min-width:0;}.control-group{display:flex;align-items:center;gap:8px;}.control-label{font-size:12px;color:#374151;font-weight:600;}.strategy-filter-container{position:relative;flex:1 1 auto;min-width:0;z-index:10000;}.strategy-filter-button{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:500;background:white;color:#374151;cursor:pointer;transition:all 0.15s ease;width:100%;white-space:nowrap;}
 .strategy-filter-button:hover{border-color:#9ca3af;background:#f9fafb;}.strategy-filter-dropdown{position:absolute;top:100%;left:0;margin-top:6px;background:white;border:1px solid #d1d5db;border-radius:10px;box-shadow:0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);min-width:180px;max-height:400px;overflow-y:auto;z-index:99999;display:none;}.strategy-filter-dropdown.active{display:block;}#monthFilterDropdown{min-width:160px;max-width:160px;max-height:500px;}#monthFilterDropdown .strategy-filter-label{font-size:12px;}
@@ -190,7 +228,481 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}.table-container{b
 }
 
 /* Tablet Layout - Dynamic columns based on card count */
-</style></head><body><div class="main-content"><div class="page-header"><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><button onclick="toggleFilteredTotalsButton()" id="filteredTotalsButton">Show Filtered Totals</button><button onclick="toggleTradeCountButton()" id="tradeCountButton">Show Trade Count</button><button onclick="toggleDrawdownButton()" id="drawdownButton">Show Drawdown</button><button onclick="toggleLotButton()" id="lotButton">Show Lot</button><button onclick="toggleLotPnlButton()" id="lotPnlButton">Show Lot PNL</button><button onclick="togglePnlTaxModeButton()" id="pnlTaxButton">Show Tax PNL</button><button onclick="expandAll()">Expand All</button><button onclick="collapseAll()">Collapse All</button><button onclick="exportToCSV()">Export to csv</button><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
+
+/* Mobile Card View Styles */
+.mobile-view {
+    display: none;
+}
+
+.mobile-days-container {
+    padding: 0;
+    margin-bottom: 60px;
+}
+
+.mobile-day-card {
+    background: white;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.mobile-day-card:active {
+    background: #f8fafc;
+}
+
+.mobile-day-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+}
+
+.mobile-day-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.mobile-day-date {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.mobile-day-separator {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.mobile-trade-count {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.mobile-pnl-amount {
+    font-size: 12px;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+.mobile-pnl-amount.positive {
+    color: #10b981;
+}
+
+.mobile-pnl-amount.negative {
+    color: #ef4444;
+}
+
+.mobile-pnl-percent {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.mobile-trend-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.mobile-expand-icon {
+    font-size: 14px;
+    color: #64748b;
+    transition: transform 0.3s ease !important;
+    margin-left: 4px;
+    display: inline-block !important;
+    transform: rotate(0deg);
+}
+
+.mobile-expand-icon.rotated {
+    transform: rotate(180deg) !important;
+}
+
+.mobile-day-card.expanded .mobile-expand-icon {
+    transform: rotate(180deg) !important;
+}
+
+.mobile-day-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    border-top: 1px solid #f1f5f9;
+}
+
+.mobile-day-card.expanded .mobile-day-details {
+    max-height: 2000px;
+}
+
+.mobile-detail-section {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.mobile-detail-section:last-child {
+    border-bottom: none;
+}
+
+.mobile-detail-section:first-child {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.mobile-section-title {
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.mobile-strategy-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 12px;
+}
+
+.mobile-strategy-name {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.mobile-strategy-value {
+    font-weight: 700;
+    font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.mobile-strategy-value.positive {
+    color: #10b981;
+}
+
+.mobile-strategy-value.negative {
+    color: #ef4444;
+}
+
+.mobile-month-card {
+    background: #f9fafb;
+    padding: 12px 16px;
+    font-weight: 600;
+    border-bottom: 2px solid #e5e7eb;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mobile-month-card:active {
+    background: #f3f4f6;
+}
+
+.mobile-month-card .mobile-expand-icon {
+    transition: transform 0.3s ease !important;
+}
+
+.mobile-year-card .mobile-expand-icon {
+    transition: transform 0.3s ease !important;
+}
+
+.mobile-month-card.expanded .mobile-expand-icon {
+    transform: rotate(180deg) !important;
+}
+
+.mobile-year-card.expanded .mobile-expand-icon {
+    transform: rotate(180deg) !important;
+}
+
+.mobile-month-title {
+    font-size: 12px;
+    color: #111827;
+}
+
+.mobile-month-value {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    html, body {
+        overflow: auto;
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+    }
+
+    .main-content {
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto;
+        height: auto;
+        width: 100% !important;
+        max-width: 100vw !important;
+    }
+
+    .page-header {
+        padding: 16px 12px 12px 12px !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        position: relative;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+
+    .page-title {
+        font-size: 18px !important;
+        color: white !important;
+    }
+
+    .page-subtitle {
+        font-size: 11px !important;
+        color: rgba(255,255,255,0.9) !important;
+    }
+
+    /* Summary Cards Mobile */
+    .summary-cards {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+        padding: 10px 12px !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        flex-wrap: nowrap !important;
+        position: relative !important;
+        background: #f8fafc;
+        box-sizing: border-box !important;
+    }
+
+    .summary-card {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 8px !important;
+        flex: none !important;
+        box-sizing: border-box !important;
+    }
+
+    .summary-card-title {
+        font-size: 10px !important;
+        white-space: normal;
+        line-height: 1.2;
+        margin-bottom: 4px !important;
+    }
+
+    .summary-card-value {
+        font-size: 14px !important;
+        word-break: break-word;
+        line-height: 1.2;
+    }
+
+    /* Controls Section Mobile */
+    .controls-section {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 6px !important;
+        padding: 8px 12px 12px 12px !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        align-items: stretch !important;
+        position: relative !important;
+        background: #f8fafc;
+        border-bottom: 8px solid #e5e7eb;
+        box-sizing: border-box !important;
+    }
+
+    /* Filter dropdowns - normal grid items (3 columns) */
+    .strategy-filter-container {
+        width: 100% !important;
+    }
+
+    /* Reset Filter button takes full width */
+    .controls-section button.primary {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+    }
+
+    .controls-section > * {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .control-group {
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .control-group select,
+    .control-group button,
+    .strategy-filter-button {
+        width: 100% !important;
+    }
+
+    .strategy-filter-button {
+        padding: 6px 8px !important;
+        font-size: 10px !important;
+        min-height: 36px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    select, button {
+        padding: 6px 8px !important;
+        font-size: 10px !important;
+        width: 100% !important;
+        white-space: nowrap !important;
+        line-height: 1.3 !important;
+        min-height: 36px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    button.primary {
+        background: #3b82f6 !important;
+        color: white !important;
+        font-weight: 600 !important;
+    }
+
+    /* Strategy Filter Dropdown Mobile */
+    .strategy-filter-dropdown {
+        left: 0 !important;
+        right: 0 !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        width: calc(100% - 24px) !important;
+        margin-left: 12px !important;
+    }
+
+    #monthFilterDropdown {
+        min-width: auto !important;
+        max-width: 100% !important;
+        width: calc(100% - 24px) !important;
+        margin-left: 12px !important;
+    }
+
+    /* Hide desktop table view on mobile */
+    .table-container {
+        display: none !important;
+    }
+
+    /* Show mobile card view */
+    .mobile-view {
+        display: block !important;
+    }
+
+    /* Hide the fixed left margin on mobile */
+    .main-content::before {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding: 14px 10px 10px 10px !important;
+    }
+
+    .page-title {
+        font-size: 16px !important;
+    }
+
+    .page-subtitle {
+        font-size: 10px !important;
+    }
+
+    .summary-cards {
+        gap: 6px !important;
+        padding: 8px 10px !important;
+    }
+
+    .summary-card {
+        padding: 7px !important;
+    }
+
+    .summary-card-title {
+        font-size: 10px !important;
+    }
+
+    .summary-card-value {
+        font-size: 14px !important;
+    }
+
+    .controls-section {
+        padding: 6px 10px 10px 10px !important;
+        gap: 5px !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .controls-section > * {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    select, button {
+        font-size: 10px !important;
+        padding: 6px 6px !important;
+        min-height: 34px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+    }
+
+    .strategy-filter-button {
+        font-size: 10px !important;
+        padding: 6px 6px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+    }
+
+    .mobile-day-header {
+        padding: 12px 10px;
+    }
+
+    .mobile-day-content {
+        gap: 5px;
+    }
+
+    .mobile-day-date {
+        font-size: 11px;
+    }
+
+    .mobile-trade-count {
+        font-size: 10px;
+    }
+
+    .mobile-pnl-amount {
+        font-size: 11px;
+    }
+
+    .mobile-pnl-percent {
+        font-size: 10px;
+    }
+
+    .mobile-trend-icon {
+        font-size: 14px;
+    }
+
+    .mobile-detail-section {
+        padding: 10px;
+    }
+
+    .mobile-month-card {
+        padding: 10px;
+    }
+}
+</style></head><body><div class="main-content"><div class="page-header"><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><button onclick="toggleFilteredTotalsButton()" id="filteredTotalsButton">Show Filtered Totals</button><button onclick="toggleTradeCountButton()" id="tradeCountButton">Show Trade Count</button><button onclick="toggleDrawdownButton()" id="drawdownButton">Show Drawdown</button><button onclick="toggleLotButton()" id="lotButton">Show Lot</button><button onclick="toggleLotPnlButton()" id="lotPnlButton">Show Lot PNL</button><button onclick="togglePnlTaxModeButton()" id="pnlTaxButton">Show Tax PNL</button><button onclick="expandAll()">Expand All</button><button onclick="collapseAll()">Collapse All</button><button onclick="exportToCSV()">Export to csv</button><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div><div class="mobile-view"><div class="mobile-days-container" id="mobileDaysContainer"></div></div></div><script>
 const elements = {
 startingCapital: document.getElementById('startingCapital'),
 runningProfit: document.getElementById('runningProfit'),
@@ -218,6 +730,478 @@ let showFilteredTotals = false, showTradeCount = false, showDrawdown = false, sh
 let showPnlTax = false;
 let showLotPnl = false;
 let monthsCleared = false;
+
+// Mobile View Functions - Defined Early
+function populateMobileView() {
+    if (window.innerWidth > 768) return; // Only populate on mobile
+    
+    const mobileContainer = document.getElementById('mobileDaysContainer');
+    if (!mobileContainer) return;
+    
+    mobileContainer.innerHTML = '';
+    
+    const tableBody = document.getElementById('tableBody');
+    const tableHeaders = document.getElementById('tableHeaders');
+    if (!tableBody || !tableHeaders) return;
+    
+    // Extract column headers and their positions
+    const headerMap = extractHeaderPositions(tableHeaders);
+    
+    const rows = Array.from(tableBody.querySelectorAll('tr')).filter(row => 
+        !row.classList.contains('no-data') && row.style.display !== 'none'
+    );
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length === 0) return;
+        
+        const periodCell = cells[0];
+        const period = periodCell.textContent.trim();
+        
+        // Month row
+        if (row.classList.contains('month-row')) {
+            const netPnlTax = cells[cells.length - 5]?.textContent.trim() || '-';
+            const netPnlPercent = cells[cells.length - 4]?.textContent.trim() || '-';
+            
+            const monthCard = document.createElement('div');
+            monthCard.className = 'mobile-month-card';
+            monthCard.style.display = 'none'; // Hidden by default until year is expanded
+            monthCard.onclick = function() {
+                // Find all day cards until next month card
+                let nextElement = this.nextElementSibling;
+                let dayCards = [];
+                while (nextElement && !nextElement.classList.contains('mobile-month-card') && !nextElement.classList.contains('mobile-month-card')) {
+                    if (nextElement.classList.contains('mobile-day-card')) {
+                        dayCards.push(nextElement);
+                    }
+                    nextElement = nextElement.nextElementSibling;
+                }
+                
+                // Toggle all day cards
+                const isExpanded = this.classList.toggle('expanded');
+                
+                // Toggle the expand icon rotation using CSS class
+                const expandIcon = this.querySelector('.mobile-expand-icon');
+                if (expandIcon) {
+                    if (isExpanded) {
+                        expandIcon.classList.add('rotated');
+                    } else {
+                        expandIcon.classList.remove('rotated');
+                    }
+                }
+                
+                dayCards.forEach(card => {
+                    if (isExpanded) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                        card.classList.remove('expanded');
+                        // Reset day card expand icons
+                        const dayExpandIcon = card.querySelector('.mobile-expand-icon');
+                        if (dayExpandIcon) {
+                            dayExpandIcon.classList.remove('rotated');
+                        }
+                    }
+                });
+            };
+            monthCard.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div class="mobile-month-title">${period}</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="mobile-month-value ${parseFloat(netPnlTax.replace(/[^0-9.-]/g, '')) >= 0 ? 'positive' : 'negative'}">${netPnlTax} (${netPnlPercent})</div>
+                    </div>
+                </div>
+            `;
+            mobileContainer.appendChild(monthCard);
+            return;
+        }
+        
+        // Year row
+        if (row.classList.contains('year-row')) {
+            const netPnlTax = cells[cells.length - 5]?.textContent.trim() || '-';
+            const netPnlPercent = cells[cells.length - 4]?.textContent.trim() || '-';
+            
+            const yearCard = document.createElement('div');
+            yearCard.className = 'mobile-month-card mobile-year-card';
+            yearCard.style.background = '#f1f3f5';
+            yearCard.style.fontWeight = '700';
+            yearCard.onclick = function() {
+                // Find all cards until next year card
+                let nextElement = this.nextElementSibling;
+                let childCards = [];
+                while (nextElement && !nextElement.classList.contains('mobile-year-card')) {
+                    if (nextElement.classList.contains('mobile-month-card') || nextElement.classList.contains('mobile-day-card')) {
+                        childCards.push(nextElement);
+                    }
+                    nextElement = nextElement.nextElementSibling;
+                }
+                
+                // Toggle all child cards
+                const isExpanded = this.classList.toggle('expanded');
+                
+                // Toggle the expand icon rotation using CSS class
+                const expandIcon = this.querySelector('.mobile-expand-icon');
+                if (expandIcon) {
+                    if (isExpanded) {
+                        expandIcon.classList.add('rotated');
+                    } else {
+                        expandIcon.classList.remove('rotated');
+                    }
+                }
+                
+                childCards.forEach(card => {
+                    if (isExpanded) {
+                        card.style.display = card.classList.contains('mobile-month-card') ? 'flex' : 'block';
+                    } else {
+                        card.style.display = 'none';
+                        card.classList.remove('expanded');
+                        // Reset child card expand icons
+                        const childExpandIcon = card.querySelector('.mobile-expand-icon');
+                        if (childExpandIcon) {
+                            childExpandIcon.classList.remove('rotated');
+                        }
+                    }
+                });
+            };
+            yearCard.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div class="mobile-month-title">${period}</div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="mobile-month-value ${parseFloat(netPnlTax.replace(/[^0-9.-]/g, '')) >= 0 ? 'positive' : 'negative'}">${netPnlTax} (${netPnlPercent})</div>
+                    </div>
+                </div>
+            `;
+            mobileContainer.appendChild(yearCard);
+            return;
+        }
+        
+        // Total row
+        if (row.classList.contains('total-row')) {
+            return; // Skip grand total for now
+        }
+        
+        // Day row - get all strategy data
+        if (row.classList.contains('day-row')) {
+            const amiPnl = headerMap.amiPnl ? cells[headerMap.amiPnl]?.textContent.trim() || '-' : '-';
+            const netPnlTax = cells[cells.length - 5]?.textContent.trim() || '-';
+            const netPnlPercent = cells[cells.length - 4]?.textContent.trim() || '-';
+            const expenses = cells[cells.length - 3]?.textContent.trim() || '-';
+            const totalMargin = cells[cells.length - 2]?.textContent.trim() || '-';
+            const drawdown = cells[cells.length - 1]?.textContent.trim() || '-';
+            
+            // Calculate trade count by counting non-empty strategy cells
+            let tradeCount = 0;
+            for (let i = 1; i < cells.length - 5; i++) {
+                const cellValue = cells[i]?.textContent.trim();
+                if (cellValue && cellValue !== '-' && cellValue !== '0' && cellValue !== '₹0' && cellValue !== '') {
+                    const numValue = parseFloat(cellValue.replace(/[^0-9.-]/g, ''));
+                    if (!isNaN(numValue) && numValue !== 0) {
+                        tradeCount++;
+                    }
+                }
+            }
+            
+            const pnlValue = parseFloat(netPnlTax.replace(/[^0-9.-]/g, ''));
+            const isPositive = pnlValue >= 0;
+            
+            const dayCard = document.createElement('div');
+            dayCard.className = 'mobile-day-card';
+            dayCard.style.display = 'none'; // Hidden by default until month is expanded
+            
+            // Extract strategy data by section
+            let detailsHTML = '';
+            
+            // Summary section first
+            detailsHTML += `
+                <div class="mobile-detail-section" style="background: #f8fafc;">
+                    <div class="mobile-section-title">Summary</div>
+                    ${amiPnl !== '-' ? `<div class="mobile-strategy-row">
+                        <span class="mobile-strategy-name">AMI PNL</span>
+                        <span class="mobile-strategy-value ${parseFloat(amiPnl.replace(/[^0-9.-]/g, '')) >= 0 ? 'positive' : 'negative'}">${amiPnl}</span>
+                    </div>` : ''}
+                    <div class="mobile-strategy-row">
+                        <span class="mobile-strategy-name">NET PNL TAX</span>
+                        <span class="mobile-strategy-value ${parseFloat(netPnlTax.replace(/[^0-9.-]/g, '')) >= 0 ? 'positive' : 'negative'}">${netPnlTax}</span>
+                    </div>
+                    <div class="mobile-strategy-row">
+                        <span class="mobile-strategy-name">NET PNL %</span>
+                        <span class="mobile-strategy-value ${parseFloat(netPnlPercent.replace(/[^0-9.-]/g, '')) >= 0 ? 'positive' : 'negative'}">${netPnlPercent}</span>
+                    </div>
+                    ${expenses !== '-' ? `<div class="mobile-strategy-row">
+                        <span class="mobile-strategy-name">Expenses</span>
+                        <span class="mobile-strategy-value negative">${expenses}</span>
+                    </div>` : ''}
+                    ${totalMargin !== '-' ? `<div class="mobile-strategy-row">
+                        <span class="mobile-strategy-name">Total Margin</span>
+                        <span class="mobile-strategy-value">${totalMargin}</span>
+                    </div>` : ''}
+                    ${drawdown !== '-' ? `<div class="mobile-strategy-row">
+                        <span class="mobile-strategy-name">Drawdown</span>
+                        <span class="mobile-strategy-value negative">${drawdown}</span>
+                    </div>` : ''}
+                </div>
+            `;
+            
+            // AMIBROKER strategies
+            const amibrokerHTML = extractStrategyData(cells, headerMap.amibroker || []);
+            if (amibrokerHTML) {
+                detailsHTML += `
+                    <div class="mobile-detail-section">
+                        <div class="mobile-section-title">AMIBROKER PNL</div>
+                        ${amibrokerHTML}
+                    </div>
+                `;
+            }
+            
+            // B1 DPNL strategies
+            const b1DpnlHTML = extractStrategyData(cells, headerMap.b1Dpnl || []);
+            if (b1DpnlHTML) {
+                detailsHTML += `
+                    <div class="mobile-detail-section">
+                        <div class="mobile-section-title">B1 DPNL</div>
+                        ${b1DpnlHTML}
+                    </div>
+                `;
+            }
+            
+            // B2 DPNL strategies
+            const b2DpnlHTML = extractStrategyData(cells, headerMap.b2Dpnl || []);
+            if (b2DpnlHTML) {
+                detailsHTML += `
+                    <div class="mobile-detail-section">
+                        <div class="mobile-section-title">B2 DPNL</div>
+                        ${b2DpnlHTML}
+                    </div>
+                `;
+            }
+            
+            // B1 PNL TAX strategies
+            const b1TaxHTML = extractStrategyData(cells, headerMap.b1Tax || []);
+            if (b1TaxHTML) {
+                detailsHTML += `
+                    <div class="mobile-detail-section">
+                        <div class="mobile-section-title">B1 PNL TAX</div>
+                        ${b1TaxHTML}
+                    </div>
+                `;
+            }
+            
+            // B2 PNL TAX strategies
+            const b2TaxHTML = extractStrategyData(cells, headerMap.b2Tax || []);
+            if (b2TaxHTML) {
+                detailsHTML += `
+                    <div class="mobile-detail-section">
+                        <div class="mobile-section-title">B2 PNL TAX</div>
+                        ${b2TaxHTML}
+                    </div>
+                `;
+            }
+            
+            dayCard.innerHTML = `
+                <div class="mobile-day-header" onclick="toggleMobileCard(this)">
+                    <div class="mobile-day-content">
+                        <span class="mobile-day-date">${period.replace(/^\s+/, '')}</span>
+                        <span class="mobile-day-separator">•</span>
+                        <span class="mobile-trade-count">${tradeCount} ${tradeCount === 1 ? 'trade' : 'trades'}</span>
+                        <span class="mobile-pnl-amount ${isPositive ? 'positive' : 'negative'}">${netPnlTax}</span>
+                        <span class="mobile-pnl-percent">(${netPnlPercent})</span>
+                        <span class="mobile-trend-icon">${isPositive ? '📈' : '📉'}</span>
+                        <span class="mobile-expand-icon">▼</span>
+                    </div>
+                </div>
+                <div class="mobile-day-details">
+                    ${detailsHTML}
+                </div>
+            `;
+            
+            mobileContainer.appendChild(dayCard);
+        }
+    });
+    
+    // If there are no year cards, show all month cards by default
+    const yearCards = mobileContainer.querySelectorAll('.mobile-year-card');
+    if (yearCards.length === 0) {
+        const monthCards = mobileContainer.querySelectorAll('.mobile-month-card');
+        monthCards.forEach(monthCard => {
+            monthCard.style.display = 'flex';
+        });
+    }
+}
+
+function extractHeaderPositions(tableHeaders) {
+    const headerMap = {
+        amibroker: [],
+        b1Dpnl: [],
+        b2Dpnl: [],
+        b1Tax: [],
+        b2Tax: [],
+        amiPnl: null
+    };
+    
+    const headerRows = tableHeaders.querySelectorAll('tr');
+    if (headerRows.length < 2) return headerMap;
+    
+    const row1Headers = headerRows[0].querySelectorAll('th');
+    const row2Headers = headerRows[1] ? headerRows[1].querySelectorAll('th') : [];
+    
+    let colIndex = 0;
+    let currentSection = null;
+    
+    // Parse first row headers to find sections
+    row1Headers.forEach((header, index) => {
+        const headerText = header.textContent.trim().toUpperCase();
+        const colspan = parseInt(header.getAttribute('colspan') || '1');
+        const rowspan = parseInt(header.getAttribute('rowspan') || '1');
+        
+        if (headerText.includes('AMIBROKER')) {
+            currentSection = 'amibroker';
+            // Get strategy names from row 2
+            for (let i = 0; i < colspan; i++) {
+                if (row2Headers[colIndex + i - 1]) {
+                    const stratName = row2Headers[colIndex + i - 1].textContent.trim();
+                    headerMap.amibroker.push({ index: colIndex + i, name: stratName });
+                }
+            }
+        } else if (headerText.includes('B1') && headerText.includes('DPNL')) {
+            currentSection = 'b1Dpnl';
+            for (let i = 0; i < colspan; i++) {
+                if (row2Headers[colIndex + i - 1]) {
+                    const stratName = row2Headers[colIndex + i - 1].textContent.trim();
+                    headerMap.b1Dpnl.push({ index: colIndex + i, name: stratName });
+                }
+            }
+        } else if (headerText.includes('B2') && headerText.includes('DPNL')) {
+            currentSection = 'b2Dpnl';
+            for (let i = 0; i < colspan; i++) {
+                if (row2Headers[colIndex + i - 1]) {
+                    const stratName = row2Headers[colIndex + i - 1].textContent.trim();
+                    headerMap.b2Dpnl.push({ index: colIndex + i, name: stratName });
+                }
+            }
+        } else if (headerText.includes('B1') && headerText.includes('TAX')) {
+            currentSection = 'b1Tax';
+            for (let i = 0; i < colspan; i++) {
+                if (row2Headers[colIndex + i - 1]) {
+                    const stratName = row2Headers[colIndex + i - 1].textContent.trim();
+                    headerMap.b1Tax.push({ index: colIndex + i, name: stratName });
+                }
+            }
+        } else if (headerText.includes('B2') && headerText.includes('TAX')) {
+            currentSection = 'b2Tax';
+            for (let i = 0; i < colspan; i++) {
+                if (row2Headers[colIndex + i - 1]) {
+                    const stratName = row2Headers[colIndex + i - 1].textContent.trim();
+                    headerMap.b2Tax.push({ index: colIndex + i, name: stratName });
+                }
+            }
+        } else if (headerText === 'AMI PNL') {
+            headerMap.amiPnl = colIndex;
+        }
+        
+        if (rowspan === 2) {
+            colIndex++;
+        } else {
+            colIndex += colspan;
+        }
+    });
+    
+    return headerMap;
+}
+
+function extractStrategyData(cells, strategyMap) {
+    if (!strategyMap || strategyMap.length === 0) return '';
+    
+    let html = '';
+    strategyMap.forEach(strategy => {
+        const value = cells[strategy.index]?.textContent.trim();
+        if (value && value !== '-' && value !== '0' && value !== '₹0') {
+            const numValue = parseFloat(value.replace(/[^0-9.-]/g, ''));
+            if (!isNaN(numValue) && numValue !== 0) {
+                html += `
+                    <div class="mobile-strategy-row">
+                        <span class="mobile-strategy-name">${strategy.name}</span>
+                        <span class="mobile-strategy-value ${numValue >= 0 ? 'positive' : 'negative'}">${value}</span>
+                    </div>
+                `;
+            }
+        }
+    });
+    return html;
+}
+
+function toggleMobileCard(headerElement) {
+    const card = headerElement.closest('.mobile-day-card');
+    if (card) {
+        const isExpanded = card.classList.toggle('expanded');
+        
+        // Toggle the expand icon rotation using CSS class
+        const expandIcon = card.querySelector('.mobile-expand-icon');
+        if (expandIcon) {
+            if (isExpanded) {
+                expandIcon.classList.add('rotated');
+            } else {
+                expandIcon.classList.remove('rotated');
+            }
+        }
+    }
+}
+
+function expandAllMobile() {
+    // Expand all year cards first
+    const yearCards = document.querySelectorAll('.mobile-year-card');
+    yearCards.forEach(yearCard => {
+        yearCard.classList.add('expanded');
+        const expandIcon = yearCard.querySelector('.mobile-expand-icon');
+        if (expandIcon) expandIcon.classList.add('rotated');
+    });
+    
+    // Expand all month cards
+    const monthCards = document.querySelectorAll('.mobile-month-card:not(.mobile-year-card)');
+    monthCards.forEach(monthCard => {
+        monthCard.classList.add('expanded');
+        monthCard.style.display = 'flex';
+        const expandIcon = monthCard.querySelector('.mobile-expand-icon');
+        if (expandIcon) expandIcon.classList.add('rotated');
+    });
+    
+    // Show and expand all day cards
+    const dayCards = document.querySelectorAll('.mobile-day-card');
+    dayCards.forEach(card => {
+        card.style.display = 'block';
+        card.classList.add('expanded');
+        const expandIcon = card.querySelector('.mobile-expand-icon');
+        if (expandIcon) expandIcon.classList.add('rotated');
+    });
+}
+
+function collapseAllMobile() {
+    // Collapse all year cards
+    const yearCards = document.querySelectorAll('.mobile-year-card');
+    yearCards.forEach(yearCard => {
+        yearCard.classList.remove('expanded');
+        const expandIcon = yearCard.querySelector('.mobile-expand-icon');
+        if (expandIcon) expandIcon.classList.remove('rotated');
+    });
+    
+    // Hide and collapse all month cards (except year cards)
+    const monthCards = document.querySelectorAll('.mobile-month-card:not(.mobile-year-card)');
+    monthCards.forEach(monthCard => {
+        monthCard.classList.remove('expanded');
+        monthCard.style.display = 'none';
+        const expandIcon = monthCard.querySelector('.mobile-expand-icon');
+        if (expandIcon) expandIcon.classList.remove('rotated');
+    });
+    
+    // Hide and collapse all day cards
+    const dayCards = document.querySelectorAll('.mobile-day-card');
+    dayCards.forEach(card => {
+        card.style.display = 'none';
+        card.classList.remove('expanded');
+        const expandIcon = card.querySelector('.mobile-expand-icon');
+        if (expandIcon) expandIcon.classList.remove('rotated');
+    });
+}
+
 function extractBrokerCode(strategyName) {
 if (!strategyName) return null;
 if (strategyName.startsWith('A.PRO')) return 'A';
@@ -1465,6 +2449,7 @@ const marginDrawdownData = calculateMarginDrawdown(dailyTotalMargins);
 const dailyExpenses = calculateDailyExpenses(sortedFilteredTrades, Array.from(strategies), dailyTotalMargins);
 const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedFilteredTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals, dailyTotalMargins, dailyExpenses);
 renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses, marginDrawdownData);
+setTimeout(populateMobileView, 100);
 }
 function calculateExpensesAndMargins(sortedTrades, hiddenStrategies, allStrategiesParam, useFilteredTotals, dailyTotalMargins, dailyExpenses) {
 const result = {};
@@ -2392,9 +3377,14 @@ if (monthIcon) monthIcon.classList.remove('expanded');
 saveYearExpandState(year, !isExpanded);
 }
 function expandAll() {
+// Expand desktop table rows
 document.querySelectorAll('.day-row').forEach(row => row.classList.add('expanded'));
 document.querySelectorAll('.month-row').forEach(row => row.classList.add('expanded'));
 document.querySelectorAll('.expand-icon').forEach(icon => icon.classList.add('expanded'));
+
+// Expand mobile cards (safe to call even if not on mobile)
+expandAllMobile();
+
 // Save all months and years as expanded
 const expandedMonths = new Set();
 const expandedYears = new Set();
@@ -2411,9 +3401,14 @@ localStorage.setItem('strategyPerformance_expandedMonths', JSON.stringify(Array.
 localStorage.setItem('strategyPerformance_expandedYears', JSON.stringify(Array.from(expandedYears)));
 }
 function collapseAll() {
+// Collapse desktop table rows
 document.querySelectorAll('.day-row').forEach(row => row.classList.remove('expanded'));
 document.querySelectorAll('.month-row').forEach(row => row.classList.remove('expanded'));
 document.querySelectorAll('.expand-icon').forEach(icon => icon.classList.remove('expanded'));
+
+// Collapse mobile cards (safe to call even if not on mobile)
+collapseAllMobile();
+
 // Clear all expanded months and years
 localStorage.setItem('strategyPerformance_expandedMonths', JSON.stringify([]));
 localStorage.setItem('strategyPerformance_expandedYears', JSON.stringify([]));
@@ -2686,4 +3681,11 @@ link.click();
 document.body.removeChild(link);
 }
 }
+
+// Mobile view updates on window resize
+window.addEventListener('resize', function() {
+    if (window.innerWidth <= 768) {
+        setTimeout(populateMobileView, 100);
+    }
+});
 </script></body></html>
