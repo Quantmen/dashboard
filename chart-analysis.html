@@ -19,7 +19,14 @@
             background: #f8fafc;
             width: 100%;
         }
-        .page-header { margin-bottom: 20px; }
+        .page-header { 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 20px;
+            flex-wrap: wrap;
+        }
         .page-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
         .page-subtitle { font-size: 12px; color: #6b7280; font-weight: 400; }
         
@@ -67,6 +74,86 @@
             letter-spacing: 0.3px;
         }
         
+        /* Date Range Selector */
+        .date-range-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+        }
+        
+        .date-range-btn {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .date-range-btn:hover {
+            color: #475569;
+        }
+        
+        .date-range-btn.active {
+            background: white;
+            color: #1e40af;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Custom Date Range Picker */
+        .custom-date-range {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 4px 8px;
+            background: transparent;
+            border-radius: 6px;
+        }
+        
+        .custom-date-range.active {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .custom-date-range label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .custom-date-range input[type="date"] {
+            padding: 4px 6px;
+            font-size: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-family: inherit;
+            color: #475569;
+            cursor: pointer;
+            background: transparent;
+        }
+        
+        .custom-date-range input[type="date"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            letter-spacing: 0.3px;
+        }
+        
         .chart-toggles {
             display: flex;
             gap: 6px;
@@ -83,7 +170,7 @@
         
         .toggle-btn {
             padding: 6px 12px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: #64748b;
             background: transparent;
@@ -114,9 +201,42 @@
             border-radius: 8px;
         }
         
+        /* Date Range Selector */
+        .date-range-selector {
+            display: flex;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+        }
+        
+        .date-range-btn {
+            padding: 6px 10px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #475569;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .date-range-btn:hover {
+            background: white;
+            color: #1e40af;
+        }
+        
+        .date-range-btn.active {
+            background: white;
+            color: #1e40af;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
         .nav-btn {
             padding: 6px 10px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: #475569;
             background: white;
@@ -138,11 +258,11 @@
         }
         
         .current-month {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #1e293b;
             padding: 0 8px;
-            min-width: 80px;
+            min-width: 65px;
             text-align: center;
         }
         
@@ -243,12 +363,40 @@
                 padding: 16px;
             }
             
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
             .page-title {
                 font-size: 18px;
             }
             
             .page-subtitle {
                 font-size: 11px;
+            }
+            
+            .date-range-selector {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            
+            .date-range-btn {
+                font-size: 9px;
+                padding: 5px 8px;
+            }
+            
+            .custom-date-range {
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            
+            .custom-date-range input[type="date"] {
+                flex: 1;
+                min-width: 100px;
             }
             
             .chart-title {
@@ -275,8 +423,23 @@
 <body>
     <div class="main-content">
         <div class="page-header">
-            <div class="page-title">Advanced Chart Analysis</div>
-            <div class="page-subtitle">Comprehensive performance visualization across multiple metrics</div>
+            <div>
+                <div class="page-title">Advanced Chart Analysis</div>
+                <div class="page-subtitle">Comprehensive performance visualization across multiple metrics</div>
+            </div>
+            
+            <!-- Date Range Selector -->
+            <div class="date-range-selector">
+                <div class="custom-date-range" id="customDateRange">
+                    <label>From:</label>
+                    <input type="date" id="fromDate" onchange="applyCustomDateRange()">
+                    <label>To:</label>
+                    <input type="date" id="toDate" onchange="applyCustomDateRange()">
+                </div>
+                <button class="date-range-btn" data-range="3" onclick="selectDateRange(3)">Last 3M</button>
+                <button class="date-range-btn" data-range="ytd" onclick="selectDateRange('ytd')">YTD</button>
+                <button class="date-range-btn active" data-range="all" onclick="selectDateRange('all')">All Time</button>
+            </div>
         </div>
         
         <div class="charts-grid">
@@ -361,13 +524,13 @@
                             <button class="toggle-btn" data-chart="compare" data-type="percentage">%</button>
                         </div>
                         <div class="chart-toggles">
-                            <button class="toggle-btn active" data-chart="compare" data-view="monthly">Monthly</button>
-                            <button class="toggle-btn" data-chart="compare" data-view="overall">Overall</button>
+                            <button class="toggle-btn active" data-chart="compare" data-view="monthly">Month</button>
+                            <button class="toggle-btn" data-chart="compare" data-view="overall">All</button>
                         </div>
                         <div class="month-navigation">
-                            <button class="nav-btn" id="prevMonth">◄ Prev</button>
+                            <button class="nav-btn" id="prevMonth">◄</button>
                             <span class="current-month" id="currentMonth">JAN-26</span>
-                            <button class="nav-btn" id="nextMonth">Next ►</button>
+                            <button class="nav-btn" id="nextMonth">►</button>
                         </div>
                     </div>
                 </div>
@@ -390,13 +553,13 @@
                             <button class="toggle-btn" data-chart="amibroker" data-type="percentage">%</button>
                         </div>
                         <div class="chart-toggles">
-                            <button class="toggle-btn active" data-chart="amibroker" data-view="monthly">Monthly</button>
-                            <button class="toggle-btn" data-chart="amibroker" data-view="overall">Overall</button>
+                            <button class="toggle-btn active" data-chart="amibroker" data-view="monthly">Month</button>
+                            <button class="toggle-btn" data-chart="amibroker" data-view="overall">All</button>
                         </div>
                         <div class="month-navigation">
-                            <button class="nav-btn" id="prevMonthAmibroker">◄ Prev</button>
+                            <button class="nav-btn" id="prevMonthAmibroker">◄</button>
                             <span class="current-month" id="currentMonthAmibroker">JAN-26</span>
-                            <button class="nav-btn" id="nextMonthAmibroker">Next ►</button>
+                            <button class="nav-btn" id="nextMonthAmibroker">►</button>
                         </div>
                     </div>
                 </div>
@@ -419,13 +582,13 @@
                             <button class="toggle-btn" data-chart="lotpnltax" data-type="percentage">%</button>
                         </div>
                         <div class="chart-toggles">
-                            <button class="toggle-btn active" data-chart="lotpnltax" data-view="monthly">Monthly</button>
-                            <button class="toggle-btn" data-chart="lotpnltax" data-view="overall">Overall</button>
+                            <button class="toggle-btn active" data-chart="lotpnltax" data-view="monthly">Month</button>
+                            <button class="toggle-btn" data-chart="lotpnltax" data-view="overall">All</button>
                         </div>
                         <div class="month-navigation">
-                            <button class="nav-btn" id="prevMonthLotpnltax">◄ Prev</button>
+                            <button class="nav-btn" id="prevMonthLotpnltax">◄</button>
                             <span class="current-month" id="currentMonthLotpnltax">JAN-26</span>
-                            <button class="nav-btn" id="nextMonthLotpnltax">Next ►</button>
+                            <button class="nav-btn" id="nextMonthLotpnltax">►</button>
                         </div>
                     </div>
                 </div>
@@ -536,6 +699,17 @@
         window.waterfallView = 'monthly'; // 'monthly' or 'overall'
         let currentMonthIndex = 0;
         let availableMonths = [];
+        let selectedDateRange = 'all'; // 'all', 'ytd', '3', 'custom'
+        let filteredTrades = []; // Trades after date range filter
+        let customFromDate = null; // Custom date range from
+        let customToDate = null; // Custom date range to
+        
+        // Track hidden strategies for legend filtering
+        const hiddenStrategies = {
+            compare: new Set(),
+            amibroker: new Set(),
+            lotpnltax: new Set()
+        };
 
         // Elements
         const elements = {
@@ -547,6 +721,81 @@
             amibrokerChart: document.getElementById('amibrokerChart'),
             lotpnltaxChart: document.getElementById('lotpnltaxChart')
         };
+
+        // Date Range Selector Function
+        function selectDateRange(range) {
+            selectedDateRange = range;
+            
+            // Update button active states
+            document.querySelectorAll('.date-range-btn').forEach(btn => {
+                if (btn.dataset.range == range) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Remove custom date range active state
+            document.getElementById('customDateRange').classList.remove('active');
+            
+            // Filter trades based on selected range
+            filterTradesByDateRange();
+            
+            // Refresh all charts with filtered data
+            refreshAllCharts();
+        }
+        
+        function filterTradesByDateRange() {
+            if (selectedDateRange === 'all') {
+                filteredTrades = allTrades;
+                return;
+            }
+            
+            if (allTrades.length === 0) {
+                filteredTrades = [];
+                return;
+            }
+            
+            const today = new Date();
+            let startDate;
+            let endDate = today;
+            
+            if (selectedDateRange === 'custom') {
+                // Use custom date range
+                if (!customFromDate || !customToDate) {
+                    filteredTrades = allTrades;
+                    return;
+                }
+                startDate = customFromDate;
+                endDate = customToDate;
+            } else if (selectedDateRange === 'ytd') {
+                // Year to date - from January 1st of current year
+                startDate = new Date(today.getFullYear(), 0, 1);
+            } else {
+                // Last N months
+                const months = parseInt(selectedDateRange);
+                startDate = new Date(today);
+                startDate.setMonth(today.getMonth() - months);
+            }
+            
+            // Filter trades
+            filteredTrades = allTrades.filter(trade => {
+                if (!trade.date) return false;
+                
+                // Parse date (format: DD/MM/YYYY)
+                const parts = trade.date.split('/');
+                if (parts.length !== 3) return false;
+                
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1; // JS months are 0-indexed
+                const year = parseInt(parts[2]);
+                const fullYear = year < 100 ? (year > 50 ? 1900 + year : 2000 + year) : year;
+                
+                const tradeDate = new Date(fullYear, month, day);
+                
+                return tradeDate >= startDate && tradeDate <= endDate;
+            });
+        }
 
         // Initialize
         (function init() {
@@ -847,6 +1096,8 @@
                 } catch (e) {
                     // Ignore storage errors
                 }
+                // Initialize date pickers with new data
+                initializeDatePickers();
                 // Force refresh all charts
                 refreshAllCharts();
             } else if (type === 'UPDATE_DATA' && data) {
@@ -857,6 +1108,8 @@
                 } catch (e) {
                     // Ignore storage errors
                 }
+                // Initialize date pickers with new data
+                initializeDatePickers();
                 // Force refresh all charts
                 refreshAllCharts();
             }
@@ -894,13 +1147,100 @@
                 if (stored) {
                     const data = JSON.parse(stored);
                     allTrades = data.tradesData || data || [];
+                    filterTradesByDateRange(); // Initialize filtered trades
                     if (allTrades.length > 0) {
+                        initializeDatePickers(); // Set date picker min/max from trades
                         refreshAllCharts();
                     }
                 }
             } catch (e) {
                 // Ignore parse errors
             }
+        }
+        
+        // Helper function to get the active trades based on date range selection
+        function getActiveTrades() {
+            return selectedDateRange === 'all' ? allTrades : filteredTrades;
+        }
+        
+        // Initialize date range pickers with available dates from trades
+        function initializeDatePickers() {
+            if (allTrades.length === 0) return;
+            
+            let minDate = null;
+            let maxDate = null;
+            
+            allTrades.forEach(trade => {
+                if (!trade.date) return;
+                
+                const parts = trade.date.split('/');
+                if (parts.length !== 3) return;
+                
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1;
+                const year = parseInt(parts[2]);
+                const fullYear = year < 100 ? (year > 50 ? 1900 + year : 2000 + year) : year;
+                
+                const tradeDate = new Date(fullYear, month, day);
+                
+                if (!minDate || tradeDate < minDate) {
+                    minDate = tradeDate;
+                }
+                if (!maxDate || tradeDate > maxDate) {
+                    maxDate = tradeDate;
+                }
+            });
+            
+            if (minDate && maxDate) {
+                const fromInput = document.getElementById('fromDate');
+                const toInput = document.getElementById('toDate');
+                
+                // Format dates as YYYY-MM-DD
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+                
+                fromInput.min = formatDate(minDate);
+                fromInput.max = formatDate(maxDate);
+                toInput.min = formatDate(minDate);
+                toInput.max = formatDate(maxDate);
+                
+                // Set default values
+                fromInput.value = formatDate(minDate);
+                toInput.value = formatDate(maxDate);
+            }
+        }
+        
+        // Apply custom date range filter
+        function applyCustomDateRange() {
+            const fromInput = document.getElementById('fromDate');
+            const toInput = document.getElementById('toDate');
+            
+            if (!fromInput.value || !toInput.value) return;
+            
+            customFromDate = new Date(fromInput.value);
+            customToDate = new Date(toInput.value);
+            
+            // Validate that from date is before to date
+            if (customFromDate > customToDate) {
+                alert('Start date must be before end date');
+                return;
+            }
+            
+            selectedDateRange = 'custom';
+            
+            // Update button active states
+            document.querySelectorAll('.date-range-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('customDateRange').classList.add('active');
+            
+            // Filter and refresh
+            filterTradesByDateRange();
+            refreshAllCharts();
         }
 
         // Calculate daily total margins using the exact same logic as Strategy Performance
@@ -1581,6 +1921,20 @@
                             display: true,
                             position: 'bottom',
                             align: 'center',
+                            onClick: (e, legendItem, legend) => {
+                                // Interactive legend - toggle strategy visibility
+                                const strategyName = legendItem.text;
+                                const chart = legend.chart;
+                                
+                                if (hiddenStrategies.compare.has(strategyName)) {
+                                    hiddenStrategies.compare.delete(strategyName);
+                                } else {
+                                    hiddenStrategies.compare.add(strategyName);
+                                }
+                                
+                                // Update the chart with filtered data
+                                updateChart('compare');
+                            },
                             labels: {
                                 boxWidth: 12,
                                 boxHeight: 12,
@@ -1593,9 +1947,9 @@
                                 color: '#94a3b8',
                                 usePointStyle: false,
                                 generateLabels: (chart) => {
-                                    // Create custom legend for waterfall - only show strategy names, not Start/Total
-                                    const labels = chart.data.labels || [];
-                                    const colors = chart.data.datasets[0].backgroundColor || [];
+                                    // Create custom legend for waterfall - show ALL strategies including hidden ones
+                                    const allStrategies = chart._allStrategies || [];
+                                    const allColors = chart._allColors || [];
                                     const legendItems = [];
                                     
                                     // Helper function to add transparency to color
@@ -1609,18 +1963,19 @@
                                         return color;
                                     };
                                     
-                                    labels.forEach((label, i) => {
-                                        if (label !== 'Start' && label !== 'Total') {
-                                            const originalColor = colors[i] || '#94a3b8';
-                                            legendItems.push({
-                                                text: label,
-                                                fillStyle: addTransparency(originalColor, 0.7),
-                                                strokeStyle: 'transparent',
-                                                lineWidth: 0,
-                                                hidden: false,
-                                                fontColor: '#94a3b8'
-                                            });
-                                        }
+                                    allStrategies.forEach((stratName, i) => {
+                                        const originalColor = allColors[i] || '#94a3b8';
+                                        const isHidden = hiddenStrategies.compare.has(stratName);
+                                        legendItems.push({
+                                            text: stratName,
+                                            fillStyle: isHidden ? addTransparency(originalColor, 0.3) : addTransparency(originalColor, 0.7),
+                                            strokeStyle: isHidden ? '#cbd5e1' : 'transparent',
+                                            lineWidth: isHidden ? 1 : 0,
+                                            hidden: false,
+                                            fontColor: isHidden ? '#cbd5e1' : '#94a3b8',
+                                            datasetIndex: 0,
+                                            index: i
+                                        });
                                     });
                                     
                                     return legendItems;
@@ -1825,6 +2180,20 @@
                             display: true,
                             position: 'bottom',
                             align: 'center',
+                            onClick: (e, legendItem, legend) => {
+                                // Interactive legend - toggle strategy visibility
+                                const strategyName = legendItem.text;
+                                const chart = legend.chart;
+                                
+                                if (hiddenStrategies.amibroker.has(strategyName)) {
+                                    hiddenStrategies.amibroker.delete(strategyName);
+                                } else {
+                                    hiddenStrategies.amibroker.add(strategyName);
+                                }
+                                
+                                // Update the chart with filtered data
+                                updateChart('amibroker');
+                            },
                             labels: {
                                 boxWidth: 12,
                                 boxHeight: 12,
@@ -1837,8 +2206,9 @@
                                 color: '#94a3b8',
                                 usePointStyle: false,
                                 generateLabels: (chart) => {
-                                    const labels = chart.data.labels || [];
-                                    const colors = chart.data.datasets[0].backgroundColor || [];
+                                    // Show ALL strategies including hidden ones
+                                    const allStrategies = chart._allStrategies || [];
+                                    const allColors = chart._allColors || [];
                                     const legendItems = [];
                                     
                                     const addTransparency = (color, opacity = 0.7) => {
@@ -1851,18 +2221,19 @@
                                         return color;
                                     };
                                     
-                                    labels.forEach((label, i) => {
-                                        if (label !== 'Start' && label !== 'Total') {
-                                            const originalColor = colors[i] || '#94a3b8';
-                                            legendItems.push({
-                                                text: label,
-                                                fillStyle: addTransparency(originalColor, 0.7),
-                                                strokeStyle: 'transparent',
-                                                lineWidth: 0,
-                                                hidden: false,
-                                                fontColor: '#94a3b8'
-                                            });
-                                        }
+                                    allStrategies.forEach((stratName, i) => {
+                                        const originalColor = allColors[i] || '#94a3b8';
+                                        const isHidden = hiddenStrategies.amibroker.has(stratName);
+                                        legendItems.push({
+                                            text: stratName,
+                                            fillStyle: isHidden ? addTransparency(originalColor, 0.3) : addTransparency(originalColor, 0.7),
+                                            strokeStyle: isHidden ? '#cbd5e1' : 'transparent',
+                                            lineWidth: isHidden ? 1 : 0,
+                                            hidden: false,
+                                            fontColor: isHidden ? '#cbd5e1' : '#94a3b8',
+                                            datasetIndex: 0,
+                                            index: i
+                                        });
                                     });
                                     
                                     return legendItems;
@@ -2056,6 +2427,20 @@
                             display: true,
                             position: 'bottom',
                             align: 'center',
+                            onClick: (e, legendItem, legend) => {
+                                // Interactive legend - toggle strategy visibility
+                                const strategyName = legendItem.text;
+                                const chart = legend.chart;
+                                
+                                if (hiddenStrategies.lotpnltax.has(strategyName)) {
+                                    hiddenStrategies.lotpnltax.delete(strategyName);
+                                } else {
+                                    hiddenStrategies.lotpnltax.add(strategyName);
+                                }
+                                
+                                // Update the chart with filtered data
+                                updateChart('lotpnltax');
+                            },
                             labels: {
                                 boxWidth: 12,
                                 boxHeight: 12,
@@ -2068,8 +2453,9 @@
                                 color: '#94a3b8',
                                 usePointStyle: false,
                                 generateLabels: (chart) => {
-                                    const labels = chart.data.labels || [];
-                                    const colors = chart.data.datasets[0].backgroundColor || [];
+                                    // Show ALL strategies including hidden ones
+                                    const allStrategies = chart._allStrategies || [];
+                                    const allColors = chart._allColors || [];
                                     const legendItems = [];
                                     
                                     const addTransparency = (color, opacity = 0.7) => {
@@ -2082,18 +2468,19 @@
                                         return color;
                                     };
                                     
-                                    labels.forEach((label, i) => {
-                                        if (label !== 'Start' && label !== 'Total') {
-                                            const originalColor = colors[i] || '#94a3b8';
-                                            legendItems.push({
-                                                text: label,
-                                                fillStyle: addTransparency(originalColor, 0.7),
-                                                strokeStyle: 'transparent',
-                                                lineWidth: 0,
-                                                hidden: false,
-                                                fontColor: '#94a3b8'
-                                            });
-                                        }
+                                    allStrategies.forEach((stratName, i) => {
+                                        const originalColor = allColors[i] || '#94a3b8';
+                                        const isHidden = hiddenStrategies.lotpnltax.has(stratName);
+                                        legendItems.push({
+                                            text: stratName,
+                                            fillStyle: isHidden ? addTransparency(originalColor, 0.3) : addTransparency(originalColor, 0.7),
+                                            strokeStyle: isHidden ? '#cbd5e1' : 'transparent',
+                                            lineWidth: isHidden ? 1 : 0,
+                                            hidden: false,
+                                            fontColor: isHidden ? '#cbd5e1' : '#94a3b8',
+                                            datasetIndex: 0,
+                                            index: i
+                                        });
                                     });
                                     
                                     return legendItems;
@@ -2368,8 +2755,11 @@
                 return;
             }
             
+            // Use filtered trades based on date range selection
+            const activeTrades = getActiveTrades();
+            
             const period = activePeriods[chartType];
-            const aggregatedData = aggregateByPeriod(allTrades, period);
+            const aggregatedData = aggregateByPeriod(activeTrades, period);
             
             const labels = aggregatedData.map(d => formatLabel(d.date, period));
             
@@ -2753,10 +3143,11 @@
                 charts.pnlbar.render();
             } else if (chartType === 'compare') {
                 // Waterfall Chart Logic
+                const activeTrades = getActiveTrades(); // Use filtered trades based on date range
                 const isMonthly = !window.waterfallView || window.waterfallView === 'monthly';
                 
                 // Check if we have cached data and only display type changed
-                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}`;
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.compare).join(',')}`;
                 const useCache = charts.compare._cacheKey === cacheKey && 
                                 charts.compare._cachedStrategies && 
                                 charts.compare._cachedTotalValue !== undefined;
@@ -2772,7 +3163,7 @@
                     // Get all unique months from trades (only if needed)
                     if (!isMonthly || availableMonths.length === 0) {
                         const monthsSet = new Set();
-                        allTrades.forEach(trade => {
+                        activeTrades.forEach(trade => {
                             if (trade.date) {
                                 const parts = trade.date.split('/');
                                 if (parts.length >= 3) {
@@ -2819,7 +3210,7 @@
                     const fullYear = '20' + year; // Convert 25 to 2025
                     
                     // Get trades for this month
-                    const monthTrades = allTrades.filter(trade => {
+                    const monthTrades = activeTrades.filter(trade => {
                         if (!trade.date) return false;
                         const parts = trade.date.split('/');
                         if (parts.length < 3) return false;
@@ -2841,7 +3232,7 @@
                     });
                 } else {
                     // Overall view - show contributions across all time
-                    allTrades.forEach(trade => {
+                    activeTrades.forEach(trade => {
                         if (trade.strategyPnlTax) {
                             Object.entries(trade.strategyPnlTax).forEach(([stratName, pnl]) => {
                                 if (!stratName.startsWith('A.PRO')) {
@@ -2858,7 +3249,9 @@
                 // Sort strategies by broker code and PRO number
                 // Filter out strategies with zero contribution
                 sortedStrategies = Object.entries(strategyContributions)
-                    .filter(([stratName, contribution]) => contribution !== 0)
+                    .filter(([stratName, contribution]) => {
+                        return contribution !== 0; // Keep all non-zero strategies
+                    })
                     .sort((a, b) => {
                         const extractParts = (name) => {
                             const match = name.match(/([A-Z0-9]+)\s*PRO\s*(\d+)/i);
@@ -2882,8 +3275,13 @@
                     })
                     .slice(0, 10);
                 
-                // Calculate total
-                totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
+                // Calculate total only from visible (non-hidden) strategies
+                totalValue = sortedStrategies.reduce((sum, [stratName, contrib]) => {
+                    if (!hiddenStrategies.compare.has(formatStrategyName(stratName))) {
+                        return sum + contrib;
+                    }
+                    return sum;
+                }, 0);
                 
                 // Cache the calculated values
                 charts.compare._cacheKey = cacheKey;
@@ -2925,11 +3323,15 @@
                 let cumulative = 0;
                 const contributions = []; // Store actual contribution values for tooltips
                 
-                sortedStrategies.forEach(([stratName, contribution], index) => {
+                // Filter to only visible strategies for the chart
+                const visibleStrategies = sortedStrategies.filter(([stratName]) => 
+                    !hiddenStrategies.compare.has(formatStrategyName(stratName))
+                );
+                
+                visibleStrategies.forEach(([stratName, contribution], index) => {
                     labels.push(formatStrategyName(stratName));
-                    contributions.push(contribution); // Always store actual value for tooltip
+                    contributions.push(contribution);
                     
-                    // Calculate display value (percentage or actual)
                     let displayValue = contribution;
                     if (isPercentageMode && totalValue !== 0) {
                         displayValue = (contribution / Math.abs(totalValue)) * 100;
@@ -2941,6 +3343,8 @@
                     // For floating bars, always use [min, max] for proper display
                     data.push([Math.min(start, end), Math.max(start, end)]);
                     
+                    cumulative += displayValue;
+                    
                     // Color based on positive/negative contribution
                     if (contribution < 0) {
                         // Use red/brown only for negative values
@@ -2950,8 +3354,6 @@
                         const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
                         colors.push(baseColor);
                     }
-                    
-                    cumulative += displayValue;
                 });
                 
                 // Add Total
@@ -2974,6 +3376,32 @@
                 charts.compare.data.labels = labels;
                 charts.compare.data.datasets[0].data = data;
                 charts.compare.data.datasets[0].backgroundColor = colors;
+                
+                // Store all strategies (including hidden) for legend generation
+                charts.compare._allStrategies = sortedStrategies.map(([name]) => formatStrategyName(name));
+                charts.compare._allColors = sortedStrategies.map(([name, contrib], index) => {
+                    const strategyColors = {
+                        'PRO 4': '#3b82f6',
+                        'PRO 5': '#ec4899',
+                        'PRO 8': '#8b5cf6',
+                        'PRO 6': '#06b6d4',
+                        'PRO 7': '#f59e0b'
+                    };
+                    const defaultColors = ['#3b82f6', '#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b'];
+                    const getColorForStrategy = (stratName) => {
+                        const match = stratName.match(/PRO\s*(\d+)/i);
+                        if (match) {
+                            const proKey = `PRO ${match[1]}`;
+                            return strategyColors[proKey];
+                        }
+                        return null;
+                    };
+                    if (contrib < 0) {
+                        return '#c2410c';
+                    } else {
+                        return getColorForStrategy(name) || defaultColors[index % defaultColors.length];
+                    }
+                });
                 
                 // Store contributions and total for tooltip access
                 charts.compare._contributions = contributions;
@@ -3014,15 +3442,19 @@
                 charts.compare.options.scales.y.min = undefined;
                 charts.compare.options.scales.y.max = undefined;
                 
+                // Force legend to regenerate
+                charts.compare.options.plugins.legend.labels.generateLabels = charts.compare.options.plugins.legend.labels.generateLabels;
+                
                 // Update with scale recalculation
                 charts.compare.update('none');
                 
                 charts.compare.render();
             } else if (chartType === 'amibroker') {
                 // Amibroker Waterfall Chart Logic (A.PRO strategies)
+                const activeTrades = getActiveTrades(); // Use filtered trades based on date range
                 const isMonthly = !window.amibrokerView || window.amibrokerView === 'monthly';
                 
-                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}`;
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.amibroker).join(',')}`;
                 const useCache = charts.amibroker._cacheKey === cacheKey && 
                                 charts.amibroker._cachedStrategies && 
                                 charts.amibroker._cachedTotalValue !== undefined;
@@ -3038,7 +3470,7 @@
                     if (isMonthly) {
                         if (availableMonths.length === 0) {
                             const monthsSet = new Set();
-                            allTrades.forEach(trade => {
+                            activeTrades.forEach(trade => {
                                 if (trade.date) {
                                     const parts = trade.date.split('/');
                                     if (parts.length >= 3) {
@@ -3072,7 +3504,7 @@
                         const monthNum = monthNames.indexOf(monthName) + 1;
                         const fullYear = '20' + year;
                         
-                        const monthTrades = allTrades.filter(trade => {
+                        const monthTrades = activeTrades.filter(trade => {
                             if (!trade.date) return false;
                             const parts = trade.date.split('/');
                             if (parts.length < 3) return false;
@@ -3092,7 +3524,7 @@
                             }
                         });
                     } else {
-                        allTrades.forEach(trade => {
+                        activeTrades.forEach(trade => {
                             if (trade.strategyPnlTax) {
                                 Object.entries(trade.strategyPnlTax).forEach(([stratName, pnl]) => {
                                     if (stratName.startsWith('A.PRO')) {
@@ -3107,7 +3539,9 @@
                     }
                     
                     sortedStrategies = Object.entries(strategyContributions)
-                        .filter(([stratName, contribution]) => contribution !== 0)
+                        .filter(([stratName, contribution]) => {
+                            return contribution !== 0; // Keep all non-zero strategies
+                        })
                         .sort((a, b) => {
                             const extractParts = (name) => {
                                 const match = name.match(/([A-Z0-9.]+)\s*PRO\s*(\d+)/i);
@@ -3131,7 +3565,13 @@
                         })
                         .slice(0, 10);
                     
-                    totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
+                    // Calculate total only from visible (non-hidden) strategies
+                    totalValue = sortedStrategies.reduce((sum, [stratName, contrib]) => {
+                        if (!hiddenStrategies.amibroker.has(formatStrategyName(stratName))) {
+                            return sum + contrib;
+                        }
+                        return sum;
+                    }, 0);
                     
                     charts.amibroker._cacheKey = cacheKey;
                     charts.amibroker._cachedStrategies = sortedStrategies;
@@ -3166,7 +3606,12 @@
                 let cumulative = 0;
                 const contributions = [];
                 
-                sortedStrategies.forEach(([stratName, contribution], index) => {
+                // Filter to only visible strategies for the chart
+                const visibleStrategies = sortedStrategies.filter(([stratName]) => 
+                    !hiddenStrategies.amibroker.has(formatStrategyName(stratName))
+                );
+                
+                visibleStrategies.forEach(([stratName, contribution], index) => {
                     labels.push(formatStrategyName(stratName));
                     contributions.push(contribution);
                     
@@ -3180,14 +3625,14 @@
                     
                     data.push([Math.min(start, end), Math.max(start, end)]);
                     
+                    cumulative += displayValue;
+                    
                     if (contribution < 0) {
                         colors.push('#c2410c');
                     } else {
                         const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
                         colors.push(baseColor);
                     }
-                    
-                    cumulative += displayValue;
                 });
                 
                 labels.push('Total');
@@ -3205,6 +3650,32 @@
                 charts.amibroker.data.labels = labels;
                 charts.amibroker.data.datasets[0].data = data;
                 charts.amibroker.data.datasets[0].backgroundColor = colors;
+                
+                // Store all strategies (including hidden) for legend generation
+                charts.amibroker._allStrategies = sortedStrategies.map(([name]) => formatStrategyName(name));
+                charts.amibroker._allColors = sortedStrategies.map(([name, contrib], index) => {
+                    const strategyColors = {
+                        'PRO 4': '#f97316',
+                        'PRO 5': '#eab308',
+                        'PRO 8': '#84cc16',
+                        'PRO 6': '#14b8a6',
+                        'PRO 7': '#0ea5e9'
+                    };
+                    const defaultColors = ['#f97316', '#eab308', '#84cc16', '#14b8a6', '#0ea5e9'];
+                    const getColorForStrategy = (stratName) => {
+                        const match = stratName.match(/PRO\s*(\d+)/i);
+                        if (match) {
+                            const proKey = `PRO ${match[1]}`;
+                            return strategyColors[proKey];
+                        }
+                        return null;
+                    };
+                    if (contrib < 0) {
+                        return '#c2410c';
+                    } else {
+                        return getColorForStrategy(name) || defaultColors[index % defaultColors.length];
+                    }
+                });
                 
                 charts.amibroker._contributions = contributions;
                 charts.amibroker._totalValue = totalValue;
@@ -3239,13 +3710,17 @@
                 charts.amibroker.options.scales.y.min = undefined;
                 charts.amibroker.options.scales.y.max = undefined;
                 
+                // Force legend to regenerate
+                charts.amibroker.options.plugins.legend.labels.generateLabels = charts.amibroker.options.plugins.legend.labels.generateLabels;
+                
                 charts.amibroker.update('none');
                 charts.amibroker.render();
             } else if (chartType === 'lotpnltax') {
                 // LOT PNLTAX Waterfall Chart Logic
+                const activeTrades = getActiveTrades(); // Use filtered trades based on date range
                 const isMonthly = !window.lotpnltaxView || window.lotpnltaxView === 'monthly';
                 
-                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}`;
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.lotpnltax).join(',')}`;
                 const useCache = charts.lotpnltax._cacheKey === cacheKey && 
                                 charts.lotpnltax._cachedStrategies && 
                                 charts.lotpnltax._cachedTotalValue !== undefined;
@@ -3261,7 +3736,7 @@
                     if (isMonthly) {
                         if (availableMonths.length === 0) {
                             const monthsSet = new Set();
-                            allTrades.forEach(trade => {
+                            activeTrades.forEach(trade => {
                                 if (trade.date) {
                                     const parts = trade.date.split('/');
                                     if (parts.length >= 3) {
@@ -3295,7 +3770,7 @@
                         const monthNum = monthNames.indexOf(monthName) + 1;
                         const fullYear = '20' + year;
                         
-                        const monthTrades = allTrades.filter(trade => {
+                        const monthTrades = activeTrades.filter(trade => {
                             if (!trade.date) return false;
                             const parts = trade.date.split('/');
                             if (parts.length < 3) return false;
@@ -3323,7 +3798,7 @@
                             }
                         });
                     } else {
-                        allTrades.forEach(trade => {
+                        activeTrades.forEach(trade => {
                             if (trade.strategyPnlTax && trade.strategyDetails) {
                                 Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
                                     if (!stratName.startsWith('A.PRO')) { // Only non-Amibroker strategies
@@ -3355,7 +3830,9 @@
                     });
                     
                     sortedStrategies = Object.entries(lotPnlTaxContributions)
-                        .filter(([stratName, contribution]) => contribution !== 0)
+                        .filter(([stratName, contribution]) => {
+                            return contribution !== 0; // Keep all non-zero strategies
+                        })
                         .sort((a, b) => {
                             const extractParts = (name) => {
                                 const match = name.match(/([A-Z0-9]+)\s*PRO\s*(\d+)/i);
@@ -3379,7 +3856,13 @@
                         })
                         .slice(0, 10);
                     
-                    totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
+                    // Calculate total only from visible (non-hidden) strategies
+                    totalValue = sortedStrategies.reduce((sum, [stratName, contrib]) => {
+                        if (!hiddenStrategies.lotpnltax.has(formatStrategyName(stratName))) {
+                            return sum + contrib;
+                        }
+                        return sum;
+                    }, 0);
                     
                     charts.lotpnltax._cacheKey = cacheKey;
                     charts.lotpnltax._cachedStrategies = sortedStrategies;
@@ -3415,7 +3898,12 @@
                 let cumulative = 0;
                 const contributions = [];
                 
-                sortedStrategies.forEach(([lotName, contribution], index) => {
+                // Filter to only visible strategies for the chart
+                const visibleStrategies = sortedStrategies.filter(([lotName]) => 
+                    !hiddenStrategies.lotpnltax.has(formatStrategyName(lotName))
+                );
+                
+                visibleStrategies.forEach(([lotName, contribution], index) => {
                     labels.push(formatStrategyName(lotName)); // Use formatStrategyName for proper spacing
                     contributions.push(contribution);
                     
@@ -3429,6 +3917,8 @@
                     
                     data.push([Math.min(start, end), Math.max(start, end)]);
                     
+                    cumulative += displayValue;
+                    
                     if (contribution < 0) {
                         colors.push('#c2410c');
                     } else {
@@ -3436,8 +3926,6 @@
                         const baseColor = getColorForStrategy(lotName) || defaultColors[index % defaultColors.length];
                         colors.push(baseColor);
                     }
-                    
-                    cumulative += displayValue;
                 });
                 
                 labels.push('Total');
@@ -3455,6 +3943,32 @@
                 charts.lotpnltax.data.labels = labels;
                 charts.lotpnltax.data.datasets[0].data = data;
                 charts.lotpnltax.data.datasets[0].backgroundColor = colors;
+                
+                // Store all strategies (including hidden) for legend generation
+                charts.lotpnltax._allStrategies = sortedStrategies.map(([name]) => formatStrategyName(name));
+                charts.lotpnltax._allColors = sortedStrategies.map(([name, contrib], index) => {
+                    const strategyColors = {
+                        'PRO 4': '#3b82f6',
+                        'PRO 5': '#ec4899',
+                        'PRO 8': '#8b5cf6',
+                        'PRO 6': '#06b6d4',
+                        'PRO 7': '#f59e0b'
+                    };
+                    const defaultColors = ['#3b82f6', '#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b'];
+                    const getColorForStrategy = (stratName) => {
+                        const match = stratName.match(/PRO\s*(\d+)/i);
+                        if (match) {
+                            const proKey = `PRO ${match[1]}`;
+                            return strategyColors[proKey];
+                        }
+                        return null;
+                    };
+                    if (contrib < 0) {
+                        return '#c2410c';
+                    } else {
+                        return getColorForStrategy(name) || defaultColors[index % defaultColors.length];
+                    }
+                });
                 
                 charts.lotpnltax._contributions = contributions;
                 charts.lotpnltax._totalValue = totalValue;
@@ -3488,6 +4002,9 @@
                 
                 charts.lotpnltax.options.scales.y.min = undefined;
                 charts.lotpnltax.options.scales.y.max = undefined;
+                
+                // Force legend to regenerate
+                charts.lotpnltax.options.plugins.legend.labels.generateLabels = charts.lotpnltax.options.plugins.legend.labels.generateLabels;
                 
                 charts.lotpnltax.update('none');
                 charts.lotpnltax.render();
