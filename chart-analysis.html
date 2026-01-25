@@ -877,7 +877,10 @@
                         const data = JSON.parse(e.newValue);
                         allTrades = data.tradesData || data || [];
                         if (allTrades.length > 0) {
-                            refreshAllCharts();
+                            // Initialize date pickers with new data
+                            initializeDatePickers();
+                            // Switch to All Time and refresh charts
+                            selectDateRange('all');
                         }
                     } catch (err) {
                         // Ignore parse errors
@@ -902,7 +905,11 @@
                             allTrades = newTrades;
                             lastDataLength = newTrades.length;
                             lastDataChecksum = newChecksum;
-                            refreshAllCharts();
+                            
+                            // Initialize date pickers with new data
+                            initializeDatePickers();
+                            // Switch to All Time and refresh charts
+                            selectDateRange('all');
                         }
                     }
                 } catch (e) {
@@ -1164,8 +1171,8 @@
                 }
                 // Initialize date pickers with new data
                 initializeDatePickers();
-                // Force refresh all charts
-                refreshAllCharts();
+                // Switch to All Time and refresh charts
+                selectDateRange('all');
             } else if (type === 'UPDATE_DATA' && data) {
                 allTrades = data.tradesData || [];
                 // Store updated data
@@ -1176,8 +1183,8 @@
                 }
                 // Initialize date pickers with new data
                 initializeDatePickers();
-                // Force refresh all charts
-                refreshAllCharts();
+                // Switch to All Time and refresh charts
+                selectDateRange('all');
             }
         }
         
@@ -1269,14 +1276,12 @@
                     return `${year}-${month}-${day}`;
                 };
                 
+                // Only set min/max constraints, not default values
+                // selectDateRange('all') will set the actual values
                 fromInput.min = formatDate(minDate);
                 fromInput.max = formatDate(maxDate);
                 toInput.min = formatDate(minDate);
                 toInput.max = formatDate(maxDate);
-                
-                // Set default values
-                fromInput.value = formatDate(minDate);
-                toInput.value = formatDate(maxDate);
             }
         }
         
