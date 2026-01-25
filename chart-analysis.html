@@ -743,11 +743,72 @@
             // Remove custom date range active state
             document.getElementById('customDateRange').classList.remove('active');
             
+            // Update date input fields based on selected range
+            updateDateInputs(range);
+            
             // Filter trades based on selected range
             filterTradesByDateRange();
             
             // Refresh all charts with filtered data
             refreshAllCharts();
+        }
+        
+        // Update date input fields based on selected range
+        function updateDateInputs(range) {
+            const fromInput = document.getElementById('fromDate');
+            const toInput = document.getElementById('toDate');
+            
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            const today = new Date();
+            let startDate, endDate;
+            
+            if (range === 'all') {
+                // For "ALL TIME", set to min and max dates from data
+                if (allTrades.length > 0) {
+                    let minDate = null;
+                    let maxDate = null;
+                    
+                    allTrades.forEach(trade => {
+                        if (!trade.date) return;
+                        const parts = trade.date.split('/');
+                        if (parts.length !== 3) return;
+                        
+                        const day = parseInt(parts[0]);
+                        const month = parseInt(parts[1]) - 1;
+                        const year = parseInt(parts[2]);
+                        const fullYear = year < 100 ? (year > 50 ? 1900 + year : 2000 + year) : year;
+                        const tradeDate = new Date(fullYear, month, day);
+                        
+                        if (!minDate || tradeDate < minDate) minDate = tradeDate;
+                        if (!maxDate || tradeDate > maxDate) maxDate = tradeDate;
+                    });
+                    
+                    if (minDate && maxDate) {
+                        fromInput.value = formatDate(minDate);
+                        toInput.value = formatDate(maxDate);
+                    }
+                }
+                return;
+            } else if (range === 'ytd') {
+                // Year to date - from January 1st of current year
+                startDate = new Date(today.getFullYear(), 0, 1);
+                endDate = today;
+            } else {
+                // Last N months
+                const months = parseInt(range);
+                startDate = new Date(today);
+                startDate.setMonth(today.getMonth() - months);
+                endDate = today;
+            }
+            
+            fromInput.value = formatDate(startDate);
+            toInput.value = formatDate(endDate);
         }
         
         function filterTradesByDateRange() {
@@ -1226,8 +1287,13 @@
             
             if (!fromInput.value || !toInput.value) return;
             
-            customFromDate = new Date(fromInput.value);
-            customToDate = new Date(toInput.value);
+            // Create dates in local timezone to match trade dates
+            const fromParts = fromInput.value.split('-');
+            const toParts = toInput.value.split('-');
+            customFromDate = new Date(parseInt(fromParts[0]), parseInt(fromParts[1]) - 1, parseInt(fromParts[2]));
+            customToDate = new Date(parseInt(toParts[0]), parseInt(toParts[1]) - 1, parseInt(toParts[2]));
+            // Set TO date to end of day to make it inclusive
+            customToDate.setHours(23, 59, 59, 999);
             
             // Validate that from date is before to date
             if (customFromDate > customToDate) {
@@ -1463,13 +1529,16 @@
                 item.drawdown = item.cumPnl - peak;
             });
             
-            // Filter out leading empty periods (periods with no trades at the start)
-            let firstNonEmptyIndex = result.findIndex(item => item.trades.length > 0);
-            if (firstNonEmptyIndex > 0) {
-                result = result.slice(firstNonEmptyIndex);
-                // Recalculate periodProfit for the new first period
-                if (result.length > 0 && result[0].trades.length > 0) {
-                    result[0].periodProfit = result[0].cumPnl;
+            // Only filter out leading empty periods when viewing ALL data
+            // When a specific date range is selected, keep all periods from the start
+            if (selectedDateRange === 'all') {
+                let firstNonEmptyIndex = result.findIndex(item => item.trades.length > 0);
+                if (firstNonEmptyIndex > 0) {
+                    result = result.slice(firstNonEmptyIndex);
+                    // Recalculate periodProfit for the new first period
+                    if (result.length > 0 && result[0].trades.length > 0) {
+                        result[0].periodProfit = result[0].cumPnl;
+                    }
                 }
             }
             
@@ -2766,6 +2835,50 @@
             const period = activePeriods[chartType];
             const aggregatedData = aggregateByPeriod(activeTrades, period);
             
+            // Calculate previous value (cumPnl before the filter) when date filter is applied
+            let previousValue = 0;
+            if (selectedDateRange !== 'all' && (chartType === 'pnl' || chartType === 'pnlbar' || chartType === 'drawdown')) {
+                // Get trades before the filter start date
+                let filterStartDate;
+                
+                if (selectedDateRange === 'custom') {
+                    filterStartDate = customFromDate;
+                } else if (selectedDateRange === 'ytd') {
+                    const today = new Date();
+                    filterStartDate = new Date(today.getFullYear(), 0, 1);
+                } else {
+                    // Last N months
+                    const today = new Date();
+                    filterStartDate = new Date(today);
+                    filterStartDate.setMonth(today.getMonth() - parseInt(selectedDateRange));
+                }
+                
+                // Get all trades before the filter start date
+                const tradesBeforeFilter = allTrades.filter(trade => {
+                    if (!trade.date) return false;
+                    
+                    const parts = trade.date.split('/');
+                    if (parts.length !== 3) return false;
+                    
+                    const day = parseInt(parts[0]);
+                    const month = parseInt(parts[1]) - 1;
+                    const year = parseInt(parts[2]);
+                    const fullYear = year < 100 ? (year > 50 ? 1900 + year : 2000 + year) : year;
+                    
+                    const tradeDate = new Date(fullYear, month, day);
+                    
+                    return tradeDate < filterStartDate;
+                });
+                
+                // Calculate cumPnl at the end of trades before filter
+                if (tradesBeforeFilter.length > 0) {
+                    const aggregatedBeforeFilter = aggregateByPeriod(tradesBeforeFilter, 'day');
+                    if (aggregatedBeforeFilter.length > 0) {
+                        previousValue = aggregatedBeforeFilter[aggregatedBeforeFilter.length - 1].cumPnl;
+                    }
+                }
+            }
+            
             const labels = aggregatedData.map(d => formatLabel(d.date, period));
             
             if (chartType === 'pnl') {
@@ -2832,10 +2945,10 @@
                     
                     data = aggregatedData.map(d => {
                         if (startingCapital === 0) return 0;
-                        return ((d.cumPnl / startingCapital) * 100);
+                        return (((d.cumPnl - previousValue) / startingCapital) * 100);
                     });
                 } else {
-                    data = aggregatedData.map(d => d.cumPnl);
+                    data = aggregatedData.map(d => d.cumPnl - previousValue);
                 }
                 
                 charts.pnl.data.labels = labels;
@@ -2867,6 +2980,19 @@
             } else if (chartType === 'drawdown') {
                 const displayType = displayTypes.drawdown || 'value';
                 let data;
+                
+                // Recalculate peak and drawdown based on adjusted cumPnl when filter is applied
+                if (selectedDateRange !== 'all' && previousValue !== 0) {
+                    let adjustedPeak = 0;
+                    aggregatedData.forEach(d => {
+                        const adjustedCumPnl = d.cumPnl - previousValue;
+                        if (adjustedCumPnl > adjustedPeak) {
+                            adjustedPeak = adjustedCumPnl;
+                        }
+                        d.adjustedPeak = adjustedPeak;
+                        d.adjustedDrawdown = adjustedCumPnl - adjustedPeak;
+                    });
+                }
                 
                 if (displayType === 'percentage') {
                     // Calculate Drawdown% = (drawdown / peakMargin) * 100
@@ -2928,13 +3054,17 @@
                     }
                     
                     data = aggregatedData.map(d => {
+                        const drawdownValue = (selectedDateRange !== 'all' && previousValue !== 0) ? d.adjustedDrawdown : d.drawdown;
+                        const peakValue = (selectedDateRange !== 'all' && previousValue !== 0) ? d.adjustedPeak : d.peak;
                         // peakMargin = startingCapital + peak cumPnl
-                        const peakMargin = startingCapital + d.peak;
+                        const peakMargin = startingCapital + peakValue;
                         if (peakMargin === 0) return 0;
-                        return ((d.drawdown / peakMargin) * 100);
+                        return ((drawdownValue / peakMargin) * 100);
                     });
                 } else {
-                    data = aggregatedData.map(d => d.drawdown);
+                    data = aggregatedData.map(d => {
+                        return (selectedDateRange !== 'all' && previousValue !== 0) ? d.adjustedDrawdown : d.drawdown;
+                    });
                 }
                 
                 charts.drawdown.data.labels = labels;
@@ -3008,6 +3138,9 @@
                             const dateParts = d.date.split('/');
                             const month = dateParts.length >= 2 ? (dateParts[1] + '/' + dateParts[2]) : d.date;
                             
+                            // Adjust periodProfit for the first period when filter is applied
+                            const adjustedPeriodProfit = (index === 0) ? (d.periodProfit || 0) - previousValue : (d.periodProfit || 0);
+                            
                             // Check if this is the first day of a new month
                             const isFirstDayOfMonth = (month !== currentMonth);
                             
@@ -3026,7 +3159,7 @@
                                 if (monthStartMargin === 0) {
                                     return 0;
                                 } else {
-                                    return ((d.periodProfit || 0) / monthStartMargin) * 100;
+                                    return (adjustedPeriodProfit / monthStartMargin) * 100;
                                 }
                             } else {
                                 // Subsequent days in month: use previous day's cumMargin
@@ -3036,7 +3169,7 @@
                                 if (previousDayMargin === 0) {
                                     return 0;
                                 } else {
-                                    return ((d.periodProfit || 0) / previousDayMargin) * 100;
+                                    return (adjustedPeriodProfit / previousDayMargin) * 100;
                                 }
                             }
                         });
@@ -3097,12 +3230,13 @@
                         }
                         
                         profitData = aggregatedData.map((d, index) => {
+                            const adjustedPeriodProfit = (index === 0) ? (d.periodProfit || 0) - previousValue : (d.periodProfit || 0);
                             if (index === 0) {
                                 // First period: use starting capital (same as Cumulative P&L)
                                 if (startingCapital === 0) {
                                     return 0;
                                 } else {
-                                    return ((d.periodProfit || 0) / startingCapital) * 100;
+                                    return (adjustedPeriodProfit / startingCapital) * 100;
                                 }
                             } else {
                                 // Subsequent periods: use previous period's cumMargin
@@ -3111,13 +3245,16 @@
                                 if (previousMargin === 0) {
                                     return 0;
                                 } else {
-                                    return ((d.periodProfit || 0) / previousMargin) * 100;
+                                    return (adjustedPeriodProfit / previousMargin) * 100;
                                 }
                             }
                         });
                     }
                 } else {
-                    profitData = aggregatedData.map(d => d.periodProfit || 0);
+                    profitData = aggregatedData.map((d, index) => {
+                        // For value mode, subtract previousValue from first period's profit
+                        return (index === 0) ? (d.periodProfit || 0) - previousValue : (d.periodProfit || 0);
+                    });
                 }
                 
                 // Create color array - green for positive, brown for negative
