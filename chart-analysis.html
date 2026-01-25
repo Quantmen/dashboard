@@ -8,18 +8,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; }
+        html, body { width: 100%; height: 100%; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f8fafc;
             color: #1e293b;
         }
         .main-content {
-            overflow-y: auto;
-            overflow-x: hidden;
             padding: 20px 32px 32px 32px;
             background: #f8fafc;
-            height: 100vh;
             width: 100%;
         }
         .page-header { margin-bottom: 20px; }
@@ -31,7 +28,6 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            height: calc(100vh - 140px);
         }
         
         .chart-card {
@@ -44,6 +40,13 @@
             flex-direction: column;
             transition: box-shadow 0.2s ease;
             overflow: hidden;
+            height: 400px;
+        }
+        
+        /* Specific height for Amibroker and LOT PNLTAX charts (5th and 6th cards) */
+        .chart-card:nth-child(5),
+        .chart-card:nth-child(6) {
+            height: 450px;
         }
         
         .chart-card:hover { 
@@ -193,30 +196,26 @@
         /* Tablet Responsive */
         @media (max-width: 1024px) {
             .charts-grid {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                grid-template-rows: auto !important;
-                height: auto !important;
-                gap: 16px !important;
-            }
-            
-            .chart-card {
-                height: 450px;
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
         }
         
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .charts-grid {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                grid-template-rows: auto !important;
-                height: auto !important;
-                gap: 16px !important;
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
             
             .chart-card {
-                height: 400px;
+                height: 350px;
+            }
+            
+            /* Specific height for Amibroker and LOT PNLTAX charts on mobile */
+            .chart-card:nth-child(5),
+            .chart-card:nth-child(6) {
+                height: 370px;
             }
             
             .chart-header {
@@ -376,6 +375,64 @@
                     <canvas id="compareChart"></canvas>
                 </div>
             </div>
+            
+            <!-- Amibroker strategy PNL -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Amibroker strategy PNL</div>
+                    <div class="chart-controls">
+                        <div class="chart-toggles">
+                            <button class="toggle-btn" id="showAmibrokerValues">Show</button>
+                            <button class="toggle-btn active" id="hideAmibrokerValues">Hide</button>
+                        </div>
+                        <div class="chart-toggles">
+                            <button class="toggle-btn active" data-chart="amibroker" data-type="value">Value</button>
+                            <button class="toggle-btn" data-chart="amibroker" data-type="percentage">%</button>
+                        </div>
+                        <div class="chart-toggles">
+                            <button class="toggle-btn active" data-chart="amibroker" data-view="monthly">Monthly</button>
+                            <button class="toggle-btn" data-chart="amibroker" data-view="overall">Overall</button>
+                        </div>
+                        <div class="month-navigation">
+                            <button class="nav-btn" id="prevMonthAmibroker">◄ Prev</button>
+                            <span class="current-month" id="currentMonthAmibroker">JAN-26</span>
+                            <button class="nav-btn" id="nextMonthAmibroker">Next ►</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="amibrokerChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- LOT PNLTAX -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">LOT PNLTAX</div>
+                    <div class="chart-controls">
+                        <div class="chart-toggles">
+                            <button class="toggle-btn" id="showLotpnltaxValues">Show</button>
+                            <button class="toggle-btn active" id="hideLotpnltaxValues">Hide</button>
+                        </div>
+                        <div class="chart-toggles">
+                            <button class="toggle-btn active" data-chart="lotpnltax" data-type="value">Value</button>
+                            <button class="toggle-btn" data-chart="lotpnltax" data-type="percentage">%</button>
+                        </div>
+                        <div class="chart-toggles">
+                            <button class="toggle-btn active" data-chart="lotpnltax" data-view="monthly">Monthly</button>
+                            <button class="toggle-btn" data-chart="lotpnltax" data-view="overall">Overall</button>
+                        </div>
+                        <div class="month-navigation">
+                            <button class="nav-btn" id="prevMonthLotpnltax">◄ Prev</button>
+                            <span class="current-month" id="currentMonthLotpnltax">JAN-26</span>
+                            <button class="nav-btn" id="nextMonthLotpnltax">Next ►</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="lotpnltaxChart"></canvas>
+                </div>
+            </div>
         </div>
         
         <div class="loading-state" id="loadingState">
@@ -447,25 +504,33 @@
             pnl: null,
             drawdown: null,
             pnlbar: null,
-            compare: null
+            compare: null,
+            amibroker: null,
+            lotpnltax: null
         };
         const activePeriods = {
             pnl: 'day',
             drawdown: 'day',
             pnlbar: 'month',
-            compare: 'month'
+            compare: 'month',
+            amibroker: 'month',
+            lotpnltax: 'month'
         };
         
         const displayTypes = {
             pnl: 'value',
             drawdown: 'value',
             pnlbar: 'value',
-            compare: 'value'
+            compare: 'value',
+            amibroker: 'value',
+            lotpnltax: 'value'
         };
         
         const showValues = {
             pnlbar: false,
-            compare: false
+            compare: false,
+            amibroker: false,
+            lotpnltax: false
         };
         
         window.waterfallView = 'monthly'; // 'monthly' or 'overall'
@@ -478,7 +543,9 @@
             pnlChart: document.getElementById('pnlChart'),
             drawdownChart: document.getElementById('drawdownChart'),
             pnlBarChart: document.getElementById('pnlBarChart'),
-            compareChart: document.getElementById('compareChart')
+            compareChart: document.getElementById('compareChart'),
+            amibrokerChart: document.getElementById('amibrokerChart'),
+            lotpnltaxChart: document.getElementById('lotpnltaxChart')
         };
 
         // Initialize
@@ -592,6 +659,12 @@
                         if (chartType === 'compare') {
                             window.waterfallView = view;
                             updateChart('compare');
+                        } else if (chartType === 'amibroker') {
+                            window.amibrokerView = view;
+                            updateChart('amibroker');
+                        } else if (chartType === 'lotpnltax') {
+                            window.lotpnltaxView = view;
+                            updateChart('lotpnltax');
                         }
                     }
                 });
@@ -621,11 +694,63 @@
                 });
             }
             
+            // Amibroker Month navigation listeners
+            const prevBtnAmibroker = document.getElementById('prevMonthAmibroker');
+            const nextBtnAmibroker = document.getElementById('nextMonthAmibroker');
+            
+            if (prevBtnAmibroker) {
+                prevBtnAmibroker.addEventListener('click', () => {
+                    if (currentMonthIndex > 0) {
+                        currentMonthIndex--;
+                        updateMonthDisplay();
+                        updateChart('amibroker');
+                    }
+                });
+            }
+            
+            if (nextBtnAmibroker) {
+                nextBtnAmibroker.addEventListener('click', () => {
+                    if (currentMonthIndex < availableMonths.length - 1) {
+                        currentMonthIndex++;
+                        updateMonthDisplay();
+                        updateChart('amibroker');
+                    }
+                });
+            }
+            
+            // LOT PNLTAX Month navigation listeners
+            const prevBtnLotpnltax = document.getElementById('prevMonthLotpnltax');
+            const nextBtnLotpnltax = document.getElementById('nextMonthLotpnltax');
+            
+            if (prevBtnLotpnltax) {
+                prevBtnLotpnltax.addEventListener('click', () => {
+                    if (currentMonthIndex > 0) {
+                        currentMonthIndex--;
+                        updateMonthDisplay();
+                        updateChart('lotpnltax');
+                    }
+                });
+            }
+            
+            if (nextBtnLotpnltax) {
+                nextBtnLotpnltax.addEventListener('click', () => {
+                    if (currentMonthIndex < availableMonths.length - 1) {
+                        currentMonthIndex++;
+                        updateMonthDisplay();
+                        updateChart('lotpnltax');
+                    }
+                });
+            }
+            
             // Show/Hide Values toggle buttons
             const showPnlBarValues = document.getElementById('showPnlBarValues');
             const hidePnlBarValues = document.getElementById('hidePnlBarValues');
             const showWaterfallValues = document.getElementById('showWaterfallValues');
             const hideWaterfallValues = document.getElementById('hideWaterfallValues');
+            const showAmibrokerValues = document.getElementById('showAmibrokerValues');
+            const hideAmibrokerValues = document.getElementById('hideAmibrokerValues');
+            const showLotpnltaxValues = document.getElementById('showLotpnltaxValues');
+            const hideLotpnltaxValues = document.getElementById('hideLotpnltaxValues');
             
             if (showPnlBarValues && hidePnlBarValues) {
                 showPnlBarValues.addEventListener('click', () => {
@@ -656,6 +781,38 @@
                     hideWaterfallValues.classList.add('active');
                     showWaterfallValues.classList.remove('active');
                     updateChart('compare');
+                });
+            }
+            
+            if (showAmibrokerValues && hideAmibrokerValues) {
+                showAmibrokerValues.addEventListener('click', () => {
+                    showValues.amibroker = true;
+                    showAmibrokerValues.classList.add('active');
+                    hideAmibrokerValues.classList.remove('active');
+                    updateChart('amibroker');
+                });
+                
+                hideAmibrokerValues.addEventListener('click', () => {
+                    showValues.amibroker = false;
+                    hideAmibrokerValues.classList.add('active');
+                    showAmibrokerValues.classList.remove('active');
+                    updateChart('amibroker');
+                });
+            }
+            
+            if (showLotpnltaxValues && hideLotpnltaxValues) {
+                showLotpnltaxValues.addEventListener('click', () => {
+                    showValues.lotpnltax = true;
+                    showLotpnltaxValues.classList.add('active');
+                    hideLotpnltaxValues.classList.remove('active');
+                    updateChart('lotpnltax');
+                });
+                
+                hideLotpnltaxValues.addEventListener('click', () => {
+                    showValues.lotpnltax = false;
+                    hideLotpnltaxValues.classList.add('active');
+                    showLotpnltaxValues.classList.remove('active');
+                    updateChart('lotpnltax');
                 });
             }
         }
@@ -711,6 +868,16 @@
                 charts.compare._cacheKey = null;
                 charts.compare._cachedStrategies = null;
                 charts.compare._cachedTotalValue = null;
+            }
+            if (charts.amibroker) {
+                charts.amibroker._cacheKey = null;
+                charts.amibroker._cachedStrategies = null;
+                charts.amibroker._cachedTotalValue = null;
+            }
+            if (charts.lotpnltax) {
+                charts.lotpnltax._cacheKey = null;
+                charts.lotpnltax._cachedStrategies = null;
+                charts.lotpnltax._cachedTotalValue = null;
             }
             
             // Reset available months for waterfall chart
@@ -1634,6 +1801,468 @@
                     }
                 }]
             });
+            
+            // Amibroker strategy PNL Chart
+            charts.amibroker = new Chart(elements.amibrokerChart, {
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8,
+                        barThickness: 'flex'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                padding: 15,
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                },
+                                color: '#94a3b8',
+                                usePointStyle: false,
+                                generateLabels: (chart) => {
+                                    const labels = chart.data.labels || [];
+                                    const colors = chart.data.datasets[0].backgroundColor || [];
+                                    const legendItems = [];
+                                    
+                                    const addTransparency = (color, opacity = 0.7) => {
+                                        if (color.startsWith('#')) {
+                                            const r = parseInt(color.slice(1, 3), 16);
+                                            const g = parseInt(color.slice(3, 5), 16);
+                                            const b = parseInt(color.slice(5, 7), 16);
+                                            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                                        }
+                                        return color;
+                                    };
+                                    
+                                    labels.forEach((label, i) => {
+                                        if (label !== 'Start' && label !== 'Total') {
+                                            const originalColor = colors[i] || '#94a3b8';
+                                            legendItems.push({
+                                                text: label,
+                                                fillStyle: addTransparency(originalColor, 0.7),
+                                                strokeStyle: 'transparent',
+                                                lineWidth: 0,
+                                                hidden: false,
+                                                fontColor: '#94a3b8'
+                                            });
+                                        }
+                                    });
+                                    
+                                    return legendItems;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            borderWidth: 2,
+                            borderColor: '#e5e7eb',
+                            padding: 14,
+                            displayColors: false,
+                            titleFont: { 
+                                size: 12, 
+                                weight: '600',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            bodyFont: { 
+                                size: 14, 
+                                weight: '700',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            cornerRadius: 8,
+                            caretSize: 6,
+                            titleColor: '#64748b',
+                            bodyColor: '#1e293b',
+                            callbacks: {
+                                title: ctx => ctx[0].label,
+                                label: ctx => {
+                                    let value;
+                                    let total;
+                                    if (charts.amibroker && charts.amibroker._contributions) {
+                                        value = charts.amibroker._contributions[ctx.dataIndex];
+                                        total = charts.amibroker._totalValue;
+                                    } else {
+                                        value = Array.isArray(ctx.parsed.y) 
+                                            ? ctx.parsed.y[1] - ctx.parsed.y[0]
+                                            : ctx.parsed.y;
+                                        total = value;
+                                    }
+                                    
+                                    if (displayTypes.amibroker === 'percentage') {
+                                        if (!total || total === 0) {
+                                            return '0.00%';
+                                        }
+                                        const percentValue = (value / Math.abs(total)) * 100;
+                                        const sign = percentValue < 0 ? '-' : '';
+                                        return `${sign}${Math.abs(percentValue).toFixed(2)}%`;
+                                    }
+                                    const sign = value < 0 ? '-' : '';
+                                    return `${sign}₹${formatIndianNumber(Math.abs(value), 2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { 
+                                color: 'rgba(148, 163, 184, 0.08)',
+                                lineWidth: 1,
+                                drawBorder: false,
+                                drawTicks: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' 
+                                },
+                                color: '#94a3b8',
+                                padding: 8,
+                                maxTicksLimit: 8,
+                                callback: value => {
+                                    if (displayTypes.amibroker === 'percentage') {
+                                        return value.toFixed(1) + '%';
+                                    }
+                                    if (value === 0) return '₹0';
+                                    if (Math.abs(value) >= 100000) return `₹${Math.round(value / 100000)}L`;
+                                    if (Math.abs(value) >= 1000) return `₹${Math.round(value / 1000)}K`;
+                                    return `₹${Math.round(value)}`;
+                                }
+                            }
+                        },
+                        x: {
+                            display: true,
+                            grid: { 
+                                display: false,
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                },
+                                color: '#94a3b8',
+                                padding: 6
+                            }
+                        }
+                    },
+                    interaction: { 
+                        intersect: false, 
+                        mode: 'index' 
+                    }
+                },
+                plugins: [{
+                    id: 'amibrokerLabels',
+                    afterDatasetsDraw(chart) {
+                        if (!showValues.amibroker) {
+                            return;
+                        }
+                        
+                        const { ctx, data, scales } = chart;
+                        const meta = chart.getDatasetMeta(0);
+                        const yScale = scales.y;
+                        
+                        const labels = chart._preCalculatedLabels || [];
+                        
+                        meta.data.forEach((bar, index) => {
+                            if (!labels[index]) return;
+                            
+                            const { label, value } = labels[index];
+                            
+                            ctx.save();
+                            ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                            ctx.fillStyle = value >= 0 ? '#10b981' : '#c2410c';
+                            ctx.textAlign = 'center';
+                            
+                            const x = bar.x;
+                            let y;
+                            
+                            const barData = data.datasets[0].data[index];
+                            
+                            if (Array.isArray(barData)) {
+                                const topValue = Math.max(barData[0], barData[1]);
+                                const bottomValue = Math.min(barData[0], barData[1]);
+                                
+                                if (value >= 0) {
+                                    ctx.textBaseline = 'bottom';
+                                    y = yScale.getPixelForValue(topValue) - 5;
+                                } else {
+                                    ctx.textBaseline = 'top';
+                                    y = yScale.getPixelForValue(bottomValue) + 5;
+                                }
+                            } else {
+                                if (value >= 0) {
+                                    ctx.textBaseline = 'bottom';
+                                    y = bar.y - 5;
+                                } else {
+                                    ctx.textBaseline = 'top';
+                                    y = bar.y + 5;
+                                }
+                            }
+                            
+                            ctx.fillText(label, x, y);
+                            ctx.restore();
+                        });
+                    }
+                }]
+            });
+            
+            // LOT PNLTAX Chart
+            charts.lotpnltax = new Chart(elements.lotpnltaxChart, {
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8,
+                        barThickness: 'flex'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                padding: 15,
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                },
+                                color: '#94a3b8',
+                                usePointStyle: false,
+                                generateLabels: (chart) => {
+                                    const labels = chart.data.labels || [];
+                                    const colors = chart.data.datasets[0].backgroundColor || [];
+                                    const legendItems = [];
+                                    
+                                    const addTransparency = (color, opacity = 0.7) => {
+                                        if (color.startsWith('#')) {
+                                            const r = parseInt(color.slice(1, 3), 16);
+                                            const g = parseInt(color.slice(3, 5), 16);
+                                            const b = parseInt(color.slice(5, 7), 16);
+                                            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                                        }
+                                        return color;
+                                    };
+                                    
+                                    labels.forEach((label, i) => {
+                                        if (label !== 'Start' && label !== 'Total') {
+                                            const originalColor = colors[i] || '#94a3b8';
+                                            legendItems.push({
+                                                text: label,
+                                                fillStyle: addTransparency(originalColor, 0.7),
+                                                strokeStyle: 'transparent',
+                                                lineWidth: 0,
+                                                hidden: false,
+                                                fontColor: '#94a3b8'
+                                            });
+                                        }
+                                    });
+                                    
+                                    return legendItems;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            borderWidth: 2,
+                            borderColor: '#e5e7eb',
+                            padding: 14,
+                            displayColors: false,
+                            titleFont: { 
+                                size: 12, 
+                                weight: '600',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            bodyFont: { 
+                                size: 14, 
+                                weight: '700',
+                                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                            },
+                            cornerRadius: 8,
+                            caretSize: 6,
+                            titleColor: '#64748b',
+                            bodyColor: '#1e293b',
+                            callbacks: {
+                                title: ctx => ctx[0].label,
+                                label: ctx => {
+                                    let value;
+                                    let total;
+                                    if (charts.lotpnltax && charts.lotpnltax._contributions) {
+                                        value = charts.lotpnltax._contributions[ctx.dataIndex];
+                                        total = charts.lotpnltax._totalValue;
+                                    } else {
+                                        value = Array.isArray(ctx.parsed.y) 
+                                            ? ctx.parsed.y[1] - ctx.parsed.y[0]
+                                            : ctx.parsed.y;
+                                        total = value;
+                                    }
+                                    
+                                    if (displayTypes.lotpnltax === 'percentage') {
+                                        if (!total || total === 0) {
+                                            return '0.00%';
+                                        }
+                                        const percentValue = (value / Math.abs(total)) * 100;
+                                        const sign = percentValue < 0 ? '-' : '';
+                                        return `${sign}${Math.abs(percentValue).toFixed(2)}%`;
+                                    }
+                                    const sign = value < 0 ? '-' : '';
+                                    return `${sign}₹${formatIndianNumber(Math.abs(value), 2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { 
+                                color: 'rgba(148, 163, 184, 0.08)',
+                                lineWidth: 1,
+                                drawBorder: false,
+                                drawTicks: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto' 
+                                },
+                                color: '#94a3b8',
+                                padding: 8,
+                                maxTicksLimit: 8,
+                                callback: value => {
+                                    if (displayTypes.lotpnltax === 'percentage') {
+                                        return value.toFixed(1) + '%';
+                                    }
+                                    if (value === 0) return '₹0';
+                                    if (Math.abs(value) >= 100000) return `₹${Math.round(value / 100000)}L`;
+                                    if (Math.abs(value) >= 1000) return `₹${Math.round(value / 1000)}K`;
+                                    return `₹${Math.round(value)}`;
+                                }
+                            }
+                        },
+                        x: {
+                            display: true,
+                            grid: { 
+                                display: false,
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { 
+                                    size: 10, 
+                                    weight: '500',
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                },
+                                color: '#94a3b8',
+                                padding: 6
+                            }
+                        }
+                    },
+                    interaction: { 
+                        intersect: false, 
+                        mode: 'index' 
+                    }
+                },
+                plugins: [{
+                    id: 'lotpnltaxLabels',
+                    afterDatasetsDraw(chart) {
+                        if (!showValues.lotpnltax) {
+                            return;
+                        }
+                        
+                        const { ctx, data, scales } = chart;
+                        const meta = chart.getDatasetMeta(0);
+                        const yScale = scales.y;
+                        
+                        const labels = chart._preCalculatedLabels || [];
+                        
+                        meta.data.forEach((bar, index) => {
+                            if (!labels[index]) return;
+                            
+                            const { label, value } = labels[index];
+                            
+                            ctx.save();
+                            ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                            ctx.fillStyle = value >= 0 ? '#10b981' : '#c2410c';
+                            ctx.textAlign = 'center';
+                            
+                            const x = bar.x;
+                            let y;
+                            
+                            const barData = data.datasets[0].data[index];
+                            
+                            if (Array.isArray(barData)) {
+                                const topValue = Math.max(barData[0], barData[1]);
+                                const bottomValue = Math.min(barData[0], barData[1]);
+                                
+                                if (value >= 0) {
+                                    ctx.textBaseline = 'bottom';
+                                    y = yScale.getPixelForValue(topValue) - 5;
+                                } else {
+                                    ctx.textBaseline = 'top';
+                                    y = yScale.getPixelForValue(bottomValue) + 5;
+                                }
+                            } else {
+                                if (value >= 0) {
+                                    ctx.textBaseline = 'bottom';
+                                    y = bar.y - 5;
+                                } else {
+                                    ctx.textBaseline = 'top';
+                                    y = bar.y + 5;
+                                }
+                            }
+                            
+                            ctx.fillText(label, x, y);
+                            ctx.restore();
+                        });
+                    }
+                }]
+            });
         }
 
         function createGradient(canvas, color) {
@@ -1665,6 +2294,8 @@
             updateChart('drawdown');
             updateChart('pnlbar');
             updateChart('compare');
+            updateChart('amibroker');
+            updateChart('lotpnltax');
         }
         
         function autoSelectPnlBarPeriod() {
@@ -2387,6 +3018,479 @@
                 charts.compare.update('none');
                 
                 charts.compare.render();
+            } else if (chartType === 'amibroker') {
+                // Amibroker Waterfall Chart Logic (A.PRO strategies)
+                const isMonthly = !window.amibrokerView || window.amibrokerView === 'monthly';
+                
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}`;
+                const useCache = charts.amibroker._cacheKey === cacheKey && 
+                                charts.amibroker._cachedStrategies && 
+                                charts.amibroker._cachedTotalValue !== undefined;
+                
+                let sortedStrategies, totalValue;
+                
+                if (useCache) {
+                    sortedStrategies = charts.amibroker._cachedStrategies;
+                    totalValue = charts.amibroker._cachedTotalValue;
+                } else {
+                    const strategyContributions = {};
+                    
+                    if (isMonthly) {
+                        if (availableMonths.length === 0) {
+                            const monthsSet = new Set();
+                            allTrades.forEach(trade => {
+                                if (trade.date) {
+                                    const parts = trade.date.split('/');
+                                    if (parts.length >= 3) {
+                                        const monthNames = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                                          'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                                        const monthNum = parseInt(parts[1]);
+                                        const year = parts[2].slice(-2);
+                                        const monthName = monthNames[monthNum];
+                                        const displayMonth = `${monthName}-${year}`;
+                                        monthsSet.add(displayMonth);
+                                    }
+                                }
+                            });
+                            
+                            availableMonths = Array.from(monthsSet).sort((a, b) => {
+                                const [aMonth, aYear] = a.split('-');
+                                const [bMonth, bYear] = b.split('-');
+                                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                                  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                                const aMonthIdx = monthNames.indexOf(aMonth);
+                                const bMonthIdx = monthNames.indexOf(bMonth);
+                                return parseInt(aYear) === parseInt(bYear) ? aMonthIdx - bMonthIdx : parseInt(aYear) - parseInt(bYear);
+                            });
+                        }
+                        
+                        const monthString = availableMonths[currentMonthIndex];
+                        document.getElementById('currentMonthAmibroker').textContent = monthString;
+                        
+                        const [monthName, year] = monthString.split('-');
+                        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                        const monthNum = monthNames.indexOf(monthName) + 1;
+                        const fullYear = '20' + year;
+                        
+                        const monthTrades = allTrades.filter(trade => {
+                            if (!trade.date) return false;
+                            const parts = trade.date.split('/');
+                            if (parts.length < 3) return false;
+                            return parseInt(parts[1]) === monthNum && parts[2] === fullYear;
+                        });
+                        
+                        monthTrades.forEach(trade => {
+                            if (trade.strategyPnlTax) {
+                                Object.entries(trade.strategyPnlTax).forEach(([stratName, pnl]) => {
+                                    if (stratName.startsWith('A.PRO')) {
+                                        if (!strategyContributions[stratName]) {
+                                            strategyContributions[stratName] = 0;
+                                        }
+                                        strategyContributions[stratName] += pnl;
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        allTrades.forEach(trade => {
+                            if (trade.strategyPnlTax) {
+                                Object.entries(trade.strategyPnlTax).forEach(([stratName, pnl]) => {
+                                    if (stratName.startsWith('A.PRO')) {
+                                        if (!strategyContributions[stratName]) {
+                                            strategyContributions[stratName] = 0;
+                                        }
+                                        strategyContributions[stratName] += pnl;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    sortedStrategies = Object.entries(strategyContributions)
+                        .filter(([stratName, contribution]) => contribution !== 0)
+                        .sort((a, b) => {
+                            const extractParts = (name) => {
+                                const match = name.match(/([A-Z0-9.]+)\s*PRO\s*(\d+)/i);
+                                if (match) {
+                                    return {
+                                        broker: match[1],
+                                        pro: parseInt(match[2])
+                                    };
+                                }
+                                return { broker: name, pro: 0 };
+                            };
+                            
+                            const partsA = extractParts(a[0]);
+                            const partsB = extractParts(b[0]);
+                            
+                            if (partsA.broker !== partsB.broker) {
+                                return partsA.broker.localeCompare(partsB.broker);
+                            }
+                            
+                            return partsA.pro - partsB.pro;
+                        })
+                        .slice(0, 10);
+                    
+                    totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
+                    
+                    charts.amibroker._cacheKey = cacheKey;
+                    charts.amibroker._cachedStrategies = sortedStrategies;
+                    charts.amibroker._cachedTotalValue = totalValue;
+                }
+                    
+                let labels = [];
+                let data = [];
+                let colors = [];
+                
+                // Warm earthy color palette for Amibroker
+                const strategyColors = {
+                    'PRO 4': '#f97316',
+                    'PRO 5': '#eab308',
+                    'PRO 8': '#84cc16',
+                    'PRO 6': '#14b8a6',
+                    'PRO 7': '#0ea5e9'
+                };
+                const defaultColors = ['#f97316', '#eab308', '#84cc16', '#14b8a6', '#0ea5e9'];
+                
+                const getColorForStrategy = (stratName) => {
+                    const match = stratName.match(/PRO\s*(\d+)/i);
+                    if (match) {
+                        const proKey = `PRO ${match[1]}`;
+                        return strategyColors[proKey];
+                    }
+                    return null;
+                };
+                
+                const isPercentageMode = displayTypes.amibroker === 'percentage';
+                
+                let cumulative = 0;
+                const contributions = [];
+                
+                sortedStrategies.forEach(([stratName, contribution], index) => {
+                    labels.push(formatStrategyName(stratName));
+                    contributions.push(contribution);
+                    
+                    let displayValue = contribution;
+                    if (isPercentageMode && totalValue !== 0) {
+                        displayValue = (contribution / Math.abs(totalValue)) * 100;
+                    }
+                    
+                    const start = cumulative;
+                    const end = cumulative + displayValue;
+                    
+                    data.push([Math.min(start, end), Math.max(start, end)]);
+                    
+                    if (contribution < 0) {
+                        colors.push('#c2410c');
+                    } else {
+                        const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
+                        colors.push(baseColor);
+                    }
+                    
+                    cumulative += displayValue;
+                });
+                
+                labels.push('Total');
+                contributions.push(totalValue);
+                
+                const totalDisplayValue = isPercentageMode ? (totalValue >= 0 ? 100 : -100) : totalValue;
+                
+                if (totalDisplayValue >= 0) {
+                    data.push([0, totalDisplayValue]);
+                } else {
+                    data.push([totalDisplayValue, 0]);
+                }
+                colors.push(totalValue < 0 ? '#c2410c' : '#10b981');
+                
+                charts.amibroker.data.labels = labels;
+                charts.amibroker.data.datasets[0].data = data;
+                charts.amibroker.data.datasets[0].backgroundColor = colors;
+                
+                charts.amibroker._contributions = contributions;
+                charts.amibroker._totalValue = totalValue;
+                
+                charts.amibroker._preCalculatedLabels = contributions.map(value => {
+                    let label;
+                    if (displayTypes.amibroker === 'percentage') {
+                        const percentValue = (value / Math.abs(totalValue || 1)) * 100;
+                        label = percentValue.toFixed(1) + '%';
+                    } else {
+                        label = formatIndianShort(value);
+                    }
+                    return { label, value };
+                });
+                
+                charts.amibroker.options.plugins.tooltip.callbacks.label = function(ctx) {
+                    const value = charts.amibroker._contributions[ctx.dataIndex];
+                    const total = charts.amibroker._totalValue;
+                    
+                    if (displayTypes.amibroker === 'percentage') {
+                        if (total === 0) {
+                            return '0.00%';
+                        }
+                        const percentValue = (value / Math.abs(total)) * 100;
+                        const sign = percentValue < 0 ? '-' : '';
+                        return `${sign}${Math.abs(percentValue).toFixed(2)}%`;
+                    }
+                    const sign = value < 0 ? '-' : '';
+                    return `${sign}₹${formatIndianNumber(Math.abs(value), 2)}`;
+                };
+                
+                charts.amibroker.options.scales.y.min = undefined;
+                charts.amibroker.options.scales.y.max = undefined;
+                
+                charts.amibroker.update('none');
+                charts.amibroker.render();
+            } else if (chartType === 'lotpnltax') {
+                // LOT PNLTAX Waterfall Chart Logic
+                const isMonthly = !window.lotpnltaxView || window.lotpnltaxView === 'monthly';
+                
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}`;
+                const useCache = charts.lotpnltax._cacheKey === cacheKey && 
+                                charts.lotpnltax._cachedStrategies && 
+                                charts.lotpnltax._cachedTotalValue !== undefined;
+                
+                let sortedStrategies, totalValue;
+                
+                if (useCache) {
+                    sortedStrategies = charts.lotpnltax._cachedStrategies;
+                    totalValue = charts.lotpnltax._cachedTotalValue;
+                } else {
+                    const strategyData = {}; // Store net, lotSum, lotCount for each strategy
+                    
+                    if (isMonthly) {
+                        if (availableMonths.length === 0) {
+                            const monthsSet = new Set();
+                            allTrades.forEach(trade => {
+                                if (trade.date) {
+                                    const parts = trade.date.split('/');
+                                    if (parts.length >= 3) {
+                                        const monthNames = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                                          'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                                        const monthNum = parseInt(parts[1]);
+                                        const year = parts[2].slice(-2);
+                                        const monthName = monthNames[monthNum];
+                                        const displayMonth = `${monthName}-${year}`;
+                                        monthsSet.add(displayMonth);
+                                    }
+                                }
+                            });
+                            
+                            availableMonths = Array.from(monthsSet).sort((a, b) => {
+                                const [aMonth, aYear] = a.split('-');
+                                const [bMonth, bYear] = b.split('-');
+                                const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                                                  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                                const aMonthIdx = monthNames.indexOf(aMonth);
+                                const bMonthIdx = monthNames.indexOf(bMonth);
+                                return parseInt(aYear) === parseInt(bYear) ? aMonthIdx - bMonthIdx : parseInt(aYear) - parseInt(bYear);
+                            });
+                        }
+                        
+                        const monthString = availableMonths[currentMonthIndex];
+                        document.getElementById('currentMonthLotpnltax').textContent = monthString;
+                        
+                        const [monthName, year] = monthString.split('-');
+                        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                        const monthNum = monthNames.indexOf(monthName) + 1;
+                        const fullYear = '20' + year;
+                        
+                        const monthTrades = allTrades.filter(trade => {
+                            if (!trade.date) return false;
+                            const parts = trade.date.split('/');
+                            if (parts.length < 3) return false;
+                            return parseInt(parts[1]) === monthNum && parts[2] === fullYear;
+                        });
+                        
+                        // Calculate LOT PNL TAX = (PNL TAX / Average Lot) for each strategy
+                        monthTrades.forEach(trade => {
+                            if (trade.strategyPnlTax && trade.strategyDetails) {
+                                Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                                    if (!stratName.startsWith('A.PRO')) { // Only non-Amibroker strategies
+                                        if (!strategyData[stratName]) {
+                                            strategyData[stratName] = { net: 0, lotSum: 0, lotCount: 0 };
+                                        }
+                                        strategyData[stratName].net += pnlTax;
+                                        
+                                        // Get lot data from strategyDetails
+                                        const stratDetail = trade.strategyDetails[stratName];
+                                        if (stratDetail && stratDetail.lot) {
+                                            strategyData[stratName].lotSum += stratDetail.lot;
+                                            strategyData[stratName].lotCount += 1;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        allTrades.forEach(trade => {
+                            if (trade.strategyPnlTax && trade.strategyDetails) {
+                                Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
+                                    if (!stratName.startsWith('A.PRO')) { // Only non-Amibroker strategies
+                                        if (!strategyData[stratName]) {
+                                            strategyData[stratName] = { net: 0, lotSum: 0, lotCount: 0 };
+                                        }
+                                        strategyData[stratName].net += pnlTax;
+                                        
+                                        // Get lot data from strategyDetails
+                                        const stratDetail = trade.strategyDetails[stratName];
+                                        if (stratDetail && stratDetail.lot) {
+                                            strategyData[stratName].lotSum += stratDetail.lot;
+                                            strategyData[stratName].lotCount += 1;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Calculate LOT PNL TAX for each strategy
+                    const lotPnlTaxContributions = {};
+                    Object.entries(strategyData).forEach(([stratName, data]) => {
+                        const avgLot = data.lotCount > 0 ? (data.lotSum / data.lotCount) : 0;
+                        const lotPnlTax = avgLot > 0 ? (data.net / avgLot) : 0;
+                        if (lotPnlTax !== 0) {
+                            lotPnlTaxContributions[stratName] = lotPnlTax;
+                        }
+                    });
+                    
+                    sortedStrategies = Object.entries(lotPnlTaxContributions)
+                        .filter(([stratName, contribution]) => contribution !== 0)
+                        .sort((a, b) => {
+                            const extractParts = (name) => {
+                                const match = name.match(/([A-Z0-9]+)\s*PRO\s*(\d+)/i);
+                                if (match) {
+                                    return {
+                                        broker: match[1],
+                                        pro: parseInt(match[2])
+                                    };
+                                }
+                                return { broker: name, pro: 0 };
+                            };
+                            
+                            const partsA = extractParts(a[0]);
+                            const partsB = extractParts(b[0]);
+                            
+                            if (partsA.broker !== partsB.broker) {
+                                return partsA.broker.localeCompare(partsB.broker);
+                            }
+                            
+                            return partsA.pro - partsB.pro;
+                        })
+                        .slice(0, 10);
+                    
+                    totalValue = sortedStrategies.reduce((sum, [, contrib]) => sum + contrib, 0);
+                    
+                    charts.lotpnltax._cacheKey = cacheKey;
+                    charts.lotpnltax._cachedStrategies = sortedStrategies;
+                    charts.lotpnltax._cachedTotalValue = totalValue;
+                }
+                    
+                let labels = [];
+                let data = [];
+                let colors = [];
+                
+                // Same color palette as Breakdown chart
+                const strategyColors = {
+                    'PRO 4': '#3b82f6',
+                    'PRO 5': '#ec4899',
+                    'PRO 8': '#8b5cf6',
+                    'PRO 6': '#06b6d4',
+                    'PRO 7': '#f59e0b'
+                };
+                const defaultColors = ['#3b82f6', '#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b'];
+                
+                // Helper function to match colors by PRO number
+                const getColorForStrategy = (stratName) => {
+                    const match = stratName.match(/PRO\s*(\d+)/i);
+                    if (match) {
+                        const proKey = `PRO ${match[1]}`;
+                        return strategyColors[proKey];
+                    }
+                    return null;
+                };
+                
+                const isPercentageMode = displayTypes.lotpnltax === 'percentage';
+                
+                let cumulative = 0;
+                const contributions = [];
+                
+                sortedStrategies.forEach(([lotName, contribution], index) => {
+                    labels.push(formatStrategyName(lotName)); // Use formatStrategyName for proper spacing
+                    contributions.push(contribution);
+                    
+                    let displayValue = contribution;
+                    if (isPercentageMode && totalValue !== 0) {
+                        displayValue = (contribution / Math.abs(totalValue)) * 100;
+                    }
+                    
+                    const start = cumulative;
+                    const end = cumulative + displayValue;
+                    
+                    data.push([Math.min(start, end), Math.max(start, end)]);
+                    
+                    if (contribution < 0) {
+                        colors.push('#c2410c');
+                    } else {
+                        // Use color matching by PRO number, same as Breakdown
+                        const baseColor = getColorForStrategy(lotName) || defaultColors[index % defaultColors.length];
+                        colors.push(baseColor);
+                    }
+                    
+                    cumulative += displayValue;
+                });
+                
+                labels.push('Total');
+                contributions.push(totalValue);
+                
+                const totalDisplayValue = isPercentageMode ? (totalValue >= 0 ? 100 : -100) : totalValue;
+                
+                if (totalDisplayValue >= 0) {
+                    data.push([0, totalDisplayValue]);
+                } else {
+                    data.push([totalDisplayValue, 0]);
+                }
+                colors.push(totalValue < 0 ? '#c2410c' : '#10b981');
+                
+                charts.lotpnltax.data.labels = labels;
+                charts.lotpnltax.data.datasets[0].data = data;
+                charts.lotpnltax.data.datasets[0].backgroundColor = colors;
+                
+                charts.lotpnltax._contributions = contributions;
+                charts.lotpnltax._totalValue = totalValue;
+                
+                charts.lotpnltax._preCalculatedLabels = contributions.map(value => {
+                    let label;
+                    if (displayTypes.lotpnltax === 'percentage') {
+                        const percentValue = (value / Math.abs(totalValue || 1)) * 100;
+                        label = percentValue.toFixed(1) + '%';
+                    } else {
+                        label = formatIndianShort(value);
+                    }
+                    return { label, value };
+                });
+                
+                charts.lotpnltax.options.plugins.tooltip.callbacks.label = function(ctx) {
+                    const value = charts.lotpnltax._contributions[ctx.dataIndex];
+                    const total = charts.lotpnltax._totalValue;
+                    
+                    if (displayTypes.lotpnltax === 'percentage') {
+                        if (total === 0) {
+                            return '0.00%';
+                        }
+                        const percentValue = (value / Math.abs(total)) * 100;
+                        const sign = percentValue < 0 ? '-' : '';
+                        return `${sign}${Math.abs(percentValue).toFixed(2)}%`;
+                    }
+                    const sign = value < 0 ? '-' : '';
+                    return `${sign}₹${formatIndianNumber(Math.abs(value), 2)}`;
+                };
+                
+                charts.lotpnltax.options.scales.y.min = undefined;
+                charts.lotpnltax.options.scales.y.max = undefined;
+                
+                charts.lotpnltax.update('none');
+                charts.lotpnltax.render();
             }
         }
     </script>
