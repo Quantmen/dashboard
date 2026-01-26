@@ -150,6 +150,36 @@
             border-color: #3b82f6;
         }
         
+        .date-nav-arrows {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin-left: 2px;
+        }
+        
+        .date-nav-arrows button {
+            padding: 0;
+            width: 16px;
+            height: 11px;
+            font-size: 8px;
+            line-height: 1;
+            border: 1px solid #e5e7eb;
+            background: transparent;
+            color: #64748b;
+            border-radius: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+        
+        .date-nav-arrows button:hover {
+            background: transparent;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+        
         .chart-title {
             font-size: 14px;
             font-weight: 600;
@@ -436,8 +466,16 @@
                 <div class="custom-date-range" id="customDateRange" style="padding: 0px 2px;">
                     <label style="font-size: 10px;">From:</label>
                     <input type="date" id="fromDate" onchange="applyCustomDateRange()" style="width: 95px; padding: 5px 4px; font-size: 10px;">
+                    <div class="date-nav-arrows">
+                        <button onclick="navigateFromDate('prev')" title="Previous month start">▲</button>
+                        <button onclick="navigateFromDate('next')" title="Next month start">▼</button>
+                    </div>
                     <label style="font-size: 10px;">To:</label>
                     <input type="date" id="toDate" onchange="applyCustomDateRange()" style="width: 95px; padding: 5px 4px; font-size: 10px;">
+                    <div class="date-nav-arrows">
+                        <button onclick="navigateToDate('prev')" title="Previous month end">▲</button>
+                        <button onclick="navigateToDate('next')" title="Next month end">▼</button>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 2px;">
                     <button class="date-range-btn" data-range="3" onclick="selectDateRange(3)" style="padding: 5px 8px; font-size: 10px;">Last 3M</button>
@@ -4157,6 +4195,36 @@
             const fromDateInput = document.getElementById('fromDate');
             const toDateInput = document.getElementById('toDate');
             
+            // Add keyboard navigation with swapped arrow behavior for FROM date
+            if (fromDateInput) {
+                fromDateInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        fromDateInput.stepDown();
+                        applyCustomDateRange();
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        fromDateInput.stepUp();
+                        applyCustomDateRange();
+                    }
+                });
+            }
+            
+            // Add keyboard navigation with swapped arrow behavior for TO date
+            if (toDateInput) {
+                toDateInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        toDateInput.stepDown();
+                        applyCustomDateRange();
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        toDateInput.stepUp();
+                        applyCustomDateRange();
+                    }
+                });
+            }
+            
             // Close calendar popup on clicking outside
             document.addEventListener('click', function(event) {
                 const isFromDate = fromDateInput.contains(event.target);
@@ -4181,6 +4249,63 @@
                 }
             });
         });
+        
+        // Navigation functions for arrow buttons
+        function navigateFromDate(direction) {
+            const fromDateInput = document.getElementById('fromDate');
+            if (!fromDateInput) return;
+            
+            let currentDate;
+            if (fromDateInput.value) {
+                currentDate = new Date(fromDateInput.value + 'T00:00:00');
+            } else {
+                currentDate = new Date();
+            }
+            
+            let targetDate;
+            if (direction === 'prev') {
+                // Previous month's first date
+                targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+            } else {
+                // Next month's first date
+                targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+            }
+            
+            const year = targetDate.getFullYear();
+            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const day = '01';
+            
+            fromDateInput.value = `${year}-${month}-${day}`;
+            applyCustomDateRange();
+        }
+        
+        function navigateToDate(direction) {
+            const toDateInput = document.getElementById('toDate');
+            if (!toDateInput) return;
+            
+            let currentDate;
+            if (toDateInput.value) {
+                currentDate = new Date(toDateInput.value + 'T00:00:00');
+            } else {
+                currentDate = new Date();
+            }
+            
+            let targetDate;
+            if (direction === 'prev') {
+                // Previous month's last date
+                targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+            } else {
+                // Next month's last date
+                targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0);
+            }
+            
+            const year = targetDate.getFullYear();
+            const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const day = String(targetDate.getDate()).padStart(2, '0');
+            
+            toDateInput.value = `${year}-${month}-${day}`;
+            applyCustomDateRange();
+        }
     </script>
 </body>
 </html>
