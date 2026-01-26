@@ -1300,12 +1300,6 @@
             // Set TO date to end of day to make it inclusive
             customToDate.setHours(23, 59, 59, 999);
             
-            // Validate that from date is before to date
-            if (customFromDate > customToDate) {
-                alert('Start date must be before end date');
-                return;
-            }
-            
             selectedDateRange = 'custom';
             
             // Update button active states
@@ -4157,6 +4151,36 @@
                 charts.lotpnltax.render();
             }
         }
+        
+        // Auto-hide date picker calendar popup when clicking outside or pressing Escape
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromDateInput = document.getElementById('fromDate');
+            const toDateInput = document.getElementById('toDate');
+            
+            // Close calendar popup on clicking outside
+            document.addEventListener('click', function(event) {
+                const isFromDate = fromDateInput.contains(event.target);
+                const isToDate = toDateInput.contains(event.target);
+                
+                if (!isFromDate && !isToDate) {
+                    if (document.activeElement === fromDateInput) {
+                        fromDateInput.blur();
+                    }
+                    if (document.activeElement === toDateInput) {
+                        toDateInput.blur();
+                    }
+                }
+            });
+            
+            // Close calendar popup on Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    if (document.activeElement === fromDateInput || document.activeElement === toDateInput) {
+                        document.activeElement.blur();
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
