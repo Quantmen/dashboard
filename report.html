@@ -3071,6 +3071,9 @@
                     await new Promise(resolve => setTimeout(resolve, 100));
                     originalAllTrades = data || [];
                     
+                    // Reset to ALL TIME and update date inputs based on available data
+                    resetToAllTimeWithDataRange();
+                    
                     // Apply date filtering
                     applyReportDateFilter();
                     
@@ -3084,6 +3087,96 @@
                 }
             }
         });
+        
+        // Reset date range to ALL TIME and set inputs based on available data
+        function resetToAllTimeWithDataRange() {
+            const fromDateInput = document.getElementById('fromDateInput');
+            const toDateInput = document.getElementById('toDateInput');
+            
+            if (originalAllTrades && originalAllTrades.length > 0) {
+                // Find min and max dates from the data
+                let minDate = null;
+                let maxDate = null;
+                
+                originalAllTrades.forEach(trade => {
+                    const dateParts = trade.date.split('/');
+                    if (dateParts.length === 3) {
+                        // Handle 2-digit years
+                        let year = parseInt(dateParts[2]);
+                        if (year < 100) {
+                            year += 2000;
+                        }
+                        
+                        const tradeDate = new Date(
+                            year, // year
+                            parseInt(dateParts[1]) - 1, // month (0-indexed)
+                            parseInt(dateParts[0]) // day
+                        );
+                        
+                        if (!minDate || tradeDate < minDate) {
+                            minDate = tradeDate;
+                        }
+                        if (!maxDate || tradeDate > maxDate) {
+                            maxDate = tradeDate;
+                        }
+                    }
+                });
+                
+                // Set FROM date to earliest date in data using string format (YYYY-MM-DD)
+                if (fromDateInput && minDate) {
+                    const year = minDate.getFullYear();
+                    const month = String(minDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(minDate.getDate()).padStart(2, '0');
+                    fromDateInput.value = `${year}-${month}-${day}`;
+                    
+                    // Set min/max attributes for validation
+                    fromDateInput.min = `${year}-${month}-${day}`;
+                    if (maxDate) {
+                        const maxYear = maxDate.getFullYear();
+                        const maxMonth = String(maxDate.getMonth() + 1).padStart(2, '0');
+                        const maxDay = String(maxDate.getDate()).padStart(2, '0');
+                        fromDateInput.max = `${maxYear}-${maxMonth}-${maxDay}`;
+                    }
+                }
+                
+                // Set TO date to latest date in data using string format (YYYY-MM-DD)
+                if (toDateInput && maxDate) {
+                    const year = maxDate.getFullYear();
+                    const month = String(maxDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(maxDate.getDate()).padStart(2, '0');
+                    toDateInput.value = `${year}-${month}-${day}`;
+                    
+                    // Set min/max attributes for validation
+                    if (minDate) {
+                        const minYear = minDate.getFullYear();
+                        const minMonth = String(minDate.getMonth() + 1).padStart(2, '0');
+                        const minDay = String(minDate.getDate()).padStart(2, '0');
+                        toDateInput.min = `${minYear}-${minMonth}-${minDay}`;
+                    }
+                    toDateInput.max = `${year}-${month}-${day}`;
+                }
+            } else {
+                // No data, set to today
+                const today = new Date();
+                if (fromDateInput) {
+                    fromDateInput.value = '';
+                }
+                if (toDateInput) {
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    toDateInput.value = `${year}-${month}-${day}`;
+                }
+            }
+            
+            // Set ALL TIME button as active
+            document.querySelectorAll('.date-range-buttons .btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.trim() === 'ALL TIME') {
+                    btn.classList.add('active');
+                }
+            });
+        }
 
         // Date filtering function for report
         function applyReportDateFilter() {
@@ -3099,18 +3192,29 @@
             // Filter trades based on date range
             if (fromDate || toDate) {
                 filteredData = originalAllTrades.filter(trade => {
-                    // Parse trade date (assuming format: DD/MM/YYYY)
+                    // Parse trade date (format: DD/MM/YY or DD/MM/YYYY)
                     const dateParts = trade.date.split('/');
                     if (dateParts.length !== 3) return true; // Keep if can't parse
                     
+                    // Handle 2-digit years
+                    let year = parseInt(dateParts[2]);
+                    if (year < 100) {
+                        year += 2000;
+                    }
+                    
                     const tradeDate = new Date(
-                        parseInt(dateParts[2]), // year
+                        year, // year
                         parseInt(dateParts[1]) - 1, // month (0-indexed)
                         parseInt(dateParts[0]) // day
                     );
                     
-                    // Check if trade date is within range
-                    if (fromDate && tradeDate < fromDate) return false;
+                    // Set both dates to start of day for inclusive comparison
+                    if (fromDate) {
+                        const fromDateStart = new Date(fromDate);
+                        fromDateStart.setHours(0, 0, 0, 0);
+                        if (tradeDate < fromDateStart) return false;
+                    }
+                    
                     if (toDate) {
                         // Set toDate to end of day for inclusive comparison
                         const toDateEnd = new Date(toDate);
@@ -3133,21 +3237,29 @@
             const toDateInput = document.getElementById('toDateInput');
             const fromDateInput = document.getElementById('fromDateInput');
             
-            // Set TO date to today
-            toDateInput.valueAsDate = today;
+            // Set TO date to today using string format
+            const todayYear = today.getFullYear();
+            const todayMonth = String(today.getMonth() + 1).padStart(2, '0');
+            const todayDay = String(today.getDate()).padStart(2, '0');
+            toDateInput.value = `${todayYear}-${todayMonth}-${todayDay}`;
             
             if (range === '3M') {
                 // Last 3 months
                 const threeMonthsAgo = new Date(today);
                 threeMonthsAgo.setMonth(today.getMonth() - 3);
-                fromDateInput.valueAsDate = threeMonthsAgo;
+                const year = threeMonthsAgo.getFullYear();
+                const month = String(threeMonthsAgo.getMonth() + 1).padStart(2, '0');
+                const day = String(threeMonthsAgo.getDate()).padStart(2, '0');
+                fromDateInput.value = `${year}-${month}-${day}`;
             } else if (range === 'YTD') {
-                // Year to date
-                const yearStart = new Date(today.getFullYear(), 0, 1);
-                fromDateInput.valueAsDate = yearStart;
+                // Year to date - January 1st of current year
+                const year = today.getFullYear();
+                fromDateInput.value = `${year}-01-01`;
             } else if (range === 'ALL') {
-                // All time - clear from date
-                fromDateInput.value = '';
+                // All time - reset to data range
+                resetToAllTimeWithDataRange();
+                reprocessReportData();
+                return; // Exit early as resetToAllTimeWithDataRange handles button activation
             }
             
             // Update active button styling
@@ -3164,34 +3276,35 @@
         async function reprocessReportData() {
             if (!originalAllTrades || originalAllTrades.length === 0) return;
             
-            showLoading('Applying date filter...', 'Processing trades');
-            try {
-                await new Promise(resolve => setTimeout(resolve, 50));
-                
-                // Apply date filtering
-                applyReportDateFilter();
-                
-                // Rebuild everything
-                extractBrokerStrategies();
-                buildDateStructure();
-                updateDateFilterList();
-                cleanupSavedFilters();
-                await applyFilters();
-            } finally {
-                hideLoading();
-            }
+            // Apply date filtering
+            applyReportDateFilter();
+            
+            // Rebuild necessary structures for the filtered data
+            extractBrokerStrategies();
+            buildDateStructure();
+            updateDateFilterList();
+            cleanupSavedFilters();
+            
+            // Refresh table only
+            await applyFilters();
         }
 
         // Initialize date inputs on load
         window.addEventListener('DOMContentLoaded', () => {
-            const today = new Date();
+            const fromDateInput = document.getElementById('fromDateInput');
             const toDateInput = document.getElementById('toDateInput');
+            
+            // Initial setup using string format
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            
             if (toDateInput) {
-                toDateInput.valueAsDate = today;
+                toDateInput.value = `${year}-${month}-${day}`;
             }
             
             // Set default to ALL TIME (no FROM date)
-            const fromDateInput = document.getElementById('fromDateInput');
             if (fromDateInput) {
                 fromDateInput.value = '';
             }
@@ -3225,6 +3338,33 @@
                     reprocessReportData();
                 });
             }
+            
+            // Auto-close calendar on click outside
+            document.addEventListener('click', function(event) {
+                const isFromDate = fromDateInput && fromDateInput.contains(event.target);
+                const isToDate = toDateInput && toDateInput.contains(event.target);
+                
+                if (!isFromDate && !isToDate) {
+                    if (fromDateInput && document.activeElement === fromDateInput) {
+                        fromDateInput.blur();
+                    }
+                    if (toDateInput && document.activeElement === toDateInput) {
+                        toDateInput.blur();
+                    }
+                }
+            });
+            
+            // Auto-close calendar on Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    if (fromDateInput && document.activeElement === fromDateInput) {
+                        fromDateInput.blur();
+                    }
+                    if (toDateInput && document.activeElement === toDateInput) {
+                        toDateInput.blur();
+                    }
+                }
+            });
         });
     </script>
 </body>
