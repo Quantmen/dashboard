@@ -460,11 +460,10 @@ window.addEventListener('message', (event) => {
 const { type, data } = event.data;
 if (type === 'TRADES_DATA') {
 originalAllTrades = data; // Store original data
-resetToAllTimeWithDataRange(); // Reset dates based on data
-applyDateFilter(); // Apply date filter
+resetToAllTimeWithDataRange(); // Reset dates based on data (must come before applyDateFilter)
 selectedBrokers.clear(); // Clear broker selections on new data load
 brokersInitialized = false; // Reset flag on new data load to allow auto-selection
-// Load filters from localStorage instead of clearing them
+// Load filters from localStorage
 try {
 const savedFilters = localStorage.getItem('strategyPerformance_hiddenStrategies');
 if (savedFilters) {
@@ -477,6 +476,21 @@ selectedMonths = new Set(JSON.parse(savedMonths));
 }
 } catch (e) {
 console.error('Failed to load saved filters:', e);
+}
+applyDateFilter(); // Apply date filter (must come after resetToAllTimeWithDataRange)
+// Check if the loaded month filter will result in empty data
+if (selectedMonths.size > 0) {
+const hasMatchingData = allTrades.some(trade => {
+const parts = trade.date?.split('/');
+const monthYear = parts && parts.length >= 3 ? `${parts[1]}/${parts[2]}` : null;
+return monthYear && selectedMonths.has(monthYear);
+});
+// Only reset to All if no data matches the selected months
+if (!hasMatchingData) {
+selectedMonths.clear();
+monthsCleared = false;
+saveMonthFilters();
+}
 }
 processAndDisplayData();
 } else if (type === 'LOAD_SAMPLE_DATA') {
@@ -594,7 +608,9 @@ processAndDisplayData();
 return;
 }
 document.querySelectorAll('.date-range-buttons .btn').forEach(btn => btn.classList.remove('active'));
-event.target.classList.add('active');
+if (window.event && window.event.target) {
+window.event.target.classList.add('active');
+}
 applyDateFilter();
 processAndDisplayData();
 }
@@ -1236,7 +1252,19 @@ elements.tableHeaders.innerHTML = headerRow1 + headerRow2;
 elements.tableBody.innerHTML = '<tr><td colspan="100%" class="no-data">No data loaded yet.</td></tr>';
 }
 function processAndDisplayData() {
-if (allTrades.length === 0) return;
+if (allTrades.length === 0) {
+// Show empty state with appropriate message
+elements.tableBody.innerHTML = '<tr><td colspan="100" class="no-data">No trades found for the selected date range.</td></tr>';
+// Clear summary cards
+if (elements.runningMargin) elements.runningMargin.textContent = '₹0';
+if (elements.startingCapital) elements.startingCapital.textContent = '₹0';
+if (elements.netBrProfit) elements.netBrProfit.textContent = '₹0';
+if (elements.runningProfit) elements.runningProfit.textContent = '0%';
+if (elements.charges) elements.charges.textContent = '₹0';
+if (elements.totalExpense) elements.totalExpense.textContent = '₹0';
+if (elements.netProfit) elements.netProfit.textContent = '₹0';
+return;
+}
 const brokersSet = new Set();
 allTrades.forEach(trade => {
 if (trade.strategyDetails) {
