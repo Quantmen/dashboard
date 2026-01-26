@@ -215,6 +215,8 @@ let allTrades = [], hiddenStrategies = new Set(), savedHiddenStrategies = new Se
 let originalAllTrades = []; // Store original trades before date filtering
 let customFromDate = null;
 let customToDate = null;
+let cachedMinDate = null; // Cache min date for performance
+let cachedMaxDate = null; // Cache max date for performance
 let globalStartingCapital = 0;
 let updateTimeout;
 let showFilteredTotals = false, showTradeCount = false, showDrawdown = false, showLot = false;
@@ -460,6 +462,8 @@ window.addEventListener('message', (event) => {
 const { type, data } = event.data;
 if (type === 'TRADES_DATA') {
 originalAllTrades = data; // Store original data
+cachedMinDate = null; // Clear cache for new data
+cachedMaxDate = null; // Clear cache for new data
 resetToAllTimeWithDataRange(); // Reset dates based on data (must come before applyDateFilter)
 selectedBrokers.clear(); // Clear broker selections on new data load
 brokersInitialized = false; // Reset flag on new data load to allow auto-selection
@@ -533,7 +537,9 @@ function resetToAllTimeWithDataRange() {
 const fromDateInput = document.getElementById('fromDate');
 const toDateInput = document.getElementById('toDate');
 if (originalAllTrades && originalAllTrades.length > 0) {
-let minDate = null, maxDate = null;
+let minDate = cachedMinDate, maxDate = cachedMaxDate;
+// Only calculate min/max if not cached
+if (!minDate || !maxDate) {
 originalAllTrades.forEach(trade => {
 const dateParts = trade.date.split('/');
 if (dateParts.length === 3) {
@@ -544,6 +550,10 @@ if (!minDate || tradeDate < minDate) minDate = tradeDate;
 if (!maxDate || tradeDate > maxDate) maxDate = tradeDate;
 }
 });
+// Cache the calculated dates
+cachedMinDate = minDate;
+cachedMaxDate = maxDate;
+}
 if (fromDateInput && minDate) {
 const year = minDate.getFullYear();
 const month = String(minDate.getMonth() + 1).padStart(2, '0');
