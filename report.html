@@ -21,7 +21,8 @@
         .main-content {
             padding: 16px 32px 32px 32px;
             background: #f8fafc;
-            min-width: 100%;
+            min-width: fit-content;
+            overflow-x: auto;
         }
         .loading-overlay {
             position: fixed;
@@ -283,6 +284,7 @@
             border: 1px solid #e5e7eb;
             display: block;
             width: 100%;
+            min-width: fit-content;
         }
         .table-wrapper { 
             scrollbar-width: thin;
@@ -638,6 +640,7 @@
             background: #f8fafc;
             border-top: 1px solid #e5e7eb;
             width: 100%;
+            min-width: fit-content;
             box-sizing: border-box;
         }
         .pagination-info { font-size: 12px; color: #6b7280; font-weight: 400; }
@@ -965,10 +968,10 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="pagination" id="pagination" style="display: none;">
-                <div class="pagination-info" id="paginationInfo">Showing 0 of 0</div>
-                <div class="pagination-controls" id="paginationControls"></div>
+                <div class="pagination" id="pagination" style="display: none;">
+                    <div class="pagination-info" id="paginationInfo">Showing 0 of 0</div>
+                    <div class="pagination-controls" id="paginationControls"></div>
+                </div>
             </div>
         </div>
     </div>
