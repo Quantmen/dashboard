@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style> *{margin:0;padding:0;box-sizing:border-box;}html,body{width:100%;height:100%;overflow:hidden;}body{font-family:'Inter', -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1e293b;}.container{overflow-y:auto;padding:16px 32px 32px;height:100vh;}.header{margin-bottom:16px;}.header h1{font-size:20px;font-weight:700;color:#111827;margin-bottom:4px;letter-spacing:-0.5px;}.header p{font-size:11px;color:#6b7280;}.summary-cards{display:flex;gap:12px;margin-bottom:16px;overflow-x:auto;}.summary-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #e5e7eb;flex:1 1 0;min-width:140px;}.summary-card-label{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}.summary-card-value{font-size:18px;font-weight:700;line-height:1.2;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#92400e;}.summary-card.broker-margin-box{background:#f0fdf4;}.summary-card.stg-margin-box{background:#fffbeb;}.summary-card.drawdown-box{background:#fdf2f8;}.controls{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;align-items:center;width:100%;}.control-group{display:flex;align-items:center;gap:8px;}.control-label{font-size:11px;color:#374151;font-weight:600;}select,input[type="number"],.btn{padding:8px 16px;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:500;background:white;color:#374151;cursor:pointer;transition:all 0.15s;font-family:inherit;white-space:nowrap;}select:hover,input:hover,.btn:hover{border-color:#9ca3af;background:#f9fafb;}select:focus,input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1);}.custom-date-range{display:flex;gap:4px;align-items:center;padding:4px 8px;background:transparent;border-radius:6px;}.custom-date-range label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;}.custom-date-range input[type="date"]{padding:4px 6px;font-size:10px;border:1px solid #e5e7eb;border-radius:4px;font-family:inherit;color:#475569;cursor:pointer;background:transparent;}.date-nav-arrows{display:flex;flex-direction:column;gap:1px;margin-left:2px;}.date-nav-arrows button{padding:0;width:16px;height:11px;font-size:8px;line-height:1;border:1px solid #e5e7eb;background:transparent;color:#64748b;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s ease;}.date-nav-arrows button:hover{background:transparent;color:#475569;border-color:#cbd5e1;}.date-range-buttons{display:flex;gap:4px;}.date-range-buttons .btn{padding:6px 12px;font-size:10px;font-weight:600;color:#64748b;background:transparent;border:none;border-radius:6px;cursor:pointer;transition:all 0.2s ease;text-transform:uppercase;letter-spacing:0.5px;}.date-range-buttons .btn:hover{background:#e2e8f0;color:#475569;}.date-range-buttons .btn.active{background:white;color:#3b82f6;border:1px solid #3b82f6;}.strategy-selector{position:relative;}.strategy-dropdown-btn{display:flex;align-items:center;gap:8px;padding:8px 16px;border:1px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;font-size:11px;}.strategy-dropdown-btn:hover{border-color:#9ca3af;background:#f9fafb;}.dropdown-badge{background:#3b82f6;color:white;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;}.strategy-dropdown-menu{display:none;position:absolute;top:100%;left:0;margin-top:6px;background:white;border:1px solid #d1d5db;border-radius:10px;box-shadow:0 10px 15px rgba(0,0,0,0.1);min-width:200px;max-height:400px;overflow-y:auto;z-index:1000;}.strategy-dropdown-menu.show{display:block;}.broker-dropdown-menu{min-width:150px;max-width:180px;}.broker-dropdown-menu .dropdown-header{padding:10px 12px;}.broker-dropdown-menu .dropdown-option{padding:7px 12px;}.broker-dropdown-menu .dropdown-option label{font-size:12px;}.dropdown-header{padding:12px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;}.dropdown-action-btn{font-size:11px;color:#1e40af;cursor:pointer;padding:4px 8px;border-radius:4px;background:none;border:none;}.dropdown-action-btn:hover{background:#eff6ff;}.dropdown-options{padding:8px 0;}.dropdown-option{display:flex;align-items:center;padding:8px 14px;cursor:pointer;}.dropdown-option:hover{background:#f8fafc;}.dropdown-option input{margin-right:10px;cursor:pointer;}.dropdown-option label{font-size:13px;color:#475569;cursor:pointer;flex:1;}.table-container{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #e5e7eb;}table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:11.5px;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-variant-numeric:tabular-nums;}thead{background:#f3f4f6;position:sticky;top:0;z-index:10;}th{padding:12px;text-align:left;font-size:11px;font-weight:700;color:#1f2937;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums;}th:nth-child(n+2){text-align:right;}th:last-child{border-right:none;}th:nth-child(1),td:nth-child(1){min-width:160px;width:160px;}th:nth-child(2),td:nth-child(2){width:85px;min-width:85px;max-width:85px;}th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){width:105px;min-width:105px;max-width:105px;}th:nth-child(6),td:nth-child(6){width:95px;min-width:95px;max-width:95px;}th:nth-child(7),td:nth-child(7),th:nth-child(8),td:nth-child(8),th:nth-child(9),td:nth-child(9),th:nth-child(10),td:nth-child(10){width:95px;min-width:95px;max-width:95px;}th:nth-child(11),td:nth-child(11){width:85px;min-width:85px;max-width:85px;}th:nth-child(12),td:nth-child(12),th:nth-child(13),td:nth-child(13){width:90px;min-width:90px;max-width:90px;}th:nth-child(14),td:nth-child(14),th:nth-child(15),td:nth-child(15){width:95px;min-width:95px;max-width:95px;}td{padding:12px;border-right:1px solid #f3f4f6;color:#374151;font-size:11px;vertical-align:middle;}td:nth-child(n+2){text-align:right;}td:last-child{border-right:none;}tbody tr{background:white;border-bottom:1px solid #f3f4f6;transition:opacity 0.15s;}tbody tr:hover{opacity:0.9;}.empty-state{text-align:left !important;padding:12px !important;color:#6b7280;font-size:11px;font-weight:400;}.negative{color:#92400e;}.positive{color:#059669;}.neutral{color:#6b7280;}body[data-view="broker"] .group-row,body[data-view="broker"] .child-row{display:none;}body[data-view="account"] .broker-row,body[data-view="account"] .child-row{display:none;}body[data-view="strategy"] .broker-row,body[data-view="strategy"] .group-row{display:none;}body[data-view="broker"] .group-b1,body[data-view="broker"] .group-b2,body[data-view="broker"] .child-row-b1,body[data-view="broker"] .child-row-b2{display:none;}body[data-view="account"] .child-row-b1,body[data-view="account"] .child-row-b2{display:none;}body[data-view="strategy"] .group-b1,body[data-view="strategy"] .group-b2{display:none;}.broker-row{background:#f3f4f6 !important;font-weight:600;}.broker-row:hover{background:#e5e7eb !important;}.broker-row td{border-right:1px solid #d1d5db;color:#000000;font-size:12px;}.broker-name{font-size:12px !important;font-weight:600 !important;color:#000000 !important;}#brokerLevelTableBody td{font-size:12px;padding:10px 12px;border-right:1px solid #fed7aa;}#brokerLevelTableBody td:last-child{border-right:none;}#brokerLevelTableBody tr{background:#fffbf5;}#brokerLevelTableBody tr:hover{background:#fff7ed;}.group-b1{background:#fce7f3 !important;font-weight:600;}.group-b1:hover{background:#fbcfe8 !important;}.group-b1 td{border-right:1px solid #f9a8d4;color:#831843;font-size:11.5px;}.group-b1 .group-name{font-size:11.5px !important;font-weight:600 !important;color:#9f1239 !important;padding-left:20px !important;}.child-row-b1{background:#fff9fb !important;}.child-row-b1:hover{background:#fce7f3 !important;}.child-row-b1 td{border-right:1px solid #fecdd3;color:#7f1d1d;font-size:11.5px;}.group-b1 .rowspan-cell{background:#fff9fb !important;}.group-b2{background:#ffedd5 !important;font-weight:600;}.group-b2:hover{background:#fed7aa !important;}.group-b2 td{border-right:1px solid #fdba74;color:#7c2d12;font-size:11.5px;}.group-b2 .group-name{font-size:11.5px !important;font-weight:600 !important;color:#9a3412 !important;padding-left:20px !important;}.child-row-b2{background:#fffbf5 !important;}.child-row-b2:hover{background:#ffedd5 !important;}.child-row-b2 td{border-right:1px solid #fed7aa;color:#7c2d12;font-size:11.5px;}.group-b2 .rowspan-cell{background:#fffbf5 !important;}.group-row{background:#f8fafc;font-weight:600;}.group-row td{font-size:11.5px;}.group-name{font-weight:600;font-size:11.5px;color:#475569;padding-left:20px;}.child-row{background:white;}.child-row td{font-size:11.5px;}@media screen and (min-width:769px) and (max-width:1024px){.summary-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-wrap:wrap;overflow-x:visible;}.summary-card{min-width:auto;flex:none;}}@media screen and (max-width:768px){.container{padding:12px 16px 24px 16px;}.header h1{font-size:18px;}.header p{font-size:11px;}.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}.control-group{flex:1 1 48%;min-width:0;}.control-label{font-size:11px;white-space:nowrap;}select,input[type="number"],.btn{padding:10px 12px;font-size:11px;width:100%;}.strategy-selector{width:100%;}.strategy-dropdown-btn{width:100%;padding:10px 12px;font-size:11px;}.strategy-dropdown-menu{left:0;right:0;min-width:auto;width:calc(100vw - 32px);max-height:60vh;}.summary-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex-wrap:wrap;overflow-x:visible;margin-bottom:16px;}.summary-card{min-width:auto;flex:none;padding:14px 16px;}.summary-card-label{font-size:11px;}.summary-card-value{font-size:20px;}.table-container{margin:0 -16px;border-radius:0;border-left:none;border-right:none;}table{font-size:11px;}th,td{padding:10px 6px;font-size:11px;}th{font-size:9px;}.broker-row td,.group-row td,.child-row td{font-size:10px;padding:8px 6px;}}@media screen and (max-width:480px){.container{padding:10px 12px 20px 12px;}.header h1{font-size:16px;}.header p{font-size:10px;}.controls{gap:8px;margin-bottom:14px;}.control-label{font-size:10px;}select,input[type="number"],.btn{padding:9px 10px;font-size:11px;}.strategy-dropdown-btn{padding:9px 10px;font-size:11px;}.summary-card{padding:12px 14px;min-width:auto;}.summary-cards{gap:8px;display:grid;grid-template-columns:repeat(2,1fr);}.summary-card-label{font-size:10px;}.summary-card-value{font-size:18px;}.table-container{margin:0 -12px;}table{font-size:10px;}th,td{padding:8px 4px;font-size:10px;}th{font-size:8px;}.broker-row td,.group-row td,.child-row td{font-size:9px;padding:6px 4px;}.strategy-dropdown-menu{width:calc(100vw - 24px);max-height:50vh;}.dropdown-badge{font-size:8px;padding:1px 4px;}}@media screen and (max-width:360px){.container{padding:8px 10px 16px 10px;}.header h1{font-size:15px;}.controls{gap:6px;}.control-label{font-size:9px;}select,input[type="number"],.btn{padding:8px 8px;font-size:10px;}.strategy-dropdown-btn{padding:8px 8px;font-size:10px;}.summary-cards{gap:6px;display:grid;grid-template-columns:repeat(2,1fr);}.summary-card{padding:10px 12px;min-width:auto;}.summary-card-label{font-size:9px;}.summary-card-value{font-size:15px;}table{font-size:9px;}th{font-size:7px;padding:6px 3px;}td{padding:6px 3px;font-size:9px;}.broker-row td,.group-row td,.child-row td{font-size:8px;}}
+    <style> *{margin:0;padding:0;box-sizing:border-box;}html,body{width:100%;height:100%;overflow:hidden;}body{font-family:'Inter', -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1e293b;}.container{overflow-y:auto;padding:16px 32px 32px;height:100vh;}.header{margin-bottom:16px;}.header h1{font-size:20px;font-weight:700;color:#111827;margin-bottom:4px;letter-spacing:-0.5px;}.header p{font-size:11px;color:#6b7280;}.summary-cards{display:flex;gap:12px;margin-bottom:16px;overflow-x:auto;}.summary-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #e5e7eb;flex:1 1 0;min-width:140px;}.summary-card-label{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}.summary-card-value{font-size:18px;font-weight:700;line-height:1.2;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#92400e;}.summary-card.broker-margin-box{background:#f0fdf4;}.summary-card.stg-margin-box{background:#fffbeb;}.summary-card.drawdown-box{background:#fdf2f8;}.controls{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;align-items:center;width:100%;}.control-group{display:flex;align-items:center;gap:8px;flex:1 1 0;min-width:fit-content;}.control-label{font-size:11px;color:#374151;font-weight:600;}select,input[type="number"],input[type="text"],.btn{padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:500;background:white;color:#374151;cursor:pointer;transition:all 0.15s;font-family:inherit;white-space:nowrap;min-width:fit-content;}select:hover,input:hover,.btn:hover{border-color:#9ca3af;background:#f9fafb;}select:focus,input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1);}.custom-date-range{display:flex;gap:4px;align-items:center;padding:4px 8px;background:transparent;border-radius:6px;}.custom-date-range label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;}.custom-date-range input[type="date"]{padding:4px 6px;font-size:10px;border:1px solid #e5e7eb;border-radius:4px;font-family:inherit;color:#475569;cursor:pointer;background:transparent;}.date-nav-arrows{display:flex;flex-direction:column;gap:1px;margin-left:2px;}.date-nav-arrows button{padding:0;width:16px;height:11px;font-size:8px;line-height:1;border:1px solid #e5e7eb;background:transparent;color:#64748b;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s ease;}.date-nav-arrows button:hover{background:transparent;color:#475569;border-color:#cbd5e1;}.date-range-buttons{display:flex;gap:4px;}.date-range-buttons .btn{padding:6px 12px;font-size:10px;font-weight:600;color:#64748b;background:transparent;border:none;border-radius:6px;cursor:pointer;transition:all 0.2s ease;text-transform:uppercase;letter-spacing:0.5px;}.date-range-buttons .btn:hover{background:#e2e8f0;color:#475569;}.date-range-buttons .btn.active{background:white;color:#3b82f6;border:1px solid #3b82f6;}.strategy-selector{position:relative;width:100%;}.strategy-dropdown-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;font-size:11px;font-weight:500;font-family:inherit;color:#374151;white-space:nowrap;transition:all 0.15s;width:100%;}.strategy-dropdown-btn:hover{border-color:#9ca3af;background:#f9fafb;}.dropdown-badge{background:#3b82f6;color:white;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;}.strategy-dropdown-menu{display:none;position:absolute;top:100%;left:0;margin-top:6px;background:white;border:1px solid #d1d5db;border-radius:10px;box-shadow:0 10px 15px rgba(0,0,0,0.1);min-width:200px;max-height:400px;overflow-y:auto;z-index:1000;}.strategy-dropdown-menu.show{display:block;}.broker-dropdown-menu{min-width:150px;max-width:180px;}.broker-dropdown-menu .dropdown-header{padding:10px 12px;}.broker-dropdown-menu .dropdown-option{padding:7px 12px;}.broker-dropdown-menu .dropdown-option label{font-size:12px;}.dropdown-header{padding:12px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;}.dropdown-action-btn{font-size:11px;color:#1e40af;cursor:pointer;padding:4px 8px;border-radius:4px;background:none;border:none;}.dropdown-action-btn:hover{background:#eff6ff;}.dropdown-options{padding:8px 0;}.dropdown-option{display:flex;align-items:center;padding:8px 14px;cursor:pointer;}.dropdown-option:hover{background:#f8fafc;}.dropdown-option input{margin-right:10px;cursor:pointer;}.dropdown-option label{font-size:13px;color:#475569;cursor:pointer;flex:1;}.table-container{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid #e5e7eb;}table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:11.5px;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;font-variant-numeric:tabular-nums;}thead{background:#f3f4f6;position:sticky;top:0;z-index:10;}th{padding:12px;text-align:left;font-size:11px;font-weight:700;color:#1f2937;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums;}th:nth-child(n+2){text-align:right;}th:last-child{border-right:none;}th:nth-child(1),td:nth-child(1){min-width:160px;width:160px;}th:nth-child(2),td:nth-child(2){width:85px;min-width:85px;max-width:85px;}th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){width:105px;min-width:105px;max-width:105px;}th:nth-child(6),td:nth-child(6){width:95px;min-width:95px;max-width:95px;}th:nth-child(7),td:nth-child(7),th:nth-child(8),td:nth-child(8),th:nth-child(9),td:nth-child(9),th:nth-child(10),td:nth-child(10){width:95px;min-width:95px;max-width:95px;}th:nth-child(11),td:nth-child(11){width:85px;min-width:85px;max-width:85px;}th:nth-child(12),td:nth-child(12),th:nth-child(13),td:nth-child(13){width:90px;min-width:90px;max-width:90px;}th:nth-child(14),td:nth-child(14),th:nth-child(15),td:nth-child(15){width:95px;min-width:95px;max-width:95px;}td{padding:12px;border-right:1px solid #f3f4f6;color:#374151;font-size:11px;vertical-align:middle;}td:nth-child(n+2){text-align:right;}td:last-child{border-right:none;}tbody tr{background:white;border-bottom:1px solid #f3f4f6;transition:opacity 0.15s;}tbody tr:hover{opacity:0.9;}.empty-state{text-align:left !important;padding:12px !important;color:#6b7280;font-size:11px;font-weight:400;}.negative{color:#92400e;}.positive{color:#059669;}.neutral{color:#6b7280;}body[data-view="broker"] .group-row,body[data-view="broker"] .child-row{display:none;}body[data-view="account"] .broker-row,body[data-view="account"] .child-row{display:none;}body[data-view="strategy"] .broker-row,body[data-view="strategy"] .group-row{display:none;}body[data-view="broker"] .group-b1,body[data-view="broker"] .group-b2,body[data-view="broker"] .child-row-b1,body[data-view="broker"] .child-row-b2{display:none;}body[data-view="account"] .child-row-b1,body[data-view="account"] .child-row-b2{display:none;}body[data-view="strategy"] .group-b1,body[data-view="strategy"] .group-b2{display:none;}.broker-row{background:#f3f4f6 !important;font-weight:600;}.broker-row:hover{background:#e5e7eb !important;}.broker-row td{border-right:1px solid #d1d5db;color:#000000;font-size:12px;}.broker-name{font-size:12px !important;font-weight:600 !important;color:#000000 !important;}#brokerLevelTableBody td{font-size:12px;padding:10px 12px;border-right:1px solid #fed7aa;}#brokerLevelTableBody td:last-child{border-right:none;}#brokerLevelTableBody tr{background:#fffbf5;}#brokerLevelTableBody tr:hover{background:#fff7ed;}.group-b1{background:#fce7f3 !important;font-weight:600;}.group-b1:hover{background:#fbcfe8 !important;}.group-b1 td{border-right:1px solid #f9a8d4;color:#831843;font-size:11.5px;}.group-b1 .group-name{font-size:11.5px !important;font-weight:600 !important;color:#9f1239 !important;padding-left:20px !important;}.child-row-b1{background:#fff9fb !important;}.child-row-b1:hover{background:#fce7f3 !important;}.child-row-b1 td{border-right:1px solid #fecdd3;color:#7f1d1d;font-size:11.5px;}.group-b1 .rowspan-cell{background:#fff9fb !important;}.group-b2{background:#ffedd5 !important;font-weight:600;}.group-b2:hover{background:#fed7aa !important;}.group-b2 td{border-right:1px solid #fdba74;color:#7c2d12;font-size:11.5px;}.group-b2 .group-name{font-size:11.5px !important;font-weight:600 !important;color:#9a3412 !important;padding-left:20px !important;}.child-row-b2{background:#fffbf5 !important;}.child-row-b2:hover{background:#ffedd5 !important;}.child-row-b2 td{border-right:1px solid #fed7aa;color:#7c2d12;font-size:11.5px;}.group-b2 .rowspan-cell{background:#fffbf5 !important;}.group-row{background:#f8fafc;font-weight:600;}.group-row td{font-size:11.5px;}.group-name{font-weight:600;font-size:11.5px;color:#475569;padding-left:20px;}.child-row{background:white;}.child-row td{font-size:11.5px;}@media screen and (min-width:769px) and (max-width:1024px){.summary-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-wrap:wrap;overflow-x:visible;}.summary-card{min-width:auto;flex:none;}}@media screen and (max-width:768px){.container{padding:12px 16px 24px 16px;}.header h1{font-size:18px;}.header p{font-size:11px;}.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}.control-group{flex:1 1 48%;min-width:0;}.control-label{font-size:11px;white-space:nowrap;}select,input[type="number"],input[type="text"],.btn{padding:10px 12px;font-size:11px;width:100%;}.strategy-selector{width:100%;}.strategy-dropdown-btn{width:100%;padding:10px 12px;font-size:11px;}.strategy-dropdown-menu{left:0;right:0;min-width:auto;width:calc(100vw - 32px);max-height:60vh;}.summary-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex-wrap:wrap;overflow-x:visible;margin-bottom:16px;}.summary-card{min-width:auto;flex:none;padding:14px 16px;}.summary-card-label{font-size:11px;}.summary-card-value{font-size:20px;}.table-container{margin:0 -16px;border-radius:0;border-left:none;border-right:none;}table{font-size:11px;}th,td{padding:10px 6px;font-size:11px;}th{font-size:9px;}.broker-row td,.group-row td,.child-row td{font-size:10px;padding:8px 6px;}}@media screen and (max-width:480px){.container{padding:10px 12px 20px 12px;}.header h1{font-size:16px;}.header p{font-size:10px;}.controls{gap:8px;margin-bottom:14px;}.control-label{font-size:10px;}select,input[type="number"],input[type="text"],.btn{padding:9px 10px;font-size:11px;}.strategy-dropdown-btn{padding:9px 10px;font-size:11px;}.summary-card{padding:12px 14px;min-width:auto;}.summary-cards{gap:8px;display:grid;grid-template-columns:repeat(2,1fr);}.summary-card-label{font-size:10px;}.summary-card-value{font-size:18px;}.table-container{margin:0 -12px;}table{font-size:10px;}th,td{padding:8px 4px;font-size:10px;}th{font-size:8px;}.broker-row td,.group-row td,.child-row td{font-size:9px;padding:6px 4px;}.strategy-dropdown-menu{width:calc(100vw - 24px);max-height:50vh;}.dropdown-badge{font-size:8px;padding:1px 4px;}}@media screen and (max-width:360px){.container{padding:8px 10px 16px 10px;}.header h1{font-size:15px;}.controls{gap:6px;}.control-label{font-size:9px;}select,input[type="number"],input[type="text"],.btn{padding:8px 8px;font-size:10px;}.strategy-dropdown-btn{padding:8px 8px;font-size:10px;}.summary-cards{gap:6px;display:grid;grid-template-columns:repeat(2,1fr);}.summary-card{padding:10px 12px;min-width:auto;}.summary-card-label{font-size:9px;}.summary-card-value{font-size:15px;}table{font-size:9px;}th{font-size:7px;padding:6px 3px;}td{padding:6px 3px;font-size:9px;}.broker-row td,.group-row td,.child-row td{font-size:8px;}}
 </style>
 </head>
 <body data-view="all">
@@ -67,8 +67,7 @@
             <!-- Broker-wise DD cards will be dynamically added here -->
         </div>
         <div class="controls">
-            <div class="control-group" style="flex: 0 0 auto;">
-                <label class="control-label">Hide Strategies:</label>
+            <div class="control-group">
                 <div class="strategy-selector">
                     <button class="strategy-dropdown-btn" onclick="toggleStrategyDropdown(event)">
                         <span>Select Strategies</span>
@@ -84,8 +83,7 @@
                     </div>
                 </div>
             </div>
-            <div class="control-group" style="flex: 0 0 auto;">
-                <label class="control-label">Select Brokers:</label>
+            <div class="control-group">
                 <div class="strategy-selector">
                     <button class="strategy-dropdown-btn" onclick="toggleBrokerDropdown(event)">
                         <span>Select Brokers</span>
@@ -101,11 +99,15 @@
                     </div>
                 </div>
             </div>
-            <div class="control-group" style="flex: 0 0 auto;">
+            <div class="control-group">
+                <label class="control-label">Lot Margin:</label>
+                <input type="text" id="lotMarginInput" value="4,00,000" onfocus="removeFormatting(this)" onblur="formatLotMarginInput(this)" oninput="updateLotMarginValue(this)">
+            </div>
+            <div class="control-group">
                 <label class="control-label">Min DD % Filter:</label>
                 <input type="number" id="minDrawdownFilter" placeholder="e.g., -10" step="0.1" oninput="applyFilters()">
             </div>
-            <div class="control-group" style="flex: 0 0 auto;">
+            <div class="control-group">
                 <label class="control-label">View Type:</label>
                 <select id="viewTypeFilter" onchange="applyFilters()">
                     <option value="all">All Levels</option>
@@ -114,7 +116,7 @@
                     <option value="strategy">Strategy Only</option>
                 </select>
             </div>
-            <div class="control-group" style="flex: 0 0 auto;">
+            <div class="control-group">
                 <label class="control-label">Sort By:</label>
                 <select id="sortSelect" onchange="handleSortSelect()">
                     <option value="strategy" selected>Strategy</option>
@@ -202,6 +204,7 @@
         let globalAccountMap = {};
         let selectedBrokers = new Set(); // Track selected brokers for filtering
         let allBrokerCodes = []; // All available broker codes
+        let lotMargin = 400000; // Default lot margin value, can be changed by user
         // Sample data structure
         const sampleData = [
             {strategy: "ACA", isGroup: true, isChild: false, lotSize: 10.40, maxDD: -584670, maxDDPercent: -9.86, currentDD: -588021, currentDDPercent: -14.14, ddDuration: 14, recoveryTime: 8, ddStartDate: "24-Nov", ddEndDate: "31-Dec", ddCount: 67, recoveryFactor: 7.96, underwaterPeriod: 538, stgMargin: 4160000, currentDDDuration: 37},
@@ -599,7 +602,7 @@
                     isBroker: false,
                     isGroup: false,
                     lotSize: stratData.lotSize,
-                    stgMargin: stratData.lotSize * 400000,
+                    stgMargin: stratData.lotSize * lotMargin,
                     maxDD: metrics.maxDD,
                     maxDDPercent: metrics.maxDDPercent,
                     currentDD: metrics.currentDD,
@@ -625,7 +628,7 @@
                     isBroker: false,
                     isChild: false,
                     lotSize: totalLotSize,
-                    stgMargin: totalLotSize * 400000,
+                    stgMargin: totalLotSize * lotMargin,
                     maxDD: metrics.maxDD,
                     maxDDPercent: metrics.maxDDPercent,
                     currentDD: metrics.currentDD,
@@ -642,7 +645,7 @@
             });
             // Recalculate Current DD % and Max DD % based on STG Margin instead of peak
             drawdownData.forEach(row => {
-                const stgMargin = (row.lotSize && row.lotSize !== '-') ? row.lotSize * 400000 : 0;
+                const stgMargin = (row.lotSize && row.lotSize !== '-') ? row.lotSize * lotMargin : 0;
                 if (stgMargin > 0) {
                     row.currentDDPercent = (row.currentDD / stgMargin) * 100;
                     row.maxDDPercent = (row.maxDD / stgMargin) * 100;
@@ -651,6 +654,56 @@
                     row.maxDDPercent = 0;
                 }
             });}
+        
+        function removeFormatting(input) {
+            // When user clicks in the input, remove commas for easy editing
+            let value = input.value.replace(/,/g, '');
+            input.value = value;
+        }
+        
+        function formatLotMarginInput(input) {
+            // When user leaves the input, format it
+            let value = input.value.replace(/,/g, '');
+            if (value && parseInt(value) > 0) {
+                lotMargin = parseInt(value);
+                input.value = formatCurrency(lotMargin);
+                saveFilters();
+                // Reprocess data with new lot margin
+                if (originalTradesData && originalTradesData.length > 0) {
+                    applyDateFilterAndProcess();
+                    applyFilters();
+                }
+            } else {
+                input.value = formatCurrency(400000);
+                lotMargin = 400000;
+                saveFilters();
+            }
+        }
+        
+        function updateLotMarginValue(input) {
+            // Update the value as user types (but don't reformat while typing)
+            let value = input.value.replace(/,/g, '');
+            if (value && parseInt(value) > 0) {
+                lotMargin = parseInt(value);
+            }
+        }
+        
+        function updateLotMarginAndRecalculate() {
+            const inputValue = parseFloat(document.getElementById('lotMarginInput').value);
+            if (inputValue && inputValue > 0) {
+                lotMargin = inputValue;
+                // Update formatted display
+                document.getElementById('lotMarginDisplay').textContent = '(' + formatCurrency(inputValue) + ')';
+                // Save to localStorage
+                saveFilters();
+                // Reprocess data with new lot margin
+                if (originalTradesData && originalTradesData.length > 0) {
+                    applyDateFilterAndProcess();
+                    applyFilters(); // Update the display with new calculations
+                }
+            }
+        }
+        
         function applyFilters() {
             const minDD = parseFloat(document.getElementById('minDrawdownFilter').value) || -Infinity;
             const viewType = document.getElementById('viewTypeFilter').value;
@@ -827,8 +880,8 @@
                     ddStartDate: getEarliestDate(children),
                     ddEndDate: accountData ? accountData.ddEndDate : '-'
                 };
-                // Calculate STG Margin = Lot Size * 400000
-                sums.stgMargin = sums.lotSize * 400000;
+                // Calculate STG Margin = Lot Size * lotMargin
+                sums.stgMargin = sums.lotSize * lotMargin;
                 // Calculate stg dd(%)
                 if (sums.stgMargin > 0) {
                     sums.stgDDPercent = (sums.stgDD / sums.stgMargin) * 100;
@@ -1071,7 +1124,7 @@
                 
                 const strategyCount = strategies.length;
                 const totalLotSize = strategies.reduce((sum, s) => sum + (s.lotSize || 0), 0);
-                const stgMargin = totalLotSize * 400000;
+                const stgMargin = totalLotSize * lotMargin;
                 const brokerMargin = getBrokerMarginForAccount(code) || 0;
                 // Calculate expense for this account
                 const accountExpense = calculateAccountExpense(code);
@@ -1220,7 +1273,7 @@
                 // Calculate Strategy Count and STG Margin from FILTERED strategies
                 const strategyCount = strategies.length;
                 const totalLotSize = strategies.reduce((sum, s) => sum + (s.lotSize || 0), 0);
-                const stgMargin = totalLotSize * 400000;
+                const stgMargin = totalLotSize * lotMargin;
                 // Calculate Add Fund (based on filtered STG Margin)
                 const addFund = brokerMargin - stgMargin;
                 const addFundPercent = stgMargin > 0 ? (addFund / stgMargin) * 100 : 0;
@@ -1322,7 +1375,7 @@
                 // Get filtered strategies for this account
                 const accountStrategies = strategies.filter(s => s.parentAccount === accountCode);
                 const lotSize = accountStrategies.reduce((sum, s) => sum + (s.lotSize || 0), 0);
-                const stgMargin = lotSize * 400000;
+                const stgMargin = lotSize * lotMargin;
                 
                 // Get broker margin
                 const brokerMargin = getBrokerMarginForAccount(accountCode) || 0;
@@ -1419,7 +1472,7 @@
                 const children = strategies.filter(s => s.parentAccount === accountStrategy);
                 if (children.length === 0) return 0;
                 const lotSize = children.reduce((sum, c) => sum + (c.lotSize || 0), 0);
-                return lotSize * 400000;
+                return lotSize * lotMargin;
             }
             // Create and append each broker card to the main container
             sortedAccounts.forEach(account => {
@@ -1476,11 +1529,21 @@
             document.getElementById('sortSelect').value = 'strategy';
             sortColumn = 'strategy';
             sortDirection = 'asc';
+            
+            // Reset Lot Margin to default
+            lotMargin = 400000;
+            document.getElementById('lotMarginInput').value = formatCurrency(400000);
+            
             updateStrategyCheckboxes();
             updateSelectedCount();
             updateBrokerCheckboxes();
             updateBrokerSelectedCount();
             clearSavedFilters();
+            
+            // Recalculate with reset lot margin
+            if (originalTradesData && originalTradesData.length > 0) {
+                applyDateFilterAndProcess();
+            }
             applyFilters();
         }
         function populateStrategyOptions() {
@@ -1718,6 +1781,13 @@
                     document.getElementById('viewTypeFilter').value = data.viewType || 'all';
                     document.getElementById('sortSelect').value = data.sortBy || 'strategy';
                     sortColumn = data.sortBy || 'strategy';
+                    
+                    // Load saved lot margin
+                    if (data.lotMargin && data.lotMargin > 0) {
+                        lotMargin = data.lotMargin;
+                        document.getElementById('lotMarginInput').value = formatCurrency(data.lotMargin);
+                    }
+                    
                     // Set body data-view attribute for CSS visibility control
                     document.body.setAttribute('data-view', data.viewType || 'all');
                 } else {
@@ -1736,7 +1806,8 @@
                     selectedBrokers: Array.from(selectedBrokers),
                     minDD: document.getElementById('minDrawdownFilter').value,
                     viewType: document.getElementById('viewTypeFilter').value,
-                    sortBy: sortColumn
+                    sortBy: sortColumn,
+                    lotMargin: lotMargin
                 }));
             } catch (e) {}
         }
