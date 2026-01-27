@@ -1360,6 +1360,12 @@
                 if (savedRowsPerPage) {
                     elements.rowsPerPage.value = savedRowsPerPage;
                 }
+                
+                // Load saved broker selection (All Broker or specific broker code)
+                const savedBrokerSelection = localStorage.getItem('reportBrokerSelection');
+                if (savedBrokerSelection !== null) {
+                    selectedBrokerFilter = savedBrokerSelection === 'null' ? null : savedBrokerSelection;
+                }
             } catch (e) {
                 hiddenStrategies = new Set();
                 hiddenBrokerStrategies = new Set();
@@ -1379,6 +1385,12 @@
             try {
                 // Only save manual filters, not auto-filtered ones from strategy selection
                 localStorage.setItem('reportBrokerStrategyFilters', JSON.stringify(Array.from(manualHiddenBrokerStrategies)));
+            } catch (e) {}
+        }
+        
+        function saveBrokerSelection() {
+            try {
+                localStorage.setItem('reportBrokerSelection', selectedBrokerFilter === null ? 'null' : selectedBrokerFilter);
             } catch (e) {}
         }
 
@@ -2183,11 +2195,11 @@
             
             // Reapply saved broker filter after strategy switch
             if (selectedBrokerFilter !== null) {
-                // Reapply specific broker filter
-                setTimeout(() => showSpecificBroker(selectedBrokerFilter), 15);
-            } else if (selectedBrokerFilter === null && strategy !== null) {
-                // Reapply "All Broker" filter
-                setTimeout(() => showAllBrokers(), 15);
+                // Reapply specific broker filter (don't save again)
+                setTimeout(() => showSpecificBroker(selectedBrokerFilter, true), 15);
+            } else if (selectedBrokerFilter === null) {
+                // Reapply "All Broker" filter when switching to any strategy (including "All Strategies")
+                setTimeout(() => showAllBrokers(true), 15);
             } else {
                 setTimeout(() => applyFilters(), 10);
             }
@@ -2297,9 +2309,12 @@
             });
         }
 
-        function showSpecificBroker(brokerPrefix) {
-            // Save broker selection
+        function showSpecificBroker(brokerPrefix, skipSave = false) {
+            // Save broker selection only if user clicked (not auto-reapply)
             selectedBrokerFilter = brokerPrefix;
+            if (!skipSave) {
+                saveBrokerSelection(); // Save to localStorage
+            }
             
             // Show only specified broker columns (temporarily)
             hiddenBrokerStrategies.clear();
@@ -2348,9 +2363,12 @@
             setTimeout(() => applyFilters(), 10);
         }
 
-        function showAllBrokers() {
-            // Save broker selection
+        function showAllBrokers(skipSave = false) {
+            // Save broker selection only if user clicked (not auto-reapply)
             selectedBrokerFilter = null; // null means "All Broker"
+            if (!skipSave) {
+                saveBrokerSelection(); // Save to localStorage
+            }
             
             // Show all broker columns (temporarily, without clearing saved manual filters)
             hiddenBrokerStrategies.clear();
@@ -2457,6 +2475,18 @@
             updateStrategyFilterList();
             updateStrategyNumberList();
             createDynamicBrokerButtons(); // Create dynamic broker buttons
+            
+            // Reapply saved broker selection after buttons are created
+            if (selectedBrokerFilter !== null) {
+                setTimeout(() => showSpecificBroker(selectedBrokerFilter, true), 50);
+            } else if (selectedBrokerFilter === null) {
+                // Check if this was explicitly saved as "All Broker" 
+                const savedSelection = localStorage.getItem('reportBrokerSelection');
+                if (savedSelection === 'null') {
+                    setTimeout(() => showAllBrokers(true), 50);
+                }
+            }
+            
             buildTableHeaders('all');
         }
 
@@ -2594,7 +2624,11 @@
                 localStorage.removeItem('reportDateFilters');
                 localStorage.removeItem('reportCollapsedMonths');
                 localStorage.removeItem('reportRowsPerPage');
+                localStorage.removeItem('reportBrokerSelection'); // Clear broker selection
             } catch (e) {}
+            
+            // Reset broker selection to null (All Broker)
+            selectedBrokerFilter = null;
             
             // Save the cleared date filters immediately
             saveDateFilters();
