@@ -74,17 +74,37 @@
         
         .controls-section {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
             align-items: center;
         }
-        .control-group { display: flex; align-items: center; gap: 8px; }
+        .control-group { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+        }
+        .control-group:empty {
+            display: none;
+        }
+        .control-group input,
+        .control-group select {
+            min-width: 80px;
+        }
+        .control-group button {
+            white-space: nowrap;
+        }
+        #brokerButtonsContainer {
+            flex: 0 0 auto;
+        }
         .control-label { font-size: 12px; color: #374151; font-weight: 600; letter-spacing: 0.1px; }
-        .strategy-filter-container { position: relative; display: inline-block; }
+        .strategy-filter-container { 
+            position: relative;
+        }
         .strategy-filter-button {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             padding: 7px 12px;
             border: 1px solid #d1d5db;
@@ -95,6 +115,7 @@
             color: #374151;
             cursor: pointer;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
         .strategy-filter-button:hover { border-color: #9ca3af; background: #f9fafb; }
         .strategy-filter-dropdown {
@@ -237,6 +258,7 @@
             cursor: pointer;
             transition: all 0.15s ease;
             font-family: inherit;
+            white-space: nowrap;
         }
         select:hover, input:hover, button:hover { 
             border-color: #9ca3af;
@@ -1001,6 +1023,7 @@
         let columnFilters = {};
         let currentFilterColumn = null;
         let selectedStrategyNumber = null; // null means "All Strategies"
+        let selectedBrokerFilter = null; // null means "All Broker", or broker code like "ACA"
         let dropdownCloseTimeout = null; // Timeout for delayed dropdown closing
 
         // Initialize with one sample strategy
@@ -2157,7 +2180,17 @@
             updateBrokerStrategyFilterList();
             updateStrategyNumberList();
             closeAllDropdowns();
-            setTimeout(() => applyFilters(), 10);
+            
+            // Reapply saved broker filter after strategy switch
+            if (selectedBrokerFilter !== null) {
+                // Reapply specific broker filter
+                setTimeout(() => showSpecificBroker(selectedBrokerFilter), 15);
+            } else if (selectedBrokerFilter === null && strategy !== null) {
+                // Reapply "All Broker" filter
+                setTimeout(() => showAllBrokers(), 15);
+            } else {
+                setTimeout(() => applyFilters(), 10);
+            }
         }
 
         function updateBrokerStrategyFilterList() {
@@ -2265,6 +2298,9 @@
         }
 
         function showSpecificBroker(brokerPrefix) {
+            // Save broker selection
+            selectedBrokerFilter = brokerPrefix;
+            
             // Show only specified broker columns (temporarily)
             hiddenBrokerStrategies.clear();
             
@@ -2313,6 +2349,9 @@
         }
 
         function showAllBrokers() {
+            // Save broker selection
+            selectedBrokerFilter = null; // null means "All Broker"
+            
             // Show all broker columns (temporarily, without clearing saved manual filters)
             hiddenBrokerStrategies.clear();
             manualHiddenBrokerStrategies.clear(); // Clear manual overrides so auto-hide can work
