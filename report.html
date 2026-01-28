@@ -1024,6 +1024,7 @@
         let currentFilterColumn = null;
         let selectedStrategyNumber = null; // null means "All Strategies"
         let selectedBrokerFilter = null; // null means "All Broker", or broker code like "ACA"
+        let savedAllStrategiesState = null; // Save broker filter state when "All Strategies" is active
         let dropdownCloseTimeout = null; // Timeout for delayed dropdown closing
 
         // Initialize with one sample strategy
@@ -1361,10 +1362,25 @@
                     elements.rowsPerPage.value = savedRowsPerPage;
                 }
                 
-                // Load saved broker selection (All Broker or specific broker code)
-                const savedBrokerSelection = localStorage.getItem('reportBrokerSelection');
-                if (savedBrokerSelection !== null) {
-                    selectedBrokerFilter = savedBrokerSelection === 'null' ? null : savedBrokerSelection;
+                // Load saved "All Strategies" state
+                const savedAllStrategiesStateJSON = localStorage.getItem('reportAllStrategiesState');
+                if (savedAllStrategiesStateJSON) {
+                    const state = JSON.parse(savedAllStrategiesStateJSON);
+                    savedAllStrategiesState = {
+                        selectedBrokerFilter: state.selectedBrokerFilter,
+                        hiddenBrokerStrategies: new Set(state.hiddenBrokerStrategies || []),
+                        manualHiddenBrokerStrategies: new Set(state.manualHiddenBrokerStrategies || [])
+                    };
+                    // Apply the saved state immediately since we start on "All Strategies"
+                    if (state.selectedBrokerFilter !== undefined) {
+                        selectedBrokerFilter = state.selectedBrokerFilter;
+                    }
+                    if (state.hiddenBrokerStrategies) {
+                        hiddenBrokerStrategies = new Set(state.hiddenBrokerStrategies);
+                    }
+                    if (state.manualHiddenBrokerStrategies) {
+                        manualHiddenBrokerStrategies = new Set(state.manualHiddenBrokerStrategies);
+                    }
                 }
             } catch (e) {
                 hiddenStrategies = new Set();
@@ -1385,12 +1401,6 @@
             try {
                 // Only save manual filters, not auto-filtered ones from strategy selection
                 localStorage.setItem('reportBrokerStrategyFilters', JSON.stringify(Array.from(manualHiddenBrokerStrategies)));
-            } catch (e) {}
-        }
-        
-        function saveBrokerSelection() {
-            try {
-                localStorage.setItem('reportBrokerSelection', selectedBrokerFilter === null ? 'null' : selectedBrokerFilter);
             } catch (e) {}
         }
 
@@ -2120,6 +2130,36 @@
         }
 
         function selectStrategyNumber(strategy) {
+            // If currently on "All Strategies" and switching to a specific strategy,
+            // save the current broker filter state
+            if (selectedStrategyNumber === null && strategy !== null) {
+                savedAllStrategiesState = {
+                    selectedBrokerFilter: selectedBrokerFilter,
+                    hiddenBrokerStrategies: new Set(hiddenBrokerStrategies),
+                    manualHiddenBrokerStrategies: new Set(manualHiddenBrokerStrategies)
+                };
+                // Save to localStorage
+                try {
+                    localStorage.setItem('reportAllStrategiesState', JSON.stringify({
+                        selectedBrokerFilter: selectedBrokerFilter,
+                        hiddenBrokerStrategies: Array.from(hiddenBrokerStrategies),
+                        manualHiddenBrokerStrategies: Array.from(manualHiddenBrokerStrategies)
+                    }));
+                } catch (e) {}
+            }
+            
+            // When switching to a specific strategy (not "All Strategies")
+            if (strategy !== null) {
+                // Reset to "All Broker" for the specific strategy
+                selectedBrokerFilter = null;
+                hiddenBrokerStrategies.clear();
+                // Also clear manual hidden to ensure all brokers show for the selected strategy
+                // (unless it's the first time selecting a strategy from "All Strategies")
+                if (selectedStrategyNumber !== null) {
+                    manualHiddenBrokerStrategies.clear();
+                }
+            }
+            
             // Save original Buy/Sell state when first selecting a specific strategy
             if (selectedStrategyNumber === null && strategy !== null) {
                 originalBuySellState = showBuySellColumns;
@@ -2131,9 +2171,17 @@
             
             if (strategy === null) {
                 elements.strategyNumberText.textContent = 'All Strategies';
-                // Restore to original manual filter state when "All Strategies" is selected
-                hiddenBrokerStrategies.clear();
-                manualHiddenBrokerStrategies.forEach(s => hiddenBrokerStrategies.add(s));
+                
+                // Restore saved "All Strategies" state
+                if (savedAllStrategiesState) {
+                    selectedBrokerFilter = savedAllStrategiesState.selectedBrokerFilter;
+                    hiddenBrokerStrategies = new Set(savedAllStrategiesState.hiddenBrokerStrategies);
+                    manualHiddenBrokerStrategies = new Set(savedAllStrategiesState.manualHiddenBrokerStrategies);
+                } else {
+                    // No saved state, just restore manual hidden ones
+                    hiddenBrokerStrategies.clear();
+                    manualHiddenBrokerStrategies.forEach(s => hiddenBrokerStrategies.add(s));
+                }
                 
                 // Restore original Buy/Sell/Qty state
                 showBuySellColumns = originalBuySellState;
@@ -2148,9 +2196,9 @@
                 document.getElementById('lotBtnText').textContent = showLotColumns ? 'Hide Lot' : 'Show Lot';
             } else {
                 elements.strategyNumberText.textContent = strategy;
-                // Combine manual filter + auto filter based on selected strategy
+                // Show selected strategy from all brokers, but respect manual hide selections
                 const strategyPattern = strategy.replace(/\s+/g, ''); // Remove spaces for matching (e.g., "PRO 4" -> "PRO4")
-                hiddenBrokerStrategies.clear();
+                // (hiddenBrokerStrategies already cleared at start)
                 
                 brokerStrategies.forEach(brokerStrat => {
                     const brokerStratClean = brokerStrat.replace(/\s+/g, '').replace(/_/g, '');
@@ -2169,7 +2217,7 @@
                         matches = brokerStratClean.includes(strategyPattern);
                     }
                     
-                    // Hide if: manually hidden OR doesn't match the selected strategy
+                    // Hide if: manually hidden by user OR doesn't match the selected strategy
                     if (manualHiddenBrokerStrategies.has(brokerStrat) || !matches) {
                         hiddenBrokerStrategies.add(brokerStrat);
                     }
@@ -2192,17 +2240,7 @@
             updateBrokerStrategyFilterList();
             updateStrategyNumberList();
             closeAllDropdowns();
-            
-            // Reapply saved broker filter after strategy switch
-            if (selectedBrokerFilter !== null) {
-                // Reapply specific broker filter (don't save again)
-                setTimeout(() => showSpecificBroker(selectedBrokerFilter, true), 15);
-            } else if (selectedBrokerFilter === null) {
-                // Reapply "All Broker" filter when switching to any strategy (including "All Strategies")
-                setTimeout(() => showAllBrokers(true), 15);
-            } else {
-                setTimeout(() => applyFilters(), 10);
-            }
+            setTimeout(() => applyFilters(), 10);
         }
 
         function updateBrokerStrategyFilterList() {
@@ -2214,7 +2252,25 @@
             
             elements.brokerStrategyFilterList.innerHTML = '';
             
-            brokerStrategies.forEach((strategy) => {
+            // Filter broker strategies based on selected strategy
+            let displayStrategies = brokerStrategies;
+            if (selectedStrategyNumber !== null) {
+                const strategyPattern = selectedStrategyNumber.replace(/\s+/g, '');
+                displayStrategies = brokerStrategies.filter(brokerStrat => {
+                    const brokerStratClean = brokerStrat.replace(/\s+/g, '').replace(/_/g, '');
+                    
+                    const strategyProMatch = strategyPattern.match(/PRO(\d+)/i);
+                    const brokerProMatch = brokerStratClean.match(/PRO(\d+)/i);
+                    
+                    if (strategyProMatch && brokerProMatch) {
+                        return strategyProMatch[1] === brokerProMatch[1];
+                    } else {
+                        return brokerStratClean.includes(strategyPattern);
+                    }
+                });
+            }
+            
+            displayStrategies.forEach((strategy) => {
                 const item = document.createElement('div');
                 item.className = 'strategy-filter-item';
                 item.onclick = () => {
@@ -2310,11 +2366,8 @@
         }
 
         function showSpecificBroker(brokerPrefix, skipSave = false) {
-            // Save broker selection only if user clicked (not auto-reapply)
+            // Set broker selection
             selectedBrokerFilter = brokerPrefix;
-            if (!skipSave) {
-                saveBrokerSelection(); // Save to localStorage
-            }
             
             // Show only specified broker columns (temporarily)
             hiddenBrokerStrategies.clear();
@@ -2364,11 +2417,8 @@
         }
 
         function showAllBrokers(skipSave = false) {
-            // Save broker selection only if user clicked (not auto-reapply)
+            // Set broker selection
             selectedBrokerFilter = null; // null means "All Broker"
-            if (!skipSave) {
-                saveBrokerSelection(); // Save to localStorage
-            }
             
             // Show all broker columns (temporarily, without clearing saved manual filters)
             hiddenBrokerStrategies.clear();
@@ -2476,16 +2526,8 @@
             updateStrategyNumberList();
             createDynamicBrokerButtons(); // Create dynamic broker buttons
             
-            // Reapply saved broker selection after buttons are created
-            if (selectedBrokerFilter !== null) {
-                setTimeout(() => showSpecificBroker(selectedBrokerFilter, true), 50);
-            } else if (selectedBrokerFilter === null) {
-                // Check if this was explicitly saved as "All Broker" 
-                const savedSelection = localStorage.getItem('reportBrokerSelection');
-                if (savedSelection === 'null') {
-                    setTimeout(() => showAllBrokers(true), 50);
-                }
-            }
+            // Default to "All Broker" (no saved selection)
+            selectedBrokerFilter = null;
             
             buildTableHeaders('all');
         }
@@ -2624,11 +2666,12 @@
                 localStorage.removeItem('reportDateFilters');
                 localStorage.removeItem('reportCollapsedMonths');
                 localStorage.removeItem('reportRowsPerPage');
-                localStorage.removeItem('reportBrokerSelection'); // Clear broker selection
+                localStorage.removeItem('reportAllStrategiesState');
             } catch (e) {}
             
-            // Reset broker selection to null (All Broker)
+            // Reset broker selection to default (All Broker)
             selectedBrokerFilter = null;
+            savedAllStrategiesState = null;
             
             // Save the cleared date filters immediately
             saveDateFilters();
