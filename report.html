@@ -307,11 +307,14 @@
             display: block;
             width: 100%;
             min-width: fit-content;
-            min-height: 400px;
         }
         .table-wrapper { 
             scrollbar-width: thin;
             scrollbar-color: #d1d5db #f9fafb;
+            transition: padding-bottom 0.2s ease;
+        }
+        .table-wrapper.dropdown-expanded {
+            padding-bottom: 250px;
         }
         .table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
         .table-wrapper::-webkit-scrollbar-track { background: #f9fafb; }
@@ -653,6 +656,8 @@
             font-variant-numeric: tabular-nums;
             font-weight: 400;
             background: #f8fafc;
+            min-height: 300px;
+            vertical-align: top;
         }
         
         .pagination {
@@ -1467,6 +1472,18 @@
                 e.stopPropagation();
                 closeOtherDropdowns('date');
                 elements.dateFilterDropdown.classList.toggle('active');
+                
+                // Only add expanded class if table wrapper is small (needs space for dropdown)
+                const tableWrapper = document.querySelector('.table-wrapper');
+                if (elements.dateFilterDropdown.classList.contains('active')) {
+                    // Check if table wrapper height is less than 300px (needs expansion)
+                    const wrapperHeight = tableWrapper.offsetHeight;
+                    if (wrapperHeight < 300) {
+                        tableWrapper.classList.add('dropdown-expanded');
+                    }
+                } else {
+                    tableWrapper.classList.remove('dropdown-expanded');
+                }
             });
             
             elements.strategyFilterBtn.addEventListener('click', (e) => {
@@ -1581,17 +1598,24 @@
         }
 
         function closeOtherDropdowns(keepOpen) {
-            if (keepOpen !== 'date') elements.dateFilterDropdown.classList.remove('active');
+            const tableWrapper = document.querySelector('.table-wrapper');
+            
+            if (keepOpen !== 'date') {
+                elements.dateFilterDropdown.classList.remove('active');
+                tableWrapper?.classList.remove('dropdown-expanded');
+            }
             if (keepOpen !== 'strategy') elements.strategyFilterDropdown.classList.remove('active');
             if (keepOpen !== 'broker') elements.brokerStrategyFilterDropdown.classList.remove('active');
             if (keepOpen !== 'strategyNumber') elements.strategyNumberDropdown.classList.remove('active');
         }
 
         function closeAllDropdowns() {
+            const tableWrapper = document.querySelector('.table-wrapper');
             elements.dateFilterDropdown.classList.remove('active');
             elements.strategyFilterDropdown.classList.remove('active');
             elements.brokerStrategyFilterDropdown.classList.remove('active');
             elements.strategyNumberDropdown.classList.remove('active');
+            tableWrapper?.classList.remove('dropdown-expanded');
         }
 
         function showLoading(text = 'Processing...', subtext = 'Please wait') {
@@ -2366,7 +2390,7 @@
             });
         }
 
-        function showSpecificBroker(brokerPrefix, skipSave = false) {
+        function showSpecificBroker(brokerPrefix) {
             // Set broker selection
             selectedBrokerFilter = brokerPrefix;
             
@@ -2417,7 +2441,7 @@
             setTimeout(() => applyFilters(), 10);
         }
 
-        function showAllBrokers(skipSave = false) {
+        function showAllBrokers() {
             // Set broker selection
             selectedBrokerFilter = null; // null means "All Broker"
             
@@ -3225,6 +3249,12 @@
                 try {
                     await new Promise(resolve => setTimeout(resolve, 100));
                     originalAllTrades = data || [];
+                    
+                    // Reset to "All Broker" when loading new data
+                    selectedBrokerFilter = null;
+                    hiddenBrokerStrategies.clear();
+                    manualHiddenBrokerStrategies.clear();
+                    // Note: Keep hiddenStrategies - preserve user's hide strategy selections
                     
                     // Reset to ALL TIME and update date inputs based on available data
                     resetToAllTimeWithDataRange();
