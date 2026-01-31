@@ -101,11 +101,21 @@
             </div>
             <div class="control-group">
                 <label class="control-label">Lot Margin:</label>
-                <input type="text" id="lotMarginInput" value="4,00,000" onfocus="removeFormatting(this)" onblur="formatLotMarginInput(this)" oninput="updateLotMarginValue(this)">
+                <input type="text" id="lotMarginInput" value="4,00,000" onfocus="removeFormatting(this)" onblur="formatLotMarginInput(this)" oninput="updateLotMarginValue(this)" style="width: 100px; min-width: 100px;">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Study Strategy:</label>
+                <select id="studyStrategySelect" onchange="handleStudyStrategyChange()">
+                    <option value="default">Default (Original)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Study Lot Size:</label>
+                <input type="text" id="studyLotSizeInput" value="0.00" placeholder="0.00" onfocus="removeFormatting(this)" onblur="formatStudyLotSizeInput(this)" oninput="updateStudyLotSizeValue(this)" disabled style="width: 80px; min-width: 80px;">
             </div>
             <div class="control-group">
                 <label class="control-label">Min DD % Filter:</label>
-                <input type="number" id="minDrawdownFilter" placeholder="e.g., -10" step="0.1" oninput="applyFilters()">
+                <input type="number" id="minDrawdownFilter" placeholder="e.g., -10" step="0.1" oninput="applyFilters()" style="width: 80px; min-width: 80px;">
             </div>
             <div class="control-group">
                 <label class="control-label">View Type:</label>
@@ -126,8 +136,6 @@
                     <option value="extraMargin">Add Fund</option>
                 </select>
             </div>
-            <button class="btn btn-action" onclick="expandAll()" style="flex: 1 1 0; min-width: 100px;">Expand All</button>
-            <button class="btn btn-action" onclick="collapseAll()" style="flex: 1 1 0; min-width: 100px;">Collapse All</button>
             <button class="btn btn-action" onclick="resetFilters()" style="flex: 1 1 0; min-width: 100px;">Reset Filters</button>
             <button class="btn btn-action" onclick="exportToCSV()" style="flex: 1 1 0; min-width: 100px;">Export CSV</button>
         </div>
@@ -205,6 +213,10 @@
         let selectedBrokers = new Set(); // Track selected brokers for filtering
         let allBrokerCodes = []; // All available broker codes
         let lotMargin = 400000; // Default lot margin value, can be changed by user
+        let studyStrategy = 'default'; // Selected strategy for study purpose
+        let studyLotSize = 0; // Custom lot size for selected strategy
+        let originalLotSizes = {}; // Store original lot sizes for each strategy
+        let customLotSizes = {}; // Store custom lot sizes entered by user for each strategy
         // Sample data structure
         const sampleData = [
             {strategy: "ACA", isGroup: true, isChild: false, lotSize: 10.40, maxDD: -584670, maxDDPercent: -9.86, currentDD: -588021, currentDDPercent: -14.14, ddDuration: 14, recoveryTime: 8, ddStartDate: "24-Nov", ddEndDate: "31-Dec", ddCount: 67, recoveryFactor: 7.96, underwaterPeriod: 538, stgMargin: 4160000, currentDDDuration: 37},
@@ -228,6 +240,7 @@
                 loadSavedFilters();
                 populateStrategyOptions();
                 populateBrokerOptions();
+                populateStudyStrategyDropdown();
                 applyFilters();
             } else if (type === 'LOAD_SAMPLE_DATA') {                drawdownData = sampleData;
                 loadSavedFilters();
@@ -594,6 +607,13 @@
                 
                 const metrics = calculateDrawdown(aggregatedPnls, sortedDates);
                 
+                // Use custom lot size if user has entered one for this strategy, otherwise use original
+                const effectiveLotSize = customLotSizes.hasOwnProperty(stratName) ? customLotSizes[stratName] : stratData.lotSize;
+                
+                if (customLotSizes.hasOwnProperty(stratName)) {
+                    console.log('Applying custom lot size to', stratName, '- Custom:', customLotSizes[stratName], 'Original:', stratData.lotSize);
+                }
+                
                 drawdownData.push({
                     strategy: stratName,
                     parentAccount: stratData.account,
@@ -601,8 +621,8 @@
                     isChild: true,
                     isBroker: false,
                     isGroup: false,
-                    lotSize: stratData.lotSize,
-                    stgMargin: stratData.lotSize * lotMargin,
+                    lotSize: effectiveLotSize,
+                    stgMargin: effectiveLotSize * lotMargin,
                     maxDD: metrics.maxDD,
                     maxDDPercent: metrics.maxDDPercent,
                     currentDD: metrics.currentDD,
@@ -702,6 +722,112 @@
                     applyFilters(); // Update the display with new calculations
                 }
             }
+        }
+        
+        // Study Strategy and Lot Size functions
+        function handleStudyStrategyChange() {
+            const select = document.getElementById('studyStrategySelect');
+            const input = document.getElementById('studyLotSizeInput');
+            studyStrategy = select.value;
+            
+            if (studyStrategy === 'default') {
+                // Disable input and reset to 0
+                input.disabled = true;
+                input.value = '0.00';
+                studyLotSize = 0;
+                
+                // Clear all custom lot sizes and recalculate
+                customLotSizes = {};
+                console.log('Cleared all custom lot sizes - returning to original values');
+            } else {
+                // Enable input
+                input.disabled = false;
+                
+                // Check if user has previously entered a custom lot size for this strategy
+                if (customLotSizes.hasOwnProperty(studyStrategy)) {
+                    // Use the custom lot size
+                    studyLotSize = customLotSizes[studyStrategy];
+                    input.value = studyLotSize.toFixed(2);
+                } else {
+                    // Use the original lot size
+                    const originalLotSize = originalLotSizes[studyStrategy] || 0;
+                    studyLotSize = originalLotSize;
+                    input.value = originalLotSize.toFixed(2);
+                }
+            }
+            
+            // Recalculate with updated lot size
+            if (originalTradesData && originalTradesData.length > 0) {
+                applyDateFilterAndProcess();
+                applyFilters();
+            }
+        }
+        
+        function formatStudyLotSizeInput(input) {
+            // When user leaves the input, format it
+            if (studyStrategy === 'default') {
+                input.value = '0.00';
+                return;
+            }
+            
+            let value = parseFloat(input.value);
+            console.log('formatStudyLotSizeInput - studyStrategy:', studyStrategy);
+            console.log('formatStudyLotSizeInput - studyLotSize:', studyLotSize);
+            console.log('formatStudyLotSizeInput - new value:', value);
+            
+            if (!isNaN(value) && value > 0) {
+                studyLotSize = value;
+                input.value = value.toFixed(2);
+                
+                // Save the custom lot size for this strategy
+                customLotSizes[studyStrategy] = value;
+                console.log('formatStudyLotSizeInput - Saved custom lot size:', studyStrategy, '=', value);
+                console.log('formatStudyLotSizeInput - All custom lot sizes:', customLotSizes);
+                
+                // Recalculate with new lot size
+                if (originalTradesData && originalTradesData.length > 0) {
+                    applyDateFilterAndProcess();
+                    applyFilters();
+                }
+            } else {
+                // Reset to original lot size
+                const originalLotSize = originalLotSizes[studyStrategy] || 0;
+                input.value = originalLotSize.toFixed(2);
+                studyLotSize = originalLotSize;
+            }
+        }
+        
+        function updateStudyLotSizeValue(input) {
+            // Update the value as user types
+            if (studyStrategy !== 'default') {
+                let value = parseFloat(input.value);
+                if (!isNaN(value) && value > 0) {
+                    studyLotSize = value;
+                }
+            }
+        }
+        
+        function populateStudyStrategyDropdown() {
+            const select = document.getElementById('studyStrategySelect');
+            // Clear existing options except default
+            select.innerHTML = '<option value="default">Default (Original)</option>';
+            
+            // Get all child strategies (individual strategies, not broker groups)
+            const childStrategies = drawdownData.filter(row => row.isChild);
+            
+            // Sort strategies alphabetically
+            childStrategies.sort((a, b) => a.strategy.localeCompare(b.strategy));
+            
+            // Add each strategy to dropdown
+            childStrategies.forEach(row => {
+                const option = document.createElement('option');
+                option.value = row.strategy;
+                option.textContent = row.strategy;
+                select.appendChild(option);
+                
+                // Store original lot size
+                originalLotSizes[row.strategy] = row.lotSize || 0;
+            });
         }
         
         function applyFilters() {
@@ -1533,6 +1659,14 @@
             // Reset Lot Margin to default
             lotMargin = 400000;
             document.getElementById('lotMarginInput').value = formatCurrency(400000);
+            
+            // Reset Study Strategy to default and clear all custom lot sizes
+            studyStrategy = 'default';
+            studyLotSize = 0;
+            customLotSizes = {}; // Clear all custom lot sizes
+            document.getElementById('studyStrategySelect').value = 'default';
+            document.getElementById('studyLotSizeInput').value = '0.00';
+            document.getElementById('studyLotSizeInput').disabled = true;
             
             updateStrategyCheckboxes();
             updateSelectedCount();
