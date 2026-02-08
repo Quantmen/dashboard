@@ -119,9 +119,7 @@
         }
         .strategy-filter-button:hover { border-color: #9ca3af; background: #f9fafb; }
         .strategy-filter-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
+            position: fixed;
             margin-top: 6px;
             background: #ffffff;
             border: 1px solid #d1d5db;
@@ -131,7 +129,7 @@
             max-height: 400px;
             overflow-y: auto;
             overflow-x: hidden;
-            z-index: 1000;
+            z-index: 9999;
             display: none;
             transform: translateZ(0);
             will-change: transform;
@@ -312,9 +310,6 @@
             scrollbar-width: thin;
             scrollbar-color: #d1d5db #f9fafb;
             transition: padding-bottom 0.2s ease;
-        }
-        .table-wrapper.dropdown-expanded {
-            padding-bottom: 250px;
         }
         .table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
         .table-wrapper::-webkit-scrollbar-track { background: #f9fafb; }
@@ -1473,16 +1468,11 @@
                 closeOtherDropdowns('date');
                 elements.dateFilterDropdown.classList.toggle('active');
                 
-                // Only add expanded class if table wrapper is small (needs space for dropdown)
-                const tableWrapper = document.querySelector('.table-wrapper');
+                // Position dropdown relative to button
                 if (elements.dateFilterDropdown.classList.contains('active')) {
-                    // Check if table wrapper height is less than 300px (needs expansion)
-                    const wrapperHeight = tableWrapper.offsetHeight;
-                    if (wrapperHeight < 300) {
-                        tableWrapper.classList.add('dropdown-expanded');
-                    }
-                } else {
-                    tableWrapper.classList.remove('dropdown-expanded');
+                    const btnRect = elements.dateFilterBtn.getBoundingClientRect();
+                    elements.dateFilterDropdown.style.top = `${btnRect.bottom + 6}px`;
+                    elements.dateFilterDropdown.style.left = `${btnRect.left}px`;
                 }
             });
             
@@ -1490,18 +1480,39 @@
                 e.stopPropagation();
                 closeOtherDropdowns('strategy');
                 elements.strategyFilterDropdown.classList.toggle('active');
+                
+                // Position dropdown relative to button
+                if (elements.strategyFilterDropdown.classList.contains('active')) {
+                    const btnRect = elements.strategyFilterBtn.getBoundingClientRect();
+                    elements.strategyFilterDropdown.style.top = `${btnRect.bottom + 6}px`;
+                    elements.strategyFilterDropdown.style.left = `${btnRect.left}px`;
+                }
             });
             
             elements.brokerStrategyFilterBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 closeOtherDropdowns('broker');
                 elements.brokerStrategyFilterDropdown.classList.toggle('active');
+                
+                // Position dropdown relative to button
+                if (elements.brokerStrategyFilterDropdown.classList.contains('active')) {
+                    const btnRect = elements.brokerStrategyFilterBtn.getBoundingClientRect();
+                    elements.brokerStrategyFilterDropdown.style.top = `${btnRect.bottom + 6}px`;
+                    elements.brokerStrategyFilterDropdown.style.left = `${btnRect.left}px`;
+                }
             });
             
             elements.strategyNumberBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 closeOtherDropdowns('strategyNumber');
                 elements.strategyNumberDropdown.classList.toggle('active');
+                
+                // Position dropdown relative to button
+                if (elements.strategyNumberDropdown.classList.contains('active')) {
+                    const btnRect = elements.strategyNumberBtn.getBoundingClientRect();
+                    elements.strategyNumberDropdown.style.top = `${btnRect.bottom + 6}px`;
+                    elements.strategyNumberDropdown.style.left = `${btnRect.left}px`;
+                }
             });
             
             elements.selectAllDatesBtn.addEventListener('click', selectAllDates);
@@ -1598,11 +1609,8 @@
         }
 
         function closeOtherDropdowns(keepOpen) {
-            const tableWrapper = document.querySelector('.table-wrapper');
-            
             if (keepOpen !== 'date') {
                 elements.dateFilterDropdown.classList.remove('active');
-                tableWrapper?.classList.remove('dropdown-expanded');
             }
             if (keepOpen !== 'strategy') elements.strategyFilterDropdown.classList.remove('active');
             if (keepOpen !== 'broker') elements.brokerStrategyFilterDropdown.classList.remove('active');
@@ -1610,12 +1618,10 @@
         }
 
         function closeAllDropdowns() {
-            const tableWrapper = document.querySelector('.table-wrapper');
             elements.dateFilterDropdown.classList.remove('active');
             elements.strategyFilterDropdown.classList.remove('active');
             elements.brokerStrategyFilterDropdown.classList.remove('active');
             elements.strategyNumberDropdown.classList.remove('active');
-            tableWrapper?.classList.remove('dropdown-expanded');
         }
 
         function showLoading(text = 'Processing...', subtext = 'Please wait') {
