@@ -1622,6 +1622,72 @@ const dailyTotalMargins = calculateDailyTotalMargins(sortedFilteredTrades, Array
 const marginDrawdownData = calculateMarginDrawdown(dailyTotalMargins);
 const dailyExpenses = calculateDailyExpenses(sortedFilteredTrades, Array.from(strategies), dailyTotalMargins);
 const monthlyExpensesAndMargins = calculateExpensesAndMargins(sortedFilteredTrades, hiddenStrategies, Array.from(strategies), showFilteredTotals, dailyTotalMargins, dailyExpenses);
+
+// Calculate globalStartingCapital before rendering table
+globalStartingCapital = 0;
+if (sortedFilteredTrades.length > 0) {
+const tradesByMonth = {};
+sortedFilteredTrades.forEach(trade => {
+const dateParts = trade.date.split('/');
+const monthKey = `${dateParts[1]}/${dateParts[2]}`;
+if (!tradesByMonth[monthKey]) {
+tradesByMonth[monthKey] = [];
+}
+tradesByMonth[monthKey].push(trade);
+});
+const sortedMonthKeys = Object.keys(tradesByMonth).sort((a, b) => {
+const [monthA, yearA] = a.split('/');
+const [monthB, yearB] = b.split('/');
+if (yearA !== yearB) return yearA.localeCompare(yearB);
+return monthA.localeCompare(monthB);
+});
+if (sortedMonthKeys.length > 0) {
+const firstMonth = sortedMonthKeys[0];
+const firstMonthTrades = tradesByMonth[firstMonth];
+const tradesByDate = {};
+firstMonthTrades.forEach(trade => {
+const dateKey = trade.date;
+if (!tradesByDate[dateKey]) {
+tradesByDate[dateKey] = [];
+}
+tradesByDate[dateKey].push(trade);
+});
+const sortedDatesInMonth = Object.keys(tradesByDate).sort((a, b) => {
+const dayA = parseInt(a.split('/')[0]);
+const dayB = parseInt(b.split('/')[0]);
+return dayA - dayB;
+});
+if (sortedDatesInMonth.length > 0) {
+const firstDate = sortedDatesInMonth[0];
+const firstDateTrades = tradesByDate[firstDate];
+const firstDateBrokerMargins = {};
+const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
+firstDateTrades.forEach(trade => {
+if (trade.strategyDetails) {
+allBrokerStrategies.forEach(brokerStrat => {
+const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+const cleanName = brokerStrat.replace(/\s+/g, '');
+const brokerMatch = cleanName.match(/^(.+?)PRO/);
+if (brokerMatch && margin > 0) {
+const brokerCode = brokerMatch[1];
+if (!firstDateBrokerMargins[brokerCode]) {
+firstDateBrokerMargins[brokerCode] = {};
+}
+firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+}
+});
+}
+});
+Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
+const margins = Object.values(firstDateBrokerMargins[brokerCode]);
+if (margins.length > 0) {
+globalStartingCapital += Math.max(...margins);
+}
+});
+}
+}
+}
+
 renderPivotTable(monthlyData, dailyData, visibleStrategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses, marginDrawdownData);
 }
 function calculateExpensesAndMargins(sortedTrades, hiddenStrategies, allStrategiesParam, useFilteredTotals, dailyTotalMargins, dailyExpenses) {
@@ -2502,7 +2568,7 @@ bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnlValue >= 0 ? 'pos
 bodyHtml += `<td class="number-col total-net-col ${totals.totalAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalAmiPnl)}</td>`;
 const totalNetPnlValue = showPnlTax ? totals.netBrProfits : totals.totalProfits;
 bodyHtml += `<td class="number-col total-net-col ${totalNetPnlValue >= 0 ? 'positive' : 'negative'}">${formatNumber(totalNetPnlValue)}</td>`;
-const totalNetPnlPercent = globalLastTotalMargin !== 0 ? (totalNetPnlValue / globalLastTotalMargin) * 100 : 0;
+const totalNetPnlPercent = globalStartingCapital !== 0 ? (totalNetPnlValue / globalStartingCapital) * 100 : 0;
 bodyHtml += `<td class="number-col net-pnl-percent-col ${totalNetPnlPercent >= 0 ? 'positive' : 'negative'}">${totalNetPnlPercent !== 0 ? totalNetPnlPercent.toFixed(2) + '%' : ''}</td>`;
 bodyHtml += `<td class="number-col expenses-col ${totals.totalExpenses >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalExpenses)}</td>`;
 bodyHtml += `<td class="number-col total-net-col ${globalLastTotalMargin >= 0 ? 'positive' : 'negative'}">${formatNumber(globalLastTotalMargin)}</td>`;
