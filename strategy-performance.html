@@ -8,20 +8,21 @@ select, button{padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;font-
 button.primary:hover{background:#2563eb;border-color:#2563eb;}button.active{background:white;color:#3b82f6;border:1px solid #3b82f6;}.custom-date-range{display:flex;gap:4px;align-items:center;padding:4px 8px;background:transparent;border-radius:6px;}.custom-date-range label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;}.custom-date-range input[type="date"]{padding:4px 6px;font-size:10px;border:1px solid #e5e7eb;border-radius:4px;font-family:inherit;color:#475569;cursor:pointer;background:transparent;}.custom-date-range input[type="date"]:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1);}.date-nav-arrows{display:flex;flex-direction:column;gap:1px;margin-left:2px;}.date-nav-arrows button{padding:0;width:16px;height:11px;font-size:8px;line-height:1;border:1px solid #e5e7eb;background:transparent;color:#64748b;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s ease;}.date-nav-arrows button:hover{background:transparent;color:#475569;border-color:#cbd5e1;}.date-range-buttons{display:flex;gap:4px;}.date-range-buttons .btn{padding:6px 12px;font-size:10px;font-weight:600;color:#64748b;background:transparent;border:none;border-radius:6px;cursor:pointer;transition:all 0.2s ease;text-transform:uppercase;letter-spacing:0.5px;}.date-range-buttons .btn:hover{background:#e2e8f0;color:#475569;}.date-range-buttons .btn.active{background:white;color:#3b82f6;border:1px solid #3b82f6;}.table-container{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);border:1px solid #e5e7eb;overflow:visible;margin-bottom:16px;position:relative;}.table-wrapper{overflow-x:visible;overflow-y:visible;background:white;border-radius:0;}.performance-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;min-width:800px;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;font-variant-numeric:tabular-nums;position:relative;isolation:isolate;}
 .performance-table thead{position:sticky;top:0;z-index:1000;background:white;isolation:isolate;transform:translateZ(0);}.performance-table thead::after{content:'';position:absolute;top:-1000px;left:0;right:0;height:1000px;background:#f8fafc;z-index:999;pointer-events:none;}.performance-table thead::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:white;z-index:-1;}.performance-table thead tr{height:0;border-spacing:0;border-collapse:collapse;}.performance-table thead tr.header-row-1, .performance-table thead tr.header-row-2{height:auto;}.performance-table thead tr.header-row-1 th{padding:12px 8px 6px 8px;position:sticky;top:0;background:#f3f4f6;z-index:1000;font-size:10px;text-align:center;font-weight:700;color:#1f2937;border-bottom:1px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;vertical-align:middle;height:32px;contain:paint;}
 .performance-table thead tr.header-row-1 th[rowspan="2"]{border-bottom:2px solid #d1d5db;text-align:center;background:#f3f4f6;padding:12px 8px;height:auto;vertical-align:middle;contain:paint;}.performance-table thead tr.header-row-2 th{padding:9px 8px;font-size:9px;position:sticky;top:32px;background:#f3f4f6;z-index:1000;font-weight:600;color:#374151;text-align:center !important;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;line-height:1.2;vertical-align:middle;height:32px;contain:paint;}
-.performance-table thead tr.header-row-1 th:first-child{position:sticky;left:0;z-index:2000;background:#f9fafb !important;width:110px;min-width:110px;max-width:110px;border-right:2px solid #cbd5e1;padding:12px 8px;vertical-align:middle;text-align:center;}.performance-table tbody{position:relative;z-index:1;}.performance-table th{background:#f3f4f6;padding:12px 8px;text-align:center;font-weight:700;color:#6b7280;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;font-size:10px;letter-spacing:0.5px;min-width:75px;max-width:90px;vertical-align:middle;}
+.performance-table thead tr.header-row-1 th:first-child{position:sticky;left:0;z-index:2000;background:#f9fafb !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;padding:12px 8px;vertical-align:middle;text-align:center;}.performance-table tbody{position:relative;z-index:1;}.performance-table th{background:#f3f4f6;padding:12px 8px;text-align:center;font-weight:700;color:#6b7280;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;font-size:10px;letter-spacing:0.5px;min-width:75px;max-width:90px;vertical-align:middle;}
 .performance-table th.strategy-group-end{border-right:1px solid #cbd5e1;}.performance-table td.strategy-group-end{border-right:1px solid #cbd5e1;}.performance-table th.apro-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table td.apro-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table th.broker-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table td.broker-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table th.strategy-bg-0, .performance-table td.strategy-bg-0, .performance-table th.strategy-bg-1, .performance-table td.strategy-bg-1, .performance-table th.strategy-bg-2, .performance-table td.strategy-bg-2{background:#f8fcf9;}
+.performance-table th.sortable{cursor:pointer;user-select:none;position:relative;}.performance-table th.sortable:hover{background:#e5e7eb;}.performance-table th.sortable::after{content:'⇅';position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:#9ca3af;opacity:0;transition:opacity 0.2s;}.performance-table th.sortable:hover::after{opacity:1;}.performance-table th.sortable.sort-asc::after{content:'▲';opacity:1;color:#3b82f6;}.performance-table th.sortable.sort-desc::after{content:'▼';opacity:1;color:#3b82f6;}
 .performance-table th.strategy-bg-3, .performance-table td.strategy-bg-3{background:#fefafd;}.performance-table th.strategy-bg-4, .performance-table td.strategy-bg-4{background:#fffaf5;}.performance-table td.lot-col.strategy-bg-0, .performance-table td.lot-col.strategy-bg-1, .performance-table td.lot-col.strategy-bg-2, .performance-table td.lot-col.strategy-bg-3, .performance-table td.lot-col.strategy-bg-4{width:65px;min-width:65px;max-width:65px;background:#eff8fe !important;}.performance-table tr:hover td.strategy-bg-0, .performance-table tr:hover td.strategy-bg-1, .performance-table tr:hover td.strategy-bg-2, .performance-table tr:hover td.strategy-bg-3, .performance-table tr:hover td.strategy-bg-4{background:#fafbfc;}
 .performance-table tr:hover td.lot-col.strategy-bg-0, .performance-table tr:hover td.lot-col.strategy-bg-1, .performance-table tr:hover td.lot-col.strategy-bg-2, .performance-table tr:hover td.lot-col.strategy-bg-3, .performance-table tr:hover td.lot-col.strategy-bg-4{background:#fafbfc;width:65px;min-width:65px;max-width:65px;}.performance-table tr:hover td.apro-pnl-col{background:#fafbfc;width:85px;min-width:75px;}.performance-table tr:hover td.apro-pnl-col.strategy-bg-0, .performance-table tr:hover td.apro-pnl-col.strategy-bg-1, .performance-table tr:hover td.apro-pnl-col.strategy-bg-2, .performance-table tr:hover td.apro-pnl-col.strategy-bg-3, .performance-table tr:hover td.apro-pnl-col.strategy-bg-4{background:#fafbfc;width:85px;min-width:75px;}
-.performance-table th:first-child{position:sticky;left:0;z-index:10;background:#f8fafc !important;width:110px;min-width:110px;max-width:110px;border-right:2px solid #cbd5e1;vertical-align:middle;text-align:center;}.performance-table th.number-col{text-align:center;max-width:80px;}.performance-table th.apro-pnl-col, .performance-table td.apro-pnl-col{min-width:75px;width:85px;}.performance-table td.apro-pnl-col.strategy-bg-0, .performance-table td.apro-pnl-col.strategy-bg-1, .performance-table td.apro-pnl-col.strategy-bg-2, .performance-table td.apro-pnl-col.strategy-bg-3, .performance-table td.apro-pnl-col.strategy-bg-4{background:#f8fcf9;width:85px;min-width:75px;}
+.performance-table th:first-child{position:sticky;left:0;z-index:10;background:#f8fafc !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;vertical-align:middle;text-align:center;}.performance-table th.number-col{text-align:center;max-width:80px;}.performance-table th.apro-pnl-col, .performance-table td.apro-pnl-col{min-width:75px;width:85px;}.performance-table td.apro-pnl-col.strategy-bg-0, .performance-table td.apro-pnl-col.strategy-bg-1, .performance-table td.apro-pnl-col.strategy-bg-2, .performance-table td.apro-pnl-col.strategy-bg-3, .performance-table td.apro-pnl-col.strategy-bg-4{background:#f8fcf9;width:85px;min-width:75px;}
 /* Section-based color overrides */ .performance-table td.dpnl-section{background:#fefafd !important;}.performance-table td.pnl-section{background:#fffaf5 !important;}.performance-table td{padding:11px 8px;border-bottom:1px solid #f3f4f6;border-right:1px solid #f3f4f6;color:#374151;text-align:right;white-space:nowrap;min-width:75px;max-width:90px;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:400;}.performance-table td.lot-col{min-width:65px;max-width:65px;width:65px;}.performance-table th.lot-col{min-width:65px;max-width:65px;width:65px;}
-.performance-table td:first-child{position:sticky;left:0;background:white !important;font-weight:450;z-index:1;border-right:2px solid #cbd5e1;width:110px;min-width:110px;max-width:110px;padding:11px 8px;text-align:left;color:#111827;}.performance-table td.number-col{text-align:right;font-weight:400;font-size:12px;min-width:75px;max-width:90px;padding:11px 8px;font-variant-numeric:tabular-nums;}.performance-table th.number-col{text-align:center;max-width:90px;}.performance-table td.number-col.total-net-col{min-width:80px;max-width:none;font-weight:450;background:#fefce8 !important;}
+.performance-table td:first-child{position:sticky;left:0;background:white !important;font-weight:450;z-index:1;border-right:2px solid #cbd5e1;width:120px;min-width:120px;max-width:120px;padding:11px 8px;text-align:left;color:#111827;}.performance-table td.number-col{text-align:right;font-weight:400;font-size:12px;min-width:75px;max-width:90px;padding:11px 8px;font-variant-numeric:tabular-nums;}.performance-table th.number-col{text-align:center;max-width:90px;}.performance-table td.number-col.total-net-col{min-width:80px;max-width:none;font-weight:450;background:#fefce8 !important;}
 .performance-table tbody tr.month-row td.number-col.total-net-col, .performance-table tbody tr.total-row td.number-col.total-net-col{background:#fef9c3 !important;}.performance-table th.total-net-col{min-width:80px;max-width:none;}.performance-table th.total-col-border, .performance-table td.total-col-border{border-right:1px solid #cbd5e1 !important;}.performance-table td.number-col.net-pnl-percent-col{min-width:60px;max-width:60px;font-weight:450;background:#fefce8 !important;font-size:12px;}.performance-table tbody tr.month-row td.number-col.net-pnl-percent-col, .performance-table tbody tr.total-row td.number-col.net-pnl-percent-col{background:#fef9c3 !important;}
 .performance-table th.net-pnl-percent-col{min-width:60px;max-width:80px;}.performance-table td.number-col.drawdown-col{min-width:90px;max-width:none;background:#fef2f2 !important;}.performance-table tbody tr.month-row td.number-col.drawdown-col{background:#feecec !important;}.performance-table tbody tr.year-row td.number-col.drawdown-col{background:#fee5e5 !important;}.performance-table tbody tr.total-row td.number-col.drawdown-col{background:#fee2e2 !important;}.performance-table th.drawdown-col{min-width:90px;max-width:none;}.performance-table td.number-col.expenses-col{font-weight:450;background:#fef2f2;border-left:1px solid #cbd5e1;}
-.performance-table tbody tr.month-row td.number-col.expenses-col, .performance-table tbody tr.total-row td.number-col.expenses-col{background:#feecec !important;}.performance-table th.expenses-col{min-width:80px;max-width:none;}.performance-table td.positive{color:#059669;}.performance-table td.negative{color:#b96060;}.performance-table tr:hover{background:#fafbfc;}.performance-table tr:hover td:first-child{background:#fafbfc !important;min-width:110px;max-width:110px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row{background:#f9fafb;font-weight:700;border-top:2px solid #d1d5db;transform:translateZ(0);position:relative;z-index:1;}
-.performance-table tbody tr.total-row:hover{background:#f3f4f6;}.performance-table tbody tr.total-row td{border-top:2px solid #d1d5db;padding:14px 8px;font-weight:450;font-size:12px;}.performance-table tbody tr.total-row td:first-child{background:#f9fafb !important;min-width:110px;max-width:110px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row:hover td:first-child{background:#f3f4f6 !important;min-width:110px;max-width:110px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row:hover td.strategy-bg-0, .performance-table tbody tr.total-row:hover td.strategy-bg-1, .performance-table tbody tr.total-row:hover td.strategy-bg-2{background:#ecf7f1;}
+.performance-table tbody tr.month-row td.number-col.expenses-col, .performance-table tbody tr.total-row td.number-col.expenses-col{background:#feecec !important;}.performance-table th.expenses-col{min-width:80px;max-width:none;}.performance-table td.positive{color:#059669;}.performance-table td.negative{color:#b96060;}.performance-table tr:hover{background:#fafbfc;}.performance-table tr:hover td:first-child{background:#fafbfc !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row{background:#f9fafb;font-weight:700;border-top:2px solid #d1d5db;transform:translateZ(0);position:relative;z-index:1;}
+.performance-table tbody tr.total-row:hover{background:#f3f4f6;}.performance-table tbody tr.total-row td{border-top:2px solid #d1d5db;padding:14px 8px;font-weight:450;font-size:12px;}.performance-table tbody tr.total-row td:first-child{background:#f9fafb !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row:hover td:first-child{background:#f3f4f6 !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row:hover td.strategy-bg-0, .performance-table tbody tr.total-row:hover td.strategy-bg-1, .performance-table tbody tr.total-row:hover td.strategy-bg-2{background:#ecf7f1;}
 .performance-table tbody tr.total-row:hover td.strategy-bg-3{background:#fef0f6;}.performance-table tbody tr.total-row:hover td.strategy-bg-4{background:#fff1e1;}.performance-table tbody tr.total-row:hover td.lot-col{width:65px;min-width:65px;max-width:65px;background:#dff0fc !important;}.performance-table tbody tr.total-row:hover td.dpnl-section{background:#fef0f6 !important;}.performance-table tbody tr.total-row:hover td.pnl-section{background:#fff1e1 !important;}.performance-table tbody tr.total-row:hover td.apro-pnl-col{width:85px;min-width:75px;}
 .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-4{background:#ecf7f1;}.performance-table tbody tr.total-row td.apro-pnl-col{width:85px;min-width:75px;}.performance-table tbody tr.month-row{background:#f9fafb;font-weight:450 !important;cursor:pointer;user-select:none;border-left:3px solid transparent;transition:all 0.15s ease;}
-.performance-table tbody tr.month-row:hover{background:#f3f4f6;border-left-color:#3b82f6;}.performance-table tbody tr.month-row td{font-weight:450 !important;font-size:12px !important;}.performance-table tbody tr.month-row td:first-child{background:#f9fafb !important;color:#111827;min-width:110px;max-width:110px;font-weight:450 !important;font-size:12px !important;border-right:2px solid #cbd5e1;padding-left:20px;}.performance-table tbody tr.month-row:hover td:first-child{background:#f3f4f6 !important;min-width:110px;max-width:110px;border-right:2px solid #cbd5e1;padding-left:20px;}
+.performance-table tbody tr.month-row:hover{background:#f3f4f6;border-left-color:#3b82f6;}.performance-table tbody tr.month-row td{font-weight:450 !important;font-size:12px !important;}.performance-table tbody tr.month-row td:first-child{background:#f9fafb !important;color:#111827;min-width:120px;max-width:120px;font-weight:450 !important;font-size:12px !important;border-right:2px solid #cbd5e1;padding-left:20px;}.performance-table tbody tr.month-row:hover td:first-child{background:#f3f4f6 !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;padding-left:20px;}
 .performance-table tbody tr.month-row:hover td.strategy-bg-0, .performance-table tbody tr.month-row:hover td.strategy-bg-1, .performance-table tbody tr.month-row:hover td.strategy-bg-2{background:#e3f3ea;}.performance-table tbody tr.month-row:hover td.strategy-bg-3{background:#fde9f3;}.performance-table tbody tr.month-row:hover td.strategy-bg-4{background:#ffecd6;}.performance-table tbody tr.month-row:hover td.lot-col{width:65px;min-width:65px;max-width:65px;background:#d5ebfa !important;}.performance-table tbody tr.month-row:hover td.dpnl-section{background:#fde9f3 !important;}
 .performance-table tbody tr.month-row:hover td.pnl-section{background:#ffecd6 !important;}.performance-table tbody tr.month-row:hover td.apro-pnl-col{width:85px;min-width:75px;}.performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-4{background:#e3f3ea;}
 .performance-table tbody tr.month-row td.strategy-bg-0, .performance-table tbody tr.month-row td.strategy-bg-1, .performance-table tbody tr.month-row td.strategy-bg-2{background:#f0f9f3;}.performance-table tbody tr.month-row td.strategy-bg-3{background:#fef2f8;}.performance-table tbody tr.month-row td.strategy-bg-4{background:#fff3e8;}.performance-table tbody tr.month-row td.lot-col{background:#e8f4fc !important;}.performance-table tbody tr.month-row td.dpnl-section{background:#fef2f8 !important;}
@@ -34,7 +35,7 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}button.active{back
 .performance-table tbody tr.year-row{background:#f1f3f5 !important;font-weight:650;cursor:pointer;user-select:none;border-left:3px solid transparent;transition:all 0.15s ease;}.performance-table tbody tr.year-row:hover{background:#e5e7eb !important;border-left-color:#3b82f6;}.performance-table tbody tr.year-row td{font-size:12px;font-weight:650;padding:12px 8px;}.performance-table tbody tr.year-row td:first-child{font-weight:700;color:#111827;background:#f1f3f5 !important;}.performance-table tbody tr.year-row:hover td:first-child{background:#e5e7eb !important;}
 .performance-table tbody tr.day-row{display:none;}
 .performance-table tbody tr.day-row[data-year]:not(.expanded){display:none;}
-.performance-table tbody tr.day-row.expanded{display:table-row;}.performance-table tbody tr.day-row td{padding:7px 8px;font-size:12px;}.performance-table tbody tr.day-row td:first-child{padding-left:40px;padding-top:7px;padding-bottom:7px;font-weight:450;color:#6b7280;min-width:110px;max-width:110px;font-size:12px;border-right:2px solid #cbd5e1;background:white !important;}.performance-table tbody tr.day-row td.apro-pnl-col{width:85px;min-width:75px;}.expand-icon{display:inline-block;width:18px;height:18px;margin-right:10px;text-align:center;font-weight:600;color:#6b7280;transition:transform 0.2s ease;font-size:12px;line-height:18px;}
+.performance-table tbody tr.day-row.expanded{display:table-row;}.performance-table tbody tr.day-row td{padding:7px 8px;font-size:12px;}.performance-table tbody tr.day-row td:first-child{padding-left:40px;padding-top:7px;padding-bottom:7px;font-weight:450;color:#6b7280;min-width:120px;max-width:120px;font-size:12px;border-right:2px solid #cbd5e1;background:white !important;}.performance-table tbody tr.day-row td.apro-pnl-col{width:85px;min-width:75px;}.expand-icon{display:inline-block;width:18px;height:18px;margin-right:10px;text-align:center;font-weight:600;color:#6b7280;transition:transform 0.2s ease;font-size:12px;line-height:18px;}
 .expand-icon.expanded{transform:rotate(90deg);}.no-data{text-align:center;color:#cbd5e1;padding:40px;font-size:14px;}.main-content::before{content:'';position:fixed;left:0;top:0;width:32px;height:100vh;background:#f8fafc;z-index:30;pointer-events:none;}.summary-cards{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:stretch;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:100;padding-right:16px;margin-right:-16px;}.summary-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);border:1px solid #e5e7eb;flex:1 1 0;min-width:140px;}.summary-card-title{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
 .summary-card-value{font-size:18px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#b96060;}.summary-card.net-profit-box{background:#f0fdf4;}.summary-card.total-expense-box{background:#fdf2f8;}.summary-card.running-margin-box{background:#fffbeb;}
 
@@ -1954,7 +1955,7 @@ brokerGroups[brokerCode].push(strat);
 });
 const sortedBrokers = Object.keys(brokerGroups).sort();
 let headerRow1 = '<tr class="header-row-1">';
-headerRow1 += '<th rowspan="2">Period</th>';
+headerRow1 += '<th rowspan="2" class="sortable" data-sort-col="period">Period</th>';
 if (aproStrategies.length > 0) {
 headerRow1 += `<th colspan="${aproStrategies.length}" class="number-col apro-boundary">Amibroker PNL</th>`;
 }
@@ -1979,14 +1980,14 @@ sortedBrokers.forEach(brokerCode => {
 const count = brokerGroups[brokerCode].length;
 headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} ${brokerPnlHeaderText}</th>`;
 });
-headerRow1 += '<th class="number-col total-net-col" rowspan="2">AMI PNL</th>';
+headerRow1 += '<th class="number-col total-net-col sortable" rowspan="2" data-sort-col="ami-pnl">AMI PNL</th>';
 const netPnlHeaderText = showPnlTax ? 'NET PNL TAX' : 'NET PNL';
-headerRow1 += `<th class="number-col total-net-col" rowspan="2">${netPnlHeaderText}</th>`;
-headerRow1 += '<th class="number-col net-pnl-percent-col" rowspan="2">NET PNL%</th>';
-headerRow1 += '<th class="number-col expenses-col" rowspan="2">Expenses</th>';
-headerRow1 += '<th class="number-col total-net-col" rowspan="2">TOTAL MARGIN</th>';
+headerRow1 += `<th class="number-col total-net-col sortable" rowspan="2" data-sort-col="net-pnl">${netPnlHeaderText}</th>`;
+headerRow1 += '<th class="number-col net-pnl-percent-col sortable" rowspan="2" data-sort-col="net-pnl-percent">NET PNL%</th>';
+headerRow1 += '<th class="number-col expenses-col sortable" rowspan="2" data-sort-col="expenses">Expenses</th>';
+headerRow1 += '<th class="number-col total-net-col sortable" rowspan="2" data-sort-col="total-margin">TOTAL MARGIN</th>';
 if (showDrawdown) {
-headerRow1 += '<th class="number-col drawdown-col" rowspan="2">DRAWDOWN</th>';
+headerRow1 += '<th class="number-col drawdown-col sortable" rowspan="2" data-sort-col="drawdown">DRAWDOWN</th>';
 }
 headerRow1 += '</tr>';
 let headerRow2 = '<tr class="header-row-2">';
@@ -2094,7 +2095,7 @@ yearTotalMargin = monthExpensesData.totalMargin;
 
 // Add year row if multiple years
 if (hasMultipleYears) {
-bodyHtml += `<tr class="year-row" onclick="toggleYear(event, '${year}')">`;
+bodyHtml += `<tr class="year-row" data-year="${year}" onclick="toggleYear(event, '${year}')">`;
 bodyHtml += `<td><span class="expand-icon" id="year-icon-${year}">▶</span>${year}</td>`;
 
 // Add APRO strategies (always show pnl)
@@ -2586,6 +2587,550 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.userAgent.include
 globalTotalExpenses = totals.totalExpenses;
 // Restore previously expanded months
 restoreExpandState();
+// Add sorting functionality to headers
+addTableSorting();
+}
+
+// Table sorting functionality
+let currentSortColumn = null;
+let currentSortDirection = 'asc';
+
+function addTableSorting() {
+const sortableHeaders = document.querySelectorAll('.performance-table th.sortable');
+sortableHeaders.forEach(header => {
+header.addEventListener('click', () => {
+const column = header.dataset.sortCol;
+sortTable(column);
+});
+});
+}
+
+function sortTable(column) {
+const tbody = document.getElementById('tableBody');
+
+// CRITICAL: Capture expanded state BEFORE getting rows (icons are in the DOM now)
+const expandedYearsSnapshot = new Set();
+const expandedMonthsSnapshot = new Set();
+
+document.querySelectorAll('.expand-icon').forEach(icon => {
+if (icon.classList.contains('expanded')) {
+if (icon.id.startsWith('year-icon-')) {
+const year = icon.id.replace('year-icon-', '');
+expandedYearsSnapshot.add(year);
+} else if (icon.id.startsWith('icon-')) {
+const monthKey = icon.id.replace('icon-', '');
+expandedMonthsSnapshot.add(monthKey);
+}
+}
+});
+
+const allRows = Array.from(tbody.querySelectorAll('tr'));
+const grandTotalRow = tbody.querySelector('tr.total-row');
+
+// Special handling for Period column - reset to original state
+if (column === 'period') {
+// Clear sort indicators
+document.querySelectorAll('.performance-table th.sortable').forEach(th => {
+th.classList.remove('sort-asc', 'sort-desc');
+});
+currentSortColumn = null;
+currentSortDirection = 'asc';
+
+// Restore original chronological order
+const newTbodyContent = [];
+const yearRows = allRows.filter(row => row.classList.contains('year-row'));
+const monthRows = allRows.filter(row => row.classList.contains('month-row'));
+const dayRows = allRows.filter(row => row.classList.contains('day-row'));
+
+// Sort years chronologically
+yearRows.sort((a, b) => {
+const yearA = parseInt(a.dataset.year || '0');
+const yearB = parseInt(b.dataset.year || '0');
+return yearA - yearB;
+});
+
+// Build table in chronological order
+yearRows.forEach(yearRow => {
+yearRow.style.display = ''; // Show year row
+newTbodyContent.push(yearRow);
+const year = yearRow.dataset.year;
+
+// Get months for this year and sort chronologically
+const yearMonths = monthRows.filter(r => r.dataset.year === year).sort((a, b) => {
+const monthKeyA = a.dataset.month;
+const monthKeyB = b.dataset.month;
+const [monthA, yearA] = monthKeyA.split('/');
+const [monthB, yearB] = monthKeyB.split('/');
+return monthA.localeCompare(monthB);
+});
+
+yearMonths.forEach(monthRow => {
+monthRow.style.display = ''; // Show month row
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+
+// Get days for this month and sort chronologically
+const monthDays = dayRows.filter(r => r.dataset.month === monthKey).sort((a, b) => {
+const dateA = a.cells[0].textContent.trim();
+const dateB = b.cells[0].textContent.trim();
+const [dayA, monthA, yearA] = dateA.split('/');
+const [dayB, monthB, yearB] = dateB.split('/');
+return parseInt(dayA) - parseInt(dayB);
+});
+newTbodyContent.push(...monthDays);
+});
+});
+
+// Add standalone months (not part of any year)
+const standaloneMonths = monthRows.filter(r => !r.dataset.year).sort((a, b) => {
+const monthKeyA = a.dataset.month;
+const monthKeyB = b.dataset.month;
+return monthKeyA.localeCompare(monthKeyB);
+});
+
+standaloneMonths.forEach(monthRow => {
+monthRow.style.display = ''; // Show month row
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+const monthDays = dayRows.filter(r => r.dataset.month === monthKey).sort((a, b) => {
+const dateA = a.cells[0].textContent.trim();
+const dateB = b.cells[0].textContent.trim();
+const [dayA, monthA, yearA] = dateA.split('/');
+const [dayB, monthB, yearB] = dateB.split('/');
+return parseInt(dayA) - parseInt(dayB);
+});
+newTbodyContent.push(...monthDays);
+});
+
+// Add Grand Total row at the end
+if (grandTotalRow) {
+newTbodyContent.push(grandTotalRow);
+}
+
+// Clear tbody and reinsert rows
+tbody.innerHTML = '';
+newTbodyContent.forEach(row => tbody.appendChild(row));
+
+// Restore day dates to original format (DD-Mon)
+document.querySelectorAll('.day-row').forEach(dayRow => {
+const firstCell = dayRow.cells[0];
+const dateText = firstCell.textContent.trim();
+// If date is in numeric format (e.g., "01-01-25"), convert back to "01-Jan"
+if (dateText.match(/^\d{2}-\d{2}-\d{2}$/)) {
+const [day, month, year] = dateText.split('-');
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthName = monthNames[parseInt(month) - 1];
+firstCell.textContent = `${day}-${monthName}`;
+}
+});
+
+// Restore icon expanded state after rebuilding
+expandedYearsSnapshot.forEach(year => {
+const icon = document.getElementById(`year-icon-${year}`);
+if (icon && !icon.classList.contains('expanded')) {
+icon.classList.add('expanded');
+}
+});
+
+expandedMonthsSnapshot.forEach(monthKey => {
+const icon = document.getElementById(`icon-${monthKey}`);
+if (icon && !icon.classList.contains('expanded')) {
+icon.classList.add('expanded');
+}
+});
+
+return;
+}
+
+// Regular sorting for other columns
+// Determine sort direction
+if (currentSortColumn === column) {
+currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+} else {
+currentSortColumn = column;
+currentSortDirection = 'asc';
+}
+
+// Update header indicators
+document.querySelectorAll('.performance-table th.sortable').forEach(th => {
+th.classList.remove('sort-asc', 'sort-desc');
+});
+const activeHeader = document.querySelector(`.performance-table th.sortable[data-sort-col="${column}"]`);
+if (activeHeader) {
+activeHeader.classList.add(currentSortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+}
+
+// Get column value function
+const getColumnValue = (row, column) => {
+switch(column) {
+case 'ami-pnl':
+const amiCell = row.querySelector('td.total-net-col:not(.expenses-col):not(.net-pnl-percent-col)');
+return parseFloat(amiCell?.textContent.replace(/,/g, '') || '0');
+case 'net-pnl':
+const cells = row.querySelectorAll('td.total-net-col:not(.expenses-col):not(.net-pnl-percent-col)');
+return parseFloat(cells[1]?.textContent.replace(/,/g, '') || '0');
+case 'net-pnl-percent':
+const percentCell = row.querySelector('td.net-pnl-percent-col');
+return parseFloat(percentCell?.textContent.replace(/%/g, '') || '0');
+case 'expenses':
+const expenseCell = row.querySelector('td.expenses-col');
+return parseFloat(expenseCell?.textContent.replace(/,/g, '') || '0');
+case 'total-margin':
+const marginCells = row.querySelectorAll('td.total-net-col:not(.expenses-col):not(.net-pnl-percent-col)');
+return parseFloat(marginCells[2]?.textContent.replace(/,/g, '') || '0');
+case 'drawdown':
+const drawdownCell = row.querySelector('td.drawdown-col');
+const ddText = drawdownCell?.textContent.replace(/,/g, '').replace(/-/g, '') || '0';
+return parseFloat(ddText);
+default:
+return 0;
+}
+};
+
+// Date sorting function
+const sortByDate = (aValue, bValue) => {
+const yearRegex = /^(\d{4})$/;
+const monthRegex = /^([A-Za-z]{3})-(\d{2,4})$/;
+const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/;
+
+let aSort, bSort;
+if (yearRegex.test(aValue)) {
+aSort = parseInt(aValue);
+} else if (monthRegex.test(aValue)) {
+const [, month, year] = aValue.match(monthRegex);
+const monthNum = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(month);
+const fullYear = year.length === 2 ? (parseInt(year) > 50 ? `19${year}` : `20${year}`) : year;
+aSort = parseInt(fullYear) * 100 + monthNum;
+} else if (dateRegex.test(aValue)) {
+const [, day, month, year] = aValue.match(dateRegex);
+const fullYear = year.length === 2 ? (parseInt(year) > 50 ? `19${year}` : `20${year}`) : year;
+aSort = parseInt(fullYear) * 10000 + parseInt(month) * 100 + parseInt(day);
+} else {
+aSort = 0;
+}
+
+if (yearRegex.test(bValue)) {
+bSort = parseInt(bValue);
+} else if (monthRegex.test(bValue)) {
+const [, month, year] = bValue.match(monthRegex);
+const monthNum = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(month);
+const fullYear = year.length === 2 ? (parseInt(year) > 50 ? `19${year}` : `20${year}`) : year;
+bSort = parseInt(fullYear) * 100 + monthNum;
+} else if (dateRegex.test(bValue)) {
+const [, day, month, year] = bValue.match(dateRegex);
+const fullYear = year.length === 2 ? (parseInt(year) > 50 ? `19${year}` : `20${year}`) : year;
+bSort = parseInt(fullYear) * 10000 + parseInt(month) * 100 + parseInt(day);
+} else {
+bSort = 0;
+}
+
+return currentSortDirection === 'asc' ? aSort - bSort : bSort - aSort;
+};
+
+// Use the captured snapshot
+const expandedYears = expandedYearsSnapshot;
+const expandedMonths = expandedMonthsSnapshot;
+
+const newTbodyContent = [];
+
+// Determine sorting level based on what's expanded
+// Priority: Days (if months expanded) > Months (if years expanded) > Years (nothing expanded)
+
+if (expandedMonths.size > 0) {
+// LEVEL 3: Sort by day rows, show days first then month/year rows after
+const processedYears = new Set();
+const processedMonths = new Set();
+const monthsToAddAfter = [];
+const yearsToAddAfter = [];
+
+// Collect and sort all day rows from expanded months
+const dayRowsToSort = [];
+expandedMonths.forEach(monthKey => {
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+dayRowsToSort.push(...dayRows);
+});
+
+dayRowsToSort.sort((a, b) => {
+const aValue = getColumnValue(a, column);
+const bValue = getColumnValue(b, column);
+return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+});
+
+// First, add all sorted day rows
+dayRowsToSort.forEach(dayRow => {
+const monthKey = dayRow.dataset.month;
+const monthRow = allRows.find(r => r.classList.contains('month-row') && r.dataset.month === monthKey);
+
+// Convert day date to numeric format with year (e.g., "01-Jan" -> "01-01-25")
+const firstCell = dayRow.cells[0];
+const originalDate = firstCell.textContent.trim();
+if (!originalDate.match(/^\d{2}-\d{2}-\d{2}$/)) { // Only convert if not already in numeric format
+const [monthNum, yearPart] = monthKey.split('/');
+const shortYear = yearPart.slice(-2);
+// Extract day from original date (e.g., "01-Jan" -> "01")
+const day = originalDate.split('-')[0];
+// Format as DD-MM-YY
+firstCell.textContent = `${day}-${monthNum}-${shortYear}`;
+}
+
+if (monthRow && !processedMonths.has(monthKey)) {
+// Store month row to add after days
+monthRow.style.display = '';
+monthsToAddAfter.push(monthRow);
+processedMonths.add(monthKey);
+
+// Also store the parent year row if it exists
+const year = monthRow.dataset.year;
+if (year) {
+const yearRow = allRows.find(r => r.classList.contains('year-row') && r.dataset.year === year);
+if (yearRow && !processedYears.has(year)) {
+yearRow.style.display = '';
+yearsToAddAfter.push(yearRow);
+processedYears.add(year);
+}
+}
+}
+newTbodyContent.push(dayRow);
+});
+
+// Then add ALL month rows after days (both expanded and collapsed), sorted by the same column
+// Collect collapsed months from expanded years
+expandedYears.forEach(year => {
+const monthRows = allRows.filter(r => r.classList.contains('month-row') && r.dataset.year === year);
+monthRows.forEach(monthRow => {
+const monthKey = monthRow.dataset.month;
+if (!expandedMonths.has(monthKey) && !processedMonths.has(monthKey)) {
+monthRow.style.display = '';
+monthsToAddAfter.push(monthRow);
+processedMonths.add(monthKey);
+}
+});
+});
+
+// Collect standalone months (not part of any year)
+allRows.forEach(row => {
+if (row.classList.contains('month-row') && !row.dataset.year) {
+const monthKey = row.dataset.month;
+if (!expandedMonths.has(monthKey) && !processedMonths.has(monthKey)) {
+row.style.display = '';
+monthsToAddAfter.push(row);
+processedMonths.add(monthKey);
+}
+}
+});
+
+// Sort ALL months together
+monthsToAddAfter.sort((a, b) => {
+const aValue = getColumnValue(a, column);
+const bValue = getColumnValue(b, column);
+return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+});
+monthsToAddAfter.forEach(monthRow => {
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+// Only add day rows for collapsed months (expanded month days were already added at top)
+if (!expandedMonths.has(monthKey)) {
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+newTbodyContent.push(...dayRows);
+}
+});
+
+// Collect year rows from expanded years (if not already processed)
+expandedYears.forEach(year => {
+const yearRow = allRows.find(r => r.classList.contains('year-row') && r.dataset.year === year);
+if (yearRow && !processedYears.has(year)) {
+yearRow.style.display = '';
+yearsToAddAfter.push(yearRow);
+processedYears.add(year);
+}
+});
+
+// Then add ALL year rows after months, sorted by the same column
+yearsToAddAfter.sort((a, b) => {
+const aValue = getColumnValue(a, column);
+const bValue = getColumnValue(b, column);
+return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+});
+yearsToAddAfter.forEach(yearRow => {
+newTbodyContent.push(yearRow);
+});
+
+// Add collapsed years (not expanded, not processed)
+allRows.forEach(row => {
+if (row.classList.contains('year-row') && !expandedYears.has(row.dataset.year) && !processedYears.has(row.dataset.year)) {
+row.style.display = '';
+newTbodyContent.push(row);
+const year = row.dataset.year;
+const monthRows = allRows.filter(r => r.classList.contains('month-row') && r.dataset.year === year);
+monthRows.forEach(monthRow => {
+monthRow.style.display = '';
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+newTbodyContent.push(...dayRows);
+});
+}
+});
+
+} else if (expandedYears.size > 0) {
+// LEVEL 2: Sort by month rows, show all months first then all year rows at bottom
+const processedYears = new Set();
+const yearRowsToAddAtEnd = [];
+
+// Collect and sort all month rows from expanded years
+const monthRowsToSort = [];
+expandedYears.forEach(year => {
+const monthRows = allRows.filter(r => r.classList.contains('month-row') && r.dataset.year === year);
+monthRowsToSort.push(...monthRows);
+});
+
+monthRowsToSort.sort((a, b) => {
+const aValue = getColumnValue(a, column);
+const bValue = getColumnValue(b, column);
+return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+});
+
+// Add all sorted months and collect year rows for later
+monthRowsToSort.forEach(monthRow => {
+const year = monthRow.dataset.year;
+const yearRow = allRows.find(r => r.classList.contains('year-row') && r.dataset.year === year);
+if (yearRow && !processedYears.has(year)) {
+// Store year row to add at the end
+yearRowsToAddAtEnd.push(yearRow);
+processedYears.add(year);
+}
+monthRow.style.display = '';
+// Keep the expanded class since the year is expanded
+if (!monthRow.classList.contains('expanded')) {
+monthRow.classList.add('expanded');
+}
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+newTbodyContent.push(...dayRows);
+});
+
+// Add collapsed years normally - preserve their month rows with correct expanded state
+allRows.forEach(row => {
+if (row.classList.contains('year-row') && !expandedYears.has(row.dataset.year)) {
+row.style.display = '';
+newTbodyContent.push(row);
+const year = row.dataset.year;
+const monthRows = allRows.filter(r => r.classList.contains('month-row') && r.dataset.year === year);
+monthRows.forEach(monthRow => {
+monthRow.style.display = '';
+// Keep whatever expanded state it had (don't change it)
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+newTbodyContent.push(...dayRows);
+});
+}
+});
+
+// Add standalone months (not part of any year)
+allRows.forEach(row => {
+if (row.classList.contains('month-row') && !row.dataset.year) {
+row.style.display = '';
+newTbodyContent.push(row);
+const monthKey = row.dataset.month;
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+newTbodyContent.push(...dayRows);
+}
+});
+
+// Finally, add all year rows at the very bottom, sorted by column value
+yearRowsToAddAtEnd.sort((a, b) => {
+const aValue = getColumnValue(a, column);
+const bValue = getColumnValue(b, column);
+return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+});
+yearRowsToAddAtEnd.forEach(yearRow => {
+yearRow.style.display = '';
+newTbodyContent.push(yearRow);
+});
+
+} else {
+// LEVEL 1: Sort by year rows only, hide months and days
+const yearRows = allRows.filter(row => row.classList.contains('year-row') && !row.classList.contains('total-row'));
+const monthRows = allRows.filter(row => row.classList.contains('month-row') && !row.classList.contains('total-row'));
+
+// Sort year rows
+yearRows.sort((a, b) => {
+const aValue = getColumnValue(a, column);
+const bValue = getColumnValue(b, column);
+return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+});
+
+// Build the table with only sorted years visible
+yearRows.forEach(yearRow => {
+yearRow.style.display = '';
+newTbodyContent.push(yearRow);
+const year = yearRow.dataset.year;
+
+// Add months for this year - ensure they don't have expanded class since year is collapsed
+const yearMonthRows = monthRows.filter(r => r.dataset.year === year);
+yearMonthRows.forEach(monthRow => {
+monthRow.style.display = '';
+// In Level 1, explicitly remove expanded class so months stay hidden
+monthRow.classList.remove('expanded');
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+newTbodyContent.push(...dayRows);
+});
+});
+
+// Add standalone months (not part of any year)
+const standaloneMonths = monthRows.filter(r => !r.dataset.year);
+standaloneMonths.forEach(monthRow => {
+monthRow.style.display = '';
+newTbodyContent.push(monthRow);
+const monthKey = monthRow.dataset.month;
+const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
+newTbodyContent.push(...dayRows);
+});
+}
+
+// Add Grand Total row at the end
+if (grandTotalRow) {
+newTbodyContent.push(grandTotalRow);
+}
+
+// Clear tbody and reinsert sorted rows
+tbody.innerHTML = '';
+newTbodyContent.forEach(row => tbody.appendChild(row));
+
+// Restore day dates to original format for Level 1 and Level 2 (remove year if present)
+if (expandedMonths.size === 0) {
+// Only restore if NOT in Level 3 (day sorting)
+document.querySelectorAll('.day-row').forEach(dayRow => {
+const firstCell = dayRow.cells[0];
+const dateText = firstCell.textContent.trim();
+// If date is in numeric format (e.g., "01-01-25"), convert back to "01-Jan"
+if (dateText.match(/^\d{2}-\d{2}-\d{2}$/)) {
+const [day, month, year] = dateText.split('-');
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const monthName = monthNames[parseInt(month) - 1];
+firstCell.textContent = `${day}-${monthName}`;
+}
+});
+}
+
+// Restore icon expanded state after rebuilding
+expandedYears.forEach(year => {
+const icon = document.getElementById(`year-icon-${year}`);
+if (icon && !icon.classList.contains('expanded')) {
+icon.classList.add('expanded');
+}
+});
+
+expandedMonths.forEach(monthKey => {
+const icon = document.getElementById(`icon-${monthKey}`);
+if (icon && !icon.classList.contains('expanded')) {
+icon.classList.add('expanded');
+}
+});
 }
 function toggleMonth(month) {
 const dayRows = document.querySelectorAll(`.day-row[data-month="${month}"]`);
@@ -2602,16 +3147,25 @@ const monthRows = document.querySelectorAll(`.month-row[data-year="${year}"]`);
 const dayRows = document.querySelectorAll(`.day-row[data-year="${year}"]`);
 const icon = document.getElementById(`year-icon-${year}`);
 const isExpanded = icon?.classList.contains('expanded');
-monthRows.forEach(row => row.classList.toggle('expanded'));
-dayRows.forEach(row => row.classList.remove('expanded'));
-if (icon) icon.classList.toggle('expanded');
-// Collapse all month icons in this year when collapsing year
+
+// Instead of toggling, set based on the desired state (opposite of current)
 if (isExpanded) {
+// Collapsing - remove expanded class from month rows
+monthRows.forEach(row => row.classList.remove('expanded'));
 monthRows.forEach(row => {
 const monthIcon = row.querySelector('.expand-icon');
 if (monthIcon) monthIcon.classList.remove('expanded');
 });
+} else {
+// Expanding - add expanded class to month rows
+monthRows.forEach(row => {
+row.classList.add('expanded');
+});
 }
+
+dayRows.forEach(row => row.classList.remove('expanded'));
+if (icon) icon.classList.toggle('expanded');
+
 // Save year expand state to localStorage
 saveYearExpandState(year, !isExpanded);
 }
