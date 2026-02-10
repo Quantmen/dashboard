@@ -10,7 +10,7 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}button.active{back
 .performance-table thead tr.header-row-1 th[rowspan="2"]{border-bottom:2px solid #d1d5db;text-align:center;background:#f3f4f6;padding:12px 8px;height:auto;vertical-align:middle;contain:paint;}.performance-table thead tr.header-row-2 th{padding:9px 8px;font-size:9px;position:sticky;top:32px;background:#f3f4f6;z-index:1000;font-weight:600;color:#374151;text-align:center !important;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;line-height:1.2;vertical-align:middle;height:32px;contain:paint;}
 .performance-table thead tr.header-row-1 th:first-child{position:sticky;left:0;z-index:2000;background:#f9fafb !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;padding:12px 8px;vertical-align:middle;text-align:center;}.performance-table tbody{position:relative;z-index:1;}.performance-table th{background:#f3f4f6;padding:12px 8px;text-align:center;font-weight:700;color:#6b7280;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;font-size:10px;letter-spacing:0.5px;min-width:75px;max-width:90px;vertical-align:middle;}
 .performance-table th.strategy-group-end{border-right:1px solid #cbd5e1;}.performance-table td.strategy-group-end{border-right:1px solid #cbd5e1;}.performance-table th.apro-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table td.apro-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table th.broker-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table td.broker-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table th.strategy-bg-0, .performance-table td.strategy-bg-0, .performance-table th.strategy-bg-1, .performance-table td.strategy-bg-1, .performance-table th.strategy-bg-2, .performance-table td.strategy-bg-2{background:#f8fcf9;}
-.performance-table th.sortable{cursor:pointer;user-select:none;position:relative;}.performance-table th.sortable:hover{background:#e5e7eb;}.performance-table th.sortable::after{content:'⇅';position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:#9ca3af;opacity:0;transition:opacity 0.2s;}.performance-table th.sortable:hover::after{opacity:1;}.performance-table th.sortable.sort-asc::after{content:'▲';opacity:1;color:#3b82f6;}.performance-table th.sortable.sort-desc::after{content:'▼';opacity:1;color:#3b82f6;}
+.performance-table th.sortable{cursor:pointer;user-select:none;position:relative;}.performance-table th.sortable:hover{background:#e5e7eb;}.performance-table th.sortable::after{content:'⇅';position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:8px;color:#9ca3af;opacity:0;transition:opacity 0.2s;}.performance-table th.sortable:hover::after{opacity:1;}.performance-table th.sortable.sort-asc::after{content:'▲';opacity:1;color:#3b82f6;}.performance-table th.sortable.sort-desc::after{content:'▼';opacity:1;color:#3b82f6;}.performance-table thead tr.header-row-2 th.sortable{padding-right:14px;}
 .performance-table th.strategy-bg-3, .performance-table td.strategy-bg-3{background:#fefafd;}.performance-table th.strategy-bg-4, .performance-table td.strategy-bg-4{background:#fffaf5;}.performance-table td.lot-col.strategy-bg-0, .performance-table td.lot-col.strategy-bg-1, .performance-table td.lot-col.strategy-bg-2, .performance-table td.lot-col.strategy-bg-3, .performance-table td.lot-col.strategy-bg-4{width:65px;min-width:65px;max-width:65px;background:#eff8fe !important;}.performance-table tr:hover td.strategy-bg-0, .performance-table tr:hover td.strategy-bg-1, .performance-table tr:hover td.strategy-bg-2, .performance-table tr:hover td.strategy-bg-3, .performance-table tr:hover td.strategy-bg-4{background:#fafbfc;}
 .performance-table tr:hover td.lot-col.strategy-bg-0, .performance-table tr:hover td.lot-col.strategy-bg-1, .performance-table tr:hover td.lot-col.strategy-bg-2, .performance-table tr:hover td.lot-col.strategy-bg-3, .performance-table tr:hover td.lot-col.strategy-bg-4{background:#fafbfc;width:65px;min-width:65px;max-width:65px;}.performance-table tr:hover td.apro-pnl-col{background:#fafbfc;width:85px;min-width:75px;}.performance-table tr:hover td.apro-pnl-col.strategy-bg-0, .performance-table tr:hover td.apro-pnl-col.strategy-bg-1, .performance-table tr:hover td.apro-pnl-col.strategy-bg-2, .performance-table tr:hover td.apro-pnl-col.strategy-bg-3, .performance-table tr:hover td.apro-pnl-col.strategy-bg-4{background:#fafbfc;width:85px;min-width:75px;}
 .performance-table th:first-child{position:sticky;left:0;z-index:10;background:#f8fafc !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;vertical-align:middle;text-align:center;}.performance-table th.number-col{text-align:center;max-width:80px;}.performance-table th.apro-pnl-col, .performance-table td.apro-pnl-col{min-width:75px;width:85px;}.performance-table td.apro-pnl-col.strategy-bg-0, .performance-table td.apro-pnl-col.strategy-bg-1, .performance-table td.apro-pnl-col.strategy-bg-2, .performance-table td.apro-pnl-col.strategy-bg-3, .performance-table td.apro-pnl-col.strategy-bg-4{background:#f8fcf9;width:85px;min-width:75px;}
@@ -1995,7 +1995,8 @@ aproStrategies.forEach((strategy, idx) => {
 const displayName = formatStrategyName(strategy), stratIndex = allStrategies.indexOf(strategy);
 const bgClass = `strategy-bg-${stratIndex % 5}`;
 const boundaryClass = idx === aproStrategies.length - 1 ? ' apro-boundary' : '';
-headerRow2 += `<th class="number-col apro-pnl-col ${bgClass}${boundaryClass}">${displayName}</th>`;
+const sortKey = `apro-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+headerRow2 += `<th class="number-col apro-pnl-col sortable ${bgClass}${boundaryClass}" data-sort-col="${sortKey}">${displayName}</th>`;
 });
 if (showLot) {
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
@@ -2003,7 +2004,8 @@ brokerGroups[brokerCode].forEach((strategy, idx) => {
 const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-headerRow2 += `<th class="number-col lot-col ${bgClass}${boundaryClass}">${displayName}</th>`;
+const sortKey = `lot-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+headerRow2 += `<th class="number-col lot-col sortable ${bgClass}${boundaryClass}" data-sort-col="${sortKey}">${displayName}</th>`;
 });
 });
 }
@@ -2012,7 +2014,8 @@ brokerGroups[brokerCode].forEach((strategy, idx) => {
 const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
+const sortKey = `dpnl-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+headerRow2 += `<th class="number-col sortable ${bgClass}${boundaryClass}" data-sort-col="${sortKey}">${displayName}</th>`;
 });
 });
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
@@ -2020,11 +2023,41 @@ brokerGroups[brokerCode].forEach((strategy, idx) => {
 const displayName = formatStrategyName(strategy).replace(/^[A-Z]+\d*\s*/, ''), stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-headerRow2 += `<th class="number-col ${bgClass}${boundaryClass}">${displayName}</th>`;
+const sortKey = `pnl-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+headerRow2 += `<th class="number-col sortable ${bgClass}${boundaryClass}" data-sort-col="${sortKey}">${displayName}</th>`;
 });
 });
 headerRow2 += '</tr>';
 elements.tableHeaders.innerHTML = headerRow1 + headerRow2;
+// Build column index map for sorting - maps data-sort-col to cell index
+let colIdx = 1; // 0 is Period
+const strategyColumnMap = {};
+aproStrategies.forEach(strategy => {
+const sortKey = `apro-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+strategyColumnMap[sortKey] = colIdx++;
+});
+if (showLot) {
+sortedBrokers.forEach(brokerCode => {
+brokerGroups[brokerCode].forEach(strategy => {
+const sortKey = `lot-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+strategyColumnMap[sortKey] = colIdx++;
+});
+});
+}
+sortedBrokers.forEach(brokerCode => {
+brokerGroups[brokerCode].forEach(strategy => {
+const sortKey = `dpnl-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+strategyColumnMap[sortKey] = colIdx++;
+});
+});
+sortedBrokers.forEach(brokerCode => {
+brokerGroups[brokerCode].forEach(strategy => {
+const sortKey = `pnl-${strategy.replace(/[^a-zA-Z0-9]/g, '_')}`;
+strategyColumnMap[sortKey] = colIdx++;
+});
+});
+// Store map globally for sort function access
+window._strategyColumnMap = strategyColumnMap;
 const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
 const [monthA, yearA] = a.split('/');
 const [monthB, yearB] = b.split('/');
@@ -2596,8 +2629,12 @@ let currentSortColumn = null;
 let currentSortDirection = 'asc';
 
 function addTableSorting() {
+// Reset sort state when table is rebuilt (e.g., after date filter change)
+currentSortColumn = null;
+currentSortDirection = 'asc';
 const sortableHeaders = document.querySelectorAll('.performance-table th.sortable');
 sortableHeaders.forEach(header => {
+header.classList.remove('sort-asc', 'sort-desc');
 header.addEventListener('click', () => {
 const column = header.dataset.sortCol;
 sortTable(column);
@@ -2760,31 +2797,64 @@ if (activeHeader) {
 activeHeader.classList.add(currentSortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
 }
 
-// Get column value function
+// Get column value function - returns null for empty cells
 const getColumnValue = (row, column) => {
+// Check if this is a strategy column (apro-, lot-, dpnl-, pnl-)
+const colMap = window._strategyColumnMap || {};
+if (colMap[column] !== undefined) {
+const cellIndex = colMap[column];
+const cell = row.cells[cellIndex];
+if (!cell) return null;
+const text = cell.textContent.replace(/,/g, '').replace(/%/g, '').trim();
+if (text === '' || text === '-') return null;
+return parseFloat(text) || 0;
+}
 switch(column) {
 case 'ami-pnl':
 const amiCell = row.querySelector('td.total-net-col:not(.expenses-col):not(.net-pnl-percent-col)');
-return parseFloat(amiCell?.textContent.replace(/,/g, '') || '0');
+const amiText = amiCell?.textContent.replace(/,/g, '').trim() || '';
+if (amiText === '' || amiText === '-') return null;
+return parseFloat(amiText) || 0;
 case 'net-pnl':
 const cells = row.querySelectorAll('td.total-net-col:not(.expenses-col):not(.net-pnl-percent-col)');
-return parseFloat(cells[1]?.textContent.replace(/,/g, '') || '0');
+const netText = cells[1]?.textContent.replace(/,/g, '').trim() || '';
+if (netText === '' || netText === '-') return null;
+return parseFloat(netText) || 0;
 case 'net-pnl-percent':
 const percentCell = row.querySelector('td.net-pnl-percent-col');
-return parseFloat(percentCell?.textContent.replace(/%/g, '') || '0');
+const pctText = percentCell?.textContent.replace(/%/g, '').trim() || '';
+if (pctText === '' || pctText === '-') return null;
+return parseFloat(pctText) || 0;
 case 'expenses':
 const expenseCell = row.querySelector('td.expenses-col');
-return parseFloat(expenseCell?.textContent.replace(/,/g, '') || '0');
+const expText = expenseCell?.textContent.replace(/,/g, '').trim() || '';
+if (expText === '' || expText === '-') return null;
+return parseFloat(expText) || 0;
 case 'total-margin':
 const marginCells = row.querySelectorAll('td.total-net-col:not(.expenses-col):not(.net-pnl-percent-col)');
-return parseFloat(marginCells[2]?.textContent.replace(/,/g, '') || '0');
+const margText = marginCells[2]?.textContent.replace(/,/g, '').trim() || '';
+if (margText === '' || margText === '-') return null;
+return parseFloat(margText) || 0;
 case 'drawdown':
 const drawdownCell = row.querySelector('td.drawdown-col');
-const ddText = drawdownCell?.textContent.replace(/,/g, '').replace(/-/g, '') || '0';
-return parseFloat(ddText);
+const ddText = drawdownCell?.textContent.replace(/,/g, '').replace(/-/g, '').trim() || '';
+if (ddText === '') return null;
+return parseFloat(ddText) || 0;
 default:
-return 0;
+return null;
 }
+};
+
+// Comparator that always pushes empty (null) values to the end
+const compareColumnValues = (a, b, column) => {
+const aValue = getColumnValue(a, column);
+const bValue = getColumnValue(b, column);
+const aEmpty = aValue === null;
+const bEmpty = bValue === null;
+if (aEmpty && bEmpty) return 0;
+if (aEmpty) return 1;  // a goes to end
+if (bEmpty) return -1; // b goes to end
+return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
 };
 
 // Date sorting function
@@ -2851,9 +2921,7 @@ dayRowsToSort.push(...dayRows);
 });
 
 dayRowsToSort.sort((a, b) => {
-const aValue = getColumnValue(a, column);
-const bValue = getColumnValue(b, column);
-return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+return compareColumnValues(a, b, column);
 });
 
 // First, add all sorted day rows
@@ -2921,9 +2989,7 @@ processedMonths.add(monthKey);
 
 // Sort ALL months together
 monthsToAddAfter.sort((a, b) => {
-const aValue = getColumnValue(a, column);
-const bValue = getColumnValue(b, column);
-return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+return compareColumnValues(a, b, column);
 });
 monthsToAddAfter.forEach(monthRow => {
 newTbodyContent.push(monthRow);
@@ -2947,9 +3013,7 @@ processedYears.add(year);
 
 // Then add ALL year rows after months, sorted by the same column
 yearsToAddAfter.sort((a, b) => {
-const aValue = getColumnValue(a, column);
-const bValue = getColumnValue(b, column);
-return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+return compareColumnValues(a, b, column);
 });
 yearsToAddAfter.forEach(yearRow => {
 newTbodyContent.push(yearRow);
@@ -2985,9 +3049,7 @@ monthRowsToSort.push(...monthRows);
 });
 
 monthRowsToSort.sort((a, b) => {
-const aValue = getColumnValue(a, column);
-const bValue = getColumnValue(b, column);
-return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+return compareColumnValues(a, b, column);
 });
 
 // Add all sorted months and collect year rows for later
@@ -3029,21 +3091,21 @@ newTbodyContent.push(...dayRows);
 });
 
 // Add standalone months (not part of any year)
-allRows.forEach(row => {
-if (row.classList.contains('month-row') && !row.dataset.year) {
+const standaloneMonthsL2 = allRows.filter(row => row.classList.contains('month-row') && !row.dataset.year);
+standaloneMonthsL2.sort((a, b) => {
+return compareColumnValues(a, b, column);
+});
+standaloneMonthsL2.forEach(row => {
 row.style.display = '';
 newTbodyContent.push(row);
 const monthKey = row.dataset.month;
 const dayRows = allRows.filter(r => r.classList.contains('day-row') && r.dataset.month === monthKey);
 newTbodyContent.push(...dayRows);
-}
 });
 
 // Finally, add all year rows at the very bottom, sorted by column value
 yearRowsToAddAtEnd.sort((a, b) => {
-const aValue = getColumnValue(a, column);
-const bValue = getColumnValue(b, column);
-return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+return compareColumnValues(a, b, column);
 });
 yearRowsToAddAtEnd.forEach(yearRow => {
 yearRow.style.display = '';
@@ -3057,9 +3119,7 @@ const monthRows = allRows.filter(row => row.classList.contains('month-row') && !
 
 // Sort year rows
 yearRows.sort((a, b) => {
-const aValue = getColumnValue(a, column);
-const bValue = getColumnValue(b, column);
-return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+return compareColumnValues(a, b, column);
 });
 
 // Build the table with only sorted years visible
@@ -3083,6 +3143,9 @@ newTbodyContent.push(...dayRows);
 
 // Add standalone months (not part of any year)
 const standaloneMonths = monthRows.filter(r => !r.dataset.year);
+standaloneMonths.sort((a, b) => {
+return compareColumnValues(a, b, column);
+});
 standaloneMonths.forEach(monthRow => {
 monthRow.style.display = '';
 newTbodyContent.push(monthRow);
