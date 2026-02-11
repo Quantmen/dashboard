@@ -710,22 +710,6 @@
             }
         }
         
-        function updateLotMarginAndRecalculate() {
-            const inputValue = parseFloat(document.getElementById('lotMarginInput').value);
-            if (inputValue && inputValue > 0) {
-                lotMargin = inputValue;
-                // Update formatted display
-                document.getElementById('lotMarginDisplay').textContent = '(' + formatCurrency(inputValue) + ')';
-                // Save to localStorage
-                saveFilters();
-                // Reprocess data with new lot margin
-                if (originalTradesData && originalTradesData.length > 0) {
-                    applyDateFilterAndProcess();
-                    applyFilters(); // Update the display with new calculations
-                }
-            }
-        }
-        
         // Study Strategy and Lot Size functions
         function handleStudyStrategyChange() {
             const select = document.getElementById('studyStrategySelect');
