@@ -2857,6 +2857,62 @@
                 return;
             }
             
+            // Pre-compute startingCapital once (used by pnl%, drawdown%, margin% charts)
+            // Cache: only recompute if allTrades changed
+            if (!updateChart._cachedTradesLen || updateChart._cachedTradesLen !== allTrades.length || !updateChart._cachedFirstDate || updateChart._cachedFirstDate !== allTrades[0]?.date) {
+                let sc = 0;
+                if (allTrades.length > 0) {
+                    const _brokerCodeCache = {};
+                    const brokerDates = {};
+                    allTrades.forEach(trade => {
+                        if (trade.strategyDetails) {
+                            Object.keys(trade.strategyDetails).forEach(strategyName => {
+                                if (!_brokerCodeCache.hasOwnProperty(strategyName)) {
+                                    const cleanName = strategyName.replace(/\s+/g, '');
+                                    const m = cleanName.match(/^(.+?)PRO/);
+                                    _brokerCodeCache[strategyName] = m ? m[1] : null;
+                                }
+                                const brokerCode = _brokerCodeCache[strategyName];
+                                if (brokerCode) {
+                                    const margin = trade.strategyDetails[strategyName]?.margin || 0;
+                                    if (margin > 0) {
+                                        if (!brokerDates[brokerCode]) brokerDates[brokerCode] = [];
+                                        if (!brokerDates[brokerCode].includes(trade.date)) brokerDates[brokerCode].push(trade.date);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    // Build tradesByDate lookup for fast filtering
+                    const _tradesByDate = {};
+                    allTrades.forEach(t => {
+                        if (!_tradesByDate[t.date]) _tradesByDate[t.date] = [];
+                        _tradesByDate[t.date].push(t);
+                    });
+                    Object.keys(brokerDates).forEach(brokerCode => {
+                        const dates = brokerDates[brokerCode].sort((a, b) => compareDates(a, b));
+                        const brokerFirstDate = dates[0];
+                        const brokerMargins = [];
+                        (_tradesByDate[brokerFirstDate] || []).forEach(trade => {
+                            if (trade.strategyDetails) {
+                                Object.keys(trade.strategyDetails).forEach(strategyName => {
+                                    const bc = _brokerCodeCache[strategyName];
+                                    if (bc === brokerCode) {
+                                        const margin = trade.strategyDetails[strategyName]?.margin || 0;
+                                        if (margin > 0) brokerMargins.push(margin);
+                                    }
+                                });
+                            }
+                        });
+                        if (brokerMargins.length > 0) sc += Math.max(...brokerMargins);
+                    });
+                }
+                updateChart._cachedStartingCapital = sc;
+                updateChart._cachedTradesLen = allTrades.length;
+                updateChart._cachedFirstDate = allTrades[0]?.date;
+            }
+            const cachedStartingCapital = updateChart._cachedStartingCapital;
+            
             // Use filtered trades based on date range selection
             const activeTrades = getActiveTrades();
             
@@ -2917,59 +2973,7 @@
                     // Calculate NET PNL% = (cumPnl / startingCapital) * 100
                     // Use starting capital for all periods (Day/Week/Month)
                     
-                    let startingCapital = 0;
-                    if (allTrades.length > 0) {
-                        const brokerDates = {};
-                        
-                        allTrades.forEach(trade => {
-                            if (trade.strategyDetails) {
-                                Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                    const cleanName = strategyName.replace(/\s+/g, '');
-                                    const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                    
-                                    if (brokerMatch) {
-                                        const brokerCode = brokerMatch[1];
-                                        const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                        
-                                        if (margin > 0) {
-                                            if (!brokerDates[brokerCode]) {
-                                                brokerDates[brokerCode] = [];
-                                            }
-                                            if (!brokerDates[brokerCode].includes(trade.date)) {
-                                                brokerDates[brokerCode].push(trade.date);
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        
-                        Object.keys(brokerDates).forEach(brokerCode => {
-                            const dates = brokerDates[brokerCode].sort((a, b) => compareDates(a, b));
-                            const brokerFirstDate = dates[0];
-                            
-                            const brokerMargins = [];
-                            allTrades.filter(t => t.date === brokerFirstDate).forEach(trade => {
-                                if (trade.strategyDetails) {
-                                    Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                        const cleanName = strategyName.replace(/\s+/g, '');
-                                        const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                        
-                                        if (brokerMatch && brokerMatch[1] === brokerCode) {
-                                            const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                            if (margin > 0) {
-                                                brokerMargins.push(margin);
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                            
-                            if (brokerMargins.length > 0) {
-                                startingCapital += Math.max(...brokerMargins);
-                            }
-                        });
-                    }
+                    const startingCapital = cachedStartingCapital;
                     
                     data = aggregatedData.map(d => {
                         if (startingCapital === 0) return 0;
@@ -3027,59 +3031,7 @@
                     // peakMargin = startingCapital + peak cumPnl at that point
                     
                     // Get starting capital
-                    let startingCapital = 0;
-                    if (allTrades.length > 0) {
-                        const brokerDates = {};
-                        
-                        allTrades.forEach(trade => {
-                            if (trade.strategyDetails) {
-                                Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                    const cleanName = strategyName.replace(/\s+/g, '');
-                                    const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                    
-                                    if (brokerMatch) {
-                                        const brokerCode = brokerMatch[1];
-                                        const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                        
-                                        if (margin > 0) {
-                                            if (!brokerDates[brokerCode]) {
-                                                brokerDates[brokerCode] = [];
-                                            }
-                                            if (!brokerDates[brokerCode].includes(trade.date)) {
-                                                brokerDates[brokerCode].push(trade.date);
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        
-                        Object.keys(brokerDates).forEach(brokerCode => {
-                            const dates = brokerDates[brokerCode].sort((a, b) => compareDates(a, b));
-                            const brokerFirstDate = dates[0];
-                            
-                            const brokerMargins = [];
-                            allTrades.filter(t => t.date === brokerFirstDate).forEach(trade => {
-                                if (trade.strategyDetails) {
-                                    Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                        const cleanName = strategyName.replace(/\s+/g, '');
-                                        const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                        
-                                        if (brokerMatch && brokerMatch[1] === brokerCode) {
-                                            const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                            if (margin > 0) {
-                                                brokerMargins.push(margin);
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                            
-                            if (brokerMargins.length > 0) {
-                                startingCapital += Math.max(...brokerMargins);
-                            }
-                        });
-                    }
+                    const startingCapital = cachedStartingCapital;
                     
                     data = aggregatedData.map(d => {
                         const drawdownValue = (selectedDateRange !== 'all' && previousValue !== 0) ? d.adjustedDrawdown : d.drawdown;
@@ -3203,59 +3155,7 @@
                         });
                     } else if (period === 'week' || period === 'month') {
                         // Calculate starting capital same way as Cumulative P&L
-                        let startingCapital = 0;
-                        if (allTrades.length > 0) {
-                            const brokerDates = {};
-                            
-                            allTrades.forEach(trade => {
-                                if (trade.strategyDetails) {
-                                    Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                        const cleanName = strategyName.replace(/\s+/g, '');
-                                        const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                        
-                                        if (brokerMatch) {
-                                            const brokerCode = brokerMatch[1];
-                                            const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                            
-                                            if (margin > 0) {
-                                                if (!brokerDates[brokerCode]) {
-                                                    brokerDates[brokerCode] = [];
-                                                }
-                                                if (!brokerDates[brokerCode].includes(trade.date)) {
-                                                    brokerDates[brokerCode].push(trade.date);
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                            
-                            Object.keys(brokerDates).forEach(brokerCode => {
-                                const dates = brokerDates[brokerCode].sort((a, b) => compareDates(a, b));
-                                const brokerFirstDate = dates[0];
-                                
-                                const brokerMargins = [];
-                                allTrades.filter(t => t.date === brokerFirstDate).forEach(trade => {
-                                    if (trade.strategyDetails) {
-                                        Object.keys(trade.strategyDetails).forEach(strategyName => {
-                                            const cleanName = strategyName.replace(/\s+/g, '');
-                                            const brokerMatch = cleanName.match(/^(.+?)PRO/);
-                                            
-                                            if (brokerMatch && brokerMatch[1] === brokerCode) {
-                                                const margin = trade.strategyDetails[strategyName]?.margin || 0;
-                                                if (margin > 0) {
-                                                    brokerMargins.push(margin);
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-                                
-                                if (brokerMargins.length > 0) {
-                                    startingCapital += Math.max(...brokerMargins);
-                                }
-                            });
-                        }
+                        const startingCapital = cachedStartingCapital;
                         
                         profitData = aggregatedData.map((d, index) => {
                             const adjustedPeriodProfit = (index === 0) ? (d.periodProfit || 0) - previousValue : (d.periodProfit || 0);
