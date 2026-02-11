@@ -70,48 +70,6 @@
             margin-bottom: 16px;
         }
         
-        .chart-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            letter-spacing: 0.3px;
-        }
-        
-        /* Date Range Selector */
-        .date-range-selector {
-            display: flex;
-            gap: 3px;
-            align-items: center;
-            background: #f1f5f9;
-            padding: 5px 6px;
-            border-radius: 8px;
-        }
-        
-        .date-range-btn {
-            padding: 5px 8px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #64748b;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-        
-        .date-range-btn:hover {
-            color: #475569;
-        }
-        
-        .date-range-btn.active {
-            background: white;
-            color: #1e40af;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
         /* Custom Date Range Picker */
         .custom-date-range {
             display: flex;
@@ -238,6 +196,7 @@
         .date-range-selector {
             display: flex;
             gap: 4px;
+            align-items: center;
             background: #f1f5f9;
             padding: 4px;
             border-radius: 8px;
@@ -467,14 +426,14 @@
                     <label style="font-size: 10px;">From:</label>
                     <input type="date" id="fromDate" onchange="applyCustomDateRange()" style="width: 95px; padding: 5px 4px; font-size: 10px;">
                     <div class="date-nav-arrows">
-                        <button onclick="navigateFromDate('prev')" title="Previous month start">▲</button>
-                        <button onclick="navigateFromDate('next')" title="Next month start">▼</button>
+                        <button onclick="navigateFromDate('next')" title="Next month start">▲</button>
+                        <button onclick="navigateFromDate('prev')" title="Previous month start">▼</button>
                     </div>
                     <label style="font-size: 10px;">To:</label>
                     <input type="date" id="toDate" onchange="applyCustomDateRange()" style="width: 95px; padding: 5px 4px; font-size: 10px;">
                     <div class="date-nav-arrows">
-                        <button onclick="navigateToDate('prev')" title="Previous month end">▲</button>
-                        <button onclick="navigateToDate('next')" title="Next month end">▼</button>
+                        <button onclick="navigateToDate('next')" title="Next month end">▲</button>
+                        <button onclick="navigateToDate('prev')" title="Previous month end">▼</button>
                     </div>
                 </div>
                 <div style="display: flex; gap: 2px;">
@@ -740,6 +699,15 @@
         };
         
         window.waterfallView = 'monthly'; // 'monthly' or 'overall'
+        window.amibrokerView = 'monthly'; // 'monthly' or 'overall'
+        window.lotpnltaxView = 'monthly'; // 'monthly' or 'overall'
+        // Per-chart month navigation state
+        const monthState = {
+            compare: { currentMonthIndex: 0, availableMonths: [] },
+            amibroker: { currentMonthIndex: 0, availableMonths: [] },
+            lotpnltax: { currentMonthIndex: 0, availableMonths: [] }
+        };
+        // Legacy aliases for backward compatibility
         let currentMonthIndex = 0;
         let availableMonths = [];
         let selectedDateRange = 'all'; // 'all', 'ytd', '3', 'custom'
@@ -1030,15 +998,15 @@
                 });
             });
             
-            // Month navigation listeners
+            // Month navigation listeners - Breakdown (compare)
             const prevBtn = document.getElementById('prevMonth');
             const nextBtn = document.getElementById('nextMonth');
             
             if (prevBtn) {
                 prevBtn.addEventListener('click', () => {
-                    if (currentMonthIndex > 0) {
-                        currentMonthIndex--;
-                        updateMonthDisplay();
+                    if (monthState.compare.currentMonthIndex > 0) {
+                        monthState.compare.currentMonthIndex--;
+                        updateMonthDisplay('compare');
                         updateChart('compare');
                     }
                 });
@@ -1046,9 +1014,9 @@
             
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
-                    if (currentMonthIndex < availableMonths.length - 1) {
-                        currentMonthIndex++;
-                        updateMonthDisplay();
+                    if (monthState.compare.currentMonthIndex < monthState.compare.availableMonths.length - 1) {
+                        monthState.compare.currentMonthIndex++;
+                        updateMonthDisplay('compare');
                         updateChart('compare');
                     }
                 });
@@ -1060,9 +1028,9 @@
             
             if (prevBtnAmibroker) {
                 prevBtnAmibroker.addEventListener('click', () => {
-                    if (currentMonthIndex > 0) {
-                        currentMonthIndex--;
-                        updateMonthDisplay();
+                    if (monthState.amibroker.currentMonthIndex > 0) {
+                        monthState.amibroker.currentMonthIndex--;
+                        updateMonthDisplay('amibroker');
                         updateChart('amibroker');
                     }
                 });
@@ -1070,9 +1038,9 @@
             
             if (nextBtnAmibroker) {
                 nextBtnAmibroker.addEventListener('click', () => {
-                    if (currentMonthIndex < availableMonths.length - 1) {
-                        currentMonthIndex++;
-                        updateMonthDisplay();
+                    if (monthState.amibroker.currentMonthIndex < monthState.amibroker.availableMonths.length - 1) {
+                        monthState.amibroker.currentMonthIndex++;
+                        updateMonthDisplay('amibroker');
                         updateChart('amibroker');
                     }
                 });
@@ -1084,9 +1052,9 @@
             
             if (prevBtnLotpnltax) {
                 prevBtnLotpnltax.addEventListener('click', () => {
-                    if (currentMonthIndex > 0) {
-                        currentMonthIndex--;
-                        updateMonthDisplay();
+                    if (monthState.lotpnltax.currentMonthIndex > 0) {
+                        monthState.lotpnltax.currentMonthIndex--;
+                        updateMonthDisplay('lotpnltax');
                         updateChart('lotpnltax');
                     }
                 });
@@ -1094,9 +1062,9 @@
             
             if (nextBtnLotpnltax) {
                 nextBtnLotpnltax.addEventListener('click', () => {
-                    if (currentMonthIndex < availableMonths.length - 1) {
-                        currentMonthIndex++;
-                        updateMonthDisplay();
+                    if (monthState.lotpnltax.currentMonthIndex < monthState.lotpnltax.availableMonths.length - 1) {
+                        monthState.lotpnltax.currentMonthIndex++;
+                        updateMonthDisplay('lotpnltax');
                         updateChart('lotpnltax');
                     }
                 });
@@ -1177,23 +1145,40 @@
             }
         }
         
-        function updateMonthDisplay() {
-            const monthDisplay = document.getElementById('currentMonth');
-            const prevBtn = document.getElementById('prevMonth');
-            const nextBtn = document.getElementById('nextMonth');
+        function updateMonthDisplay(chartType) {
+            // Map chart types to their DOM element suffixes
+            const suffixMap = {
+                compare: '',
+                amibroker: 'Amibroker',
+                lotpnltax: 'Lotpnltax'
+            };
             
-            if (monthDisplay && availableMonths.length > 0) {
-                const currentMonth = availableMonths[currentMonthIndex];
-                monthDisplay.textContent = currentMonth;
-            }
+            // If no chartType specified, update all
+            const chartsToUpdate = chartType ? [chartType] : ['compare', 'amibroker', 'lotpnltax'];
             
-            // Enable/disable navigation buttons
-            if (prevBtn) {
-                prevBtn.disabled = currentMonthIndex <= 0;
-            }
-            if (nextBtn) {
-                nextBtn.disabled = currentMonthIndex >= availableMonths.length - 1;
-            }
+            chartsToUpdate.forEach(ct => {
+                const suffix = suffixMap[ct];
+                const state = monthState[ct];
+                const monthDisplay = document.getElementById('currentMonth' + suffix);
+                const prevBtnEl = document.getElementById('prevMonth' + suffix);
+                const nextBtnEl = document.getElementById('nextMonth' + suffix);
+                
+                if (monthDisplay && state.availableMonths.length > 0) {
+                    const currentMonth = state.availableMonths[state.currentMonthIndex];
+                    monthDisplay.textContent = currentMonth;
+                }
+                
+                if (prevBtnEl) {
+                    prevBtnEl.disabled = state.currentMonthIndex <= 0;
+                }
+                if (nextBtnEl) {
+                    nextBtnEl.disabled = state.currentMonthIndex >= state.availableMonths.length - 1;
+                }
+            });
+            
+            // Keep legacy variables in sync with compare chart for any other code that uses them
+            currentMonthIndex = monthState.compare.currentMonthIndex;
+            availableMonths = monthState.compare.availableMonths;
         }
 
         function handleParentMessage(event) {
@@ -1244,7 +1229,13 @@
                 charts.lotpnltax._cachedTotalValue = null;
             }
             
-            // Reset available months for waterfall chart
+            // Reset available months for all waterfall-type charts
+            monthState.compare.availableMonths = [];
+            monthState.compare.currentMonthIndex = 0;
+            monthState.amibroker.availableMonths = [];
+            monthState.amibroker.currentMonthIndex = 0;
+            monthState.lotpnltax.availableMonths = [];
+            monthState.lotpnltax.currentMonthIndex = 0;
             availableMonths = [];
             currentMonthIndex = 0;
             
@@ -3326,7 +3317,7 @@
                 const isMonthly = !window.waterfallView || window.waterfallView === 'monthly';
                 
                 // Check if we have cached data and only display type changed
-                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.compare).join(',')}`;
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${monthState.compare.currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.compare).join(',')}`;
                 const useCache = charts.compare._cacheKey === cacheKey && 
                                 charts.compare._cachedStrategies && 
                                 charts.compare._cachedTotalValue !== undefined;
@@ -3340,7 +3331,7 @@
                 } else {
                     // Perform full calculation
                     // Get all unique months from trades (only if needed)
-                    if (!isMonthly || availableMonths.length === 0) {
+                    if (!isMonthly || monthState.compare.availableMonths.length === 0) {
                         const monthsSet = new Set();
                         activeTrades.forEach(trade => {
                             if (trade.date) {
@@ -3357,7 +3348,7 @@
                             }
                         });
                         
-                        availableMonths = Array.from(monthsSet).sort((a, b) => {
+                        monthState.compare.availableMonths = Array.from(monthsSet).sort((a, b) => {
                             const [aMonth, aYear] = a.split('-');
                             const [bMonth, bYear] = b.split('-');
                             const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
@@ -3367,21 +3358,21 @@
                             return parseInt(aYear) === parseInt(bYear) ? aMonthIdx - bMonthIdx : parseInt(aYear) - parseInt(bYear);
                         });
                         
-                        if (availableMonths.length > 0 && currentMonthIndex >= availableMonths.length) {
-                            currentMonthIndex = availableMonths.length - 1;
+                        if (monthState.compare.availableMonths.length > 0 && monthState.compare.currentMonthIndex >= monthState.compare.availableMonths.length) {
+                            monthState.compare.currentMonthIndex = monthState.compare.availableMonths.length - 1;
                         }
                     }
                     
                     // Only update month display if not using cache
                     if (!useCache) {
-                        updateMonthDisplay();
+                        updateMonthDisplay('compare');
                     }
                     
                     let strategyContributions = {};
                     
-                    if (isMonthly && availableMonths.length > 0) {
+                    if (isMonthly && monthState.compare.availableMonths.length > 0) {
                     // Monthly view - show contributions for selected month
-                    const selectedMonth = availableMonths[currentMonthIndex];
+                    const selectedMonth = monthState.compare.availableMonths[monthState.compare.currentMonthIndex];
                     const [monthName, year] = selectedMonth.split('-');
                     const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
                                       'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -3621,6 +3612,15 @@
                 charts.compare.options.scales.y.min = undefined;
                 charts.compare.options.scales.y.max = undefined;
                 
+                // Add padding for labels in percentage mode
+                if (displayTypes.compare === 'percentage') {
+                    charts.compare.options.scales.y.grace = undefined;
+                    charts.compare.options.layout = { padding: { top: 20 } };
+                } else {
+                    charts.compare.options.scales.y.grace = '5%';
+                    charts.compare.options.layout = { padding: { top: 0 } };
+                }
+                
                 // Force legend to regenerate
                 charts.compare.options.plugins.legend.labels.generateLabels = charts.compare.options.plugins.legend.labels.generateLabels;
                 
@@ -3633,7 +3633,7 @@
                 const activeTrades = getActiveTrades(); // Use filtered trades based on date range
                 const isMonthly = !window.amibrokerView || window.amibrokerView === 'monthly';
                 
-                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.amibroker).join(',')}`;
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${monthState.amibroker.currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.amibroker).join(',')}`;
                 const useCache = charts.amibroker._cacheKey === cacheKey && 
                                 charts.amibroker._cachedStrategies && 
                                 charts.amibroker._cachedTotalValue !== undefined;
@@ -3647,7 +3647,7 @@
                     const strategyContributions = {};
                     
                     if (isMonthly) {
-                        if (availableMonths.length === 0) {
+                        if (monthState.amibroker.availableMonths.length === 0) {
                             const monthsSet = new Set();
                             activeTrades.forEach(trade => {
                                 if (trade.date) {
@@ -3664,7 +3664,7 @@
                                 }
                             });
                             
-                            availableMonths = Array.from(monthsSet).sort((a, b) => {
+                            monthState.amibroker.availableMonths = Array.from(monthsSet).sort((a, b) => {
                                 const [aMonth, aYear] = a.split('-');
                                 const [bMonth, bYear] = b.split('-');
                                 const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
@@ -3675,8 +3675,8 @@
                             });
                         }
                         
-                        const monthString = availableMonths[currentMonthIndex];
-                        document.getElementById('currentMonthAmibroker').textContent = monthString;
+                        const monthString = monthState.amibroker.availableMonths[monthState.amibroker.currentMonthIndex];
+                        updateMonthDisplay('amibroker');
                         
                         const [monthName, year] = monthString.split('-');
                         const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -3889,6 +3889,15 @@
                 charts.amibroker.options.scales.y.min = undefined;
                 charts.amibroker.options.scales.y.max = undefined;
                 
+                // Add padding for labels in percentage mode
+                if (displayTypes.amibroker === 'percentage') {
+                    charts.amibroker.options.scales.y.grace = undefined;
+                    charts.amibroker.options.layout = { padding: { top: 20 } };
+                } else {
+                    charts.amibroker.options.scales.y.grace = '5%';
+                    charts.amibroker.options.layout = { padding: { top: 0 } };
+                }
+                
                 // Force legend to regenerate
                 charts.amibroker.options.plugins.legend.labels.generateLabels = charts.amibroker.options.plugins.legend.labels.generateLabels;
                 
@@ -3899,7 +3908,7 @@
                 const activeTrades = getActiveTrades(); // Use filtered trades based on date range
                 const isMonthly = !window.lotpnltaxView || window.lotpnltaxView === 'monthly';
                 
-                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.lotpnltax).join(',')}`;
+                const cacheKey = `${isMonthly ? 'monthly' : 'overall'}_${monthState.lotpnltax.currentMonthIndex}_${selectedDateRange}_${Array.from(hiddenStrategies.lotpnltax).join(',')}`;
                 const useCache = charts.lotpnltax._cacheKey === cacheKey && 
                                 charts.lotpnltax._cachedStrategies && 
                                 charts.lotpnltax._cachedTotalValue !== undefined;
@@ -3913,7 +3922,7 @@
                     const strategyData = {}; // Store net, lotSum, lotCount for each strategy
                     
                     if (isMonthly) {
-                        if (availableMonths.length === 0) {
+                        if (monthState.lotpnltax.availableMonths.length === 0) {
                             const monthsSet = new Set();
                             activeTrades.forEach(trade => {
                                 if (trade.date) {
@@ -3930,7 +3939,7 @@
                                 }
                             });
                             
-                            availableMonths = Array.from(monthsSet).sort((a, b) => {
+                            monthState.lotpnltax.availableMonths = Array.from(monthsSet).sort((a, b) => {
                                 const [aMonth, aYear] = a.split('-');
                                 const [bMonth, bYear] = b.split('-');
                                 const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
@@ -3941,8 +3950,8 @@
                             });
                         }
                         
-                        const monthString = availableMonths[currentMonthIndex];
-                        document.getElementById('currentMonthLotpnltax').textContent = monthString;
+                        const monthString = monthState.lotpnltax.availableMonths[monthState.lotpnltax.currentMonthIndex];
+                        updateMonthDisplay('lotpnltax');
                         
                         const [monthName, year] = monthString.split('-');
                         const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -4182,6 +4191,15 @@
                 charts.lotpnltax.options.scales.y.min = undefined;
                 charts.lotpnltax.options.scales.y.max = undefined;
                 
+                // Add padding for labels in percentage mode
+                if (displayTypes.lotpnltax === 'percentage') {
+                    charts.lotpnltax.options.scales.y.grace = undefined;
+                    charts.lotpnltax.options.layout = { padding: { top: 20 } };
+                } else {
+                    charts.lotpnltax.options.scales.y.grace = '5%';
+                    charts.lotpnltax.options.layout = { padding: { top: 0 } };
+                }
+                
                 // Force legend to regenerate
                 charts.lotpnltax.options.plugins.legend.labels.generateLabels = charts.lotpnltax.options.plugins.legend.labels.generateLabels;
                 
@@ -4195,31 +4213,31 @@
             const fromDateInput = document.getElementById('fromDate');
             const toDateInput = document.getElementById('toDate');
             
-            // Add keyboard navigation with swapped arrow behavior for FROM date
+            // Add keyboard navigation for FROM date
             if (fromDateInput) {
                 fromDateInput.addEventListener('keydown', (e) => {
                     if (e.key === 'ArrowUp') {
                         e.preventDefault();
-                        fromDateInput.stepDown();
+                        fromDateInput.stepUp();
                         applyCustomDateRange();
                     } else if (e.key === 'ArrowDown') {
                         e.preventDefault();
-                        fromDateInput.stepUp();
+                        fromDateInput.stepDown();
                         applyCustomDateRange();
                     }
                 });
             }
             
-            // Add keyboard navigation with swapped arrow behavior for TO date
+            // Add keyboard navigation for TO date
             if (toDateInput) {
                 toDateInput.addEventListener('keydown', (e) => {
                     if (e.key === 'ArrowUp') {
                         e.preventDefault();
-                        toDateInput.stepDown();
+                        toDateInput.stepUp();
                         applyCustomDateRange();
                     } else if (e.key === 'ArrowDown') {
                         e.preventDefault();
-                        toDateInput.stepUp();
+                        toDateInput.stepDown();
                         applyCustomDateRange();
                     }
                 });
@@ -4271,9 +4289,19 @@
                 targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
             }
             
+            // Enforce min/max boundaries
+            if (fromDateInput.min) {
+                const minDate = new Date(fromDateInput.min + 'T00:00:00');
+                if (targetDate < minDate) targetDate = minDate;
+            }
+            if (fromDateInput.max) {
+                const maxDate = new Date(fromDateInput.max + 'T00:00:00');
+                if (targetDate > maxDate) targetDate = maxDate;
+            }
+            
             const year = targetDate.getFullYear();
             const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-            const day = '01';
+            const day = String(targetDate.getDate()).padStart(2, '0');
             
             fromDateInput.value = `${year}-${month}-${day}`;
             applyCustomDateRange();
@@ -4297,6 +4325,16 @@
             } else {
                 // Next month's last date
                 targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0);
+            }
+            
+            // Enforce min/max boundaries
+            if (toDateInput.min) {
+                const minDate = new Date(toDateInput.min + 'T00:00:00');
+                if (targetDate < minDate) targetDate = minDate;
+            }
+            if (toDateInput.max) {
+                const maxDate = new Date(toDateInput.max + 'T00:00:00');
+                if (targetDate > maxDate) targetDate = maxDate;
             }
             
             const year = targetDate.getFullYear();
