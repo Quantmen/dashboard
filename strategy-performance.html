@@ -1444,111 +1444,105 @@ monthlyFilteredTotals[monthKey].drawdown = cumulativeData[monthKey][lastDate].dr
 }
 });
 const aproStrategies = Array.from(strategies).filter(s => s.startsWith('A.PRO'));
+// --- PRE-COMPUTE lookups once (instead of inside nested loops) ---
+const brokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
+// Map: aproStrategy -> proNumber, brokerStrategy -> proNumber
+const stratProNumMap = {};
+// Map: aproStrategy -> brokerCode
+const stratBrokerCodeMap = {};
+// Map: proNumber -> [brokerStrategies]
+const proNumToBrokerStrats = {};
+aproStrategies.forEach(s => {
+const m = s.match(/PRO\s*(\d+)/i);
+if (m) stratProNumMap[s] = m[1];
+});
+brokerStrategies.forEach(s => {
+const m = s.match(/PRO\s*(\d+)/i);
+if (m) {
+stratProNumMap[s] = m[1];
+if (!proNumToBrokerStrats[m[1]]) proNumToBrokerStrats[m[1]] = [];
+proNumToBrokerStrats[m[1]].push(s);
+}
+const cleanName = s.replace(/\s+/g, '');
+const bm = cleanName.match(/^(.+?)PRO/);
+if (bm) stratBrokerCodeMap[s] = bm[1];
+});
+// --- Group trades by month and date using EXISTING sortedTrades (no re-scan) ---
+const tradesByMonthMap = {};
+sortedTrades.forEach(trade => {
+const dateParts = trade.date.split('/');
+const monthKey = `${dateParts[1]}/${dateParts[2]}`;
+if (!tradesByMonthMap[monthKey]) tradesByMonthMap[monthKey] = {};
+if (!tradesByMonthMap[monthKey][trade.date]) tradesByMonthMap[monthKey][trade.date] = [];
+tradesByMonthMap[monthKey][trade.date].push(trade);
+});
+// --- Calculate amiPnl per month and per date in a single efficient pass ---
 Object.keys(monthlyTotals).forEach(monthKey => {
 let amiPnlTotal = 0, amiPnlFiltered = 0;
-const monthTrades = trades.filter(trade => {
-const tradeParts = trade.date.split('/');
-const tradeMonthKey = `${tradeParts[1]}/${tradeParts[2]}`;
-return tradeMonthKey === monthKey;
-});
+const monthDates = tradesByMonthMap[monthKey] || {};
+// Step 1: Build dailyMaxLots for this month (single pass over month's trades)
 const dailyMaxLots = {};
-monthTrades.forEach(trade => {
-const dateKey = trade.date;
-if (!dailyMaxLots[dateKey]) {
+const dateKeys = Object.keys(monthDates);
+for (let di = 0; di < dateKeys.length; di++) {
+const dateKey = dateKeys[di];
+const dayTrades = monthDates[dateKey];
 dailyMaxLots[dateKey] = {};
-}
-if (trade.strategyDetails) {
-const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
-allBrokerStrategies.forEach(brokerStrat => {
-let lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
-if (lotSize > 0) {
-if (!dailyMaxLots[dateKey][brokerStrat] || lotSize > dailyMaxLots[dateKey][brokerStrat]) {
-dailyMaxLots[dateKey][brokerStrat] = lotSize;
-}
-}
-});
-}
-});
-monthTrades.forEach(trade => {
-if (trade.strategyDetails) {
-aproStrategies.forEach(aproStrat => {
-const aproPnl = trade.strategyDetails[aproStrat]?.pnl || 0;
-if (aproPnl !== 0) {
-const proMatch = aproStrat.match(/PRO\s*(\d+)/i);
-if (proMatch) {
-const proNum = proMatch[1];
-const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
-allBrokerStrategies.forEach(brokerStrat => {
-const brokerProMatch = brokerStrat.match(/PRO\s*(\d+)/i);
-if (brokerProMatch && brokerProMatch[1] === proNum) {
-let lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
-if (lotSize === 0 && dailyMaxLots[trade.date]?.[brokerStrat]) {
-lotSize = dailyMaxLots[trade.date][brokerStrat];
-}
-const contribution = aproPnl * lotSize;
-amiPnlTotal += contribution;
-if (!hiddenStrategies.has(brokerStrat)) {
-let brokerCode = null;
-const cleanName = brokerStrat.replace(/\s+/g, '');
-const match = cleanName.match(/^(.+?)PRO/);
-if (match) {
-brokerCode = match[1];
-}
-if (!brokerCode || selectedBrokers.size === 0 || selectedBrokers.has(brokerCode)) {
-amiPnlFiltered += contribution;
+for (let ti = 0; ti < dayTrades.length; ti++) {
+const trade = dayTrades[ti];
+if (!trade.strategyDetails) continue;
+for (let bi = 0; bi < brokerStrategies.length; bi++) {
+const bs = brokerStrategies[bi];
+const lotSize = trade.strategyDetails[bs]?.lot || 0;
+if (lotSize > 0 && (!dailyMaxLots[dateKey][bs] || lotSize > dailyMaxLots[dateKey][bs])) {
+dailyMaxLots[dateKey][bs] = lotSize;
 }
 }
 }
-});
 }
-}
-});
-}
-});
-monthlyTotals[monthKey].amiPnl = amiPnlTotal;
-monthlyFilteredTotals[monthKey].amiPnl = amiPnlFiltered;
-Object.keys(dailyData[monthKey] || {}).forEach(dateKey => {
+// Step 2: Calculate monthly + daily amiPnl in one pass
+for (let di = 0; di < dateKeys.length; di++) {
+const dateKey = dateKeys[di];
+const dayTrades = monthDates[dateKey];
 let dailyAmiPnl = 0, dailyAmiPnlFiltered = 0;
-const dayTrades = monthTrades.filter(t => t.date === dateKey);
-dayTrades.forEach(trade => {
-if (trade.strategyDetails) {
-aproStrategies.forEach(aproStrat => {
+for (let ti = 0; ti < dayTrades.length; ti++) {
+const trade = dayTrades[ti];
+if (!trade.strategyDetails) continue;
+for (let ai = 0; ai < aproStrategies.length; ai++) {
+const aproStrat = aproStrategies[ai];
 const aproPnl = trade.strategyDetails[aproStrat]?.pnl || 0;
-if (aproPnl !== 0) {
-const proMatch = aproStrat.match(/PRO\s*(\d+)/i);
-if (proMatch) {
-const proNum = proMatch[1];
-const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
-allBrokerStrategies.forEach(brokerStrat => {
-const brokerProMatch = brokerStrat.match(/PRO\s*(\d+)/i);
-if (brokerProMatch && brokerProMatch[1] === proNum) {
+if (aproPnl === 0) continue;
+const proNum = stratProNumMap[aproStrat];
+if (!proNum) continue;
+const matchingBrokerStrats = proNumToBrokerStrats[proNum];
+if (!matchingBrokerStrats) continue;
+for (let bi = 0; bi < matchingBrokerStrats.length; bi++) {
+const brokerStrat = matchingBrokerStrats[bi];
 let lotSize = trade.strategyDetails[brokerStrat]?.lot || 0;
 if (lotSize === 0 && dailyMaxLots[dateKey]?.[brokerStrat]) {
 lotSize = dailyMaxLots[dateKey][brokerStrat];
 }
 const contribution = aproPnl * lotSize;
+amiPnlTotal += contribution;
 dailyAmiPnl += contribution;
 if (!hiddenStrategies.has(brokerStrat)) {
-let brokerCode = null;
-const cleanName = brokerStrat.replace(/\s+/g, '');
-const match = cleanName.match(/^(.+?)PRO/);
-if (match) {
-brokerCode = match[1];
-}
+const brokerCode = stratBrokerCodeMap[brokerStrat];
 if (!brokerCode || selectedBrokers.size === 0 || selectedBrokers.has(brokerCode)) {
+amiPnlFiltered += contribution;
 dailyAmiPnlFiltered += contribution;
 }
 }
 }
-});
 }
 }
-});
-}
-});
+if (dailyTotals[monthKey] && dailyTotals[monthKey][dateKey]) {
 dailyTotals[monthKey][dateKey].amiPnl = dailyAmiPnl;
+}
+if (dailyFilteredTotals[monthKey] && dailyFilteredTotals[monthKey][dateKey]) {
 dailyFilteredTotals[monthKey][dateKey].amiPnl = dailyAmiPnlFiltered;
-});
+}
+}
+monthlyTotals[monthKey].amiPnl = amiPnlTotal;
+monthlyFilteredTotals[monthKey].amiPnl = amiPnlFiltered;
 });
 allStrategies = Array.from(strategies).sort((a, b) => {
 const aIsAPro = a.startsWith('A.PRO');
@@ -1662,21 +1656,19 @@ if (sortedDatesInMonth.length > 0) {
 const firstDate = sortedDatesInMonth[0];
 const firstDateTrades = tradesByDate[firstDate];
 const firstDateBrokerMargins = {};
-const allBrokerStrategies = Array.from(strategies).filter(s => !s.startsWith('A.PRO'));
 firstDateTrades.forEach(trade => {
 if (trade.strategyDetails) {
-allBrokerStrategies.forEach(brokerStrat => {
+for (let bi = 0; bi < brokerStrategies.length; bi++) {
+const brokerStrat = brokerStrategies[bi];
 const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
-const cleanName = brokerStrat.replace(/\s+/g, '');
-const brokerMatch = cleanName.match(/^(.+?)PRO/);
-if (brokerMatch && margin > 0) {
-const brokerCode = brokerMatch[1];
+const brokerCode = stratBrokerCodeMap[brokerStrat];
+if (brokerCode && margin > 0) {
 if (!firstDateBrokerMargins[brokerCode]) {
 firstDateBrokerMargins[brokerCode] = {};
 }
 firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
 }
-});
+}
 }
 });
 Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
@@ -1807,6 +1799,14 @@ return result;
 function calculateDailyTotalMargins(sortedTrades, allStrategiesParam) {
 const result = {};
 const tradesByDate = {};
+// Pre-compute broker codes for all strategies once
+const _brokerCodeCache = {};
+allStrategiesParam.forEach(s => {
+if (s.startsWith('A.PRO')) { _brokerCodeCache[s] = null; return; }
+const cleanName = s.replace(/\s+/g, '');
+const m = cleanName.match(/^(.+?)PRO/);
+_brokerCodeCache[s] = m ? m[1] : null;
+});
 sortedTrades.forEach(trade => {
 const dateKey = trade.date;
 if (!tradesByDate[dateKey]) {
@@ -1827,11 +1827,8 @@ brokerPnlTaxByDate[tradeDate] = {};
 }
 if (trade && trade.strategyPnlTax) {
 Object.entries(trade.strategyPnlTax).forEach(([stratName, pnlTax]) => {
-if (!stratName.startsWith('A.PRO')) {
-const cleanName = stratName.replace(/\s+/g, '');
-const brokerMatch = cleanName.match(/^(.+?)PRO/);
-if (brokerMatch) {
-const brokerCode = brokerMatch[1];
+const brokerCode = _brokerCodeCache[stratName];
+if (brokerCode) {
 if (!brokerPnlTaxByDate[tradeDate][brokerCode]) {
 brokerPnlTaxByDate[tradeDate][brokerCode] = {};
 }
@@ -1839,7 +1836,6 @@ if (!brokerPnlTaxByDate[tradeDate][brokerCode][stratName]) {
 brokerPnlTaxByDate[tradeDate][brokerCode][stratName] = 0;
 }
 brokerPnlTaxByDate[tradeDate][brokerCode][stratName] += pnlTax;
-}
 }
 });
 }
@@ -1852,17 +1848,14 @@ const dayBrokerMargins = {};
 dayTrades.forEach(trade => {
 if (trade.strategyDetails) {
 Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
-if (!stratName.startsWith('A.PRO')) {
-const margin = details.margin || 0, cleanName = stratName.replace(/\s+/g, '');
-const brokerMatch = cleanName.match(/^(.+?)PRO/);
-if (brokerMatch) {
-const brokerCode = brokerMatch[1];
+const brokerCode = _brokerCodeCache[stratName];
+if (brokerCode) {
+const margin = details.margin || 0;
 if (!dayBrokerMargins[brokerCode]) {
 dayBrokerMargins[brokerCode] = {};
 }
 if (!dayBrokerMargins[brokerCode][stratName] || margin > dayBrokerMargins[brokerCode][stratName]) {
 dayBrokerMargins[brokerCode][stratName] = margin;
-}
 }
 }
 });
@@ -3369,10 +3362,9 @@ const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
 firstDateTrades.forEach(trade => {
 if (trade.strategyDetails) {
 allBrokerStrategies.forEach(brokerStrat => {
-const margin = trade.strategyDetails[brokerStrat]?.margin || 0, cleanName = brokerStrat.replace(/\s+/g, '');
-const brokerMatch = cleanName.match(/^(.+?)PRO/);
-if (brokerMatch && margin > 0) {
-const brokerCode = brokerMatch[1];
+const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
+const brokerCode = extractBrokerCode(brokerStrat);
+if (brokerCode && margin > 0) {
 if (!firstDateBrokerMargins[brokerCode]) {
 firstDateBrokerMargins[brokerCode] = {};
 }
