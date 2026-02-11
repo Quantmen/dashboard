@@ -625,6 +625,7 @@
             
             for (let i = 0; i < len; i++) {
                 const trade = allTrades[i];
+                if (!trade.strategyPnlTax) continue;
                 const entries = Object.entries(trade.strategyPnlTax);
                 for (let j = 0; j < entries.length; j++) {
                     const [strategyName, pnl] = entries[j];
@@ -685,7 +686,7 @@
             }
             
             const totalPnl = Object.values(allBrokerStrategyPnls).reduce((sum, data) => sum + data.pnl, 0);
-            elements.profitLoss.textContent = `₹${Math.abs(totalPnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            elements.profitLoss.textContent = `₹${totalPnl >= 0 ? '' : '-'}${Math.abs(totalPnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
             elements.profitLoss.className = `card-value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
             
             const brokerTotals = {};
@@ -892,6 +893,7 @@
             const len = todayTrades.length;
             for (let i = 0; i < len; i++) {
                 const trade = todayTrades[i];
+                if (!trade.strategyDetails) continue;
                 const keys = Object.keys(trade.strategyDetails);
                 for (let j = 0; j < keys.length; j++) {
                     const strategy = keys[j];
@@ -942,45 +944,104 @@
                 .filter(trade => {
                     const details = trade.strategyDetails[selectedStrategy];
                     return details && (details.buy !== 0 || details.sell !== 0 || details.qty !== 0);
-                })
-                .sort((a, b) => (a.symbol || '').toString().toUpperCase().localeCompare((b.symbol || '').toString().toUpperCase()));
+                });
             
-            for (let i = 0; i < filteredTrades.length; i++) {
-                const trade = filteredTrades[i];
-                const details = trade.strategyDetails[selectedStrategy];
-                const pnl = trade.strategyPnls[selectedStrategy] || 0;
-                const lotPnl = details.lot > 0 ? pnl / details.lot : 0;
-                
-                // Determine BR.Entry Price and BR.Exit Price based on trade.trade field
-                let brEntryPrice = '-';
-                let brExitPrice = '-';
-                
-                if (trade.trade) {
-                    const tradeType = trade.trade.toString().toUpperCase();
-                    if (tradeType === 'SHORT') {
-                        // Short trade: Entry = Sell, Exit = Buy
-                        brEntryPrice = details.sell > 0 ? details.sell.toFixed(2) : '-';
-                        brExitPrice = details.buy > 0 ? details.buy.toFixed(2) : '-';
-                    } else if (tradeType === 'LONG') {
-                        // Long trade: Entry = Buy, Exit = Sell
-                        brEntryPrice = details.buy > 0 ? details.buy.toFixed(2) : '-';
-                        brExitPrice = details.sell > 0 ? details.sell.toFixed(2) : '-';
+            // Find corresponding strategy trades (PRO number) to include missing symbols
+            // Extract PRO number from selected broker strategy (e.g., B2PRO 8 -> PRO 8, ACAPRO 4 -> PRO 4)
+            const proMatch = selectedStrategy.match(/PRO\s*(\d+)/i);
+            const proNumber = proMatch ? proMatch[1] : null;
+            let correspondingStrategy = null;
+            
+            if (proNumber) {
+                // Find matching strategy name in trade.strategy field (e.g., "PRO 8", "PRO 4")
+                for (let i = 0; i < todayTrades.length; i++) {
+                    const tradeStrat = todayTrades[i].strategy;
+                    if (tradeStrat) {
+                        const stratProMatch = tradeStrat.match(/PRO\s*(\d+)/i);
+                        if (stratProMatch && stratProMatch[1] === proNumber) {
+                            correspondingStrategy = tradeStrat;
+                            break;
+                        }
                     }
                 }
+            }
+            
+            // Get all strategy-level trades for this PRO number
+            const strategyTrades = correspondingStrategy 
+                ? todayTrades.filter(trade => trade.strategy === correspondingStrategy)
+                : [];
+            
+            // Build a set of sno values already in broker filtered trades
+            const brokerSnoSet = new Set();
+            for (let i = 0; i < filteredTrades.length; i++) {
+                brokerSnoSet.add(filteredTrades[i].sno);
+            }
+            
+            // Find missing trades (in strategy but not in broker)
+            const missingTrades = strategyTrades.filter(trade => !brokerSnoSet.has(trade.sno));
+            
+            // Combine and sort by sno
+            const allRows = [];
+            for (let i = 0; i < filteredTrades.length; i++) {
+                allRows.push({ trade: filteredTrades[i], hasBrokerData: true });
+            }
+            for (let i = 0; i < missingTrades.length; i++) {
+                allRows.push({ trade: missingTrades[i], hasBrokerData: false });
+            }
+            allRows.sort((a, b) => (a.trade.sno || 0) - (b.trade.sno || 0));
+            
+            for (let i = 0; i < allRows.length; i++) {
+                const { trade, hasBrokerData } = allRows[i];
                 
-                htmlParts.push(`<tr>
-                    <td>${trade.sno}</td>
-                    <td>${formatDateForTable(trade.date)}</td>
-                    <td>${trade.symbol}</td>
-                    <td>${details.qty > 0 ? details.qty : '-'}</td>
-                    <td style="text-align: right;">${brEntryPrice}</td>
-                    <td style="text-align: right;">${brExitPrice}</td>
-                    <td class="profit-cell ${pnl >= 0 ? 'positive' : 'negative'}">${pnl !== 0 ? `₹${pnl >= 0 ? '' : '-'}${Math.abs(pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
-                    <td class="profit-cell ${details.unpnl >= 0 ? 'positive' : 'negative'}">${details.unpnl !== 0 ? `${details.unpnl >= 0 ? '' : '-'}${Math.abs(details.unpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
-                    <td style="text-align: right;">${details.lot > 0 ? details.lot : '-'}</td>
-                    <td class="profit-cell ${lotPnl >= 0 ? 'positive' : 'negative'}">${details.lot > 0 && pnl !== 0 ? `₹${lotPnl >= 0 ? '' : '-'}${Math.abs(lotPnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
-                    <td class="profit-cell ${details.dpnl >= 0 ? 'positive' : 'negative'}">${details.dpnl !== 0 ? `₹${details.dpnl >= 0 ? '' : '-'}${Math.abs(details.dpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
-                </tr>`);
+                if (hasBrokerData) {
+                    const details = trade.strategyDetails[selectedStrategy];
+                    const pnl = trade.strategyPnls[selectedStrategy] || 0;
+                    const lotPnl = details.lot > 0 ? pnl / details.lot : 0;
+                    
+                    // Determine BR.Entry Price and BR.Exit Price based on trade.trade field
+                    let brEntryPrice = '-';
+                    let brExitPrice = '-';
+                    
+                    if (trade.trade) {
+                        const tradeType = trade.trade.toString().toUpperCase();
+                        if (tradeType === 'SHORT') {
+                            brEntryPrice = details.sell > 0 ? details.sell.toFixed(2) : '-';
+                            brExitPrice = details.buy > 0 ? details.buy.toFixed(2) : '-';
+                        } else if (tradeType === 'LONG') {
+                            brEntryPrice = details.buy > 0 ? details.buy.toFixed(2) : '-';
+                            brExitPrice = details.sell > 0 ? details.sell.toFixed(2) : '-';
+                        }
+                    }
+                    
+                    htmlParts.push(`<tr>
+                        <td>${trade.sno}</td>
+                        <td>${formatDateForTable(trade.date)}</td>
+                        <td>${trade.symbol}</td>
+                        <td>${details.qty > 0 ? details.qty : '-'}</td>
+                        <td style="text-align: right;">${brEntryPrice}</td>
+                        <td style="text-align: right;">${brExitPrice}</td>
+                        <td class="profit-cell ${pnl >= 0 ? 'positive' : 'negative'}">${pnl !== 0 ? `₹${pnl >= 0 ? '' : '-'}${Math.abs(pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
+                        <td class="profit-cell ${details.unpnl >= 0 ? 'positive' : 'negative'}">${details.unpnl !== 0 ? `${details.unpnl >= 0 ? '' : '-'}${Math.abs(details.unpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
+                        <td style="text-align: right;">${details.lot > 0 ? details.lot : '-'}</td>
+                        <td class="profit-cell ${lotPnl >= 0 ? 'positive' : 'negative'}">${details.lot > 0 && pnl !== 0 ? `₹${lotPnl >= 0 ? '' : '-'}${Math.abs(lotPnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
+                        <td class="profit-cell ${details.dpnl >= 0 ? 'positive' : 'negative'}">${details.dpnl !== 0 ? `₹${details.dpnl >= 0 ? '' : '-'}${Math.abs(details.dpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
+                    </tr>`);
+                } else {
+                    // Placeholder row for missing broker data - show symbol and dashes
+                    htmlParts.push(`<tr style="opacity: 0.5;">
+                        <td>${trade.sno || '-'}</td>
+                        <td>${formatDateForTable(trade.date)}</td>
+                        <td>${trade.symbol || '-'}</td>
+                        <td>-</td>
+                        <td style="text-align: right;">-</td>
+                        <td style="text-align: right;">-</td>
+                        <td style="text-align: right;">-</td>
+                        <td style="text-align: right;">-</td>
+                        <td style="text-align: right;">-</td>
+                        <td style="text-align: right;">-</td>
+                        <td style="text-align: right;">-</td>
+                    </tr>`);
+                }
             }
             
             htmlParts.push('</tbody></table>');
@@ -1035,7 +1096,7 @@
             
             const filteredTrades = todayTrades
                 .filter(trade => trade.strategy === selectedRecentStrategy)
-                .sort((a, b) => (a.symbol || '').toString().toUpperCase().localeCompare((b.symbol || '').toString().toUpperCase()));
+                .sort((a, b) => (a.sno || 0) - (b.sno || 0));
             
             if (filteredTrades.length === 0) {
                 htmlParts.push('<tr><td colspan="11" style="text-align: center; padding: 20px; color: #cbd5e1;">No trades for this strategy</td></tr>');
@@ -1043,7 +1104,9 @@
                 for (let i = 0; i < filteredTrades.length; i++) {
                     const trade = filteredTrades[i];
                     const pnl = trade.profit || 0;
-                    htmlParts.push(`<tr>
+                    const hasTradeData = pnl !== 0 || trade.trade || trade.a_entime || trade.a_extime || (trade.qty && trade.qty > 0);
+                    const rowStyle = hasTradeData ? '' : ' style="opacity: 0.5;"';
+                    htmlParts.push(`<tr${rowStyle}>
                         <td>${trade.sno || i + 1}</td>
                         <td>${formatDateForTable(trade.date)}</td>
                         <td>${trade.trade ? trade.trade.toString().toUpperCase() : '-'}</td>
