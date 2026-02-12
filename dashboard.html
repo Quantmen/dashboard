@@ -247,6 +247,27 @@
             font-size: 11px; letter-spacing: 0.01em;
             letter-spacing: 0.5px;
             z-index: 10;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .orders-table th:hover {
+            background: #eef2f7;
+            color: #1e40af;
+        }
+        .orders-table th .sort-arrow {
+            display: inline-block;
+            margin-left: 3px;
+            font-size: 10px;
+            color: #94a3b8;
+            transition: color 0.15s ease;
+        }
+        .orders-table th.sort-active .sort-arrow {
+            color: #1e40af;
+        }
+        .orders-table th.sort-active {
+            color: #1e40af;
+            background: #eef2f7;
         }
         .orders-table td {
             padding: 12px 6px;
@@ -439,6 +460,100 @@
         let selectedStrategy = null;
         let selectedRecentStrategy = null;
         let brokerCodeMap = {};
+        
+        // Sort state per table: { colIndex, direction: 'asc'|'desc' }
+        const sortState = { brokerOrder: null, strategyOrder: null };
+        
+        function attachTableSort(table, stateKey) {
+            if (!table) return;
+            const headers = table.querySelectorAll('th');
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            
+            // Add sort arrows to all headers
+            headers.forEach((th, colIdx) => {
+                const state = sortState[stateKey];
+                let arrow = ' ↕';
+                if (state && state.colIndex === colIdx) {
+                    arrow = state.direction === 'asc' ? ' ↑' : ' ↓';
+                    th.classList.add('sort-active');
+                }
+                const span = document.createElement('span');
+                span.className = 'sort-arrow';
+                span.textContent = arrow;
+                th.appendChild(span);
+                
+                th.addEventListener('click', () => {
+                    const current = sortState[stateKey];
+                    let dir = 'asc';
+                    if (current && current.colIndex === colIdx) {
+                        dir = current.direction === 'asc' ? 'desc' : 'asc';
+                    }
+                    sortState[stateKey] = { colIndex: colIdx, direction: dir };
+                    sortTableRows(table, colIdx, dir, stateKey);
+                });
+            });
+        }
+        
+        function sortTableRows(table, colIdx, direction, stateKey) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                const cellA = a.children[colIdx];
+                const cellB = b.children[colIdx];
+                if (!cellA || !cellB) return 0;
+                
+                let valA = cellA.textContent.trim();
+                let valB = cellB.textContent.trim();
+                
+                // Parse numeric values (strip ₹, commas, dashes)
+                const numA = parseTableValue(valA);
+                const numB = parseTableValue(valB);
+                
+                let result;
+                if (numA !== null && numB !== null) {
+                    result = numA - numB;
+                } else if (numA !== null) {
+                    result = -1; // numbers before dashes
+                } else if (numB !== null) {
+                    result = 1;
+                } else {
+                    result = valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
+                }
+                
+                return direction === 'asc' ? result : -result;
+            });
+            
+            // Re-append sorted rows
+            for (let i = 0; i < rows.length; i++) {
+                tbody.appendChild(rows[i]);
+            }
+            
+            // Update header arrows
+            const headers = table.querySelectorAll('th');
+            headers.forEach((th, idx) => {
+                th.classList.remove('sort-active');
+                const arrow = th.querySelector('.sort-arrow');
+                if (arrow) {
+                    if (idx === colIdx) {
+                        arrow.textContent = direction === 'asc' ? ' ↑' : ' ↓';
+                        th.classList.add('sort-active');
+                    } else {
+                        arrow.textContent = ' ↕';
+                    }
+                }
+            });
+        }
+        
+        function parseTableValue(val) {
+            if (!val || val === '-' || val === '') return null;
+            // Remove ₹, commas, whitespace
+            const cleaned = val.replace(/[₹,\s]/g, '');
+            if (cleaned === '' || cleaned === '-') return null;
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? null : num;
+        }
         
         // Extract broker code from strategy name
         function extractBrokerCode(strategyName) {
@@ -1046,6 +1161,7 @@
             
             htmlParts.push('</tbody></table>');
             elements.ordersSummary.innerHTML = htmlParts.join('');
+            attachTableSort(elements.ordersSummary.querySelector('.orders-table'), 'brokerOrder');
         }
         
         function selectStrategy(strategy) {
@@ -1124,6 +1240,7 @@
             
             htmlParts.push('</tbody></table>');
             elements.recentOrders.innerHTML = htmlParts.join('');
+            attachTableSort(elements.recentOrders.querySelector('.orders-table'), 'strategyOrder');
         }
         
         function selectRecentStrategy(strategy) {
