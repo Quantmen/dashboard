@@ -1673,8 +1673,8 @@
             container.innerHTML = allStrategyNames.map(s => {
                 // Format strategy name with space
                 let displayName = s;
-                // Handle B1, B2 patterns: B1PRO 1 -> B1 PRO 1
-                const b1b2Match = s.match(/^(B[12])(PRO\s*\d+)$/i);
+                // Handle B1, B2, B3, ... patterns: B1PRO 1 -> B1 PRO 1
+                const b1b2Match = s.match(/^(B\d+)(PRO\s*\d+)$/i);
                 if (b1b2Match) {
                     displayName = b1b2Match[1] + ' ' + b1b2Match[2];
                 } else {
@@ -2054,8 +2054,8 @@
                 return displayNames[name];
             }
             
-            // For strategy names with B1, B2 broker codes (e.g., B1PRO 1 -> PRO 1)
-            const b1b2Match = name.match(/^B[12](PRO\s*\d+)$/i);
+            // For strategy names with B1, B2, B3, ... broker codes (e.g., B1PRO 1 -> PRO 1)
+            const b1b2Match = name.match(/^B\d+(PRO\s*\d+)$/i);
             if (b1b2Match) {
                 return b1b2Match[1]; // Return just "PRO X" part
             }
