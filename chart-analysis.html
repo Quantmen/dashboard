@@ -1230,14 +1230,15 @@
             }
             
             // Reset available months for all waterfall-type charts
+            // Use 9999 as sentinel so charts default to latest month when re-populated
             monthState.compare.availableMonths = [];
-            monthState.compare.currentMonthIndex = 0;
+            monthState.compare.currentMonthIndex = 9999;
             monthState.amibroker.availableMonths = [];
-            monthState.amibroker.currentMonthIndex = 0;
+            monthState.amibroker.currentMonthIndex = 9999;
             monthState.lotpnltax.availableMonths = [];
-            monthState.lotpnltax.currentMonthIndex = 0;
+            monthState.lotpnltax.currentMonthIndex = 9999;
             availableMonths = [];
-            currentMonthIndex = 0;
+            currentMonthIndex = 9999;
             
             // Update all charts
             updateAllCharts();
@@ -3575,6 +3576,10 @@
                             });
                         }
                         
+                        // Clamp to latest month if out of bounds (handles sentinel 9999 = default to latest)
+                        if (monthState.amibroker.availableMonths.length > 0 && monthState.amibroker.currentMonthIndex >= monthState.amibroker.availableMonths.length) {
+                            monthState.amibroker.currentMonthIndex = monthState.amibroker.availableMonths.length - 1;
+                        }
                         const monthString = monthState.amibroker.availableMonths[monthState.amibroker.currentMonthIndex];
                         updateMonthDisplay('amibroker');
                         
@@ -3850,6 +3855,10 @@
                             });
                         }
                         
+                        // Clamp to latest month if out of bounds (handles sentinel 9999 = default to latest)
+                        if (monthState.lotpnltax.availableMonths.length > 0 && monthState.lotpnltax.currentMonthIndex >= monthState.lotpnltax.availableMonths.length) {
+                            monthState.lotpnltax.currentMonthIndex = monthState.lotpnltax.availableMonths.length - 1;
+                        }
                         const monthString = monthState.lotpnltax.availableMonths[monthState.lotpnltax.currentMonthIndex];
                         updateMonthDisplay('lotpnltax');
                         
