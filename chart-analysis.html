@@ -1998,6 +1998,25 @@
                             ctx.restore();
                         });
                     }
+                },{
+                    id: 'zeroDashLine',
+                    afterDraw(chart) {
+                        const yScale = chart.scales.y;
+                        if (!yScale) return;
+                        const { ctx, chartArea: { left, right } } = chart;
+                        const yZero = yScale.getPixelForValue(0);
+                        if (yZero < chart.chartArea.top || yZero > chart.chartArea.bottom) return;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.setLineDash([3, 5]);
+                        ctx.lineWidth = 0.7;
+                        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                        ctx.moveTo(left, yZero);
+                        ctx.lineTo(right, yZero);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.restore();
+                    }
                 }]
             });
             // Monthly Contribution Breakdown (Waterfall) Chart
@@ -2008,7 +2027,8 @@
                     datasets: [{
                         data: [],
                         backgroundColor: [],
-                        borderWidth: 0,
+                        borderColor: [],
+                        borderWidth: [],
                         borderRadius: 6,
                         barPercentage: 0.6,
                         categoryPercentage: 0.8,
@@ -2257,6 +2277,25 @@
                             ctx.restore();
                         });
                     }
+                },{
+                    id: 'zeroDashLine',
+                    afterDraw(chart) {
+                        const yScale = chart.scales.y;
+                        if (!yScale) return;
+                        const { ctx, chartArea: { left, right } } = chart;
+                        const yZero = yScale.getPixelForValue(0);
+                        if (yZero < chart.chartArea.top || yZero > chart.chartArea.bottom) return;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.setLineDash([3, 5]);
+                        ctx.lineWidth = 0.7;
+                        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                        ctx.moveTo(left, yZero);
+                        ctx.lineTo(right, yZero);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.restore();
+                    }
                 }]
             });
             
@@ -2268,7 +2307,8 @@
                     datasets: [{
                         data: [],
                         backgroundColor: [],
-                        borderWidth: 0,
+                        borderColor: [],
+                        borderWidth: [],
                         borderRadius: 6,
                         barPercentage: 0.6,
                         categoryPercentage: 0.8,
@@ -2504,6 +2544,25 @@
                             ctx.restore();
                         });
                     }
+                },{
+                    id: 'zeroDashLine',
+                    afterDraw(chart) {
+                        const yScale = chart.scales.y;
+                        if (!yScale) return;
+                        const { ctx, chartArea: { left, right } } = chart;
+                        const yZero = yScale.getPixelForValue(0);
+                        if (yZero < chart.chartArea.top || yZero > chart.chartArea.bottom) return;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.setLineDash([3, 5]);
+                        ctx.lineWidth = 0.7;
+                        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                        ctx.moveTo(left, yZero);
+                        ctx.lineTo(right, yZero);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.restore();
+                    }
                 }]
             });
             
@@ -2515,7 +2574,8 @@
                     datasets: [{
                         data: [],
                         backgroundColor: [],
-                        borderWidth: 0,
+                        borderColor: [],
+                        borderWidth: [],
                         borderRadius: 6,
                         barPercentage: 0.6,
                         categoryPercentage: 0.8,
@@ -2750,6 +2810,25 @@
                             ctx.fillText(label, x, y);
                             ctx.restore();
                         });
+                    }
+                },{
+                    id: 'zeroDashLine',
+                    afterDraw(chart) {
+                        const yScale = chart.scales.y;
+                        if (!yScale) return;
+                        const { ctx, chartArea: { left, right } } = chart;
+                        const yZero = yScale.getPixelForValue(0);
+                        if (yZero < chart.chartArea.top || yZero > chart.chartArea.bottom) return;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.setLineDash([3, 5]);
+                        ctx.lineWidth = 0.7;
+                        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                        ctx.moveTo(left, yZero);
+                        ctx.lineTo(right, yZero);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.restore();
                     }
                 }]
             });
@@ -3317,32 +3396,15 @@
                     });
                 }
                 
-                // Sort strategies by broker code and PRO number
+                // Sort strategies by PnL contribution value (descending: highest first, then negatives)
                 // Filter out strategies with zero contribution
                 sortedStrategies = Object.entries(strategyContributions)
                     .filter(([stratName, contribution]) => {
                         return contribution !== 0; // Keep all non-zero strategies
                     })
                     .sort((a, b) => {
-                        const extractParts = (name) => {
-                            const match = name.match(/([A-Z0-9]+)\s*PRO\s*(\d+)/i);
-                            if (match) {
-                                return {
-                                    broker: match[1],
-                                    pro: parseInt(match[2])
-                                };
-                            }
-                            return { broker: name, pro: 0 };
-                        };
-                        
-                        const partsA = extractParts(a[0]);
-                        const partsB = extractParts(b[0]);
-                        
-                        if (partsA.broker !== partsB.broker) {
-                            return partsA.broker.localeCompare(partsB.broker);
-                        }
-                        
-                        return partsA.pro - partsB.pro;
+                        // Sort descending by PnL value (highest positive first, lowest negative last)
+                        return b[1] - a[1];
                     })
                     .slice(0, 10);
                 
@@ -3393,6 +3455,8 @@
                 
                 let cumulative = 0;
                 const contributions = []; // Store actual contribution values for tooltips
+                const borderColors = [];
+                const borderWidths = [];
                 
                 // Filter to only visible strategies for the chart
                 const visibleStrategies = sortedStrategies.filter(([stratName]) => 
@@ -3425,6 +3489,8 @@
                         const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
                         colors.push(baseColor);
                     }
+                    borderColors.push('transparent');
+                    borderWidths.push(0);
                 });
                 
                 // Add Total
@@ -3440,13 +3506,18 @@
                 } else {
                     data.push([totalDisplayValue, 0]);
                 }
-                // Use red/brown for negative total, green for positive
-                colors.push(totalValue < 0 ? '#c2410c' : '#10b981');
+                // Total bar: outlined style (transparent fill + colored border)
+                const totalColor = totalValue < 0 ? '#c2410c' : '#10b981';
+                colors.push(totalValue < 0 ? 'rgba(194, 65, 12, 0.08)' : 'rgba(16, 185, 129, 0.08)');
+                borderColors.push(totalColor);
+                borderWidths.push(2);
                 
                 // Update chart
                 charts.compare.data.labels = labels;
                 charts.compare.data.datasets[0].data = data;
                 charts.compare.data.datasets[0].backgroundColor = colors;
+                charts.compare.data.datasets[0].borderColor = borderColors;
+                charts.compare.data.datasets[0].borderWidth = borderWidths;
                 
                 // Store all strategies (including hidden) for legend generation
                 charts.compare._allStrategies = sortedStrategies.map(([name]) => formatStrategyName(name));
@@ -3689,6 +3760,8 @@
                 
                 let cumulative = 0;
                 const contributions = [];
+                const borderColors = [];
+                const borderWidths = [];
                 
                 // Filter to only visible strategies for the chart
                 const visibleStrategies = sortedStrategies.filter(([stratName]) => 
@@ -3717,6 +3790,8 @@
                         const baseColor = getColorForStrategy(stratName) || defaultColors[index % defaultColors.length];
                         colors.push(baseColor);
                     }
+                    borderColors.push('transparent');
+                    borderWidths.push(0);
                 });
                 
                 labels.push('Total');
@@ -3729,11 +3804,17 @@
                 } else {
                     data.push([totalDisplayValue, 0]);
                 }
-                colors.push(totalValue < 0 ? '#c2410c' : '#10b981');
+                // Total bar: outlined style (transparent fill + colored border)
+                const totalColor = totalValue < 0 ? '#c2410c' : '#10b981';
+                colors.push(totalValue < 0 ? 'rgba(194, 65, 12, 0.08)' : 'rgba(16, 185, 129, 0.08)');
+                borderColors.push(totalColor);
+                borderWidths.push(2);
                 
                 charts.amibroker.data.labels = labels;
                 charts.amibroker.data.datasets[0].data = data;
                 charts.amibroker.data.datasets[0].backgroundColor = colors;
+                charts.amibroker.data.datasets[0].borderColor = borderColors;
+                charts.amibroker.data.datasets[0].borderWidth = borderWidths;
                 
                 // Store all strategies (including hidden) for legend generation
                 charts.amibroker._allStrategies = sortedStrategies.map(([name]) => formatStrategyName(name));
@@ -3931,25 +4012,8 @@
                             return contribution !== 0; // Keep all non-zero strategies
                         })
                         .sort((a, b) => {
-                            const extractParts = (name) => {
-                                const match = name.match(/([A-Z0-9]+)\s*PRO\s*(\d+)/i);
-                                if (match) {
-                                    return {
-                                        broker: match[1],
-                                        pro: parseInt(match[2])
-                                    };
-                                }
-                                return { broker: name, pro: 0 };
-                            };
-                            
-                            const partsA = extractParts(a[0]);
-                            const partsB = extractParts(b[0]);
-                            
-                            if (partsA.broker !== partsB.broker) {
-                                return partsA.broker.localeCompare(partsB.broker);
-                            }
-                            
-                            return partsA.pro - partsB.pro;
+                            // Sort descending by PnL per lot value (highest first)
+                            return b[1] - a[1];
                         })
                         .slice(0, 10);
                     
@@ -3994,6 +4058,8 @@
                 
                 let cumulative = 0;
                 const contributions = [];
+                const borderColors = [];
+                const borderWidths = [];
                 
                 // Filter to only visible strategies for the chart
                 const visibleStrategies = sortedStrategies.filter(([lotName]) => 
@@ -4023,6 +4089,8 @@
                         const baseColor = getColorForStrategy(lotName) || defaultColors[index % defaultColors.length];
                         colors.push(baseColor);
                     }
+                    borderColors.push('transparent');
+                    borderWidths.push(0);
                 });
                 
                 labels.push('Total');
@@ -4035,11 +4103,17 @@
                 } else {
                     data.push([totalDisplayValue, 0]);
                 }
-                colors.push(totalValue < 0 ? '#c2410c' : '#10b981');
+                // Total bar: outlined style (transparent fill + colored border)
+                const totalColor = totalValue < 0 ? '#c2410c' : '#10b981';
+                colors.push(totalValue < 0 ? 'rgba(194, 65, 12, 0.08)' : 'rgba(16, 185, 129, 0.08)');
+                borderColors.push(totalColor);
+                borderWidths.push(2);
                 
                 charts.lotpnltax.data.labels = labels;
                 charts.lotpnltax.data.datasets[0].data = data;
                 charts.lotpnltax.data.datasets[0].backgroundColor = colors;
+                charts.lotpnltax.data.datasets[0].borderColor = borderColors;
+                charts.lotpnltax.data.datasets[0].borderWidth = borderWidths;
                 
                 // Store all strategies (including hidden) for legend generation
                 charts.lotpnltax._allStrategies = sortedStrategies.map(([name]) => formatStrategyName(name));
