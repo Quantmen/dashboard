@@ -1505,6 +1505,7 @@
             }
             
             let peak = 0;
+            let peakCumMargin = 0;  // Peak of total broker margin curve — matches ALL ACCOUNT DD(₹)
             let prevCumPnl = 0;
             let startingCapital = 0;  // Will be set from first period
             let cumulativeExpenses = 0;  // Track expenses/withdrawals (negative of margin additions)
@@ -1555,7 +1556,15 @@
                     peak = item.cumPnl;
                 }
                 item.peak = peak;
-                item.drawdown = item.cumPnl - peak;
+                // Drawdown on total broker margin curve (base margin + PnlTax),
+                // identical to how ALL ACCOUNT DD(₹) is computed in drawdown.html:
+                //   dailyTotalMarginsForDD[date] = dayTotalMargin + dayPnlTax  →  cumMargin
+                //   ALL ACCOUNT DD(₹) = currentTotalMargin - peakTotalMargin
+                if (item.cumMargin > peakCumMargin) {
+                    peakCumMargin = item.cumMargin;
+                }
+                item.peakCumMargin = peakCumMargin;
+                item.drawdown = item.cumMargin - peakCumMargin;
             });
             
             // Only filter out leading empty periods when viewing ALL data
@@ -3093,38 +3102,17 @@
                 const displayType = displayTypes.drawdown || 'value';
                 let data;
                 
-                // Recalculate peak and drawdown based on adjusted cumPnl when filter is applied
-                if (selectedDateRange !== 'all' && previousValue !== 0) {
-                    let adjustedPeak = 0;
-                    aggregatedData.forEach(d => {
-                        const adjustedCumPnl = d.cumPnl - previousValue;
-                        if (adjustedCumPnl > adjustedPeak) {
-                            adjustedPeak = adjustedCumPnl;
-                        }
-                        d.adjustedPeak = adjustedPeak;
-                        d.adjustedDrawdown = adjustedCumPnl - adjustedPeak;
-                    });
-                }
-                
                 if (displayType === 'percentage') {
-                    // Calculate Drawdown% = (drawdown / peakMargin) * 100
-                    // peakMargin = startingCapital + peak cumPnl at that point
-                    
-                    // Get starting capital
-                    const startingCapital = cachedStartingCapital;
-                    
+                    // DD % = (cumMargin - peakCumMargin) / peakCumMargin × 100
+                    // Matches drawdown.html: allAccountDDPercent = (calculatedStgDD / peakTotalMargin) * 100
                     data = aggregatedData.map(d => {
-                        const drawdownValue = (selectedDateRange !== 'all' && previousValue !== 0) ? d.adjustedDrawdown : d.drawdown;
-                        const peakValue = (selectedDateRange !== 'all' && previousValue !== 0) ? d.adjustedPeak : d.peak;
-                        // peakMargin = startingCapital + peak cumPnl
-                        const peakMargin = startingCapital + peakValue;
-                        if (peakMargin === 0) return 0;
-                        return ((drawdownValue / peakMargin) * 100);
+                        if (!d.peakCumMargin || d.peakCumMargin === 0) return 0;
+                        return (d.drawdown / d.peakCumMargin) * 100;
                     });
                 } else {
-                    data = aggregatedData.map(d => {
-                        return (selectedDateRange !== 'all' && previousValue !== 0) ? d.adjustedDrawdown : d.drawdown;
-                    });
+                    // drawdown is based on total broker margin (cumMargin - peakCumMargin),
+                    // matching ALL ACCOUNT DD(₹) in drawdown.html. No previousValue offset needed.
+                    data = aggregatedData.map(d => d.drawdown);
                 }
                 
                 charts.drawdown.data.labels = labels;
