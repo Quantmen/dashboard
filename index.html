@@ -3,59 +3,70 @@
 <head>
     <title>Trading Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ============ DESIGN TOKENS ============ */
+        :root {
+            --bg-page: #f8fafc;
+            --bg-overlay: rgba(248, 250, 252, 0.95);
+            --bg-surface: #ffffff;
+            --border-default: #e5e7eb;
+            --text-primary: #1e293b;
+            --text-muted: #64748b;
+            --accent: #4338ca;
+            --profit: #059669;
+            --loss: #b91c1c;
+            --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
         }
-        
-        body { 
+
+        body {
             display: flex;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: var(--font-ui);
+            background: var(--bg-page);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        
-        iframe { 
+
+        iframe {
             border: none;
             display: block;
         }
-        
-        #sidebar { 
+
+        /* ============ SIDEBAR ============ */
+        #sidebar {
             width: 60px;
             height: 100vh;
             flex-shrink: 0;
             transition: width 0.3s ease;
         }
+        #sidebar.collapsed { width: 60px; }
+        #sidebar.expanded { width: 240px; }
 
-        #sidebar.collapsed {
-            width: 60px;
-        }
-
-        #sidebar.expanded {
-            width: 240px;
-        }
-        
-        .main-content-container { 
+        /* ============ MAIN CONTENT CONTAINER ============ */
+        .main-content-container {
             flex: 1;
             height: 100vh;
             width: calc(100vw - 60px);
             transition: width 0.3s ease;
             position: relative;
         }
-
-        .main-content-container.expanded {
-            width: calc(100vw - 60px);
-        }
-
-        .main-content-container.collapsed {
-            width: calc(100vw - 240px);
-        }
+        .main-content-container.expanded { width: calc(100vw - 60px); }
+        .main-content-container.collapsed { width: calc(100vw - 240px); }
 
         .main-content-frame {
             position: absolute;
@@ -65,12 +76,9 @@
             height: 100%;
             display: none;
         }
+        .main-content-frame.active { display: block; }
 
-        .main-content-frame.active {
-            display: block;
-        }
-
-        /* Loading Overlay Styles */
+        /* ============ LOADING OVERLAY ============ */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -79,7 +87,9 @@
             bottom: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(248, 250, 252, 0.95);
+            background: var(--bg-overlay);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -88,7 +98,6 @@
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
-
         .loading-overlay.active {
             opacity: 1;
             pointer-events: all;
@@ -98,24 +107,24 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 14px;
             text-align: center;
             padding: 0 20px;
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e5e7eb;
-            border-top-color: #1e40af;
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--border-default);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 0;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto;
         }
 
         .loading-message {
-            color: #64748b;
-            font-size: 14px;
+            color: var(--text-muted);
+            font-size: 13px;
             font-weight: 500;
             margin: 0;
             line-height: 1.5;
@@ -125,6 +134,32 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* ============ TOAST NOTIFICATION ============ */
+        .main-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.92);
+            background: var(--profit);
+            color: #ffffff;
+            padding: 13px 24px;
+            border-radius: 10px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08);
+            font-family: var(--font-ui);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100000;
+            display: none;
+            min-width: 200px;
+            text-align: center;
+        }
+        .main-toast.error {
+            background: var(--loss);
         }
     </style>
     <!-- XLSX Library for data processing -->
@@ -140,7 +175,7 @@
     </div>
 
     <!-- Toast notification for bottom center of screen -->
-    <div id="mainToast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0.9); background: #28a745; color: #fff; padding: 16px 32px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 100000; display: none; min-width: 200px; text-align: center;">
+    <div id="mainToast" class="main-toast">
         <span id="mainToastText"></span>
     </div>
 
@@ -323,7 +358,7 @@
             const toastText = document.getElementById('mainToastText');
             
             toastText.textContent = message;
-            toast.style.background = success ? '#28a745' : '#dc3545';
+            toast.classList.toggle('error', !success);
             toast.style.display = 'block';
             
             setTimeout(() => {
@@ -333,7 +368,7 @@
             
             setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) scale(0.9)';
+                toast.style.transform = 'translateX(-50%) scale(0.92)';
                 setTimeout(() => {
                     toast.style.display = 'none';
                 }, 300);
