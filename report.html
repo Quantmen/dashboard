@@ -6,21 +6,49 @@
     <title>Detailed Report</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-page: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-subtle: #f3f4f6;
+            --bg-muted: #f9fafb;
+            --bg-totals: #e5e7eb;
+            --bg-totals-subtle: #e5e7eb;
+            --border-default: #e7e5e4;
+            --border-subtle: #f5f5f4;
+            --border-emphasis: #d6d3d1;
+            --border-divider: #94a3b8;
+            --text-primary: #0c0a09;
+            --text-secondary: #44403c;
+            --text-muted: #78716c;
+            --text-subtle: #a8a29e;
+            --text-inverse: #fafaf9;
+            --accent: #4338ca;
+            --accent-hover: #3730a3;
+            --accent-light: #eef2ff;
+            --accent-subtle: #e0e7ff;
+            --profit: #15803d;
+            --profit-bg: #f0fdf4;
+            --loss: #b91c1c;
+            --loss-bg: #fef2f2;
+            --font-ui: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f8fafc;
-            color: #1a1a1a;
+            font-family: var(--font-ui);
+            background: var(--bg-page);
+            color: var(--text-primary);
             overflow-x: auto;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: 'cv11', 'ss01';
         }
         .main-content {
             padding: 16px 32px 32px 32px;
-            background: #f8fafc;
+            background: var(--bg-page);
             min-width: fit-content;
             overflow-x: auto;
         }
@@ -48,8 +76,8 @@
         }
         .loading-spinner {
             height: 44px;
-            border: 4px solid #e5e7eb;
-            border-top-color: #1e40af;
+            border: 4px solid var(--border-default);
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 18px;
@@ -69,20 +97,37 @@
             color: #9ca3af;
         }
         .page-header { margin-bottom: 16px; }
-        .page-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
-        .page-subtitle { font-size: 11px; color: #6b7280; font-weight: 400; }
+        .page-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+        }
+        .page-subtitle {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 400;
+        }
         
         .controls-section {
             display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 6px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
             align-items: center;
+            padding: 10px 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-default);
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
         .control-group { 
             display: flex; 
             align-items: center; 
-            gap: 8px;
+            gap: 6px;
         }
         .control-group:empty {
             display: none;
@@ -94,10 +139,55 @@
         .control-group button {
             white-space: nowrap;
         }
+        /* Thin vertical separator between control groups */
+        .controls-section > .control-divider {
+            width: 1px;
+            height: 22px;
+            background: var(--border-default);
+            margin: 0 4px;
+        }
+        #applyFiltersBtn {
+            flex: 0 0 auto;
+            width: 100px;
+        }
+        #resetFiltersBtn,
+        #exportCSVBtn {
+            flex: 1;
+            min-width: fit-content;
+        }
+        #toggleBuySellBtn {
+            min-width: 135px;
+        }
+        #toggleTimeBtn,
+        #toggleLotBtn {
+            min-width: 115px;
+        }
         #brokerButtonsContainer {
             flex: 0 0 auto;
+            display: flex;
+            gap: 4px;
+            padding: 3px;
+            background: var(--bg-subtle);
+            border-radius: 8px;
         }
-        .control-label { font-size: 12px; color: #374151; font-weight: 600; letter-spacing: 0.1px; }
+        #brokerButtonsContainer button {
+            border: none;
+            background: transparent;
+            padding: 5px 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        #brokerButtonsContainer button:hover {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+        }
+        #brokerButtonsContainer button.active {
+            background: var(--bg-surface);
+            color: var(--accent);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+        .control-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
         .strategy-filter-container { 
             position: relative;
         }
@@ -106,18 +196,19 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 7px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 11px;
+            padding: 7px 11px;
+            border: 1px solid var(--border-emphasis);
+            border-radius: 7px;
+            font-size: 11.5px;
             font-weight: 500;
-            background: white;
-            color: #374151;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.12s ease;
             white-space: nowrap;
+            letter-spacing: 0.01em;
         }
-        .strategy-filter-button:hover { border-color: #9ca3af; background: #f9fafb; }
+        .strategy-filter-button:hover { border-color: var(--text-muted); background: var(--bg-muted); }
         .strategy-filter-dropdown {
             position: fixed;
             margin-top: 6px;
@@ -151,29 +242,30 @@
         .strategy-filter-actions { display: flex; gap: 8px; }
         .filter-action-btn {
             font-size: 11px;
-            color: #1e40af;
+            color: var(--accent);
             cursor: pointer;
             padding: 4px 8px;
             border-radius: 4px;
-            transition: background 0.2s ease;
+            transition: background 0.15s ease;
+            font-weight: 600;
         }
-        .filter-action-btn:hover { background: #eff6ff; }
+        .filter-action-btn:hover { background: var(--accent-light); }
         .quick-date-btn {
             padding: 6px 10px;
-            border: 1px solid #d1d5db;
+            border: 1px solid var(--border-emphasis);
             border-radius: 6px;
             font-size: 11px;
-            font-weight: 500;
-            background: white;
-            color: #374151;
+            font-weight: 600;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.12s ease;
             text-align: center;
         }
         .quick-date-btn:hover {
-            background: #eff6ff;
-            border-color: #1e40af;
-            color: #1e40af;
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: var(--accent);
         }
         .strategy-filter-list { 
             padding: 8px 0; 
@@ -181,12 +273,13 @@
         }
         .filter-info-note {
             padding: 10px 14px;
-            background: #eff6ff;
-            border-top: 1px solid #e2e8f0;
+            background: var(--accent-light);
+            border-top: 1px solid var(--border-default);
             font-size: 11px;
-            color: #1e40af;
+            color: var(--accent);
             line-height: 1.4;
             margin-top: 8px;
+            font-weight: 500;
         }
         .strategy-filter-item {
             display: flex;
@@ -236,58 +329,53 @@
         .month-children.expanded { display: block; }
         .filter-badge {
             display: inline-block;
-            background: #1e40af;
-            color: white;
+            background: var(--accent);
+            color: var(--text-inverse);
             font-size: 9px;
-            padding: 2px 5px;
+            padding: 2px 6px;
             border-radius: 10px;
             margin-left: 6px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.03em;
         }
         
         select, input, button {
-            padding: 7px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 11px;
+            padding: 7px 11px;
+            border: 1px solid var(--border-emphasis);
+            border-radius: 7px;
+            font-size: 11.5px;
             font-weight: 500;
-            background: white;
-            color: #374151;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.12s ease;
             font-family: inherit;
             white-space: nowrap;
+            letter-spacing: 0.01em;
         }
         select:hover, input:hover, button:hover { 
-            border-color: #9ca3af;
-            background: #f9fafb;
+            border-color: var(--text-muted);
+            background: var(--bg-muted);
         }
         select:focus, input:focus, button:focus {
             outline: none;
-            border-color: #0284c7;
-            box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-subtle);
         }
         button.primary { 
-            background: #1e40af;
-            color: white;
-            border-color: #1e40af;
-            font-weight: 500;
+            background: var(--accent);
+            color: var(--text-inverse);
+            border-color: var(--accent);
+            font-weight: 600;
+            letter-spacing: 0.02em;
         }
         button.primary:hover { 
-            background: #1e3a8a;
-            border-color: #1e3a8a;
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
         }
         
         /* Make specific buttons extend */
-        #toggleBuySellBtn,
-        #toggleTimeBtn,
-        #toggleLotBtn,
-        #applyFiltersBtn,
-        #resetFiltersBtn,
-        #exportCSVBtn {
-            flex: 1;
-            min-width: fit-content;
-        }
+        
         
         #symbolFilter {
             box-sizing: border-box;
@@ -298,13 +386,14 @@
         }
         
         .table-container {
-            background: white;
+            background: var(--bg-surface);
             border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-default);
             display: block;
             width: 100%;
             min-width: fit-content;
+            overflow: hidden;
         }
         .table-wrapper { 
             scrollbar-width: thin;
@@ -317,8 +406,7 @@
         .table-wrapper::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
         .report-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
             font-size: 12px;
             font-variant-numeric: tabular-nums;
         }
@@ -326,82 +414,105 @@
             position: sticky; 
             top: 0; 
             z-index: 10; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
         .report-table thead tr.header-row-1, .report-table thead tr.header-row-2, .report-table thead tr.totals-row { height: auto; }
+        /* TOTALS row - solid dark for prominence, inverted colors */
         .report-table thead tr.totals-row th {
-            padding: 6px 6px;
+            padding: 10px 8px;
             position: sticky;
             top: 0;
-            background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+            background: var(--bg-totals);
             z-index: 11;
-            font-size: 11.5px;
+            font-size: 11px;
             text-align: center;
             font-weight: 600;
-            color: #1e40af;
-            border-bottom: 1px solid #94a3b8;
-            border-right: 1px solid #d1d5db;
+            color: #111827;
+            border-bottom: 1px solid var(--bg-totals-subtle);
+            border-right: 1px solid var(--bg-totals-subtle);
             white-space: nowrap;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+        .report-table thead tr.totals-row th:first-child {
+            font-family: var(--font-ui);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #111827;
         }
         .report-table thead tr.totals-row th.number-col {
             text-align: right;
         }
         .report-table thead tr.totals-row th.positive { color: #15803d; }
-        .report-table thead tr.totals-row th.negative { color: #b96060; }
+        .report-table thead tr.totals-row th.negative { color: #b91c1c; }
+        /* Main header row - cleaner, more editorial */
         .report-table thead tr.header-row-1 th {
-            padding: 10px 6px 10px 6px;
+            padding: 11px 8px;
             position: sticky;
-            top: 28px;
-            background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+            top: 40px;
+            background: var(--bg-subtle);
             z-index: 10;
             font-size: 10.5px;
             text-align: center;
-            font-weight: 600;
-            color: #0f172a;
-            border-bottom: 1px solid #cbd5e1;
-            border-right: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: var(--text-primary);
+            border-right: 0.5px solid var(--border-default);
             white-space: nowrap;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-            transition: background 0.2s ease;
+            letter-spacing: 0.06em;
+            transition: background 0.15s ease;
         }
-        /* Slightly reduced height for broker strategy group headers */
+        /* Broker strategy group labels (colspan cells) - more distinctive */
         .report-table thead tr.header-row-1 th[colspan] {
-            padding: 4px 6px 4px 6px;
+            padding: 8px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-emphasis);
         }
         .report-table thead tr.header-row-1 th[rowspan="2"] {
-            border-bottom: 1px solid #94a3b8;
             cursor: pointer;
             user-select: none;
-            box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-divider);
         }
         .report-table thead tr.header-row-1 th[rowspan="2"]:hover { 
-            background: linear-gradient(to bottom, #eff6ff 0%, #dbeafe 100%);
-            color: #1e40af;
+            background: var(--accent-light);
+            color: var(--accent);
         }
+        /* Sub-header row */
         .report-table thead tr.header-row-2 th {
-            padding: 4px 4px 4px 4px;
+            padding: 6px 6px 8px 6px;
             font-size: 9.5px;
             position: sticky;
-            top: 50px;
-            background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
+            top: 68px;
+            background: var(--bg-muted);
             z-index: 10;
-            font-weight: 450;
-            color: #475569;
+            font-weight: 600;
+            color: var(--text-muted);
             text-align: center;
-            border-bottom: 1px solid #94a3b8;
-            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border-divider);
+            border-right: 0.5px solid var(--border-subtle);
             white-space: nowrap;
             text-transform: uppercase;
             cursor: pointer;
             user-select: none;
-            letter-spacing: 0.3px;
-            transition: all 0.2s ease;
+            letter-spacing: 0.06em;
+            transition: all 0.15s ease;
+            font-family: var(--font-ui);
         }
         .report-table thead tr.header-row-2 th:hover { 
-            background: linear-gradient(to bottom, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        /* AMI main column sub-headers: more prominent than broker sub-headers */
+        .report-table thead tr.header-row-2 th.ami-main {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: var(--bg-subtle);
+            padding: 8px 8px 10px 8px;
         }
         .report-table th.sortable::after {
             content: '';
@@ -412,13 +523,13 @@
         .report-table th.sorted-asc::after { 
             content: ' ↑'; 
             opacity: 1; 
-            color: #1e40af;
+            color: var(--accent);
             font-weight: 700;
         }
         .report-table th.sorted-desc::after { 
             content: ' ↓'; 
             opacity: 1; 
-            color: #1e40af;
+            color: var(--accent);
             font-weight: 700;
         }
         .report-table th.number-col { text-align: right; }
@@ -555,54 +666,76 @@
         }
         
         .report-table tbody tr {
-            transition: all 0.15s ease;
-            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.12s ease;
+            border-bottom: 1px solid var(--border-subtle);
         }
         .report-table tbody tr:hover { 
-            background: #f0f4f8;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            background: var(--accent-light) !important;
         }
-        .report-table tbody tr:nth-child(even) { background: #f9fafb; }
-        .report-table tbody tr:nth-child(even):hover { background: #f0f4f8; }
+        .report-table tbody tr:nth-child(even) { background: var(--bg-muted); }
+        .report-table tbody tr:nth-child(even):hover { background: var(--accent-light) !important; }
         .report-table td {
-            padding: 10px 6px;
-            border-bottom: 1px solid #f3f4f6;
-            border-right: 1px solid #f0f0f0;
-            color: #1f2937;
+            padding: 9px 8px;
+            border-bottom: 1px solid var(--border-subtle);
+            border-right: 0.5px solid var(--border-subtle);
+            color: var(--text-primary);
             white-space: nowrap;
-            font-size: 12px;
+            font-size: 11.5px;
             font-variant-numeric: tabular-nums;
-            font-weight: 400;
+            font-weight: 500;
             overflow: hidden;
             text-overflow: ellipsis;
             vertical-align: middle;
             box-sizing: border-box;
+            font-family: var(--font-mono);
         }
-        .report-table td:nth-child(1) { text-align: center; color: #4b5563; font-weight: 400; font-size: 11.5px; }
-        .report-table td:nth-child(2) { font-weight: 400; color: #1f2937; font-size: 11.5px; }
-        .report-table td:nth-child(3) { font-weight: 400; color: #1f2937; font-size: 11.5px; }
-        .report-table td:nth-child(4) { font-size: 11.5px; }
-        .report-table td:nth-child(5) { font-weight: 400; color: #1f2937; font-size: 11.5px; }
-        .report-table td:nth-child(6) { font-size: 11.5px; }
-        .report-table td:nth-child(7), .report-table td:nth-child(8) { font-size: 11.5px; }
-        .report-table td:nth-child(9) { 
+        /* Non-number columns use UI font */
+        .report-table td:nth-child(1),
+        .report-table td:nth-child(2),
+        .report-table td:nth-child(3),
+        .report-table td:nth-child(4),
+        .report-table td:nth-child(5) {
+            font-family: var(--font-ui);
+            font-weight: 500;
         }
-        .report-table td:nth-child(11) { 
-            border-right: 1px solid #e5e7eb;
+        /* S.No subtle */
+        .report-table td:nth-child(1) { 
+            text-align: center; 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            font-variant-numeric: tabular-nums;
         }
-        .report-table thead tr.totals-row th:nth-child(11) { 
-            border-right: 1px solid #e5e7eb;
+        /* STG + Symbol emphasis */
+        .report-table td:nth-child(3) { color: var(--text-secondary); font-weight: 600; letter-spacing: 0.02em; font-size: 10.5px; text-transform: uppercase; }
+        .report-table td:nth-child(5) { color: var(--text-primary); font-weight: 600; letter-spacing: 0.01em; }
+        /* TRADE column emphasis */
+        .report-table td:nth-child(4) { 
+            font-weight: 600;
+            font-size: 10.5px;
+            letter-spacing: 0.04em;
         }
-        .report-table thead tr.header-row-1 th:nth-child(11) { 
-            border-right: 1px solid #e5e7eb;
+        /* AMI / Broker section divider - 1px line at the boundary */
+        .report-table td:nth-child(11),
+        .report-table thead tr.totals-row th:nth-child(7),
+        .report-table thead tr.header-row-1 th:first-child,
+        .report-table thead tr.header-row-2 th:nth-child(11) { 
+            border-right: 1px solid var(--border-divider);
         }
         .report-table td.number-col {
             text-align: right;
             font-variant-numeric: tabular-nums;
-            font-weight: 400;
+            font-weight: 500;
+            font-family: var(--font-mono);
         }
-        .report-table td.positive { color: #15803d; font-weight: 450; }
-        .report-table td.negative { color: #b96060; font-weight: 450; }
+        /* Center-aligned columns (overrides .number-col right-align) */
+        .report-table th.center-col,
+        .report-table td.center-col,
+        .report-table th.number-col.center-col,
+        .report-table td.number-col.center-col {
+            text-align: center;
+        }
+        .report-table td.positive { color: var(--profit); font-weight: 600; }
+        .report-table td.negative { color: var(--loss); font-weight: 600; }
         .buy-sell-column { display: none; }
         .buy-sell-column.visible { display: table-cell; }
         
@@ -643,16 +776,16 @@
         .table-wrapper.single-strategy .report-table td {
         }
         
-        .no-data { 
-            text-align: center; 
-            color: #9ca3af; 
-            padding: 60px 40px; 
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
             font-size: 12px;
-            font-variant-numeric: tabular-nums;
-            font-weight: 400;
-            background: #f8fafc;
-            min-height: 300px;
-            vertical-align: top;
+            font-style: italic;
+        }
+        .no-data.no-data-left {
+            text-align: left !important;
+            padding-left: 24px !important;
         }
         
         .pagination {
@@ -660,34 +793,36 @@
             justify-content: space-between;
             align-items: center;
             padding: 14px 20px;
-            background: #f8fafc;
-            border-top: 1px solid #e5e7eb;
+            background: var(--bg-muted);
+            border-top: 1px solid var(--border-default);
             width: 100%;
             min-width: fit-content;
             box-sizing: border-box;
         }
-        .pagination-info { font-size: 12px; color: #6b7280; font-weight: 400; }
-        .pagination-controls { display: flex; gap: 8px; }
+        .pagination-info { font-size: 11.5px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.01em; }
+        .pagination-controls { display: flex; gap: 6px; }
         .pagination-btn {
-            padding: 5px 10px;
-            border: 1px solid #d1d5db;
+            padding: 6px 11px;
+            border: 1px solid var(--border-emphasis);
             border-radius: 6px;
-            background: white;
-            color: #374151;
-            font-size: 10.5px;
-            font-weight: 450;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.12s ease;
+            min-width: 30px;
         }
         .pagination-btn:hover:not(:disabled) { 
-            background: #f9fafb;
-            border-color: #9ca3af;
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: var(--accent);
         }
-        .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .pagination-btn.active { 
-            background: #1e40af;
-            color: white;
-            border-color: #1e40af;
+            background: var(--accent);
+            color: var(--text-inverse);
+            border-color: var(--accent);
         }
         
         @media (max-width: 768px) {
@@ -710,21 +845,22 @@
             border-radius: 6px;
         }
         .custom-date-range label {
-            font-size: 10px;
-            font-weight: 600;
-            color: #64748b;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.06em;
         }
         .custom-date-range input[type="date"] {
             padding: 5px 4px;
-            font-size: 10px;
-            border: 1px solid #e5e7eb;
+            font-size: 10.5px;
+            border: 1px solid var(--border-default);
             border-radius: 4px;
-            font-family: inherit;
-            color: #475569;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
             cursor: pointer;
             background: transparent;
+            font-weight: 500;
         }
         .date-nav-arrows {
             display: flex;
@@ -738,9 +874,9 @@
             height: 11px;
             font-size: 8px;
             line-height: 1;
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border-default);
             background: transparent;
-            color: #64748b;
+            color: var(--text-muted);
             border-radius: 2px;
             cursor: pointer;
             display: flex;
@@ -758,26 +894,26 @@
             gap: 4px;
         }
         .date-range-buttons .btn {
-            padding: 5px 8px;
+            padding: 5px 9px;
             font-size: 10px;
-            font-weight: 600;
-            color: #64748b;
+            font-weight: 700;
+            color: var(--text-muted);
             background: transparent;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.06em;
         }
         .date-range-buttons .btn:hover {
-            background: #e2e8f0;
-            color: #475569;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
         }
         .date-range-buttons .btn.active {
-            background: white;
-            color: #3b82f6;
-            border: 1px solid #e5e7eb;
+            background: var(--bg-surface);
+            color: var(--accent);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
         }
     </style>
 </head>
@@ -837,7 +973,7 @@
                 <p class="page-subtitle">Complete transaction history with broker-wise data</p>
             </div>
             <!-- Date Range Controls aligned to right -->
-            <div style="display: flex; gap: 3px; align-items: center; padding: 5px 6px; background: #f1f5f9; border-radius: 8px; white-space: nowrap;">
+            <div style="display: flex; gap: 3px; align-items: center; padding: 6px 8px; background: var(--bg-subtle); border: 1px solid var(--border-default); border-radius: 10px; white-space: nowrap;">
                 <div class="custom-date-range" style="padding: 0px 2px;">
                     <label style="font-size: 10px;">FROM:</label>
                     <input type="date" id="fromDateInput" style="width: 95px; padding: 5px 4px; font-size: 10px;">
@@ -972,22 +1108,24 @@
             <div class="table-wrapper">
                 <table class="report-table" id="reportTable">
                     <thead id="tableHeaders">
-                        <tr>
-                            <th rowspan="2" class="sortable" data-column="sno">S.No</th>
-                            <th rowspan="2" class="sortable" data-column="date">Date</th>
-                            <th rowspan="2" class="sortable" data-column="strategy">STG</th>
-                            <th rowspan="2" class="sortable" data-column="trade">Trade</th>
-                            <th rowspan="2" class="sortable" data-column="symbol">Symbol</th>
-                            <th rowspan="2" class="sortable number-col" data-column="qty">Qty</th>
-                            <th rowspan="2" class="sortable number-col" data-column="entry">Entry</th>
-                            <th rowspan="2" class="sortable number-col" data-column="exit">Exit</th>
-                            <th rowspan="2" class="sortable number-col" data-column="profit">Profit</th>
+                        <tr class="header-row-1">
+                            <th colspan="9" class="number-col" style="background: #fafaf9; border-top: 3px solid #475569; color: #475569; border-right: 0.5px solid var(--border-default); border-left: 0.5px solid var(--border-default);">AMIBROKER</th>
                         </tr>
-                        <tr class="header-row-2"></tr>
+                        <tr class="header-row-2">
+                            <th class="sortable ami-main" data-column="sno">S.No</th>
+                            <th class="sortable ami-main center-col" data-column="date">Date</th>
+                            <th class="sortable ami-main" data-column="strategy">STG</th>
+                            <th class="sortable ami-main center-col" data-column="trade">TRADE</th>
+                            <th class="sortable ami-main" data-column="symbol">Symbol</th>
+                            <th class="sortable ami-main number-col center-col" data-column="qty">QTY</th>
+                            <th class="sortable ami-main number-col" data-column="entry">BE PRICE</th>
+                            <th class="sortable ami-main number-col" data-column="exit">SE PRICE</th>
+                            <th class="sortable ami-main number-col" data-column="profit">PNL</th>
+                        </tr>
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td colspan="100" class="no-data">No data available</td>
+                            <td colspan="100" class="no-data">No data loaded yet.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -2737,7 +2875,10 @@
                 displayStrategies = [filterBrokerStrategy];
             }
             
-            const colors = ['#fef5f5', '#fefaf5', '#fefef5', '#f5fef8', '#f5f8fe', '#f8f5fe'];
+            // Very subtle neutral tints — differentiation comes from the colored top-strip accent, not loud backgrounds
+            const colors = ['#fafaf9', '#fafaf9', '#fafaf9', '#fafaf9', '#fafaf9', '#fafaf9'];
+            // Vibrant accent colors for 3px top-strip on each broker group header
+            const accentColors = ['#4338ca', '#059669', '#d97706', '#db2777', '#0284c7', '#7c3aed'];
             const colsPerStrategy = (showLotColumns ? 2 : 0) + 4 + (showTimeColumns ? 2 : 0) + (showBuySellColumns ? 3 : 0);
             
             const totals = { profit: 0 };
@@ -2770,61 +2911,103 @@
                 <th class="number-col" style="border-right: none;"></th>
                 <th class="number-col ${totals.profit >= 0 ? 'positive' : 'negative'}">₹${totals.profit.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
             
+            let prevBrokerT = null;
             displayStrategies.forEach((stratName, index) => {
+                const str = String(stratName || '');
+                const m = str.match(/^(.+?)PRO/i);
+                const currBroker = m ? m[1] : '_ALL_';
+                const brokerChanged = prevBrokerT !== null && currBroker !== prevBrokerT;
+                prevBrokerT = currBroker;
                 const bt = brokerTotals[stratName];
-                const firstColStyle = index === 0 ? `style="border-left: 1px solid #e5e7eb;"` : `style=""`;
+                const firstColStyle = brokerChanged
+                    ? `style="border-left: 1px solid var(--border-divider);"`
+                    : (index === 0 ? `style="border-left: 0.5px solid #e5e7eb;"` : `style=""`);
                 const groupStyle = `style=""`;
-                const lastColStyle = `style="border-right: 1px solid #d1d5db;"`;
+                const lastColStyle = `style="border-right: 0.5px solid #d1d5db;"`;
+                // Put the first-col border on whichever cell is first visible
+                const lotFirst = showLotColumns ? firstColStyle : `style=""`;
+                const pnlFirst = !showLotColumns ? firstColStyle : `style=""`;
+                // Last visible field in DOM order: exprc (buy-sell on), else lot_size (lot on), else extime (time on), else dsell
+                const lastField = showBuySellColumns
+                    ? 'exprc'
+                    : (showLotColumns ? 'lot_size' : (showTimeColumns ? 'extime' : 'dsell'));
+                const dsellLast    = (lastField === 'dsell')    ? lastColStyle : `style=""`;
+                const extimeLast   = (lastField === 'extime')   ? lastColStyle : `style=""`;
+                const lot_sizeLast = (lastField === 'lot_size') ? lastColStyle : `style=""`;
+                const exprcLast    = (lastField === 'exprc')    ? lastColStyle : `style=""`;
                 
-                totalsRow += `<th class="number-col ${bt.lot_pnl >= 0 ? 'positive' : 'negative'} lot-column${showLotColumns ? ' visible' : ''}" ${firstColStyle}>${bt.lot_pnl !== 0 ? bt.lot_pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</th>`;
-                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.lot_pnl >= 0 ? 'positive' : 'negative'} lot-column${showLotColumns ? ' visible' : ''}" ${lotFirst}>${bt.lot_pnl !== 0 ? bt.lot_pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</th>`;
+                totalsRow += `<th class="number-col ${bt.pnl >= 0 ? 'positive' : 'negative'}" ${pnlFirst}>${bt.pnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dpnl >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col ${bt.dbuy >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
-                totalsRow += `<th class="number-col ${bt.dsell >= 0 ? 'positive' : 'negative'}" ${groupStyle}>${bt.dsell.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
+                totalsRow += `<th class="number-col ${bt.dsell >= 0 ? 'positive' : 'negative'}" ${dsellLast}>${bt.dsell.toLocaleString('en-IN', {maximumFractionDigits: 0})}</th>`;
                 totalsRow += `<th class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupStyle}></th>`;
-                totalsRow += `<th class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupStyle}></th>`;
+                totalsRow += `<th class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${extimeLast}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
-                totalsRow += `<th class="number-col lot-column${showLotColumns ? ' visible' : ''}" ${groupStyle}></th>`;
+                totalsRow += `<th class="number-col lot-column${showLotColumns ? ' visible' : ''}" ${lot_sizeLast}></th>`;
                 totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupStyle}></th>`;
-                totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColStyle}></th>`;
+                totalsRow += `<th class="number-col buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${exprcLast}></th>`;
             });
             totalsRow += '</tr>';
             
             const mainColumns = ['sno', 'date', 'strategy', 'trade', 'symbol', 'a_entime', 'a_extime', 'qty', 'entry', 'exit', 'profit'];
-            const columnLabels = { sno: 'S.No', date: 'Date', strategy: 'STG', trade: 'Trade', symbol: 'Symbol', a_entime: 'ENTIME', a_extime: 'EXTIME', qty: 'Qty', entry: 'Entry', exit: 'Exit', profit: 'Profit' };
+            const columnLabels = { sno: 'S.No', date: 'Date', strategy: 'STG', trade: 'TRADE', symbol: 'Symbol', a_entime: 'EN TIME', a_extime: 'EX TIME', qty: 'QTY', entry: 'BE PRICE', exit: 'SE PRICE', profit: 'PNL' };
+            const amiAccentColor = '#475569';
+            const amiBgColor = '#fafaf9';
+            const amiVisibleCount = showTimeColumns ? 11 : 9;
             
             let headerRow1 = '<tr class="header-row-1">';
+            const amiBorderStyle = 'border-right: 0.5px solid var(--border-default); border-left: 0.5px solid var(--border-default);';
+            headerRow1 += `<th colspan="${amiVisibleCount}" class="number-col" style="background: ${amiBgColor}; border-top: 3px solid ${amiAccentColor}; color: ${amiAccentColor}; ${amiBorderStyle}">AMIBROKER</th>`;
+            
+            const getBrokerPrefix = (s) => {
+                const str = String(s || '');
+                const m = str.match(/^(.+?)PRO/i);
+                return m ? m[1] : '_ALL_';
+            };
+            
+            let prevBroker1 = null;
+            displayStrategies.forEach((stratName, index) => {
+                const currBroker = getBrokerPrefix(stratName);
+                const brokerChanged = prevBroker1 !== null && currBroker !== prevBroker1;
+                prevBroker1 = currBroker;
+                const displayName = formatStrategyName(stratName);
+                const bgColor = colors[index % colors.length];
+                const accentColor = accentColors[index % accentColors.length];
+                const leftBorder = brokerChanged ? 'border-left: 1px solid var(--border-divider);' : 'border-left: 0.5px solid var(--border-default);';
+                const borderStyle = `border-right: 0.5px solid var(--border-default); ${leftBorder}`;
+                headerRow1 += `<th colspan="${colsPerStrategy}" class="number-col" style="background: ${bgColor}; border-top: 3px solid ${accentColor}; color: ${accentColor}; ${borderStyle}">${displayName}</th>`;
+            });
+            headerRow1 += '</tr>';
+            
+            let headerRow2 = '<tr class="header-row-2">';
             mainColumns.forEach(col => {
                 const hasFilter = columnFilters[col];
                 const filterIcon = hasFilter ? ' active' : '';
                 const isNumber = ['qty', 'entry', 'exit', 'profit'].includes(col);
                 const isTime = ['a_entime', 'a_extime'].includes(col);
                 const isPrice = ['qty', 'entry', 'exit'].includes(col);
+                const isCenter = ['date', 'trade', 'a_entime', 'a_extime', 'qty'].includes(col);
                 const timeClass = isTime ? ` time-column${showTimeColumns ? ' visible' : ''}` : '';
                 const priceClass = isPrice ? ' price-column' : '';
-                headerRow1 += `<th rowspan="2" class="sortable${isNumber ? ' number-col' : ''}${timeClass}${priceClass}" data-column="${col}">
+                const centerClass = isCenter ? ' center-col' : '';
+                headerRow2 += `<th class="sortable ami-main${isNumber ? ' number-col' : ''}${timeClass}${priceClass}${centerClass}" data-column="${col}">
                     ${columnLabels[col]}
                     <span class="filter-icon${filterIcon}" data-filter-column="${col}">🔽</span>
                 </th>`;
             });
-            
+            let prevBroker2 = null;
             displayStrategies.forEach((stratName, index) => {
-                const displayName = formatStrategyName(stratName);
-                const bgColor = colors[index % colors.length];
-                const borderStyle = 'border-right: 1px solid #d1d5db; border-left: ' + (index === 0 ? '1px solid #e5e7eb;' : '0;');
-                headerRow1 += `<th colspan="${colsPerStrategy}" class="number-col" style="background: linear-gradient(to bottom, ${bgColor} 0%, ${adjustColor(bgColor, -3)} 100%); ${borderStyle}">${displayName}</th>`;
-            });
-            headerRow1 += '</tr>';
-            
-            let headerRow2 = '<tr class="header-row-2">';
-            displayStrategies.forEach((stratName, index) => {
-                const bgColor = colors[index % colors.length];
-                const baseBg = `background: linear-gradient(to bottom, ${adjustColor(bgColor, -3)} 0%, ${adjustColor(bgColor, -6)} 100%);`;
-                const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
-                const lastColBorder = 'border-right: 1px solid #d1d5db;';
+                const currBroker = getBrokerPrefix(stratName);
+                const brokerChanged = prevBroker2 !== null && currBroker !== prevBroker2;
+                prevBroker2 = currBroker;
+                const accentColor = accentColors[index % accentColors.length];
+                const baseBg = `background: #f5f5f4;`;
+                const firstColBorder = brokerChanged ? 'border-left: 1px solid var(--border-divider);' : 'border-left: 0.5px solid var(--border-default);';
+                const lastColBorder = 'border-right: 1px solid var(--border-emphasis);';
                 
                 const fields = ['lot_pnl', 'pnl', 'dpnl', 'dbuy', 'dsell', 'entime', 'extime', 'qty', 'lot_size', 'enprc', 'exprc'];
-                const fieldLabels = { lot_pnl: 'LOT PNL', pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', lot_size: 'LOT SIZE', enprc: 'ENPRC', exprc: 'EXPRC' };
+                const fieldLabels = { lot_pnl: 'LOT PNL', pnl: 'PNL', dpnl: 'DPNL', dbuy: 'DBUY', dsell: 'DSELL', entime: 'ENTIME', extime: 'EXTIME', qty: 'QTY', lot_size: 'LOT SIZE', enprc: 'BE PRICE', exprc: 'SE PRICE' };
                 
                 fields.forEach((field, fIdx) => {
                     const filterKey = `${stratName}_${field}`;
@@ -2834,13 +3017,25 @@
                     const isTime = ['entime', 'extime'].includes(field);
                     const isLot = ['lot_size', 'lot_pnl'].includes(field);
                     const isPrice = ['qty', 'enprc', 'exprc'].includes(field);
-                    const border = fIdx === 0 ? firstColBorder : (fIdx === fields.length - 1 ? lastColBorder : '');
+                    const isCenter = ['entime', 'extime', 'qty', 'lot_size'].includes(field);
+                    // First visible field gets the left group border (broker-change or subtle)
+                    const isFirstVisibleField = showLotColumns ? (field === 'lot_pnl') : (field === 'pnl');
+                    // Last visible field in DOM order: exprc (buy-sell on), else lot_size (lot on), else extime (time on), else dsell
+                    const isLastVisibleField = showBuySellColumns
+                        ? (field === 'exprc')
+                        : (showLotColumns
+                            ? (field === 'lot_size')
+                            : (showTimeColumns ? (field === 'extime') : (field === 'dsell')));
+                    let border = '';
+                    if (isFirstVisibleField) border += firstColBorder;
+                    if (isLastVisibleField) border += lastColBorder;
                     const buySellClass = isBuySell ? ` buy-sell-column${showBuySellColumns ? ' visible' : ''}` : '';
                     const timeClass = isTime ? ` time-column${showTimeColumns ? ' visible' : ''}` : '';
                     const lotClass = isLot ? ` lot-column${showLotColumns ? ' visible' : ''}` : '';
                     const priceClass = isPrice ? ' price-column' : '';
+                    const centerClass = isCenter ? ' center-col' : '';
                     
-                    headerRow2 += `<th class="number-col sortable${buySellClass}${timeClass}${lotClass}${priceClass}" data-stratname="${stratName}" data-field="${field}" style="${baseBg} ${border}">
+                    headerRow2 += `<th class="number-col sortable${buySellClass}${timeClass}${lotClass}${priceClass}${centerClass}" data-stratname="${stratName}" data-field="${field}" style="${baseBg} ${border}">
                         ${fieldLabels[field]}
                         <span class="filter-icon${filterIcon}" data-filter-strat="${stratName}" data-filter-field="${field}">🔽</span>
                     </th>`;
@@ -2866,22 +3061,31 @@
         function createTableRow(trade, displayStrategies) {
             const profit = trade.profit || 0;
             const profitClass = profit > 0 ? 'positive' : profit < 0 ? 'negative' : '';
-            const colors = ['#fef5f5', '#fefaf5', '#fefef5', '#f5fef8', '#f5f8fe', '#f8f5fe'];
+            // BE/SE mapping: LONG -> BE=entry, SE=exit ; SHORT -> BE=exit, SE=entry
+            const isShort = (trade.trade || '').toString().toUpperCase() === 'SHORT';
+            const bePrice = isShort ? trade.exit : trade.entry;
+            const sePrice = isShort ? trade.entry : trade.exit;
             
             let row = `<tr>
                 <td>${trade.sno || ''}</td>
-                <td>${convertDateToShortFormat(trade.date)}</td>
+                <td class="center-col">${convertDateToShortFormat(trade.date)}</td>
                 <td>${trade.strategy || ''}</td>
-                <td>${(trade.trade || '').toUpperCase()}</td>
+                <td class="center-col">${(trade.trade || '').toUpperCase()}</td>
                 <td>${trade.symbol || ''}</td>
-		<td class="number-col time-column${showTimeColumns ? ' visible' : ''}">${trade.a_entime || ''}</td>
-		<td class="number-col time-column${showTimeColumns ? ' visible' : ''}">${trade.a_extime || ''}</td>
-                <td class="number-col price-column">${trade.qty || ''}</td>
-                <td class="number-col price-column">${trade.entry ? trade.entry.toFixed(2) : ''}</td>
-                <td class="number-col price-column">${trade.exit ? trade.exit.toFixed(2) : ''}</td>
+		<td class="number-col center-col time-column${showTimeColumns ? ' visible' : ''}">${trade.a_entime || ''}</td>
+		<td class="number-col center-col time-column${showTimeColumns ? ' visible' : ''}">${trade.a_extime || ''}</td>
+                <td class="number-col center-col price-column">${trade.qty || ''}</td>
+                <td class="number-col price-column">${bePrice ? bePrice.toFixed(2) : ''}</td>
+                <td class="number-col price-column">${sePrice ? sePrice.toFixed(2) : ''}</td>
                 <td class="number-col ${profitClass}">${profit !== 0 ? `₹${profit.toLocaleString('en-IN', {maximumFractionDigits: 0})}` : ''}</td>`;
             
+            let prevBrokerR = null;
             displayStrategies.forEach((stratName, index) => {
+                const _bstr = String(stratName || '');
+                const _bm = _bstr.match(/^(.+?)PRO/i);
+                const _curB = _bm ? _bm[1] : '_ALL_';
+                const _brokerChanged = prevBrokerR !== null && _curB !== prevBrokerR;
+                prevBrokerR = _curB;
                 const details = trade.strategyDetails?.[stratName] || {};
                 const pnl = details.pnl || 0;
                 const dpnl = details.dpnl || 0;
@@ -2895,44 +3099,44 @@
                 const lot_size = details.lot !== undefined && details.lot !== null ? details.lot : '';
                 const lot_pnl = (lot_size && lot_size !== 0) ? (pnl / lot_size) : 0;
                 
-                // Calculate ENPRC and EXPRC based on trade type
-                let enprc = 0;
-                let exprc = 0;
-                if (trade.trade) {
-                    const tradeType = trade.trade.toString().toUpperCase();
-                    if (tradeType === 'SHORT') {
-                        // Short trade: ENPRC = sell, EXPRC = buy
-                        enprc = sell;
-                        exprc = buy;
-                    } else if (tradeType === 'LONG') {
-                        // Long trade: ENPRC = buy, EXPRC = sell
-                        enprc = buy;
-                        exprc = sell;
-                    }
-                }
+                // Broker BE/SE: always BE PRICE = buy, SE PRICE = sell (no direction flip)
+                const enprc = buy;   // BE PRICE column
+                const exprc = sell;  // SE PRICE column
                 
-                const bgColor = colors[index % colors.length];
                 const pnlClass = pnl > 0 ? 'positive' : pnl < 0 ? 'negative' : '';
                 const dpnlClass = dpnl > 0 ? 'positive' : dpnl < 0 ? 'negative' : '';
                 const dbuyClass = dbuy > 0 ? 'positive' : dbuy < 0 ? 'negative' : '';
                 const dsellClass = dsell > 0 ? 'positive' : dsell < 0 ? 'negative' : '';
                 const lot_pnlClass = lot_pnl > 0 ? 'positive' : lot_pnl < 0 ? 'negative' : '';
-                const firstColBorder = index === 0 ? 'border-left: 1px solid #e5e7eb;' : '';
-                const groupBorder = `style="background-color: ${bgColor}; ${firstColBorder}"`;
-                const groupBorderNoFirst = `style="background-color: ${bgColor};"`;
-                const lastColBorder = 'style="background-color: ' + bgColor + '; border-right: 1px solid #d1d5db;"';
+                // Unified 1px inter-column border; the AMI/broker divider is handled by CSS on column 11
+                const groupBorder = _brokerChanged
+                    ? 'border-left: 1px solid var(--border-divider);'
+                    : 'border-left: 0.5px solid var(--border-default);';
+                const groupBorderNoFirst = '';
+                const lastColBorder = 'border-right: 1px solid var(--border-emphasis);';
+                // Apply left group border to the first VISIBLE cell of this strategy
+                const lotBorderL = showLotColumns ? groupBorder : '';
+                const pnlBorderL = !showLotColumns ? groupBorder : '';
+                // Last visible field in DOM order: exprc (buy-sell on), else lot_size (lot on), else extime (time on), else dsell
+                const lastField = showBuySellColumns
+                    ? 'exprc'
+                    : (showLotColumns ? 'lot_size' : (showTimeColumns ? 'extime' : 'dsell'));
+                const dsellBorderR    = (lastField === 'dsell')    ? lastColBorder : '';
+                const extimeBorderR   = (lastField === 'extime')   ? lastColBorder : '';
+                const lot_sizeBorderR = (lastField === 'lot_size') ? lastColBorder : '';
+                const exprcBorderR    = (lastField === 'exprc')    ? lastColBorder : '';
                 
-                row += `<td class="number-col ${lot_pnlClass} lot-column${showLotColumns ? ' visible' : ''}" ${groupBorder}>${lot_pnl !== 0 ? lot_pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${pnlClass}" ${groupBorderNoFirst}>${pnl !== 0 ? pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dpnlClass}" ${groupBorderNoFirst}>${dpnl !== 0 ? dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dbuyClass}" ${groupBorderNoFirst}>${dbuy !== 0 ? dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col ${dsellClass}" ${groupBorderNoFirst}>${dsell !== 0 ? dsell.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
-                row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${entime}</td>`;
-                row += `<td class="number-col time-column${showTimeColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${extime}</td>`;
-                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${qty !== 0 ? qty : ''}</td>`;
-                row += `<td class="number-col price-column lot-column${showLotColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${lot_size && lot_size !== 0 ? parseFloat(lot_size).toFixed(1) : ''}</td>`;
-                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${groupBorderNoFirst}>${enprc !== 0 ? enprc.toFixed(2) : ''}</td>`;
-                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" ${lastColBorder}>${exprc !== 0 ? exprc.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col ${lot_pnlClass} lot-column${showLotColumns ? ' visible' : ''}" style="${lotBorderL}">${lot_pnl !== 0 ? lot_pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${pnlClass}" style="${pnlBorderL}">${pnl !== 0 ? pnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dpnlClass}">${dpnl !== 0 ? dpnl.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dbuyClass}">${dbuy !== 0 ? dbuy.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col ${dsellClass}" style="${dsellBorderR}">${dsell !== 0 ? dsell.toLocaleString('en-IN', {maximumFractionDigits: 0}) : ''}</td>`;
+                row += `<td class="number-col center-col time-column${showTimeColumns ? ' visible' : ''}">${entime}</td>`;
+                row += `<td class="number-col center-col time-column${showTimeColumns ? ' visible' : ''}" style="${extimeBorderR}">${extime}</td>`;
+                row += `<td class="number-col center-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}">${qty !== 0 ? qty : ''}</td>`;
+                row += `<td class="number-col center-col price-column lot-column${showLotColumns ? ' visible' : ''}" style="${lot_sizeBorderR}">${lot_size && lot_size !== 0 ? parseFloat(lot_size).toFixed(1) : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}">${enprc !== 0 ? enprc.toFixed(2) : ''}</td>`;
+                row += `<td class="number-col price-column buy-sell-column${showBuySellColumns ? ' visible' : ''}" style="${exprcBorderR}">${exprc !== 0 ? exprc.toFixed(2) : ''}</td>`;
             });
             
             return row + '</tr>';
@@ -2969,7 +3173,7 @@
             const totalCols = 9 + (showTimeColumns ? 2 : 0) + (displayStrategies.length * colsPerStrategy);
 
             if (filteredTrades.length === 0) {
-                elements.tableBody.innerHTML = `<tr><td colspan="${totalCols}" class="no-data">No trades found</td></tr>`;
+                elements.tableBody.innerHTML = `<tr><td colspan="${totalCols}" class="no-data no-data-left">No trades found</td></tr>`;
                 elements.pagination.style.display = 'none';
                 return;
             }
@@ -3126,7 +3330,7 @@
             const displayStrategies = visibleBrokerStrategies.length === brokerStrategies.length ? 
                 brokerStrategies : visibleBrokerStrategies;
 
-            const headers = ['S.No', 'Date', 'STG', 'Trade', 'Symbol', 'EN TIME', 'EX TIME', 'Qty', 'Entry', 'Exit', 'Profit'];
+            const headers = ['S.No', 'Date', 'STG', 'TRADE', 'Symbol', 'EN TIME', 'EX TIME', 'QTY', 'BE PRICE', 'SE PRICE', 'PNL'];
             displayStrategies.forEach(stratName => {
                 const displayName = formatStrategyName(stratName);
                 headers.push(`${displayName} LOT PNL`);
@@ -3140,16 +3344,20 @@
                     headers.push(`${displayName} LOT SIZE`);
                 }
                 if (showBuySellColumns) {
-                    headers.push(`${displayName} ENPRC`, `${displayName} EXPRC`);
+                    headers.push(`${displayName} BE PRICE`, `${displayName} SE PRICE`);
                 }
             });
             
             const rows = filteredTrades.map(trade => {
+                // BE/SE mapping: LONG -> BE=entry, SE=exit ; SHORT -> BE=exit, SE=entry
+                const isShort = (trade.trade || '').toString().toUpperCase() === 'SHORT';
+                const bePrice = isShort ? trade.exit : trade.entry;
+                const sePrice = isShort ? trade.entry : trade.exit;
                 const row = [
                     trade.sno || '', trade.date || '', trade.strategy || '', trade.trade || '',
                     trade.symbol || '', trade.a_entime || '', trade.a_extime || '', 
-                    trade.qty || '', trade.entry?.toFixed(2) || '',
-                    trade.exit?.toFixed(2) || '', trade.profit || ''
+                    trade.qty || '', bePrice?.toFixed(2) || '',
+                    sePrice?.toFixed(2) || '', trade.profit || ''
                 ];
                 
                 displayStrategies.forEach(stratName => {
@@ -3157,19 +3365,9 @@
                     const lot = details.lot || 0;
                     const lot_pnl = (lot && lot !== 0) ? ((details.pnl || 0) / lot) : 0;
                     
-                    // Calculate ENPRC and EXPRC based on trade type
-                    let enprc = 0;
-                    let exprc = 0;
-                    if (trade.trade) {
-                        const tradeType = trade.trade.toString().toUpperCase();
-                        if (tradeType === 'SHORT') {
-                            enprc = details.sell || 0;
-                            exprc = details.buy || 0;
-                        } else if (tradeType === 'LONG') {
-                            enprc = details.buy || 0;
-                            exprc = details.sell || 0;
-                        }
-                    }
+                    // Broker BE/SE: always BE PRICE = buy, SE PRICE = sell (no direction flip)
+                    const enprc = details.buy || 0;   // BE PRICE column
+                    const exprc = details.sell || 0;  // SE PRICE column
                     
                     row.push(lot_pnl !== 0 ? lot_pnl.toFixed(0) : '');
                     row.push(details.pnl || '', details.dpnl || '');
