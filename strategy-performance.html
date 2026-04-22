@@ -1,59 +1,807 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Strategy Performance</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
-*{margin:0;padding:0;box-sizing:border-box;}html, body{width:100%;height:100%;overflow:hidden;}body{font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;background:#f8fafc;color:#1e293b;}.main-content{overflow-y:auto;overflow-x:auto;padding:16px 16px 32px 32px;background:#f8fafc;height:100vh;width:100%;}.page-header{margin-bottom:16px;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:100;padding-right:16px;margin-right:-16px;}.page-title{font-size:20px;font-weight:700;color:#111827;margin-bottom:4px;letter-spacing:-0.5px;}.page-subtitle{font-size:12px;color:#6b7280;font-weight:400;}
-.controls-section{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:1000;padding-right:16px;margin-right:-16px;}.controls-section > *{flex:1 1 auto;min-width:0;}.control-group{display:flex;align-items:center;gap:8px;}.control-label{font-size:12px;color:#374151;font-weight:600;}.strategy-filter-container{position:relative;flex:1 1 auto;min-width:0;z-index:10000;}.strategy-filter-button{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:500;background:white;color:#374151;cursor:pointer;transition:all 0.15s ease;width:100%;white-space:nowrap;}
-.strategy-filter-button:hover{border-color:#9ca3af;background:#f9fafb;}.strategy-filter-dropdown{position:absolute;top:100%;left:0;margin-top:6px;background:white;border:1px solid #d1d5db;border-radius:10px;box-shadow:0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);min-width:180px;max-height:400px;overflow-y:auto;z-index:99999;display:none;}.strategy-filter-dropdown.active{display:block;}#monthFilterDropdown{min-width:160px;max-width:160px;max-height:500px;}#monthFilterDropdown .strategy-filter-label{font-size:12px;}
-#monthFilterDropdown .strategy-filter-item{padding:6px 14px;}.strategy-filter-header{padding:10px 12px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;}.strategy-filter-title{font-size:13px;font-weight:600;color:#1e293b;}.strategy-filter-actions{display:flex;gap:4px;}.filter-action-btn{font-size:11px;color:#1e40af;cursor:pointer;padding:4px 6px;border-radius:4px;transition:background 0.2s ease;}.filter-action-btn:hover{background:#eff6ff;}.filter-action-btn[style*="color:#dc2626"]:hover{background:#fee2e2;}
-.strategy-filter-list{padding:8px 0;}.strategy-filter-item{display:flex;align-items:center;padding:8px 14px;cursor:pointer;transition:background 0.2s ease;}.strategy-filter-item:hover{background:#f8fafc;}.strategy-filter-checkbox{margin-right:10px;width:16px;height:16px;cursor:pointer;}.strategy-filter-label{font-size:13px;color:#475569;cursor:pointer;user-select:none;}.filter-badge{display:inline-block;background:#1e40af;color:white;font-size:9px;padding:2px 5px;border-radius:10px;margin-left:6px;font-weight:600;}
-select, button{padding:7px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:11px;font-weight:500;background:white;color:#374151;cursor:pointer;transition:all 0.15s ease;font-family:inherit;white-space:nowrap;text-align:center;flex:1 1 auto;min-width:0;}select:hover, button:hover{border-color:#9ca3af;background:#f9fafb;}select:focus, button:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59, 130, 246, 0.1);}button.primary{background:#3b82f6;color:white;border-color:#3b82f6;}
-button.primary:hover{background:#2563eb;border-color:#2563eb;}button.active{background:white;color:#3b82f6;border:1px solid #3b82f6;}.custom-date-range{display:flex;gap:4px;align-items:center;padding:4px 8px;background:transparent;border-radius:6px;}.custom-date-range label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;}.custom-date-range input[type="date"]{padding:4px 6px;font-size:10px;border:1px solid #e5e7eb;border-radius:4px;font-family:inherit;color:#475569;cursor:pointer;background:transparent;}.custom-date-range input[type="date"]:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1);}.date-nav-arrows{display:flex;flex-direction:column;gap:1px;margin-left:2px;}.date-nav-arrows button{padding:0;width:16px;height:11px;font-size:8px;line-height:1;border:1px solid #e5e7eb;background:transparent;color:#64748b;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s ease;}.date-nav-arrows button:hover{background:transparent;color:#475569;border-color:#cbd5e1;}.date-range-buttons{display:flex;gap:4px;}.date-range-buttons .btn{padding:6px 12px;font-size:10px;font-weight:600;color:#64748b;background:transparent;border:none;border-radius:6px;cursor:pointer;transition:all 0.2s ease;text-transform:uppercase;letter-spacing:0.5px;}.date-range-buttons .btn:hover{background:#e2e8f0;color:#475569;}.date-range-buttons .btn.active{background:white;color:#3b82f6;border:1px solid #3b82f6;}.table-container{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);border:1px solid #e5e7eb;overflow:visible;margin-bottom:16px;position:relative;}.table-wrapper{overflow-x:visible;overflow-y:visible;background:white;border-radius:0;}.performance-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;min-width:800px;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;font-variant-numeric:tabular-nums;position:relative;isolation:isolate;}
-.performance-table thead{position:sticky;top:0;z-index:1000;background:white;isolation:isolate;transform:translateZ(0);}.performance-table thead::after{content:'';position:absolute;top:-1000px;left:0;right:0;height:1000px;background:#f8fafc;z-index:999;pointer-events:none;}.performance-table thead::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:white;z-index:-1;}.performance-table thead tr{height:0;border-spacing:0;border-collapse:collapse;}.performance-table thead tr.header-row-1, .performance-table thead tr.header-row-2{height:auto;}.performance-table thead tr.header-row-1 th{padding:12px 8px 6px 8px;position:sticky;top:0;background:#f3f4f6;z-index:1000;font-size:10px;text-align:center;font-weight:700;color:#1f2937;border-bottom:1px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;vertical-align:middle;height:32px;contain:paint;}
-.performance-table thead tr.header-row-1 th[rowspan="2"]{border-bottom:2px solid #d1d5db;text-align:center;background:#f3f4f6;padding:12px 8px;height:auto;vertical-align:middle;contain:paint;}.performance-table thead tr.header-row-2 th{padding:9px 8px;font-size:9px;position:sticky;top:32px;background:#f3f4f6;z-index:1000;font-weight:600;color:#374151;text-align:center !important;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;line-height:1.2;vertical-align:middle;height:32px;contain:paint;}
-.performance-table thead tr.header-row-1 th:first-child{position:sticky;left:0;z-index:2000;background:#f9fafb !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;padding:12px 8px;vertical-align:middle;text-align:center;}.performance-table tbody{position:relative;z-index:1;}.performance-table th{background:#f3f4f6;padding:12px 8px;text-align:center;font-weight:700;color:#6b7280;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;font-size:10px;letter-spacing:0.5px;min-width:75px;max-width:90px;vertical-align:middle;}
-.performance-table th.strategy-group-end{border-right:1px solid #cbd5e1;}.performance-table td.strategy-group-end{border-right:1px solid #cbd5e1;}.performance-table th.apro-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table td.apro-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table th.broker-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table td.broker-boundary{border-right:1px solid #cbd5e1 !important;}.performance-table th.strategy-bg-0, .performance-table td.strategy-bg-0, .performance-table th.strategy-bg-1, .performance-table td.strategy-bg-1, .performance-table th.strategy-bg-2, .performance-table td.strategy-bg-2{background:#f8fcf9;}
-.performance-table th.sortable{cursor:pointer;user-select:none;position:relative;}.performance-table th.sortable:hover{background:#e5e7eb;}.performance-table th.sortable::after{content:'⇅';position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:8px;color:#9ca3af;opacity:0;transition:opacity 0.2s;}.performance-table th.sortable:hover::after{opacity:1;}.performance-table th.sortable.sort-asc::after{content:'▲';opacity:1;color:#3b82f6;}.performance-table th.sortable.sort-desc::after{content:'▼';opacity:1;color:#3b82f6;}.performance-table thead tr.header-row-2 th.sortable{padding-right:14px;}
-.performance-table th.strategy-bg-3, .performance-table td.strategy-bg-3{background:#fefafd;}.performance-table th.strategy-bg-4, .performance-table td.strategy-bg-4{background:#fffaf5;}.performance-table td.lot-col.strategy-bg-0, .performance-table td.lot-col.strategy-bg-1, .performance-table td.lot-col.strategy-bg-2, .performance-table td.lot-col.strategy-bg-3, .performance-table td.lot-col.strategy-bg-4{width:65px;min-width:65px;max-width:65px;background:#eff8fe !important;}.performance-table tr:hover td.strategy-bg-0, .performance-table tr:hover td.strategy-bg-1, .performance-table tr:hover td.strategy-bg-2, .performance-table tr:hover td.strategy-bg-3, .performance-table tr:hover td.strategy-bg-4{background:#fafbfc;}
-.performance-table tr:hover td.lot-col.strategy-bg-0, .performance-table tr:hover td.lot-col.strategy-bg-1, .performance-table tr:hover td.lot-col.strategy-bg-2, .performance-table tr:hover td.lot-col.strategy-bg-3, .performance-table tr:hover td.lot-col.strategy-bg-4{background:#fafbfc;width:65px;min-width:65px;max-width:65px;}.performance-table tr:hover td.apro-pnl-col{background:#fafbfc;width:85px;min-width:75px;}.performance-table tr:hover td.apro-pnl-col.strategy-bg-0, .performance-table tr:hover td.apro-pnl-col.strategy-bg-1, .performance-table tr:hover td.apro-pnl-col.strategy-bg-2, .performance-table tr:hover td.apro-pnl-col.strategy-bg-3, .performance-table tr:hover td.apro-pnl-col.strategy-bg-4{background:#fafbfc;width:85px;min-width:75px;}
-.performance-table th:first-child{position:sticky;left:0;z-index:10;background:#f8fafc !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;vertical-align:middle;text-align:center;}.performance-table th.number-col{text-align:center;max-width:80px;}.performance-table th.apro-pnl-col, .performance-table td.apro-pnl-col{min-width:75px;width:85px;}.performance-table td.apro-pnl-col.strategy-bg-0, .performance-table td.apro-pnl-col.strategy-bg-1, .performance-table td.apro-pnl-col.strategy-bg-2, .performance-table td.apro-pnl-col.strategy-bg-3, .performance-table td.apro-pnl-col.strategy-bg-4{background:#f8fcf9;width:85px;min-width:75px;}
-/* Hide Total DPNL columns */ .performance-table.hide-total-dpnl th.dpnl-header-col,.performance-table.hide-total-dpnl th.dpnl-sub-header-col,.performance-table.hide-total-dpnl td.dpnl-section{display:none;}
-/* Section-based color overrides */ .performance-table td.dpnl-section{background:#fefafd !important;}.performance-table td.pnl-section{background:#fffaf5 !important;}.performance-table td{padding:11px 8px;border-bottom:1px solid #f3f4f6;border-right:1px solid #f3f4f6;color:#374151;text-align:right;white-space:nowrap;min-width:75px;max-width:90px;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:400;}.performance-table td.lot-col{min-width:65px;max-width:65px;width:65px;}.performance-table th.lot-col{min-width:65px;max-width:65px;width:65px;}
-.performance-table td:first-child{position:sticky;left:0;background:white !important;font-weight:450;z-index:1;border-right:2px solid #cbd5e1;width:120px;min-width:120px;max-width:120px;padding:11px 8px;text-align:left;color:#111827;}.performance-table td.number-col{text-align:right;font-weight:400;font-size:12px;min-width:75px;max-width:90px;padding:11px 8px;font-variant-numeric:tabular-nums;}.performance-table th.number-col{text-align:center;max-width:90px;}.performance-table td.number-col.total-net-col{min-width:80px;max-width:none;font-weight:450;background:#fefce8 !important;}
-.performance-table tbody tr.month-row td.number-col.total-net-col, .performance-table tbody tr.total-row td.number-col.total-net-col{background:#fef9c3 !important;}.performance-table th.total-net-col{min-width:80px;max-width:none;}.performance-table th.total-col-border, .performance-table td.total-col-border{border-right:1px solid #cbd5e1 !important;}.performance-table td.number-col.net-pnl-percent-col{min-width:60px;max-width:60px;font-weight:450;background:#fefce8 !important;font-size:12px;}.performance-table tbody tr.month-row td.number-col.net-pnl-percent-col, .performance-table tbody tr.total-row td.number-col.net-pnl-percent-col{background:#fef9c3 !important;}
-.performance-table th.net-pnl-percent-col{min-width:60px;max-width:80px;}.performance-table td.number-col.drawdown-col{min-width:90px;max-width:none;background:#fef2f2 !important;}.performance-table tbody tr.month-row td.number-col.drawdown-col{background:#feecec !important;}.performance-table tbody tr.year-row td.number-col.drawdown-col{background:#fee5e5 !important;}.performance-table tbody tr.total-row td.number-col.drawdown-col{background:#fee2e2 !important;}.performance-table th.drawdown-col{min-width:90px;max-width:none;}.performance-table td.number-col.expenses-col{font-weight:450;background:#fef2f2;border-left:1px solid #cbd5e1;}
-.performance-table tbody tr.month-row td.number-col.expenses-col, .performance-table tbody tr.total-row td.number-col.expenses-col{background:#feecec !important;}.performance-table th.expenses-col{min-width:80px;max-width:none;}.performance-table td.positive{color:#059669;}.performance-table td.negative{color:#b96060;}.performance-table tr:hover{background:#fafbfc;}.performance-table tr:hover td:first-child{background:#fafbfc !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row{background:#f9fafb;font-weight:700;border-top:2px solid #d1d5db;transform:translateZ(0);position:relative;z-index:1;}
-.performance-table tbody tr.total-row:hover{background:#f3f4f6;}.performance-table tbody tr.total-row td{border-top:2px solid #d1d5db;padding:14px 8px;font-weight:450;font-size:12px;}.performance-table tbody tr.total-row td:first-child{background:#f9fafb !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row:hover td:first-child{background:#f3f4f6 !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}.performance-table tbody tr.total-row:hover td.strategy-bg-0, .performance-table tbody tr.total-row:hover td.strategy-bg-1, .performance-table tbody tr.total-row:hover td.strategy-bg-2{background:#ecf7f1;}
-.performance-table tbody tr.total-row:hover td.strategy-bg-3{background:#fef0f6;}.performance-table tbody tr.total-row:hover td.strategy-bg-4{background:#fff1e1;}.performance-table tbody tr.total-row:hover td.lot-col{width:65px;min-width:65px;max-width:65px;background:#dff0fc !important;}.performance-table tbody tr.total-row:hover td.dpnl-section{background:#fef0f6 !important;}.performance-table tbody tr.total-row:hover td.pnl-section{background:#fff1e1 !important;}.performance-table tbody tr.total-row:hover td.apro-pnl-col{width:85px;min-width:75px;}
-.performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-4{background:#ecf7f1;}.performance-table tbody tr.total-row td.apro-pnl-col{width:85px;min-width:75px;}.performance-table tbody tr.month-row{background:#f9fafb;font-weight:450 !important;cursor:pointer;user-select:none;border-left:3px solid transparent;transition:all 0.15s ease;}
-.performance-table tbody tr.month-row:hover{background:#f3f4f6;border-left-color:#3b82f6;}.performance-table tbody tr.month-row td{font-weight:450 !important;font-size:12px !important;}.performance-table tbody tr.month-row td:first-child{background:#f9fafb !important;color:#111827;min-width:120px;max-width:120px;font-weight:450 !important;font-size:12px !important;border-right:2px solid #cbd5e1;padding-left:20px;}.performance-table tbody tr.month-row:hover td:first-child{background:#f3f4f6 !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;padding-left:20px;}
-.performance-table tbody tr.month-row:hover td.strategy-bg-0, .performance-table tbody tr.month-row:hover td.strategy-bg-1, .performance-table tbody tr.month-row:hover td.strategy-bg-2{background:#e3f3ea;}.performance-table tbody tr.month-row:hover td.strategy-bg-3{background:#fde9f3;}.performance-table tbody tr.month-row:hover td.strategy-bg-4{background:#ffecd6;}.performance-table tbody tr.month-row:hover td.lot-col{width:65px;min-width:65px;max-width:65px;background:#d5ebfa !important;}.performance-table tbody tr.month-row:hover td.dpnl-section{background:#fde9f3 !important;}
-.performance-table tbody tr.month-row:hover td.pnl-section{background:#ffecd6 !important;}.performance-table tbody tr.month-row:hover td.apro-pnl-col{width:85px;min-width:75px;}.performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-4{background:#e3f3ea;}
-.performance-table tbody tr.month-row td.strategy-bg-0, .performance-table tbody tr.month-row td.strategy-bg-1, .performance-table tbody tr.month-row td.strategy-bg-2{background:#f0f9f3;}.performance-table tbody tr.month-row td.strategy-bg-3{background:#fef2f8;}.performance-table tbody tr.month-row td.strategy-bg-4{background:#fff3e8;}.performance-table tbody tr.month-row td.lot-col{background:#e8f4fc !important;}.performance-table tbody tr.month-row td.dpnl-section{background:#fef2f8 !important;}
-.performance-table tbody tr.month-row td.pnl-section{background:#fff3e8 !important;}.performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-4{background:#f0f9f3;width:85px;min-width:75px;}
-.performance-table tbody tr.year-row td.strategy-bg-0, .performance-table tbody tr.year-row td.strategy-bg-1, .performance-table tbody tr.year-row td.strategy-bg-2{background:#e9f5ee;}.performance-table tbody tr.year-row td.strategy-bg-3{background:#fbeaf4;}.performance-table tbody tr.year-row td.strategy-bg-4{background:#ffedd9;}.performance-table tbody tr.year-row td.lot-col{background:#dfeef9 !important;}.performance-table tbody tr.year-row td.dpnl-section{background:#fbeaf4 !important;}
-.performance-table tbody tr.year-row td.pnl-section{background:#ffedd9 !important;}.performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-4{background:#e9f5ee;width:85px;min-width:75px;}
-.performance-table tbody tr.year-row td.number-col.total-net-col{background:#fef5cd !important;}.performance-table tbody tr.year-row td.number-col.net-pnl-percent-col{background:#fef5cd !important;}.performance-table tbody tr.year-row td.number-col.expenses-col{background:#fee5e5 !important;}
-.performance-table tbody tr.month-row[data-year]:not(.expanded){display:none;}
-.performance-table tbody tr.month-row[data-year].expanded{display:table-row;}
-.performance-table tbody tr.year-row{background:#f1f3f5 !important;font-weight:650;cursor:pointer;user-select:none;border-left:3px solid transparent;transition:all 0.15s ease;}.performance-table tbody tr.year-row:hover{background:#e5e7eb !important;border-left-color:#3b82f6;}.performance-table tbody tr.year-row td{font-size:12px;font-weight:650;padding:12px 8px;}.performance-table tbody tr.year-row td:first-child{font-weight:700;color:#111827;background:#f1f3f5 !important;}.performance-table tbody tr.year-row:hover td:first-child{background:#e5e7eb !important;}
-.performance-table tbody tr.day-row{display:none;}
-.performance-table tbody tr.day-row[data-year]:not(.expanded){display:none;}
-.performance-table tbody tr.day-row.expanded{display:table-row;}.performance-table tbody tr.day-row td{padding:7px 8px;font-size:12px;}.performance-table tbody tr.day-row td:first-child{padding-left:40px;padding-top:7px;padding-bottom:7px;font-weight:450;color:#6b7280;min-width:120px;max-width:120px;font-size:12px;border-right:2px solid #cbd5e1;background:white !important;}.performance-table tbody tr.day-row td.apro-pnl-col{width:85px;min-width:75px;}.expand-icon{display:inline-block;width:18px;height:18px;margin-right:10px;text-align:center;font-weight:600;color:#6b7280;transition:transform 0.2s ease;font-size:12px;line-height:18px;}
-.expand-icon.expanded{transform:rotate(90deg);}.no-data{text-align:center;color:#cbd5e1;padding:40px;font-size:14px;}.main-content::before{content:'';position:fixed;left:0;top:0;width:32px;height:100vh;background:#f8fafc;z-index:30;pointer-events:none;}.summary-cards{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:stretch;max-width:calc(100vw - 48px);position:sticky;left:0;background:#f8fafc;z-index:100;padding-right:16px;margin-right:-16px;}.summary-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);border:1px solid #e5e7eb;flex:1 1 0;min-width:140px;}.summary-card-title{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
-.summary-card-value{font-size:18px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;}.summary-card-value.positive{color:#059669;}.summary-card-value.negative{color:#b96060;}.summary-card.net-profit-box{background:#f0fdf4;}.summary-card.total-expense-box{background:#fdf2f8;}.summary-card.running-margin-box{background:#fffbeb;}
+/* ============ DESIGN TOKENS ============ */
+:root {
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f3f4f6;
+    --bg-muted: #f9fafb;
+    --bg-totals: #e5e7eb;
+    --bg-totals-subtle: #d1d5db;
+    --border-default: #e5e7eb;
+    --border-subtle: #f3f4f6;
+    --border-emphasis: #d1d5db;
+    --border-divider: #94a3b8;
+    --text-primary: #1e293b;
+    --text-body: #374151;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --text-subtle: #9ca3af;
+    --text-title: #111827;
+    --accent: #4338ca;
+    --accent-hover: #3730a3;
+    --accent-light: #eef2ff;
+    --accent-subtle: #e0e7ff;
+    --profit: #059669;
+    --loss: #b96060;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 
-/* Mobile Safari Critical Fix */
-@supports (-webkit-touch-callout: none) {
-  /* Safari-only styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--font-ui);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============ LAYOUT ============ */
+.main-content {
+    overflow-y: auto;
+    padding: 16px 24px 24px;
+    height: 100vh;
+    position: relative;
+    background: var(--bg-page);
+}
+
+.page-header {
+    margin-bottom: 12px;
+}
+
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-title);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* ============ SUMMARY CARDS ============ */
+.summary-cards {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.summary-card {
+    background: var(--bg-surface);
+    border-radius: 10px;
+    padding: 11px 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    border: 1px solid var(--border-default);
+    border-top: 2px solid transparent;
+    flex: 1 1 0;
+    min-width: 0;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    overflow: hidden;
+}
+
+.summary-card:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    border-color: var(--border-emphasis);
+}
+
+.summary-card-title {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 5px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.summary-card-value {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.summary-card-value.positive { color: #059669; }
+
+.summary-card-value.negative { color: #b96060; }
+
+/* Accent strips on specialized cards */
+.summary-card.running-margin-box {
+    border-top-color: #0284c7;
+}
+
+.summary-card.total-expense-box {
+    border-top-color: #d97706;
+}
+
+.summary-card.net-profit-box {
+    border-top-color: #059669;
+}
+
+/* ============ CONTROLS ============ */
+.controls-section {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    align-items: stretch;
+    padding: 10px 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.controls-section > button,
+.controls-section > .strategy-filter-container {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.controls-section > .strategy-filter-container {
+    flex: 1.35 1 0;
+}
+/* Auto-size these filter buttons to their text content */
+.controls-section > .strategy-filter-container:has(#monthFilterDropdown),
+.controls-section > .strategy-filter-container:has(#strategyFilterDropdown),
+.controls-section > .strategy-filter-container:has(#brokerFilterDropdown) {
+    flex: 0 0 auto;
+}
+.controls-section > #filteredTotalsButton {
+    flex: 0 0 auto;
+}
+.controls-section > .strategy-filter-container > .strategy-filter-button {
+    width: 100%;
+    justify-content: center;
+}
+.controls-section > button {
+    text-align: center;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.control-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Strategy filter dropdowns */
+.strategy-filter-container {
+    position: relative;
+}
+
+.strategy-filter-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border: 1px solid var(--border-emphasis);
+    border-radius: 7px;
+    background: var(--bg-surface);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-body);
+    white-space: nowrap;
+    transition: all 0.15s;
+}
+
+.strategy-filter-button:hover {
+    border-color: var(--text-muted);
+    background: var(--bg-subtle);
+}
+
+.strategy-filter-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-emphasis);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.05);
+    min-width: 240px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.strategy-filter-dropdown.active { display: block; }
+
+#monthFilterDropdown { min-width: 200px; }
+
+#monthFilterDropdown .strategy-filter-label { font-size: 11px; }
+
+#monthFilterDropdown .strategy-filter-item { padding: 6px 12px; }
+
+.strategy-filter-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.strategy-filter-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-title);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.strategy-filter-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.filter-action-btn {
+    font-size: 10.5px;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background 0.12s ease;
+}
+
+.filter-action-btn:hover { background: var(--accent-light); }
+
+.strategy-filter-list {
+    padding: 6px 0;
+}
+
+.strategy-filter-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.strategy-filter-item:hover { background: var(--bg-subtle); }
+
+.strategy-filter-checkbox {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.strategy-filter-label {
+    font-size: 12px;
+    color: var(--text-body);
+    cursor: pointer;
+    flex: 1;
+    font-weight: 500;
+}
+
+.filter-badge {
+    background: var(--accent);
+    color: white;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============ BUTTONS ============ */
+select, button {
+    padding: 7px 11px;
+    border: 1px solid var(--border-emphasis);
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--bg-surface);
+    color: var(--text-body);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-ui);
+    white-space: nowrap;
+}
+
+select:hover, button:hover {
+    border-color: var(--text-muted);
+    background: var(--bg-subtle);
+}
+
+select:focus, button:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+button.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+button.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+button.active {
+    background: var(--bg-surface);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Date controls */
+.custom-date-range {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.custom-date-range label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.custom-date-range input[type="date"] {
+    padding: 4px 6px;
+    font-size: 10px;
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    color: var(--text-body);
+    background: transparent;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-ui);
+}
+
+.date-nav-arrows {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-left: 2px;
+}
+
+.date-nav-arrows button {
+    padding: 0;
+    width: 16px;
+    height: 11px;
+    font-size: 8px;
+    line-height: 1;
+    border: 1px solid var(--border-default);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-nav-arrows button:hover {
+    background: var(--bg-subtle);
+    color: var(--text-body);
+}
+
+.date-range-buttons {
+    display: flex;
+    gap: 2px;
+}
+
+.date-range-buttons .btn {
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.date-range-buttons .btn:hover {
+    background: var(--bg-subtle);
+    color: var(--text-body);
+}
+
+.date-range-buttons .btn.active {
+    background: var(--bg-surface);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+    .main-content { padding: 12px 16px 20px; }
+    .summary-card { padding: 9px 12px; }
+    .summary-card-value { font-size: 16px; }
+    .summary-card-title { font-size: 9px; }
+}
+
+@media screen and (max-width: 768px) {
+  .page-title { font-size: 18px; }
+  .page-subtitle { font-size: 11px; }
+  .summary-cards { gap: 6px; }
+  .summary-card { padding: 8px 10px; }
+  .summary-card-value { font-size: 15px; }
+  .controls-section { padding: 8px 10px; gap: 4px; }
+}
+
+/* ============ ORIGINAL TABLE LAYOUT ============ */
+
+.table-container{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);border:1px solid #e5e7eb;overflow:visible;margin-bottom:16px;position:relative;}
+
+.table-wrapper{overflow-x:visible;overflow-y:visible;background:white;border-radius:0;}
+
+.performance-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;min-width:800px;font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;font-variant-numeric:tabular-nums;position:relative;isolation:isolate;}
+
+.performance-table thead{position:sticky;top:0;z-index:1000;background:white;isolation:isolate;transform:translateZ(0);}
+
+.performance-table thead::after{content:'';position:absolute;top:-1000px;left:0;right:0;height:1000px;background:#f8fafc;z-index:999;pointer-events:none;}
+
+.performance-table thead::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:white;z-index:-1;}
+
+.performance-table thead tr{height:0;border-spacing:0;border-collapse:collapse;}
+
+.performance-table thead tr.header-row-1, .performance-table thead tr.header-row-2{height:auto;}
+
+.performance-table thead tr.header-row-1 th{padding:12px 8px 6px 8px;position:sticky;top:0;background:#f3f4f6;z-index:1000;font-size:10px;text-align:center;font-weight:700;color:#1f2937;border-bottom:1px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;vertical-align:middle;height:32px;contain:paint;}
+
+.performance-table thead tr.header-row-1 th[rowspan="2"]{border-bottom:2px solid #d1d5db;text-align:center;background:#f3f4f6;padding:12px 8px;height:auto;vertical-align:middle;contain:paint;}
+
+.performance-table thead tr.header-row-2 th{padding:9px 8px;font-size:9px;position:sticky;top:32px;background:#f3f4f6;z-index:1000;font-weight:600;color:#374151;text-align:center !important;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;line-height:1.2;vertical-align:middle;height:32px;contain:paint;}
+
+.performance-table thead tr.header-row-1 th:first-child{position:sticky;left:0;z-index:2000;background:#f9fafb !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;padding:12px 8px;vertical-align:middle;text-align:center;}
+
+.performance-table tbody{position:relative;z-index:1;}
+
+.performance-table th{background:#f3f4f6;padding:12px 8px;text-align:center;font-weight:700;color:#6b7280;border-bottom:2px solid #d1d5db;border-right:1px solid #e5e7eb;white-space:nowrap;text-transform:uppercase;font-size:10px;letter-spacing:0.5px;min-width:75px;max-width:90px;vertical-align:middle;}
+
+.performance-table th.strategy-group-end{border-right:1px solid #cbd5e1;}
+
+.performance-table td.strategy-group-end{border-right:1px solid #cbd5e1;}
+
+.performance-table th.apro-boundary{border-right:1px solid #cbd5e1 !important;}
+
+.performance-table td.apro-boundary{border-right:1px solid #cbd5e1 !important;}
+
+.performance-table th.broker-boundary{border-right:1px solid #cbd5e1 !important;}
+
+.performance-table td.broker-boundary{border-right:1px solid #cbd5e1 !important;}
+
+.performance-table th.strategy-bg-0, .performance-table td.strategy-bg-0, .performance-table th.strategy-bg-1, .performance-table td.strategy-bg-1, .performance-table th.strategy-bg-2, .performance-table td.strategy-bg-2{background:#f8fcf9;}
+
+.performance-table th.sortable{cursor:pointer;user-select:none;position:relative;}
+
+.performance-table th.sortable:hover{background:#e5e7eb;}
+
+.performance-table th.sortable::after{content:'⇅';position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:8px;color:#9ca3af;opacity:0;transition:opacity 0.2s;}
+
+.performance-table th.sortable:hover::after{opacity:1;}
+
+.performance-table th.sortable.sort-asc::after{content:'▲';opacity:1;color:#3b82f6;}
+
+.performance-table th.sortable.sort-desc::after{content:'▼';opacity:1;color:#3b82f6;}
+
+.performance-table thead tr.header-row-2 th.sortable{padding-right:14px;}
+
+.performance-table th.strategy-bg-3, .performance-table td.strategy-bg-3{background:#fefafd;}
+
+.performance-table th.strategy-bg-4, .performance-table td.strategy-bg-4{background:#fffaf5;}
+
+.performance-table td.lot-col.strategy-bg-0, .performance-table td.lot-col.strategy-bg-1, .performance-table td.lot-col.strategy-bg-2, .performance-table td.lot-col.strategy-bg-3, .performance-table td.lot-col.strategy-bg-4{width:65px;min-width:65px;max-width:65px;background:#eff8fe !important;}
+
+.performance-table tr:hover td.strategy-bg-0, .performance-table tr:hover td.strategy-bg-1, .performance-table tr:hover td.strategy-bg-2, .performance-table tr:hover td.strategy-bg-3, .performance-table tr:hover td.strategy-bg-4{background:#fafbfc;}
+
+.performance-table tr:hover td.lot-col.strategy-bg-0, .performance-table tr:hover td.lot-col.strategy-bg-1, .performance-table tr:hover td.lot-col.strategy-bg-2, .performance-table tr:hover td.lot-col.strategy-bg-3, .performance-table tr:hover td.lot-col.strategy-bg-4{background:#fafbfc;width:65px;min-width:65px;max-width:65px;}
+
+.performance-table tr:hover td.apro-pnl-col{background:#fafbfc;width:85px;min-width:75px;}
+
+.performance-table tr:hover td.apro-pnl-col.strategy-bg-0, .performance-table tr:hover td.apro-pnl-col.strategy-bg-1, .performance-table tr:hover td.apro-pnl-col.strategy-bg-2, .performance-table tr:hover td.apro-pnl-col.strategy-bg-3, .performance-table tr:hover td.apro-pnl-col.strategy-bg-4{background:#fafbfc;width:85px;min-width:75px;}
+
+.performance-table th:first-child{position:sticky;left:0;z-index:10;background:#f8fafc !important;width:120px;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;vertical-align:middle;text-align:center;}
+
+.performance-table th.number-col{text-align:center;max-width:80px;}
+
+.performance-table th.apro-pnl-col, .performance-table td.apro-pnl-col{min-width:75px;width:85px;}
+
+.performance-table td.apro-pnl-col.strategy-bg-0, .performance-table td.apro-pnl-col.strategy-bg-1, .performance-table td.apro-pnl-col.strategy-bg-2, .performance-table td.apro-pnl-col.strategy-bg-3, .performance-table td.apro-pnl-col.strategy-bg-4{background:#f8fcf9;width:85px;min-width:75px;}
+
+/* Hide Total DPNL columns */ .performance-table.hide-total-dpnl th.dpnl-header-col,.performance-table.hide-total-dpnl th.dpnl-sub-header-col,.performance-table.hide-total-dpnl td.dpnl-section{display:none !important;}
+
+/* Section-based color overrides */ .performance-table td.dpnl-section{background:#fefafd !important;}
+
+.performance-table td.pnl-section{background:#fffaf5 !important;}
+
+.performance-table td{padding:11px 8px;border-bottom:1px solid #f3f4f6;border-right:1px solid #f3f4f6;color:#374151;text-align:right;white-space:nowrap;min-width:75px;max-width:90px;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:400;}
+
+.performance-table td.lot-col{min-width:65px;max-width:65px;width:65px;}
+
+.performance-table th.lot-col{min-width:65px;max-width:65px;width:65px;}
+
+.performance-table td:first-child{position:sticky;left:0;background:white !important;font-weight:450;z-index:1;border-right:2px solid #cbd5e1;width:120px;min-width:120px;max-width:120px;padding:11px 8px;text-align:left;color:#111827;}
+
+.performance-table td.number-col{text-align:right;font-weight:400;font-size:12px;min-width:75px;max-width:90px;padding:11px 8px;font-variant-numeric:tabular-nums;}
+
+.performance-table th.number-col{text-align:center;max-width:90px;}
+
+.performance-table td.number-col.total-net-col{min-width:80px;max-width:none;font-weight:450;background:#fefce8 !important;}
+
+.performance-table tbody tr.month-row td.number-col.total-net-col, .performance-table tbody tr.total-row td.number-col.total-net-col{background:#fef9c3 !important;}
+
+.performance-table th.total-net-col{min-width:80px;max-width:none;}
+
+.performance-table th.total-col-border, .performance-table td.total-col-border{border-right:1px solid #cbd5e1 !important;}
+
+.performance-table td.number-col.net-pnl-percent-col{min-width:60px;max-width:60px;font-weight:450;background:#fefce8 !important;font-size:12px;}
+
+.performance-table tbody tr.month-row td.number-col.net-pnl-percent-col, .performance-table tbody tr.total-row td.number-col.net-pnl-percent-col{background:#fef9c3 !important;}
+
+.performance-table th.net-pnl-percent-col{min-width:60px;max-width:80px;}
+
+.performance-table td.number-col.drawdown-col{min-width:90px;max-width:none;background:#fef2f2 !important;}
+
+.performance-table tbody tr.month-row td.number-col.drawdown-col{background:#feecec !important;}
+
+.performance-table tbody tr.year-row td.number-col.drawdown-col{background:#fee5e5 !important;}
+
+.performance-table tbody tr.total-row td.number-col.drawdown-col{background:#fee2e2 !important;}
+
+.performance-table th.drawdown-col{min-width:90px;max-width:none;}
+
+.performance-table td.number-col.expenses-col{font-weight:450;background:#fef2f2;border-left:1px solid #cbd5e1;}
+
+.performance-table tbody tr.month-row td.number-col.expenses-col, .performance-table tbody tr.total-row td.number-col.expenses-col{background:#feecec !important;}
+
+.performance-table th.expenses-col{min-width:80px;max-width:none;}
+
+.performance-table td.positive{color:#059669;}
+
+.performance-table td.negative{color:#b96060;}
+
+.performance-table tr:hover{background:#fafbfc;}
+
+.performance-table tr:hover td:first-child{background:#fafbfc !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}
+
+.performance-table tbody tr.total-row{background:#f9fafb;font-weight:700;border-top:2px solid #d1d5db;transform:translateZ(0);position:relative;z-index:1;}
+
+.performance-table tbody tr.total-row:hover{background:#f3f4f6;}
+
+.performance-table tbody tr.total-row td{border-top:2px solid #d1d5db;padding:14px 8px;font-weight:450;font-size:12px;}
+
+.performance-table tbody tr.total-row td:first-child{background:#f9fafb !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}
+
+.performance-table tbody tr.total-row:hover td:first-child{background:#f3f4f6 !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;}
+
+.performance-table tbody tr.total-row:hover td.strategy-bg-0, .performance-table tbody tr.total-row:hover td.strategy-bg-1, .performance-table tbody tr.total-row:hover td.strategy-bg-2{background:#ecf7f1;}
+
+.performance-table tbody tr.total-row:hover td.strategy-bg-3{background:#fef0f6;}
+
+.performance-table tbody tr.total-row:hover td.strategy-bg-4{background:#fff1e1;}
+
+.performance-table tbody tr.total-row:hover td.lot-col{width:65px;min-width:65px;max-width:65px;background:#dff0fc !important;}
+
+.performance-table tbody tr.total-row:hover td.dpnl-section{background:#fef0f6 !important;}
+
+.performance-table tbody tr.total-row:hover td.pnl-section{background:#fff1e1 !important;}
+
+.performance-table tbody tr.total-row:hover td.apro-pnl-col{width:85px;min-width:75px;}
+
+.performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.total-row:hover td.apro-pnl-col.strategy-bg-4{background:#ecf7f1;}
+
+.performance-table tbody tr.total-row td.apro-pnl-col{width:85px;min-width:75px;}
+
+.performance-table tbody tr.month-row{background:#f9fafb;font-weight:450 !important;cursor:pointer;user-select:none;border-left:3px solid transparent;transition:all 0.15s ease;}
+
+.performance-table tbody tr.month-row:hover{background:#f3f4f6;border-left-color:#3b82f6;}
+
+.performance-table tbody tr.month-row td{font-weight:450 !important;font-size:12px !important;}
+
+.performance-table tbody tr.month-row td:first-child{background:#f9fafb !important;color:#111827;min-width:120px;max-width:120px;font-weight:450 !important;font-size:12px !important;border-right:2px solid #cbd5e1;padding-left:20px;}
+
+.performance-table tbody tr.month-row:hover td:first-child{background:#f3f4f6 !important;min-width:120px;max-width:120px;border-right:2px solid #cbd5e1;padding-left:20px;}
+
+.performance-table tbody tr.month-row:hover td.strategy-bg-0, .performance-table tbody tr.month-row:hover td.strategy-bg-1, .performance-table tbody tr.month-row:hover td.strategy-bg-2{background:#e3f3ea;}
+
+.performance-table tbody tr.month-row:hover td.strategy-bg-3{background:#fde9f3;}
+
+.performance-table tbody tr.month-row:hover td.strategy-bg-4{background:#ffecd6;}
+
+.performance-table tbody tr.month-row:hover td.lot-col{width:65px;min-width:65px;max-width:65px;background:#d5ebfa !important;}
+
+.performance-table tbody tr.month-row:hover td.dpnl-section{background:#fde9f3 !important;}
+
+.performance-table tbody tr.month-row:hover td.pnl-section{background:#ffecd6 !important;}
+
+.performance-table tbody tr.month-row:hover td.apro-pnl-col{width:85px;min-width:75px;}
+
+.performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.month-row:hover td.apro-pnl-col.strategy-bg-4{background:#e3f3ea;}
+
+.performance-table tbody tr.month-row td.strategy-bg-0, .performance-table tbody tr.month-row td.strategy-bg-1, .performance-table tbody tr.month-row td.strategy-bg-2{background:#f0f9f3;}
+
+.performance-table tbody tr.month-row td.strategy-bg-3{background:#fef2f8;}
+
+.performance-table tbody tr.month-row td.strategy-bg-4{background:#fff3e8;}
+
+.performance-table tbody tr.month-row td.lot-col{background:#e8f4fc !important;}
+
+.performance-table tbody tr.month-row td.dpnl-section{background:#fef2f8 !important;}
+
+.performance-table tbody tr.month-row td.pnl-section{background:#fff3e8 !important;}
+
+.performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.month-row td.apro-pnl-col.strategy-bg-4{background:#f0f9f3;width:85px;min-width:75px;}
+
+.performance-table tbody tr.year-row td.strategy-bg-0, .performance-table tbody tr.year-row td.strategy-bg-1, .performance-table tbody tr.year-row td.strategy-bg-2{background:#e9f5ee;}
+
+.performance-table tbody tr.year-row td.strategy-bg-3{background:#fbeaf4;}
+
+.performance-table tbody tr.year-row td.strategy-bg-4{background:#ffedd9;}
+
+.performance-table tbody tr.year-row td.lot-col{background:#dfeef9 !important;}
+
+.performance-table tbody tr.year-row td.dpnl-section{background:#fbeaf4 !important;}
+
+.performance-table tbody tr.year-row td.pnl-section{background:#ffedd9 !important;}
+
+.performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-0, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-1, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-2, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-3, .performance-table tbody tr.year-row td.apro-pnl-col.strategy-bg-4{background:#e9f5ee;width:85px;min-width:75px;}
+
+.performance-table tbody tr.year-row td.number-col.total-net-col{background:#fef5cd !important;}
+
+.performance-table tbody tr.year-row td.number-col.net-pnl-percent-col{background:#fef5cd !important;}
+
+.performance-table tbody tr.year-row td.number-col.expenses-col{background:#fee5e5 !important;}
+
+.performance-table tbody tr.month-row[data-year]:not(.expanded){display:none;}
+
+.performance-table tbody tr.month-row[data-year].expanded{display:table-row;}
+
+.performance-table tbody tr.year-row{background:#f1f3f5 !important;font-weight:650;cursor:pointer;user-select:none;border-left:3px solid transparent;transition:all 0.15s ease;}
+
+.performance-table tbody tr.year-row:hover{background:#e5e7eb !important;border-left-color:#3b82f6;}
+
+.performance-table tbody tr.year-row td{font-size:12px;font-weight:650;padding:12px 8px;}
+
+.performance-table tbody tr.year-row td:first-child{font-weight:700;color:#111827;background:#f1f3f5 !important;}
+
+.performance-table tbody tr.year-row:hover td:first-child{background:#e5e7eb !important;}
+
+.performance-table tbody tr.day-row{display:none;}
+
+.performance-table tbody tr.day-row[data-year]:not(.expanded){display:none;}
+
+.performance-table tbody tr.day-row.expanded{display:table-row;}
+
+.performance-table tbody tr.day-row td{padding:7px 8px;font-size:12px;}
+
+.performance-table tbody tr.day-row td:first-child{padding-left:40px;padding-top:7px;padding-bottom:7px;font-weight:450;color:#6b7280;min-width:120px;max-width:120px;font-size:12px;border-right:2px solid #cbd5e1;background:white !important;}
+
+.performance-table tbody tr.day-row td.apro-pnl-col{width:85px;min-width:75px;}
+
+.expand-icon{display:inline-block;width:18px;height:18px;margin-right:10px;text-align:center;font-weight:600;color:#6b7280;transition:transform 0.2s ease;font-size:12px;line-height:18px;}
+
+.expand-icon.expanded{transform:rotate(90deg);}
+
+.no-data{text-align:center;color:#cbd5e1;padding:40px;font-size:14px;}
+
+/* Safari-only styles */
   .performance-table {
     isolation: auto !important;
   }
-  .performance-table thead {
+
+.performance-table thead {
     transform: none !important;
     -webkit-transform: none !important;
   }
-  .performance-table thead::after {
+
+.performance-table thead::after {
     display: none !important;
   }
-}
+
+.table-container {
+    overflow: visible !important;
+    width: auto !important;
+    z-index: 1 !important;
+  }
+
+.table-wrapper {
+    overflow: visible !important;
+    width: auto !important;
+  }
+
+.performance-table {
+    isolation: auto !important;
+    min-width: 800px;
+  }
+
+.performance-table thead {
+    position: relative !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    isolation: auto !important;
+  }
+
+.performance-table thead::after,
+  .performance-table thead::before {
+    display: none !important;
+    content: none !important;
+    height: 0 !important;
+  }
+
+.performance-table thead tr.header-row-1 th,
+  .performance-table thead tr.header-row-2 th,
+  .performance-table th:first-child,
+  .performance-table td:first-child {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    contain: none !important;
+  }
+
+.performance-table tbody {
+    display: table-row-group !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+.performance-table tbody tr {
+    display: table-row !important;
+    visibility: visible !important;
+    height: auto !important;
+  }
+
+.performance-table tbody tr.year-row,
+  .performance-table tbody tr.total-row {
+    display: table-row !important;
+    transform: none !important;
+  }
+
+/* Fix expand/collapse - month rows hidden by default, shown when expanded */
+  .performance-table tbody tr.month-row[data-year] {
+    display: none !important;
+  }
+
+.performance-table tbody tr.month-row[data-year].expanded {
+    display: table-row !important;
+  }
+
+.performance-table tbody tr.day-row {
+    display: none !important;
+  }
+
+.performance-table tbody tr.day-row.expanded {
+    display: table-row !important;
+  }
+
+.performance-table tbody td {
+    display: table-cell !important;
+    visibility: visible !important;
+  }
+
+
 
 @media screen and (max-width: 1024px) {
   html, body {
@@ -190,8 +938,6 @@ button.primary:hover{background:#2563eb;border-color:#2563eb;}button.active{back
     visibility: visible !important;
   }
 }
-
-/* Tablet Layout - Dynamic columns based on card count */
 </style></head><body><div class="main-content"><div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;"><div><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div style="display: flex; gap: 3px; align-items: center; padding: 5px 6px; background: #f1f5f9; border-radius: 8px; white-space: nowrap;"><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">FROM:</label><input type="date" id="fromDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateFromDate('next')" title="Next month start">▲</button><button onclick="navigateFromDate('prev')" title="Previous month start">▼</button></div></div><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">TO:</label><input type="date" id="toDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateToDate('next')" title="Next month end">▲</button><button onclick="navigateToDate('prev')" title="Previous month end">▼</button></div></div><div class="date-range-buttons" style="gap: 2px;"><button class="btn" onclick="setDateRange('3M', this)" style="padding: 5px 8px; font-size: 10px;">LAST 3M</button><button class="btn" onclick="setDateRange('YTD', this)" style="padding: 5px 8px; font-size: 10px;">YTD</button><button class="btn active" onclick="setDateRange('ALL', this)" style="padding: 5px 8px; font-size: 10px;">ALL TIME</button></div></div></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><button onclick="toggleFilteredTotalsButton()" id="filteredTotalsButton">Show Filtered Totals</button><button onclick="toggleTradeCountButton()" id="tradeCountButton">Show Trade Count</button><button onclick="toggleDrawdownButton()" id="drawdownButton">Show Drawdown</button><button onclick="toggleLotButton()" id="lotButton">Show Lot</button><button onclick="toggleLotPnlButton()" id="lotPnlButton">Show Lot PNL</button><button onclick="toggleTotalDpnlButton()" id="totalDpnlButton">Hide All DPNL</button><button onclick="togglePnlTaxModeButton()" id="pnlTaxButton">Show Tax PNL</button><button onclick="expandAll()">Expand All</button><button onclick="collapseAll()">Collapse All</button><button onclick="exportToCSV()">Export to csv</button><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
 const elements = {
 startingCapital: document.getElementById('startingCapital'),
@@ -274,7 +1020,8 @@ hiddenStrategies.add(strategyName);
 }
 saveFilters();
 updateFilterBadge();
-processAndDisplayData();
+clearTimeout(updateTimeout);
+updateTimeout = setTimeout(() => processAndDisplayData(), 300);
 }
 }
 });
@@ -393,6 +1140,7 @@ selectedBrokers.delete(broker);
 }
 selectedBrokers.add('A');
 updateBrokerFilterBadge();
+saveBrokerFilters();
 processAndDisplayData();
 }
 }
@@ -479,6 +1227,14 @@ savedHiddenStrategies = new Set(JSON.parse(savedFilters)); // Keep a copy of sav
 const savedMonths = localStorage.getItem('strategyPerformance_selectedMonths');
 if (savedMonths) {
 selectedMonths = new Set(JSON.parse(savedMonths));
+}
+const savedBrokers = localStorage.getItem('strategyPerformance_selectedBrokers');
+if (savedBrokers !== null) {
+const parsedBrokers = JSON.parse(savedBrokers);
+if (Array.isArray(parsedBrokers)) {
+selectedBrokers = new Set(parsedBrokers);
+brokersInitialized = true; // Prevent auto-select-all from overriding the persisted choice
+}
 }
 } catch (e) {
 console.error('Failed to load saved filters:', e);
@@ -641,9 +1397,15 @@ localStorage.setItem('strategyPerformance_selectedMonths', JSON.stringify(Array.
 console.error('Failed to save month filters:', e);
 }
 }
+function saveBrokerFilters() {
+try {
+localStorage.setItem('strategyPerformance_selectedBrokers', JSON.stringify(Array.from(selectedBrokers)));
+} catch (e) {
+console.error('Failed to save broker filters:', e);
+}
+}
 function loadSavedFilters() {
 try {
-localStorage.removeItem('selectedBrokers');
 const savedFilters = localStorage.getItem('strategyPerformance_hiddenStrategies');
 if (savedFilters) {
 hiddenStrategies = new Set(JSON.parse(savedFilters));
@@ -651,6 +1413,14 @@ hiddenStrategies = new Set(JSON.parse(savedFilters));
 const savedMonths = localStorage.getItem('strategyPerformance_selectedMonths');
 if (savedMonths) {
 selectedMonths = new Set(JSON.parse(savedMonths));
+}
+const savedBrokers = localStorage.getItem('strategyPerformance_selectedBrokers');
+if (savedBrokers !== null) {
+const parsedBrokers = JSON.parse(savedBrokers);
+if (Array.isArray(parsedBrokers)) {
+selectedBrokers = new Set(parsedBrokers);
+brokersInitialized = true; // Prevent auto-select-all from overriding the persisted choice
+}
 }
 const savedTotalsMode = localStorage.getItem('strategyPerformance_showFilteredTotals');
 if (savedTotalsMode !== null) {
@@ -843,7 +1613,7 @@ const html = allStrategies.map(strategy => {
 const isChecked = !hiddenStrategies.has(strategy);
 const displayName = formatStrategyName(strategy);
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
-return `<div class="strategy-filter-item"><input type="checkbox" class="strategy-filter-checkbox" id="check_${safeId}" data-strategy-name="${strategy.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}><label class="strategy-filter-label" for="check_${safeId}">${displayName}</label></div>`;
+return `<div class="strategy-filter-item"><input type="checkbox" class="strategy-filter-checkbox" id="check_${safeId}" data-strategy-name="${strategy.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}><label class="strategy-filter-label">${displayName}</label></div>`;
 }).join('');
 elements.strategyFilterList.innerHTML = html;
 updateFilterBadge();
@@ -866,7 +1636,7 @@ const html = allStrategies.map(strategy => {
 const isChecked = !hiddenStrategies.has(strategy);
 const displayName = formatStrategyName(strategy);
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
-return `<div class="strategy-filter-item"><input type="checkbox" class="strategy-filter-checkbox" id="check_${safeId}" data-strategy-name="${strategy.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}><label class="strategy-filter-label" for="check_${safeId}">${displayName}</label></div>`;
+return `<div class="strategy-filter-item"><input type="checkbox" class="strategy-filter-checkbox" id="check_${safeId}" data-strategy-name="${strategy.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}><label class="strategy-filter-label">${displayName}</label></div>`;
 }).join('');
 elements.strategyFilterList.innerHTML = html;
 updateFilterBadge();
@@ -880,19 +1650,17 @@ hiddenStrategies.delete(strategyName);
 } else {
 hiddenStrategies.add(strategyName);
 }
-// Only save to localStorage if all brokers are selected
 const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
 if (allBrokersSelected) {
 saveFilters();
 }
 updateFilterBadge();
-processAndDisplayData();
+clearTimeout(updateTimeout);
+updateTimeout = setTimeout(() => processAndDisplayData(), 300);
 }
 function toggleStrategyRow(strategyName) {
 const checkbox = document.getElementById(`check_${strategyName}`);
 if (!checkbox) return;
-// If this was triggered by clicking the div (not the checkbox), toggle the checkbox
-// If triggered by checkbox click, checkbox state is already changed
 if (event && event.target.type !== 'checkbox') {
 checkbox.checked = !checkbox.checked;
 }
@@ -901,14 +1669,13 @@ hiddenStrategies.delete(strategyName);
 } else {
 hiddenStrategies.add(strategyName);
 }
-// Only save to localStorage if all brokers are selected
 const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
 if (allBrokersSelected) {
 saveFilters();
 }
 updateFilterBadge();
 clearTimeout(updateTimeout);
-updateTimeout = setTimeout(() => processAndDisplayData(), 250);
+updateTimeout = setTimeout(() => processAndDisplayData(), 300);
 }
 function selectAllStrategies() {
 hiddenStrategies.clear();
@@ -1061,6 +1828,7 @@ selectedBrokers.delete(broker);
 }
 selectedBrokers.add('A');
 updateBrokerFilterBadge();
+saveBrokerFilters();
 processAndDisplayData();
 }
 function toggleBrokerRow(broker) {
@@ -1083,6 +1851,7 @@ selectedBrokers.delete(broker);
 }
 selectedBrokers.add('A');
 updateBrokerFilterBadge();
+saveBrokerFilters();
 processAndDisplayData();
 }
 function updateBrokerFilterBadge() {
@@ -1105,6 +1874,7 @@ if (checkbox) checkbox.checked = true;
 }
 });
 updateBrokerFilterBadge();
+saveBrokerFilters();
 processAndDisplayData();
 }
 function clearAllBrokers() {
@@ -1117,6 +1887,7 @@ if (checkbox) checkbox.checked = false;
 }
 });
 updateBrokerFilterBadge();
+saveBrokerFilters();
 processAndDisplayData();
 }
 function selectAllMonths() {
@@ -1184,6 +1955,7 @@ selectedBrokers.add(broker);
 const checkbox = document.getElementById(`broker_check_${broker}`);
 if (checkbox) checkbox.checked = true;
 });
+saveBrokerFilters();
 // Update badges and refresh display
 updateFilterBadge();
 updateMonthFilterBadge();
@@ -1309,7 +2081,19 @@ const tempAllBrokers = Array.from(brokersSet).sort();
 if (tempAllBrokers.includes('A')) {
 selectedBrokers.add('A');
 }
-if (!brokersInitialized && selectedBrokers.size <= 1 && tempAllBrokers.length > 0) {
+// Stale-data safeguard: if persisted brokers are completely disjoint from the
+// broker set in the newly loaded Excel, fall back to auto-select-all so the user
+// doesn't see an empty table. User's explicit "clear to only A" state (no non-A
+// entries selected) is respected and NOT overridden.
+const nonAggSelected = Array.from(selectedBrokers).filter(b => b !== 'A');
+const nonAggAvailable = tempAllBrokers.filter(b => b !== 'A');
+const hasStaleSavedOnly = nonAggSelected.length > 0 && nonAggAvailable.length > 0 &&
+                          !nonAggSelected.some(b => nonAggAvailable.includes(b));
+if (hasStaleSavedOnly) {
+selectedBrokers.clear();
+if (tempAllBrokers.includes('A')) selectedBrokers.add('A');
+}
+if ((!brokersInitialized && selectedBrokers.size <= 1 && tempAllBrokers.length > 0) || hasStaleSavedOnly) {
 tempAllBrokers.forEach(broker => selectedBrokers.add(broker));
 brokersInitialized = true;
 }
@@ -1657,14 +2441,13 @@ if (yearA !== yearB) return yearA.localeCompare(yearB);
 return monthA.localeCompare(monthB);
 });
 if (sortedMonthKeys.length > 0) {
-const firstMonth = sortedMonthKeys[0];
-const firstMonthTrades = tradesByMonth[firstMonth];
+let found = false;
+for (let mi = 0; mi < sortedMonthKeys.length && !found; mi++) {
+const monthTrades = tradesByMonth[sortedMonthKeys[mi]];
 const tradesByDate = {};
-firstMonthTrades.forEach(trade => {
+monthTrades.forEach(trade => {
 const dateKey = trade.date;
-if (!tradesByDate[dateKey]) {
-tradesByDate[dateKey] = [];
-}
+if (!tradesByDate[dateKey]) tradesByDate[dateKey] = [];
 tradesByDate[dateKey].push(trade);
 });
 const sortedDatesInMonth = Object.keys(tradesByDate).sort((a, b) => {
@@ -1672,31 +2455,29 @@ const dayA = parseInt(a.split('/')[0]);
 const dayB = parseInt(b.split('/')[0]);
 return dayA - dayB;
 });
-if (sortedDatesInMonth.length > 0) {
-const firstDate = sortedDatesInMonth[0];
-const firstDateTrades = tradesByDate[firstDate];
-const firstDateBrokerMargins = {};
-firstDateTrades.forEach(trade => {
+for (let di = 0; di < sortedDatesInMonth.length && !found; di++) {
+const dateTrades = tradesByDate[sortedDatesInMonth[di]], brokerMargins = {};
+dateTrades.forEach(trade => {
 if (trade.strategyDetails) {
 for (let bi = 0; bi < brokerStrategies.length; bi++) {
 const brokerStrat = brokerStrategies[bi];
 const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
 const brokerCode = stratBrokerCodeMap[brokerStrat];
 if (brokerCode && margin > 0) {
-if (!firstDateBrokerMargins[brokerCode]) {
-firstDateBrokerMargins[brokerCode] = {};
-}
-firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+if (!brokerMargins[brokerCode]) brokerMargins[brokerCode] = {};
+brokerMargins[brokerCode][brokerStrat] = margin;
 }
 }
 }
 });
-Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
-const margins = Object.values(firstDateBrokerMargins[brokerCode]);
-if (margins.length > 0) {
-globalStartingCapital += Math.max(...margins);
-}
+if (Object.keys(brokerMargins).length > 0) {
+Object.keys(brokerMargins).forEach(brokerCode => {
+const margins = Object.values(brokerMargins[brokerCode]);
+if (margins.length > 0) globalStartingCapital += Math.max(...margins);
 });
+found = true;
+}
+}
 }
 }
 }
@@ -1768,35 +2549,42 @@ const dateB = b.split('/').reverse().join('');
 return dateA.localeCompare(dateB);
 });
 let startingCapital = 0;
+let startingCapitalDateKey = null;
 if (sortedDates.length > 0) {
-const firstDate = sortedDates[0], firstDateTrades = tradesByDate[firstDate];
-const firstDateBrokerMargins = {};
 const allBrokerStrategies = allStrategiesParam.filter(s => !s.startsWith('A.PRO'));
-firstDateTrades.forEach(trade => {
+for (let di = 0; di < sortedDates.length; di++) {
+const dateTrades = tradesByDate[sortedDates[di]], brokerMargins = {};
+dateTrades.forEach(trade => {
 if (trade.strategyDetails) {
 allBrokerStrategies.forEach(brokerStrat => {
 const margin = trade.strategyDetails[brokerStrat]?.margin || 0, cleanName = brokerStrat.replace(/\s+/g, '');
 const brokerMatch = cleanName.match(/^(.+?)PRO/);
 if (brokerMatch && margin > 0) {
 const brokerCode = brokerMatch[1];
-if (!firstDateBrokerMargins[brokerCode]) {
-firstDateBrokerMargins[brokerCode] = {};
-}
-firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+if (!brokerMargins[brokerCode]) brokerMargins[brokerCode] = {};
+brokerMargins[brokerCode][brokerStrat] = margin;
 }
 });
 }
 });
-Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
-const margins = Object.values(firstDateBrokerMargins[brokerCode]);
-if (margins.length > 0) {
-startingCapital += Math.max(...margins);
-}
+if (Object.keys(brokerMargins).length > 0) {
+Object.keys(brokerMargins).forEach(brokerCode => {
+const margins = Object.values(brokerMargins[brokerCode]);
+if (margins.length > 0) startingCapital += Math.max(...margins);
 });
+startingCapitalDateKey = sortedDates[di];
+break;
+}
+}
 }
 let cumulativeNetPnl = 0;
 let cumulativeCharges = 0;
+let reachedStartingDate = !startingCapitalDateKey;
 sortedDates.forEach(dateKey => {
+if (!reachedStartingDate) {
+if (dateKey === startingCapitalDateKey) reachedStartingDate = true;
+else { result[dateKey] = 0; return; }
+}
 const dayTrades = tradesByDate[dateKey];
 let dayNet = 0;
 dayTrades.forEach(trade => {
@@ -1973,9 +2761,10 @@ if (aproStrategies.length > 0) {
 headerRow1 += `<th colspan="${aproStrategies.length}" class="number-col apro-boundary">Amibroker PNL</th>`;
 }
 if (showLot) {
-const columnLabel = showTradeCount ? 'TRADE COUNT' : 'LOT';
 sortedBrokers.forEach(brokerCode => {
 const count = brokerGroups[brokerCode].length;
+// Use short "COUNT" when only one sub-column to prevent truncation
+const columnLabel = showTradeCount ? (count === 1 ? 'COUNT' : 'TRADE COUNT') : 'LOT';
 headerRow1 += `<th colspan="${count}" class="number-col broker-boundary">${brokerCode} ${columnLabel}</th>`;
 });
 }
@@ -3362,13 +4151,15 @@ if (yearA !== yearB) return yearA.localeCompare(yearB);
 return monthA.localeCompare(monthB);
 });
 if (sortedMonths.length > 0) {
-const firstMonth = sortedMonths[0], firstMonthTrades = tradesByMonth[firstMonth];
+const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
+// Search across months/dates until we find the first date with broker margin data
+let found = false;
+for (let mi = 0; mi < sortedMonths.length && !found; mi++) {
+const monthTrades = tradesByMonth[sortedMonths[mi]];
 const tradesByDate = {};
-firstMonthTrades.forEach(trade => {
+monthTrades.forEach(trade => {
 const dateKey = trade.date;
-if (!tradesByDate[dateKey]) {
-tradesByDate[dateKey] = [];
-}
+if (!tradesByDate[dateKey]) tradesByDate[dateKey] = [];
 tradesByDate[dateKey].push(trade);
 });
 const sortedDatesInMonth = Object.keys(tradesByDate).sort((a, b) => {
@@ -3376,29 +4167,28 @@ const dayA = parseInt(a.split('/')[0]);
 const dayB = parseInt(b.split('/')[0]);
 return dayA - dayB;
 });
-if (sortedDatesInMonth.length > 0) {
-const firstDate = sortedDatesInMonth[0], firstDateTrades = tradesByDate[firstDate], firstDateBrokerMargins = {};
-const allBrokerStrategies = allStrategies.filter(s => !s.startsWith('A.PRO'));
-firstDateTrades.forEach(trade => {
+for (let di = 0; di < sortedDatesInMonth.length && !found; di++) {
+const dateTrades = tradesByDate[sortedDatesInMonth[di]], brokerMargins = {};
+dateTrades.forEach(trade => {
 if (trade.strategyDetails) {
 allBrokerStrategies.forEach(brokerStrat => {
 const margin = trade.strategyDetails[brokerStrat]?.margin || 0;
 const brokerCode = extractBrokerCode(brokerStrat);
 if (brokerCode && margin > 0) {
-if (!firstDateBrokerMargins[brokerCode]) {
-firstDateBrokerMargins[brokerCode] = {};
-}
-firstDateBrokerMargins[brokerCode][brokerStrat] = margin;
+if (!brokerMargins[brokerCode]) brokerMargins[brokerCode] = {};
+brokerMargins[brokerCode][brokerStrat] = margin;
 }
 });
 }
 });
-Object.keys(firstDateBrokerMargins).forEach(brokerCode => {
-const margins = Object.values(firstDateBrokerMargins[brokerCode]);
-if (margins.length > 0) {
-globalStartingCapital += Math.max(...margins);
-}
+if (Object.keys(brokerMargins).length > 0) {
+Object.keys(brokerMargins).forEach(brokerCode => {
+const margins = Object.values(brokerMargins[brokerCode]);
+if (margins.length > 0) globalStartingCapital += Math.max(...margins);
 });
+found = true;
+}
+}
 }
 }
 }
