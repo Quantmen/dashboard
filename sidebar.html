@@ -4,40 +4,147 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Trading Sidebar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ============ DESIGN TOKENS ============ */
+    :root {
+      --sidebar-bg: #2d4a8a;
+      --sidebar-bg-active: #1a2844;
+      --sidebar-bg-hover: rgba(255, 255, 255, 0.08);
+      --sidebar-border: rgba(255, 255, 255, 0.10);
+      --sidebar-text: #a3b8e0;
+      --sidebar-text-active: #ffffff;
+      --sidebar-text-hover: #ffffff;
+      --sidebar-accent: #6366f1;
+      --toggle-bg: rgba(255, 255, 255, 0.12);
+      --toggle-bg-hover: rgba(255, 255, 255, 0.20);
+      --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #2d4a8a; }
+    body {
+      font-family: var(--font-ui);
+      background: var(--sidebar-bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-    .sidebar { width: 60px; height: 100vh; background: #2d4a8a; box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-               display: flex; flex-direction: column; transition: width 0.3s ease; position: relative; }
+    .sidebar {
+      width: 60px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
     .sidebar.expanded { width: 240px; }
 
-    .sidebar-header { display: flex; align-items: center; justify-content: center; padding: 28px 10px 20px;
-                      border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; }
-    .sidebar.expanded .sidebar-header { padding: 28px 20px 20px; justify-content: space-between; }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 26px 10px 18px;
+      border-bottom: 1px solid var(--sidebar-border);
+      margin-bottom: 8px;
+    }
+    .sidebar.expanded .sidebar-header {
+      padding: 26px 20px 18px;
+      justify-content: space-between;
+    }
 
-    .sidebar-logo { font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;
-                    opacity: 0; width: 0; overflow: hidden; transition: opacity 0.3s ease; }
+    .sidebar-logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--sidebar-text-active);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      transition: opacity 0.3s ease;
+      letter-spacing: -0.01em;
+    }
     .sidebar.expanded .sidebar-logo { opacity: 1; width: auto; }
-    .logo-icon { font-size: 24px; }
+    .logo-icon { font-size: 22px; }
 
-    .toggle-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 30px; height: 30px; border-radius: 6px;
-                  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
-                  font-size: 16px; transform: rotate(180deg); }
-    .toggle-btn:hover { background: rgba(255,255,255,0.2); }
+    .toggle-btn {
+      background: var(--toggle-bg);
+      border: none;
+      color: var(--sidebar-text-active);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 15px;
+      transform: rotate(180deg);
+      font-family: var(--font-ui);
+    }
+    .toggle-btn:hover { background: var(--toggle-bg-hover); }
     .sidebar.expanded .toggle-btn { transform: rotate(0deg); }
 
-    .sidebar-item { display: flex; align-items: center; justify-content: center; padding: 13px 0; color: #a3b8e0;
-                    text-decoration: none; transition: all 0.2s ease; cursor: pointer; font-size: 14px; font-weight: 500;
-                    position: relative; margin: 2px 0; white-space: nowrap; }
-    .sidebar.expanded .sidebar-item { padding: 13px 20px; justify-content: flex-start; }
-    .sidebar-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
-    .sidebar-item.active { background: #1a2844; color: #fff; font-weight: 600; }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      position: relative;
+      margin: 1px 0;
+      white-space: nowrap;
+    }
+    .sidebar.expanded .sidebar-item {
+      padding: 11px 20px;
+      justify-content: flex-start;
+    }
+    .sidebar-item:hover {
+      background: var(--sidebar-bg-hover);
+      color: var(--sidebar-text-hover);
+    }
+    .sidebar-item.active {
+      background: var(--sidebar-bg-active);
+      color: var(--sidebar-text-active);
+      font-weight: 600;
+    }
+    .sidebar-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--sidebar-accent);
+    }
 
-    .sidebar-icon { font-size: 18px; width: 20px; display: flex; align-items: center; justify-content: center; }
+    .sidebar-icon {
+      font-size: 18px;
+      width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .sidebar.expanded .sidebar-icon { margin-right: 14px; }
-    .sidebar-text { opacity: 0; width: 0; overflow: hidden; transition: opacity 0.3s ease; }
+    .sidebar-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      transition: opacity 0.3s ease;
+      letter-spacing: 0.01em;
+    }
     .sidebar.expanded .sidebar-text { opacity: 1; width: auto; }
   </style>
 </head>
