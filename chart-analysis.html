@@ -10,406 +10,413 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-        }
-        .main-content {
-            padding: 20px 32px 32px 32px;
-            background: #f8fafc;
-            width: 100%;
-        }
-        .page-header { 
-            margin-bottom: 16px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start; 
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .page-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 4px; letter-spacing: -0.5px; }
-        .page-subtitle { font-size: 11px; color: #6b7280; font-weight: 400; }
-        
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-            border: 1px solid #f1f5f9;
-            display: flex;
-            flex-direction: column;
-            transition: box-shadow 0.2s ease;
-            overflow: hidden;
-            height: 400px;
-        }
-        
-        /* Specific height for Amibroker and LOT PNLTAX charts (5th and 6th cards) */
-        .chart-card:nth-child(5),
-        .chart-card:nth-child(6) {
-            height: 450px;
-        }
-        
-        .chart-card:hover { 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05); 
-        }
-        
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        /* Custom Date Range Picker */
-        .custom-date-range {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            padding: 0px 2px;
-            background: transparent;
-            border-radius: 6px;
-        }
-        
-        .custom-date-range.active {
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .custom-date-range label {
-            font-size: 10px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .custom-date-range input[type="date"] {
-            padding: 5px 4px;
-            font-size: 10px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            font-family: inherit;
-            color: #475569;
-            cursor: pointer;
-            background: transparent;
-        }
-        
-        .custom-date-range input[type="date"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        .date-nav-arrows {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-            margin-left: 2px;
-        }
-        
-        .date-nav-arrows button {
-            padding: 0;
-            width: 16px;
-            height: 11px;
-            font-size: 8px;
-            line-height: 1;
-            border: 1px solid #e5e7eb;
-            background: transparent;
-            color: #64748b;
-            border-radius: 2px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s ease;
-        }
-        
-        .date-nav-arrows button:hover {
-            background: transparent;
-            color: #475569;
-            border-color: #cbd5e1;
-        }
-        
-        .chart-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            letter-spacing: 0.3px;
-        }
-        
-        .chart-toggles {
-            display: flex;
-            gap: 6px;
-            background: #f1f5f9;
-            padding: 3px;
-            border-radius: 8px;
-        }
-        
-        .chart-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .toggle-btn {
-            padding: 6px 12px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #64748b;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .toggle-btn:hover {
-            color: #475569;
-        }
-        
-        .toggle-btn.active {
-            background: white;
-            color: #1e40af;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .month-navigation {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            background: #f1f5f9;
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-        
-        /* Date Range Selector */
-        .date-range-selector {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            background: #f1f5f9;
-            padding: 4px;
-            border-radius: 8px;
-        }
-        
-        .date-range-btn {
-            padding: 6px 10px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #475569;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        
-        .date-range-btn:hover {
-            background: white;
-            color: #1e40af;
-        }
-        
-        .date-range-btn.active {
-            background: white;
-            color: #1e40af;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .nav-btn {
-            padding: 6px 10px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #475569;
-            background: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        
-        .nav-btn:hover {
-            background: #f8fafc;
-            color: #1e40af;
-        }
-        
-        .nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .current-month {
-            font-size: 11px;
-            font-weight: 600;
-            color: #1e293b;
-            padding: 0 8px;
-            min-width: 65px;
-            text-align: center;
-        }
-        
-        .chart-container {
-            flex: 1;
-            position: relative;
-            min-height: 0;
-        }
-        
-        .chart-container canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
-        /* Loading State */
-        .loading-state {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 10;
-        }
-        
-        .loading-state.active {
-            display: block;
-        }
-        
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e5e7eb;
-            border-top: 3px solid #1e40af;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 12px;
-        }
-        
-        .loading-message {
-            color: #64748b;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Tablet Responsive */
-        @media (max-width: 1024px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-        }
-        
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            
-            .chart-card {
-                height: 350px;
-            }
-            
-            /* Specific height for Amibroker and LOT PNLTAX charts on mobile */
-            .chart-card:nth-child(5),
-            .chart-card:nth-child(6) {
-                height: 370px;
-            }
-            
-            .chart-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .chart-controls {
-                width: 100%;
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-            
-            .chart-toggles {
-                flex-shrink: 0;
-            }
-            
-            .month-navigation {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .main-content {
-                padding: 16px;
-            }
-            
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            
-            .page-title {
-                font-size: 18px;
-            }
-            
-            .page-subtitle {
-                font-size: 11px;
-            }
-            
-            .date-range-selector {
-                width: 100%;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-            
-            .date-range-btn {
-                font-size: 9px;
-                padding: 5px 8px;
-            }
-            
-            .custom-date-range {
-                width: 100%;
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-            
-            .custom-date-range input[type="date"] {
-                flex: 1;
-                min-width: 100px;
-            }
-            
-            .chart-title {
-                font-size: 13px;
-            }
-            
-            .toggle-btn {
-                padding: 5px 10px;
-                font-size: 10px;
-            }
-            
-            .nav-btn {
-                padding: 5px 8px;
-                font-size: 10px;
-            }
-            
-            .current-month {
-                font-size: 11px;
-                min-width: 70px;
-            }
-        }
+/* ============ DESIGN TOKENS ============ */
+:root {
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f3f4f6;
+    --bg-muted: #f9fafb;
+    --bg-pill: #f1f5f9;
+    --border-default: #e5e7eb;
+    --border-subtle: #f1f5f9;
+    --border-emphasis: #d1d5db;
+    --border-divider: #94a3b8;
+    --text-primary: #1e293b;
+    --text-body: #374151;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --text-subtle: #9ca3af;
+    --text-title: #111827;
+    --accent: #4338ca;
+    --accent-hover: #3730a3;
+    --accent-light: #eef2ff;
+    --accent-subtle: #e0e7ff;
+    --accent-active: #1e40af;
+    --profit: #059669;
+    --loss: #b96060;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { width: 100%; height: 100%; }
+
+body {
+    font-family: var(--font-ui);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============ LAYOUT ============ */
+.main-content {
+    padding: 16px 24px 32px;
+    background: var(--bg-page);
+    width: 100%;
+}
+
+.page-header {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-title);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+.page-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* ============ CHARTS GRID ============ */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.chart-card {
+    background: var(--bg-surface);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    border: 1px solid var(--border-default);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.18s ease, border-color 0.18s ease;
+    overflow: hidden;
+    height: 400px;
+}
+.chart-card:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    border-color: var(--border-emphasis);
+}
+
+/* Specific heights for Amibroker + LOT PNLTAX charts (5th & 6th cards) */
+.chart-card:nth-child(5),
+.chart-card:nth-child(6) {
+    height: 450px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 10px;
+}
+
+.chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-title);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* ============ CHART TOGGLES (pill group) ============ */
+.chart-toggles {
+    display: flex;
+    gap: 2px;
+    background: var(--bg-pill);
+    padding: 3px;
+    border-radius: 8px;
+    border: 1px solid var(--border-default);
+}
+.toggle-btn {
+    padding: 5px 11px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-ui);
+}
+.toggle-btn:hover {
+    color: var(--text-body);
+}
+.toggle-btn.active {
+    background: var(--bg-surface);
+    color: var(--accent);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* ============ DATE RANGE SELECTOR ============ */
+.date-range-selector {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    background: var(--bg-surface);
+    padding: 5px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--border-default);
+    white-space: nowrap;
+}
+
+.custom-date-range {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 0px 2px;
+    background: transparent;
+    border-radius: 6px;
+}
+.custom-date-range.active {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.custom-date-range label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.custom-date-range input[type="date"] {
+    padding: 5px 4px;
+    font-size: 10px;
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    font-family: var(--font-ui);
+    color: var(--text-body);
+    cursor: pointer;
+    background: transparent;
+    font-variant-numeric: tabular-nums;
+}
+.custom-date-range input[type="date"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+/* Date navigation arrows (next / prev month) */
+.date-nav-arrows {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-left: 2px;
+}
+.date-nav-arrows button {
+    padding: 0;
+    width: 16px;
+    height: 11px;
+    font-size: 8px;
+    line-height: 1;
+    border: 1px solid var(--border-default);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+.date-nav-arrows button:hover {
+    background: transparent;
+    color: var(--text-body);
+    border-color: var(--border-emphasis);
+}
+
+.date-range-btn {
+    padding: 5px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: var(--font-ui);
+}
+.date-range-btn:hover {
+    background: var(--bg-muted);
+    color: var(--text-body);
+}
+.date-range-btn.active {
+    background: var(--bg-pill);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent-subtle);
+}
+
+/* ============ MONTH NAVIGATION ============ */
+.month-navigation {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: var(--bg-pill);
+    padding: 3px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--border-default);
+}
+.nav-btn {
+    padding: 5px 9px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-body);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.nav-btn:hover {
+    background: var(--bg-muted);
+    color: var(--accent);
+    border-color: var(--accent-subtle);
+}
+.nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.current-month {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 0 6px;
+    min-width: 65px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============ CHART CONTAINER ============ */
+.chart-container {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+}
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ============ LOADING STATE ============ */
+.loading-state {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+}
+.loading-state.active {
+    display: block;
+}
+.loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border-default);
+    border-top: 3px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto 10px;
+}
+.loading-message {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    .chart-card { height: 350px; padding: 14px; }
+    .chart-card:nth-child(5),
+    .chart-card:nth-child(6) { height: 370px; }
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .chart-controls {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .chart-toggles { flex-shrink: 0; }
+    .month-navigation {
+        width: 100%;
+        justify-content: center;
+    }
+    .main-content { padding: 14px 16px 24px; }
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .page-title { font-size: 18px; }
+    .page-subtitle { font-size: 11px; }
+    .date-range-selector {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    .date-range-btn {
+        font-size: 9px;
+        padding: 5px 8px;
+    }
+    .custom-date-range {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .custom-date-range input[type="date"] {
+        flex: 1;
+        min-width: 100px;
+    }
+    .chart-title { font-size: 12px; }
+    .toggle-btn {
+        padding: 5px 9px;
+        font-size: 10px;
+    }
+    .nav-btn {
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+    .current-month {
+        font-size: 11px;
+        min-width: 70px;
+    }
+}
+
     </style>
 </head>
 <body>
