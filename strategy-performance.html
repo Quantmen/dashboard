@@ -1679,7 +1679,10 @@ updateTimeout = setTimeout(() => processAndDisplayData(), 300);
 }
 function selectAllStrategies() {
 hiddenStrategies.clear();
+const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
+if (allBrokersSelected) {
 saveFilters();
+}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
@@ -1690,7 +1693,10 @@ processAndDisplayData();
 }
 function deselectAllStrategies() {
 allStrategies.forEach(strategy => hiddenStrategies.add(strategy));
+const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
+if (allBrokersSelected) {
 saveFilters();
+}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
@@ -2406,8 +2412,14 @@ if (allBrokersSelected) {
 // Restore saved hidden strategies when All brokers are selected
 hiddenStrategies = new Set(savedHiddenStrategies);
 } else {
-// Clear hidden strategies temporarily when specific brokers are selected
-hiddenStrategies = new Set();
+// Broker-subset mode: keep the user's in-session strategy hides, but drop
+// any entries that aren't in the currently-visible strategy list (i.e.
+// strategies belonging to brokers that are no longer selected).
+// This lets the strategy filter stack on top of the broker filter instead
+// of being wiped on every render.
+const filteredHidden = new Set();
+hiddenStrategies.forEach(s => { if (allStrategies.includes(s)) filteredHidden.add(s); });
+hiddenStrategies = filteredHidden;
 }
 // Update the strategy filter dropdown to reflect currently available strategies
 updateStrategyFilterList();
