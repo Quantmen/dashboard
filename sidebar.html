@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Trading Sidebar</title>
+  <title>Quantmens — Navigation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,16 +11,27 @@
     /* ============ DESIGN TOKENS ============ */
     :root {
       --sidebar-bg: #2d4a8a;
+      --sidebar-bg-deep: #25406f;
       --sidebar-bg-active: #1a2844;
-      --sidebar-bg-hover: rgba(255, 255, 255, 0.08);
-      --sidebar-border: rgba(255, 255, 255, 0.10);
-      --sidebar-text: #a3b8e0;
+      --sidebar-bg-hover: rgba(255, 255, 255, 0.06);
+      --sidebar-border: rgba(255, 255, 255, 0.08);
+      --sidebar-divider: rgba(255, 255, 255, 0.06);
+
+      --sidebar-text: #cdd6ed;
+      --sidebar-text-muted: #7a8bb3;
       --sidebar-text-active: #ffffff;
-      --sidebar-text-hover: #ffffff;
+
       --sidebar-accent: #6366f1;
-      --toggle-bg: rgba(255, 255, 255, 0.12);
-      --toggle-bg-hover: rgba(255, 255, 255, 0.20);
+      --sidebar-accent-glow: rgba(99, 102, 241, 0.35);
+
+      --status-online: #10b981;
+
       --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+      --sidebar-width-expanded: 240px;
+      --sidebar-width-collapsed: 60px;
+
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,89 +43,177 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
+    /* ============ SIDEBAR SHELL ============ */
     .sidebar {
-      width: 60px;
+      width: var(--sidebar-width-expanded);
       height: 100vh;
       background: var(--sidebar-bg);
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+      border-right: 1px solid rgba(0, 0, 0, 0.12);
       display: flex;
       flex-direction: column;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
+      transition: width 0.28s var(--ease);
     }
-    .sidebar.expanded { width: 240px; }
+    .sidebar.collapsed { width: var(--sidebar-width-collapsed); }
 
-    .sidebar-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 26px 10px 18px;
-      border-bottom: 1px solid var(--sidebar-border);
-      margin-bottom: 8px;
-    }
-    .sidebar.expanded .sidebar-header {
-      padding: 26px 20px 18px;
-      justify-content: space-between;
-    }
-
-    .sidebar-logo {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--sidebar-text-active);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-      transition: opacity 0.3s ease;
-      letter-spacing: -0.01em;
-    }
-    .sidebar.expanded .sidebar-logo { opacity: 1; width: auto; }
-    .logo-icon { font-size: 22px; }
-
-    .toggle-btn {
-      background: var(--toggle-bg);
-      border: none;
-      color: var(--sidebar-text-active);
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+    /* ============ TOGGLE (inside panel) ============ */
+    .sidebar-toggle {
+      position: absolute;
+      top: 19px;
+      right: 12px;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.85);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      font-size: 15px;
-      transform: rotate(180deg);
-      font-family: var(--font-ui);
+      z-index: 10;
+      transition: background 0.15s ease, color 0.15s ease, right 0.28s var(--ease), border-color 0.15s ease;
+      padding: 0;
     }
-    .toggle-btn:hover { background: var(--toggle-bg-hover); }
-    .sidebar.expanded .toggle-btn { transform: rotate(0deg); }
+    .sidebar-toggle:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+    .sidebar-toggle:active { background: rgba(255, 255, 255, 0.22); }
+    .sidebar-toggle svg {
+      width: 13px;
+      height: 13px;
+      transition: transform 0.28s var(--ease);
+    }
+    .sidebar.collapsed .sidebar-toggle {
+      right: 17px; /* (60 - 26) / 2 = 17, centers in collapsed width */
+    }
+    .sidebar.collapsed .sidebar-toggle svg { transform: rotate(180deg); }
+
+    /* ============ HEADER / BRAND ============ */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 22px 20px 20px;
+      border-bottom: 1px solid var(--sidebar-divider);
+      transition: padding 0.28s var(--ease);
+    }
+    .sidebar.collapsed .sidebar-header {
+      padding: 18px 0;
+      justify-content: center;
+      min-height: 64px;
+    }
+    .sidebar.collapsed .brand-mark {
+      opacity: 0;
+      width: 0;
+      pointer-events: none;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .brand-mark svg { width: 18px; height: 18px; color: #ffffff; }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.18s ease;
+    }
+    .sidebar.collapsed .brand-text {
+      opacity: 0;
+      width: 0;
+      pointer-events: none;
+    }
+    .brand-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sidebar-text-active);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .brand-sub {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--sidebar-text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    /* ============ NAV ============ */
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 14px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      transition: padding 0.28s var(--ease);
+    }
+    .sidebar.collapsed .sidebar-nav {
+      padding: 14px 8px 10px;
+      gap: 6px;
+    }
+    .sidebar-nav::-webkit-scrollbar { width: 0; }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--sidebar-text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 10px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.18s ease, height 0.28s var(--ease), padding 0.28s var(--ease);
+    }
+    .nav-section-label:first-child { padding-top: 4px; }
+    .sidebar.collapsed .nav-section-label {
+      opacity: 0;
+      height: 8px;
+      padding: 0;
+      pointer-events: none;
+    }
 
     .sidebar-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 12px 0;
+      gap: 12px;
+      padding: 9px 10px;
       color: var(--sidebar-text);
       text-decoration: none;
-      transition: background 0.15s ease, color 0.15s ease;
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
+      border-radius: 6px;
       position: relative;
-      margin: 1px 0;
       white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease;
     }
-    .sidebar.expanded .sidebar-item {
-      padding: 11px 20px;
-      justify-content: flex-start;
+    .sidebar.collapsed .sidebar-item {
+      padding: 11px 0;
+      justify-content: center;
     }
     .sidebar-item:hover {
       background: var(--sidebar-bg-hover);
-      color: var(--sidebar-text-hover);
+      color: var(--sidebar-text-active);
     }
+
     .sidebar-item.active {
       background: var(--sidebar-bg-active);
       color: var(--sidebar-text-active);
@@ -123,74 +222,222 @@
     .sidebar-item.active::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
+      left: -10px;
+      top: 8px;
+      bottom: 8px;
       width: 3px;
       background: var(--sidebar-accent);
+      border-radius: 0 2px 2px 0;
     }
+    .sidebar.collapsed .sidebar-item.active::before { left: -8px; }
 
     .sidebar-icon {
-      font-size: 18px;
       width: 20px;
+      height: 20px;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: currentColor;
     }
-    .sidebar.expanded .sidebar-icon { margin-right: 14px; }
+    .sidebar-icon svg { width: 100%; height: 100%; }
+
     .sidebar-text {
+      letter-spacing: 0.005em;
+      flex: 1;
+      opacity: 1;
+      transition: opacity 0.18s ease;
+    }
+    .sidebar.collapsed .sidebar-text {
       opacity: 0;
       width: 0;
       overflow: hidden;
-      transition: opacity 0.3s ease;
-      letter-spacing: 0.01em;
+      flex: 0;
+      pointer-events: none;
     }
-    .sidebar.expanded .sidebar-text { opacity: 1; width: auto; }
+
+    /* ============ NATIVE TOOLTIPS ============ */
+    /* In collapsed mode, items rely on their `title` attribute for hover labels.
+       This avoids iframe-clipping issues and the layout cost of pseudo-element
+       tooltips that the previous implementation had. */
+
+    /* ============ FOOTER ============ */
+    .sidebar-footer {
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--sidebar-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: padding 0.28s var(--ease);
+    }
+    .sidebar.collapsed .sidebar-footer {
+      padding: 12px 0 16px;
+      justify-content: center;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--sidebar-text-muted);
+      letter-spacing: 0.02em;
+    }
+    .status-pill .label { transition: opacity 0.18s ease; }
+    .sidebar.collapsed .status-pill .label {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--status-online);
+      flex-shrink: 0;
+    }
+    .version-tag {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--sidebar-text-muted);
+      letter-spacing: 0.04em;
+      transition: opacity 0.18s ease;
+    }
+    .sidebar.collapsed .version-tag {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        <span class="logo-icon">🦅</span>
-        <span>Quantmens</span>
+  <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+
+    <!-- EDGE TOGGLE -->
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle sidebar" title="Toggle sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+
+    <!-- BRAND -->
+    <header class="sidebar-header">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 18V8"/>
+          <path d="M10 18V4"/>
+          <path d="M16 18v-7"/>
+          <path d="M3 21h18"/>
+        </svg>
       </div>
-      <button class="toggle-btn" onclick="toggleSidebar()">«</button>
-    </div>
+      <div class="brand-text">
+        <span class="brand-name">Quantmens</span>
+        <span class="brand-sub">Trading Suite</span>
+      </div>
+    </header>
 
-    <div class="sidebar-item active" onclick="navigateTo(event, 'dashboard.html')">
-      <span class="sidebar-icon">🏠</span>
-      <span class="sidebar-text">Dashboard</span>
-    </div>
-    <div class="sidebar-item" onclick="navigateTo(event, 'strategy-performance.html')">
-      <span class="sidebar-icon">📅</span>
-      <span class="sidebar-text">Strategy Performance</span>
-    </div>
-    <div class="sidebar-item" onclick="navigateTo(event, 'drawdown.html')">
-      <span class="sidebar-icon">💧</span>
-      <span class="sidebar-text">Drawdown Analysis</span>
-    </div>
-    <div class="sidebar-item" onclick="navigateTo(event, 'report.html')">
-      <span class="sidebar-icon">🧭</span>
-      <span class="sidebar-text">Detailed Report</span>
-    </div>
-    <div class="sidebar-item" onclick="navigateTo(event, 'chart-analysis.html')">
-      <span class="sidebar-icon">🎯</span>
-      <span class="sidebar-text">Chart Analysis</span>
-    </div>
+    <!-- NAV -->
+    <nav class="sidebar-nav">
 
-    <div class="sidebar-item" onclick="handleFileUploadTrigger(event)">
-      <span class="sidebar-icon">🗂️</span>
-      <span class="sidebar-text">Data Management</span>
-    </div>
-  </div>
+      <div class="nav-section-label">Overview</div>
+
+      <a class="sidebar-item active" data-label="Dashboard" title="Dashboard" onclick="navigateTo(event, 'dashboard.html')">
+        <span class="sidebar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="5" rx="1.5"/>
+            <rect x="14" y="12" width="7" height="9" rx="1.5"/>
+            <rect x="3" y="16" width="7" height="5" rx="1.5"/>
+          </svg>
+        </span>
+        <span class="sidebar-text">Dashboard</span>
+      </a>
+
+      <div class="nav-section-label">Analytics</div>
+
+      <a class="sidebar-item" data-label="Strategy Performance" title="Strategy Performance" onclick="navigateTo(event, 'strategy-performance.html')">
+        <span class="sidebar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/>
+            <rect x="5" y="11" width="3" height="7" rx="0.5"/>
+            <rect x="10.5" y="7" width="3" height="11" rx="0.5"/>
+            <rect x="16" y="13" width="3" height="5" rx="0.5"/>
+          </svg>
+        </span>
+        <span class="sidebar-text">Strategy Performance</span>
+      </a>
+
+      <a class="sidebar-item" data-label="Drawdown Analysis" title="Drawdown Analysis" onclick="navigateTo(event, 'drawdown.html')">
+        <span class="sidebar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6l5 5 4-3 4 4 5-7"/>
+            <path d="M17 5h4v4"/>
+            <path d="M3 20h18" opacity="0.5"/>
+          </svg>
+        </span>
+        <span class="sidebar-text">Drawdown Analysis</span>
+      </a>
+
+      <a class="sidebar-item" data-label="Chart Analysis" title="Chart Analysis" onclick="navigateTo(event, 'chart-analysis.html')">
+        <span class="sidebar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/>
+            <rect x="5.5" y="8" width="3" height="8" rx="0.4"/>
+            <rect x="11.5" y="11" width="3" height="6" rx="0.4"/>
+            <rect x="17.5" y="6" width="3" height="10" rx="0.4"/>
+          </svg>
+        </span>
+        <span class="sidebar-text">Chart Analysis</span>
+      </a>
+
+      <div class="nav-section-label">Reports</div>
+
+      <a class="sidebar-item" data-label="Detailed Report" title="Detailed Report" onclick="navigateTo(event, 'report.html')">
+        <span class="sidebar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+            <path d="M14 3v5h5"/>
+            <path d="M9 13h6M9 17h4"/>
+          </svg>
+        </span>
+        <span class="sidebar-text">Detailed Report</span>
+      </a>
+
+      <div class="nav-section-label">System</div>
+
+      <a class="sidebar-item" data-label="Data Management" title="Data Management" onclick="handleFileUploadTrigger(event)">
+        <span class="sidebar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="5" rx="8" ry="2.5"/>
+            <path d="M4 5v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5V5"/>
+            <path d="M4 11v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-6"/>
+          </svg>
+        </span>
+        <span class="sidebar-text">Data Management</span>
+      </a>
+
+    </nav>
+
+    <!-- FOOTER -->
+    <footer class="sidebar-footer">
+      <span class="status-pill">
+        <span class="status-dot"></span>
+        <span class="label">Live</span>
+      </span>
+      <span class="version-tag">v3.0</span>
+    </footer>
+
+  </aside>
 
   <script>
     const el = { sidebar: document.getElementById('sidebar') };
 
     (function init() {
-      const collapsed = localStorage.getItem('sidebarCollapsed') !== 'false';
-      if (!collapsed) el.sidebar.classList.add('expanded');
+      // Restore last-known state; default to expanded on first load.
+      const stored = localStorage.getItem('sidebarCollapsed');
+      const collapsed = stored === 'true';
+      if (collapsed) el.sidebar.classList.add('collapsed');
       postMessage('SIDEBAR_TOGGLE', { collapsed });
       loadFiltersOnly();
     })();
@@ -200,8 +447,8 @@
     }
 
     function toggleSidebar() {
-      el.sidebar.classList.toggle('expanded');
-      const collapsed = !el.sidebar.classList.contains('expanded');
+      el.sidebar.classList.toggle('collapsed');
+      const collapsed = el.sidebar.classList.contains('collapsed');
       localStorage.setItem('sidebarCollapsed', collapsed);
       postMessage('SIDEBAR_TOGGLE', { collapsed });
     }
@@ -224,7 +471,6 @@
 
     function handleFileUploadTrigger(event) {
       event.preventDefault();
-      // Request parent to trigger file upload
       postMessage('TRIGGER_FILE_UPLOAD');
     }
   </script>
