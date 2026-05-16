@@ -174,7 +174,7 @@ select, input[type="number"], input[type="text"], .btn {
     background: var(--bg-surface);
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     font-family: var(--font-ui);
     white-space: nowrap;
     min-width: fit-content;
@@ -236,7 +236,7 @@ select:focus, input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .date-nav-arrows button:hover {
     background: var(--bg-subtle);
@@ -253,7 +253,7 @@ select:focus, input:focus {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
@@ -284,7 +284,7 @@ select:focus, input:focus {
     font-family: var(--font-ui);
     color: var(--text-secondary);
     white-space: nowrap;
-    transition: all 0.15s;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     width: 100%;
 }
 .strategy-dropdown-btn:hover {
@@ -741,6 +741,30 @@ body[data-view="strategy"] .group-b2 { display: none; }
     th { font-size: 7.5px; padding: 6px 4px; }
     td { padding: 6px 4px; font-size: 9px; }
     .broker-row td, .group-row td, .child-row td { font-size: 8.5px; }
+}
+
+
+/* ============ PERF: CSS CONTAINMENT (Claude) ============ */
+.summary-card {
+  contain: layout style paint;
+}
+.broker-row,
+.group-row,
+.child-row,
+.child-row-b1,
+.child-row-b2 {
+  contain: layout style;
+}
+
+
+/* ============ PERF: content-visibility (Claude) ============ */
+.broker-row,
+.group-row,
+.child-row,
+.child-row-b1,
+.child-row-b2 {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 32px;
 }
 
 </style>
