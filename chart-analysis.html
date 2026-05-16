@@ -147,7 +147,7 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-family: var(--font-ui);
@@ -229,7 +229,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .date-nav-arrows button:hover {
     background: transparent;
@@ -246,7 +246,7 @@ body {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     white-space: nowrap;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -281,7 +281,7 @@ body {
     border: 1px solid var(--border-default);
     border-radius: 5px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .nav-btn:hover {
     background: var(--bg-muted);
@@ -417,7 +417,13 @@ body {
     }
 }
 
-    </style>
+    
+/* ============ PERF: CSS CONTAINMENT (Claude) ============ */
+.chart-card {
+  contain: layout style paint;
+}
+
+</style>
 </head>
 <body>
     <div class="main-content">
