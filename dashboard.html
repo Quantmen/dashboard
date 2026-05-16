@@ -381,7 +381,7 @@ body {
     font-size: 11px;
     font-weight: 600;
     color: var(--text-muted);
-    transition: all 0.15s ease;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     font-family: var(--font-ui);
 }
 .strategy-tab:hover {
@@ -524,7 +524,30 @@ canvas { width: 100% !important; height: 100% !important; }
     .chart-container { height: 200px; }
 }
 
-    </style>
+    
+/* ============ PERF: CSS CONTAINMENT (Claude) ============ */
+/* Isolates style recalc & paint to each card. Cuts cursor-move work. */
+.card,
+.bottom-card,
+.chart-card,
+.earnings-card,
+.pnl-card,
+.profit-loss-card,
+.strategy-card-inline,
+.strategy-pnl-item,
+.trades-card {
+  contain: layout style paint;
+}
+
+
+/* ============ PERF: content-visibility (Claude) ============ */
+/* Skip rendering for sections that are typically below the fold. */
+.bottom-grid {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+</style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
