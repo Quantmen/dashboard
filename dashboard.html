@@ -228,7 +228,7 @@ body {
 /* ============ STRATEGY PNL LIST (inside trades card) ============ */
 .strategy-pnl-list {
     margin-top: 10px;
-    font-size: 11px;
+    font-size: 12px;
     border-top: 1px solid var(--border-subtle);
     padding-top: 10px;
 }
@@ -246,7 +246,7 @@ body {
 }
 
 /* ============ STRATEGY PERFORMANCE ============ */
-.strategy-performance-container { min-height: 120px; }
+.strategy-performance-container { min-height: 0; display: flex; flex-direction: column; }
 .strategy-performance-header {
     font-size: 12px;
     color: var(--text-muted);
@@ -256,10 +256,71 @@ body {
     letter-spacing: 0.08em;
 }
 .strategy-grid-inline {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-content: flex-start;
+    flex: 1;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.tm-tile {
     min-width: 0;
+    height: 106px;
+    border-radius: 8px;
+    padding: 12px 13px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: filter 0.15s ease;
+}
+.tm-tile:hover { filter: brightness(0.97); }
+.strategy-grid-inline.tm-compact .tm-tile { height: 58px; }
+.tm-tile.tm-sample {
+    background: var(--bg-pill);
+    border: 1px dashed var(--border-default);
+}
+.tm-sample .tm-name,
+.tm-sample .tm-val { color: #94a3b8; }
+.tm-sample .tm-sub,
+.tm-sample .tm-sub2 { color: #b6c0cf; }
+.tm-name {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tm-val {
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+}
+.tm-sub {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 7px;
+}
+.tm-sub2 {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 3px;
 }
 .strategy-card-inline {
     background: var(--bg-surface);
@@ -497,6 +558,7 @@ canvas { width: 100% !important; height: 100% !important; }
         grid-column: 1 / -1 !important;
         grid-row: 2 !important;
     }
+    .strategy-grid-inline { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 @media (max-width: 768px) {
     .main-content { padding: 14px 14px 20px; }
@@ -516,7 +578,7 @@ canvas { width: 100% !important; height: 100% !important; }
     .trades-card .card-value { font-size: 20px; }
     .profit-loss-card .card-value { font-size: 16px; }
     .earnings-card .card-value { font-size: 16px; }
-    .strategy-grid-inline { gap: 10px; }
+    .strategy-grid-inline { grid-template-columns: 1fr !important; }
     .strategy-card-inline { padding: 12px 10px; }
     .strategy-label { font-size: 9.5px; }
     .strategy-pnl { font-size: 17px; }
@@ -559,14 +621,14 @@ canvas { width: 100% !important; height: 100% !important; }
 
     <div class="main-content" id="mainContent">
         <div class="top-section">
-            <div>
+            <div style="display: flex; flex-direction: column;">
                 <div class="strategy-performance-header">Today P&L</div>
-                <div class="card pnl-card" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                <div class="card pnl-card" style="flex: 1; padding: 12px 18px; flex-direction: row; align-items: center; justify-content: space-between;">
                     <div>
                         <div class="card-value positive" id="todayPnl">₹0</div>
                         <div class="card-subtitle">Gross profit/loss</div>
                     </div>
-                    <div id="todayBrokerProfits" style="font-size: 13px; color: #64748b; display: flex; flex-direction: column; gap: 3px; text-align: right;"></div>
+                    <div id="todayBrokerProfits" style="font-size: 13px; color: #64748b; display: flex; flex-direction: column; gap: 6px; text-align: right;"></div>
                 </div>
             </div>
             
@@ -597,7 +659,7 @@ canvas { width: 100% !important; height: 100% !important; }
                     <div class="card-title">Margin</div>
                     <div class="card-value" id="totalMargin">₹0</div>
                     <div style="font-size: 11px; letter-spacing: 0.01em; color: #94a3b8; margin-top: 1px;">Margin include today approx PNL</div>
-                    <div id="brokerMarginList" style="margin-top: 10px; font-size: 12px; color: #64748b; display: flex; flex-direction: column; gap: 2px;"></div>
+                    <div id="brokerMarginList" style="margin-top: 12px; font-size: 12px; color: #64748b; display: flex; flex-direction: column; gap: 4px;"></div>
                 </div>           
             </div>
 
@@ -924,28 +986,28 @@ canvas { width: 100% !important; height: 100% !important; }
                 const entries = Object.entries(trade.strategyPnlTax);
                 for (let j = 0; j < entries.length; j++) {
                     const [strategyName, pnl] = entries[j];
-                    totalStrategyPnls[strategyName] = (totalStrategyPnls[strategyName] || 0) + (pnl || 0);
+                    if (strategyName.startsWith('A.PRO')) continue;
+                    // Club all brokers (B1/B2/B3...) under a single strategy line (PRO number)
+                    const proMatch = strategyName.replace(/_/g, ' ').match(/PRO\s*(\d+)/i);
+                    const key = proMatch ? `PRO ${proMatch[1]}` : strategyName.replace(/_/g, ' ').trim();
+                    totalStrategyPnls[key] = (totalStrategyPnls[key] || 0) + (pnl || 0);
                 }
             }
             
             const htmlParts = [];
             const entries = Object.entries(totalStrategyPnls)
-                .filter(([name, pnl]) => pnl !== 0 && !name.startsWith('A.PRO'))
-                .sort((a, b) => a[0].localeCompare(b[0]));
+                .filter(([name, pnl]) => pnl !== 0)
+                .sort((a, b) => {
+                    const na = parseInt((a[0].match(/(\d+)/) || [])[1] || '9999', 10);
+                    const nb = parseInt((b[0].match(/(\d+)/) || [])[1] || '9999', 10);
+                    return na !== nb ? na - nb : a[0].localeCompare(b[0]);
+                });
             
             for (let i = 0; i < entries.length; i++) {
                 const [name, pnl] = entries[i];
                 const colorClass = pnl >= 0 ? 'positive' : 'negative';
-                // Format strategy name to add space between broker code and PRO
-                let displayName = name.replace(/_/g, ' ');
-                const match = displayName.match(/^(.+?)PRO\s*(\d+)$/);
-                if (match) {
-                    displayName = `${match[1]} PRO ${match[2]}`;
-                } else {
-                    displayName = displayName.replace(/(\d)(PRO)/g, '$1 $2');
-                }
                 htmlParts.push(`<div class="strategy-pnl-item">
-                    <span class="strategy-name">${displayName}</span>
+                    <span class="strategy-name">${name}</span>
                     <span class="pnl-value ${colorClass}">₹${pnl >= 0 ? '' : '-'}${Math.abs(pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>
                 </div>`);
             }
@@ -1119,47 +1181,56 @@ canvas { width: 100% !important; height: 100% !important; }
         }
 
         function updateStrategyCards(strategies) {
-            const strategyEntries = Object.entries(strategies).sort((a, b) => a[0].localeCompare(b[0]));
-            
-            const htmlParts = [];
-            
-            if (strategyEntries.length > 0) {
-                for (let i = 0; i < strategyEntries.length; i++) {
-                    const [name, data] = strategyEntries[i];
-                    const winRate = data.trades > 0 ? (data.wins / data.trades * 100) : 0;
-                    htmlParts.push(`<div class="strategy-card-inline">
-                        <div class="strategy-label">${formatStrategyName(name)}</div>
-                        <div class="strategy-pnl ${data.totalPnl >= 0 ? 'positive' : 'negative'}">
-                            ₹${data.totalPnl >= 0 ? '' : '-'}${Math.abs(data.totalPnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}
-                        </div>
-                        <div class="strategy-stats">Trades: ${data.trades.toLocaleString()} | Win: ${winRate.toFixed(1)}% | W/L: ${data.wins}/${data.losses}</div>
-                        <div class="win-rate-bar">
-                            <div class="win-rate-fill ${winRate >= 50 ? 'profit' : 'loss'}" style="width: ${winRate}%"></div>
-                        </div>
-                    </div>`);
+            const rows = Object.entries(strategies).map(([name, data]) => ({
+                name: formatStrategyName(name),
+                pnl: data.totalPnl,
+                trades: data.trades,
+                wins: data.wins,
+                losses: data.losses,
+                winRate: data.trades > 0 ? (data.wins / data.trades * 100) : 0
+            })).sort((a, b) => b.pnl - a.pnl);
+
+            if (rows.length === 0) {
+                const sampleCount = 6;
+                elements.strategyGridInline.classList.remove('tm-compact');
+                elements.strategyGridInline.style.gridTemplateColumns = `repeat(${sampleCount}, minmax(0, 1fr))`;
+                let cells = '';
+                for (let i = 1; i <= sampleCount; i++) {
+                    cells += `<div class="tm-tile tm-sample" title="Sample — upload an Excel file to see live strategies">
+                        <div class="tm-name">STRATEGY ${i}</div>
+                        <div class="tm-val">₹0</div>
+                        <div class="tm-sub">Trades : 00</div>
+                        <div class="tm-sub2">W/L : 0 / 0</div>
+                    </div>`;
                 }
-                
-                const minCards = 4;
-                for (let i = strategyEntries.length; i < minCards; i++) {
-                    htmlParts.push(`<div class="strategy-card-inline" style="opacity: 0.5;">
-                        <div class="strategy-label">NO STRATEGY</div>
-                        <div class="strategy-pnl" style="color: #94a3b8;">₹0</div>
-                        <div class="strategy-stats">Trades: 0 | Win: 0.0% | W/L: 0/0</div>
-                        <div class="win-rate-bar"><div class="win-rate-fill" style="width: 0%; background: #e2e8f0;"></div></div>
-                    </div>`);
-                }
-            } else {
-                for (let i = 0; i < 4; i++) {
-                    htmlParts.push(`<div class="strategy-card-inline" style="border: 2px dashed #d1d5db; background: #fafbfc; box-shadow: none;">
-                        <div class="strategy-label" style="color: #9ca3af;">STRATEGY ${i + 1}</div>
-                        <div class="strategy-pnl" style="color: #9ca3af;">₹0</div>
-                        <div class="strategy-stats" style="color: #9ca3af;">Trades: 0 | Win: 0.0% | W/L: 0/0</div>
-                        <div class="win-rate-bar"><div class="win-rate-fill" style="width: 0%; background: #e2e8f0;"></div></div>
-                    </div>`);
-                }
+                elements.strategyGridInline.innerHTML = cells;
+                return;
             }
-            
-            elements.strategyGridInline.innerHTML = htmlParts.join('');
+
+            const MAX_PER_ROW = 13;
+            const numRows = Math.max(1, Math.ceil(rows.length / MAX_PER_ROW));
+            const cols = Math.ceil(rows.length / numRows);
+            const compact = numRows > 1;
+            elements.strategyGridInline.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+            elements.strategyGridInline.classList.toggle('tm-compact', compact);
+
+            // Equal-size tiles; one light tint per sign. When it wraps to more
+            // than one row, tiles show only the strategy name and P&L.
+            elements.strategyGridInline.innerHTML = rows.map(r => {
+                const pos = r.pnl >= 0;
+                const base = pos ? '5,150,105' : '220,38,38';
+                const txt = pos ? 'var(--profit)' : 'var(--loss)';
+                const val = `₹${pos ? '' : '-'}${Math.abs(r.pnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                const tip = `${r.trades} trades · ${r.winRate.toFixed(1)}% win · W/L ${r.wins}/${r.losses}`;
+                const stats = compact ? '' :
+                    `<div class="tm-sub">Trades : ${String(r.trades).padStart(2, '0')}</div>
+                    <div class="tm-sub2">W/L : ${r.wins} / ${r.losses}</div>`;
+                return `<div class="tm-tile" title="${tip}" style="background: rgba(${base}, 0.13);">
+                    <div class="tm-name" style="color: ${txt};">${r.name}</div>
+                    <div class="tm-val" style="color: ${txt};">${val}</div>
+                    ${stats}
+                </div>`;
+            }).join('');
         }
 
         function formatDateForTable(dateStr) {
