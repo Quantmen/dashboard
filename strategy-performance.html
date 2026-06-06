@@ -352,7 +352,7 @@ button.active {
 .pnl-mode-seg {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 15px;
     padding: 3px;
     background: var(--bg-subtle);
     border-radius: 8px;
@@ -1009,7 +1009,7 @@ button.active {
   contain-intrinsic-size: auto 32px;
 }
 
-</style></head><body><div class="main-content"><div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;"><div><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div style="display: flex; gap: 3px; align-items: center; padding: 5px 6px; background: #f1f5f9; border-radius: 8px; white-space: nowrap;"><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">FROM:</label><input type="date" id="fromDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateFromDate('next')" title="Next month start">▲</button><button onclick="navigateFromDate('prev')" title="Previous month start">▼</button></div></div><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">TO:</label><input type="date" id="toDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateToDate('next')" title="Next month end">▲</button><button onclick="navigateToDate('prev')" title="Previous month end">▼</button></div></div><div class="date-range-buttons" style="gap: 2px;"><button class="btn" onclick="setDateRange('3M', this)" style="padding: 5px 8px; font-size: 10px;">LAST 3M</button><button class="btn" onclick="setDateRange('YTD', this)" style="padding: 5px 8px; font-size: 10px;">YTD</button><button class="btn active" onclick="setDateRange('ALL', this)" style="padding: 5px 8px; font-size: 10px;">ALL TIME</button></div></div></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="broker-pill-group" id="brokerPillGroup"></div><div class="strategy-filter-container" style="display: none;"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><div class="pnl-mode-seg"><button id="filteredTotalsButton" onclick="toggleFilteredTotalsButton()">Filtered Totals</button></div><div class="pnl-mode-seg"><button id="drawdownButton" onclick="toggleDrawdownButton()">Drawdown</button></div><div class="pnl-mode-seg"><button id="brokerTotalButton" onclick="toggleBrokerTotalButton()">Broker Total</button></div><div class="pnl-mode-seg" id="lotModeSeg"><button data-lotmode="hide" onclick="setLotMode('hide')">HIDE</button><button data-lotmode="lotsize" onclick="setLotMode('lotsize')">LOT SIZE</button><button data-lotmode="tradecount" onclick="setLotMode('tradecount')">TRADE COUNT</button></div><div class="pnl-mode-seg" id="pnlModeSeg"><button data-mode="dpnl" onclick="setPnlMode('dpnl')">DPNL</button><button data-mode="lotpnl" onclick="setPnlMode('lotpnl')">LOT PNL</button><button data-mode="pnl" onclick="setPnlMode('pnl')">PNL</button><button data-mode="pnltax" onclick="setPnlMode('pnltax')">PNL TAX</button></div><div class="pnl-mode-seg" id="expandModeSeg"><button data-expand="expand" onclick="setExpandMode('expand')">EXPAND ALL</button><button data-expand="collapse" onclick="setExpandMode('collapse')">COLLAPSE ALL</button></div><div class="pnl-mode-seg"><button id="exportCsvButton" onclick="exportToCSV()">Export CSV</button></div><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
+</style></head><body><div class="main-content"><div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;"><div><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div style="display: flex; gap: 3px; align-items: center; padding: 5px 6px; background: #f1f5f9; border-radius: 8px; white-space: nowrap;"><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">FROM:</label><input type="date" id="fromDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateFromDate('next')" title="Next month start">▲</button><button onclick="navigateFromDate('prev')" title="Previous month start">▼</button></div></div><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">TO:</label><input type="date" id="toDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateToDate('next')" title="Next month end">▲</button><button onclick="navigateToDate('prev')" title="Previous month end">▼</button></div></div><div class="date-range-buttons" style="gap: 2px;"><button class="btn" onclick="setDateRange('3M', this)" style="padding: 5px 8px; font-size: 10px;">LAST 3M</button><button class="btn" onclick="setDateRange('YTD', this)" style="padding: 5px 8px; font-size: 10px;">YTD</button><button class="btn active" onclick="setDateRange('ALL', this)" style="padding: 5px 8px; font-size: 10px;">ALL TIME</button></div></div></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="broker-pill-group" id="brokerPillGroup"></div><div class="strategy-filter-container" style="display: none;"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><div class="pnl-mode-seg"><button id="filteredTotalsButton" onclick="toggleFilteredTotalsButton()">Filtered Totals</button></div><div class="pnl-mode-seg"><button id="drawdownButton" onclick="toggleDrawdownButton()">Drawdown</button></div><div class="pnl-mode-seg"><button id="brokerTotalButton" onclick="toggleBrokerTotalButton()">Broker Total</button></div><div class="pnl-mode-seg" id="lotModeSeg"><button data-lotmode="hide" onclick="setLotMode('hide')">Hide</button><button data-lotmode="lotsize" onclick="setLotMode('lotsize')">Lot Size</button><button data-lotmode="tradecount" onclick="setLotMode('tradecount')">Trade Count</button></div><div class="pnl-mode-seg" id="pnlModeSeg"><button data-mode="dpnl" onclick="setPnlMode('dpnl')">DPNL</button><button data-mode="lotpnl" onclick="setPnlMode('lotpnl')">Lot PNL</button><button data-mode="pnl" onclick="setPnlMode('pnl')">Trade PNL</button><button data-mode="pnltax" onclick="setPnlMode('pnltax')">PNL Tax</button></div><div class="pnl-mode-seg" id="expandModeSeg"><button data-expand="expand" onclick="setExpandMode('expand')">Expand All</button><button data-expand="collapse" onclick="setExpandMode('collapse')">Collapse All</button></div><div class="pnl-mode-seg"><button id="exportCsvButton" onclick="exportToCSV()">Export CSV</button></div><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
 const elements = {
 startingCapital: document.getElementById('startingCapital'),
 runningProfit: document.getElementById('runningProfit'),
@@ -1679,8 +1679,15 @@ applyPnlMode();
 processAndDisplayData();
 }
 function updateStrategyFilterList() {
-// NOTE: do NOT prune hiddenStrategies to the current broker here -- hides for
-// other brokers must be preserved so each broker keeps its own per-broker selection.
+if (allStrategies.length > 0) {
+const validHiddenStrategies = new Set();
+hiddenStrategies.forEach(strategy => {
+if (allStrategies.includes(strategy)) {
+validHiddenStrategies.add(strategy);
+}
+});
+hiddenStrategies = validHiddenStrategies;
+}
 const html = allStrategies.map(strategy => {
 const isChecked = !hiddenStrategies.has(strategy);
 const displayName = formatStrategyName(strategy);
@@ -1695,8 +1702,15 @@ elements.monthFilterDropdown.classList.remove('active');
 elements.strategyFilterDropdown.classList.toggle('active');
 }
 function updateStrategyFilterList() {
-// NOTE: do NOT prune hiddenStrategies to the current broker here -- hides for
-// other brokers must be preserved so each broker keeps its own per-broker selection.
+if (allStrategies.length > 0) {
+const validHiddenStrategies = new Set();
+hiddenStrategies.forEach(strategy => {
+if (allStrategies.includes(strategy)) {
+validHiddenStrategies.add(strategy);
+}
+});
+hiddenStrategies = validHiddenStrategies;
+}
 const html = allStrategies.map(strategy => {
 const isChecked = !hiddenStrategies.has(strategy);
 const displayName = formatStrategyName(strategy);
@@ -1743,9 +1757,11 @@ clearTimeout(updateTimeout);
 updateTimeout = setTimeout(() => processAndDisplayData(), 300);
 }
 function selectAllStrategies() {
-// Per-broker: show all of the CURRENTLY-VISIBLE strategies (leave other brokers' hides intact)
-allStrategies.forEach(strategy => hiddenStrategies.delete(strategy));
+hiddenStrategies.clear();
+const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
+if (allBrokersSelected) {
 saveFilters();
+}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
@@ -1755,9 +1771,11 @@ updateFilterBadge();
 processAndDisplayData();
 }
 function deselectAllStrategies() {
-// Per-broker: hide all of the CURRENTLY-VISIBLE strategies (leave other brokers' hides intact)
 allStrategies.forEach(strategy => hiddenStrategies.add(strategy));
+const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
+if (allBrokersSelected) {
 saveFilters();
+}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
@@ -2050,7 +2068,7 @@ updateBrokerFilterBadge();
 processAndDisplayData();
 }
 function updateFilterBadge() {
-const hiddenCount = Array.from(hiddenStrategies).filter(s => allStrategies.includes(s)).length;
+const hiddenCount = hiddenStrategies.size;
 if (hiddenCount > 0 && allStrategies.length > 0) {
 elements.filterBadge.textContent = hiddenCount;
 elements.filterBadge.style.display = 'inline-block';
