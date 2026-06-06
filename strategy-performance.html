@@ -1757,11 +1757,12 @@ clearTimeout(updateTimeout);
 updateTimeout = setTimeout(() => processAndDisplayData(), 300);
 }
 function selectAllStrategies() {
-hiddenStrategies.clear();
-const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
-if (allBrokersSelected) {
+// Only un-hide the strategies currently listed (i.e. for the selected broker(s)),
+// so per-broker hides for brokers that aren't displayed stay intact.
+allStrategies.forEach(strategy => hiddenStrategies.delete(strategy));
+// Persist unconditionally so processAndDisplayData()'s reload from
+// savedHiddenStrategies doesn't clobber this change when a single broker is selected.
 saveFilters();
-}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
@@ -1772,10 +1773,9 @@ processAndDisplayData();
 }
 function deselectAllStrategies() {
 allStrategies.forEach(strategy => hiddenStrategies.add(strategy));
-const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
-if (allBrokersSelected) {
+// Persist unconditionally so processAndDisplayData()'s reload from
+// savedHiddenStrategies doesn't clobber this change when a single broker is selected.
 saveFilters();
-}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
