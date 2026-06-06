@@ -1743,11 +1743,9 @@ clearTimeout(updateTimeout);
 updateTimeout = setTimeout(() => processAndDisplayData(), 300);
 }
 function selectAllStrategies() {
-hiddenStrategies.clear();
-const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
-if (allBrokersSelected) {
+// Per-broker: show all of the CURRENTLY-VISIBLE strategies (leave other brokers' hides intact)
+allStrategies.forEach(strategy => hiddenStrategies.delete(strategy));
 saveFilters();
-}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
@@ -1757,11 +1755,9 @@ updateFilterBadge();
 processAndDisplayData();
 }
 function deselectAllStrategies() {
+// Per-broker: hide all of the CURRENTLY-VISIBLE strategies (leave other brokers' hides intact)
 allStrategies.forEach(strategy => hiddenStrategies.add(strategy));
-const allBrokersSelected = allBrokers.length > 0 && allBrokers.every(broker => selectedBrokers.has(broker));
-if (allBrokersSelected) {
 saveFilters();
-}
 allStrategies.forEach(strategy => {
 const safeId = strategy.replace(/[^a-zA-Z0-9]/g, '_');
 const checkbox = document.getElementById(`check_${safeId}`);
