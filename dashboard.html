@@ -1308,7 +1308,7 @@ canvas { width: 100% !important; height: 100% !important; }
             htmlParts.push('<th style="text-align: center;">Quantity</th>');
             htmlParts.push('<th style="text-align: right;">BUY AVG</th><th style="text-align: right;">SELL AVG</th>');
             htmlParts.push('<th style="text-align: right;">PNL</th><th style="text-align: right;">Un PNL</th>');
-            htmlParts.push('<th style="text-align: center;">Lot Size</th><th style="text-align: right;">Lot PNL</th><th style="text-align: right;">Slippage</th><th style="text-align: right;">BE SLIPP</th><th style="text-align: right;">SE SLIPP</th><th style="text-align: center;">DIF:QTY</th>');
+            htmlParts.push('<th style="text-align: center;">Lot Size</th><th style="text-align: right;">Lot PNL</th><th style="text-align: right;">Slippage</th><th style="text-align: right;">BE SLIPP</th><th style="text-align: right;">SE SLIPP</th><th style="text-align: right;">SLIPP %</th><th style="text-align: center;">DIF:QTY</th>');
             htmlParts.push('</tr></thead><tbody>');
             
             const filteredTrades = todayTrades
@@ -1397,6 +1397,11 @@ canvas { width: 100% !important; height: 100% !important; }
                     const seSlip = (amiSeNum !== null && details.sell > 0 && trade.qty > 0)
                         ? (details.sell - amiSeNum) * trade.qty : null;
                     
+                    // SLIPP % = DPNL (the "Slippage" column value) / round-trip AMI value, where AMI value = (BE + SE) * AMI QTY * LOT
+                    const slipNotional = (amiBeNum !== null && amiSeNum !== null && trade.qty > 0 && details.lot > 0)
+                        ? (amiBeNum + amiSeNum) * trade.qty * details.lot : 0;
+                    const slipPct = (slipNotional > 0 && details.dpnl !== 0) ? (details.dpnl / slipNotional) * 100 : null;
+                    
                     htmlParts.push(`<tr>
                         <td>${trade.sno}</td>
                         <td style="text-align: center;">${formatDateForTable(trade.date)}</td>
@@ -1418,6 +1423,7 @@ canvas { width: 100% !important; height: 100% !important; }
                         <td class="profit-cell ${details.dpnl >= 0 ? 'positive' : 'negative'}">${details.dpnl !== 0 ? `₹${details.dpnl >= 0 ? '' : '-'}${Math.abs(details.dpnl).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
                         <td class="profit-cell ${beSlip !== null && beSlip >= 0 ? 'positive' : 'negative'}">${beSlip !== null && Math.round(beSlip) !== 0 ? `₹${beSlip >= 0 ? '' : '-'}${Math.abs(beSlip).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
                         <td class="profit-cell ${seSlip !== null && seSlip >= 0 ? 'positive' : 'negative'}">${seSlip !== null && Math.round(seSlip) !== 0 ? `₹${seSlip >= 0 ? '' : '-'}${Math.abs(seSlip).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : '-'}</td>
+                        <td class="profit-cell ${slipPct !== null && slipPct >= 0 ? 'positive' : 'negative'}">${slipPct !== null ? `${slipPct >= 0 ? '' : '-'}${Math.abs(slipPct).toFixed(2)}%` : '-'}</td>
                         <td class="${qtyMismatch !== null ? 'profit-cell ' + (qtyMismatch === 0 ? 'positive' : 'negative') : ''}" style="text-align: center;">${qtyMismatch !== null ? qtyMismatch.toLocaleString('en-IN') : '-'}</td>
                     </tr>`);
                 } else {
@@ -1439,6 +1445,7 @@ canvas { width: 100% !important; height: 100% !important; }
                         <td style="text-align: right;">-</td>
                         <td style="text-align: right;">-</td>
                         <td style="text-align: center;">-</td>
+                        <td style="text-align: right;">-</td>
                         <td style="text-align: right;">-</td>
                         <td style="text-align: right;">-</td>
                         <td style="text-align: right;">-</td>
