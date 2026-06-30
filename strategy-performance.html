@@ -361,7 +361,7 @@ button.active {
 .pnl-mode-seg button {
     border: none;
     background: transparent;
-    padding: 5px 10px;
+    padding: 5px 7px;
     font-size: 11px;
     font-weight: 600;
     color: var(--text-secondary);
@@ -384,8 +384,12 @@ button.active {
     border-color: transparent;
     box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
-#filteredTotalsButton, #drawdownButton, #brokerTotalButton, #exportCsvButton {
-    min-width: 120px;
+#filteredTotalsButton, #drawdownButton, #brokerTotalButton {
+    min-width: 110px;
+    text-align: center;
+}
+#exportCsvButton {
+    min-width: 80px;
     text-align: center;
 }
 .broker-pill-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;padding:3px;background:var(--bg-subtle);border-radius:8px;flex:0 0 auto;}
@@ -1009,7 +1013,7 @@ button.active {
   contain-intrinsic-size: auto 32px;
 }
 
-</style></head><body><div class="main-content"><div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;"><div><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div style="display: flex; gap: 3px; align-items: center; padding: 5px 6px; background: #f1f5f9; border-radius: 8px; white-space: nowrap;"><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">FROM:</label><input type="date" id="fromDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateFromDate('next')" title="Next month start">▲</button><button onclick="navigateFromDate('prev')" title="Previous month start">▼</button></div></div><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">TO:</label><input type="date" id="toDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateToDate('next')" title="Next month end">▲</button><button onclick="navigateToDate('prev')" title="Previous month end">▼</button></div></div><div class="date-range-buttons" style="gap: 2px;"><button class="btn" onclick="setDateRange('3M', this)" style="padding: 5px 8px; font-size: 10px;">LAST 3M</button><button class="btn" onclick="setDateRange('YTD', this)" style="padding: 5px 8px; font-size: 10px;">YTD</button><button class="btn active" onclick="setDateRange('ALL', this)" style="padding: 5px 8px; font-size: 10px;">ALL TIME</button></div></div></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="broker-pill-group" id="brokerPillGroup"></div><div class="strategy-filter-container" style="display: none;"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><div class="pnl-mode-seg"><button id="filteredTotalsButton" onclick="toggleFilteredTotalsButton()">Filtered Totals</button></div><div class="pnl-mode-seg"><button id="drawdownButton" onclick="toggleDrawdownButton()">Drawdown</button></div><div class="pnl-mode-seg"><button id="brokerTotalButton" onclick="toggleBrokerTotalButton()">Broker Total</button></div><div class="pnl-mode-seg" id="lotModeSeg"><button data-lotmode="hide" onclick="setLotMode('hide')">Hide</button><button data-lotmode="lotsize" onclick="setLotMode('lotsize')">Lot Size</button><button data-lotmode="tradecount" onclick="setLotMode('tradecount')">Trade Count</button></div><div class="pnl-mode-seg" id="pnlModeSeg"><button data-mode="dpnl" onclick="setPnlMode('dpnl')">DPNL</button><button data-mode="lotpnl" onclick="setPnlMode('lotpnl')">Lot PNL</button><button data-mode="pnl" onclick="setPnlMode('pnl')">Trade PNL</button><button data-mode="pnltax" onclick="setPnlMode('pnltax')">PNL Tax</button></div><div class="pnl-mode-seg" id="expandModeSeg"><button data-expand="expand" onclick="setExpandMode('expand')">Expand All</button><button data-expand="collapse" onclick="setExpandMode('collapse')">Collapse All</button></div><div class="pnl-mode-seg"><button id="exportCsvButton" onclick="exportToCSV()">Export CSV</button></div><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
+</style></head><body><div class="main-content"><div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;"><div><h1 class="page-title">Strategy Performance</h1><p class="page-subtitle">Detailed profit and loss analysis by strategy and time period</p></div><div style="display: flex; gap: 3px; align-items: center; padding: 5px 6px; background: #f1f5f9; border-radius: 8px; white-space: nowrap;"><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">FROM:</label><input type="date" id="fromDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateFromDate('next')" title="Next month start">▲</button><button onclick="navigateFromDate('prev')" title="Previous month start">▼</button></div></div><div class="custom-date-range" style="padding: 0px 2px;"><label style="font-size: 10px;">TO:</label><input type="date" id="toDate" style="width: 95px; padding: 5px 4px; font-size: 10px;"><div class="date-nav-arrows"><button onclick="navigateToDate('next')" title="Next month end">▲</button><button onclick="navigateToDate('prev')" title="Previous month end">▼</button></div></div><div class="date-range-buttons" style="gap: 2px;"><button class="btn" onclick="setDateRange('3M', this)" style="padding: 5px 8px; font-size: 10px;">LAST 3M</button><button class="btn" onclick="setDateRange('YTD', this)" style="padding: 5px 8px; font-size: 10px;">YTD</button><button class="btn active" onclick="setDateRange('ALL', this)" style="padding: 5px 8px; font-size: 10px;">ALL TIME</button></div></div></div><div class="summary-cards" id="summaryCards"><div class="summary-card running-margin-box"><div class="summary-card-title">Running Margin</div><div class="summary-card-value" id="runningMargin">-</div></div><div class="summary-card"><div class="summary-card-title">Starting Capital</div><div class="summary-card-value" id="startingCapital">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit</div><div class="summary-card-value" id="netBrProfit">₹0</div></div><div class="summary-card"><div class="summary-card-title">Net Broker Profit(%)</div><div class="summary-card-value" id="runningProfit">0%</div></div><div class="summary-card"><div class="summary-card-title">BROKER CHARGES</div><div class="summary-card-value negative" id="charges">₹0</div></div><div class="summary-card total-expense-box"><div class="summary-card-title">Total Expense/Withdrawn</div><div class="summary-card-value" id="totalExpense">-</div></div><div class="summary-card net-profit-box"><div class="summary-card-title">Total Margin Addition</div><div class="summary-card-value" id="netProfit">-</div></div></div><div class="controls-section"><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleMonthFilter()"><span>Select Months</span><span class="filter-badge" id="monthFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="monthFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Months</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllMonths()">All</span><span class="filter-action-btn" onclick="clearAllMonths()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="monthFilterList"></div></div></div><div class="strategy-filter-container"><button class="strategy-filter-button" onclick="toggleStrategyFilter()"><span>Select Strategies</span><span class="filter-badge" id="filterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="strategyFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Strategies</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllStrategies()">All</span><span class="filter-action-btn" onclick="deselectAllStrategies()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="strategyFilterList"></div></div></div><div class="broker-pill-group" id="brokerPillGroup"></div><div class="strategy-filter-container" style="display: none;"><button class="strategy-filter-button" onclick="toggleBrokerFilter()"><span>Select Brokers</span><span class="filter-badge" id="brokerFilterBadge" style="display: none;">0</span><span>▼</span></button><div class="strategy-filter-dropdown" id="brokerFilterDropdown"><div class="strategy-filter-header"><span class="strategy-filter-title">Brokers</span><div class="strategy-filter-actions"><span class="filter-action-btn" onclick="selectAllBrokers()">All</span><span class="filter-action-btn" onclick="clearAllBrokers()" style="color: #dc2626;">Clear</span></div></div><div class="strategy-filter-list" id="brokerFilterList"></div></div></div><div class="pnl-mode-seg"><button id="filteredTotalsButton" onclick="toggleFilteredTotalsButton()">Filtered Totals</button></div><div class="pnl-mode-seg"><button id="drawdownButton" onclick="toggleDrawdownButton()">Drawdown</button></div><div class="pnl-mode-seg"><button id="brokerTotalButton" onclick="toggleBrokerTotalButton()">Broker Total</button></div><div class="pnl-mode-seg" id="valueModeSeg"><button data-valuemode="dollar" onclick="setValueMode('dollar')">$ Value</button><button data-valuemode="percent" onclick="setValueMode('percent')">% Value</button></div><div class="pnl-mode-seg" id="lotModeSeg"><button data-lotmode="hide" onclick="setLotMode('hide')">Hide</button><button data-lotmode="lotsize" onclick="setLotMode('lotsize')">Lot Size</button><button data-lotmode="tradecount" onclick="setLotMode('tradecount')">Trade Count</button></div><div class="pnl-mode-seg" id="pnlModeSeg"><button data-mode="dpnl" onclick="setPnlMode('dpnl')">DPNL</button><button data-mode="lotpnl" onclick="setPnlMode('lotpnl')">Lot PNL</button><button data-mode="pnl" onclick="setPnlMode('pnl')">Trade PNL</button><button data-mode="pnltax" onclick="setPnlMode('pnltax')">PNL Tax</button></div><div class="pnl-mode-seg" id="expandModeSeg"><button data-expand="expand" onclick="setExpandMode('expand')">Expand All</button><button data-expand="collapse" onclick="setExpandMode('collapse')">Collapse All</button></div><div class="pnl-mode-seg"><button id="exportCsvButton" onclick="exportToCSV()">Export CSV</button></div><button class="primary" onclick="resetAllFilters()">Reset Filter</button></div><div class="table-container"><div class="table-wrapper"><table class="performance-table" id="performanceTable"><thead id="tableHeaders"></thead><tbody id="tableBody"><tr><td colspan="100" class="no-data">Upload Excel file to view performance data</td></tr></tbody></table></div></div></div><script>
 const elements = {
 startingCapital: document.getElementById('startingCapital'),
 runningProfit: document.getElementById('runningProfit'),
@@ -1044,6 +1048,7 @@ let showFilteredTotals = false, showTradeCount = false, showDrawdown = false, sh
 let lotMode = 'hide'; // 'hide' | 'lotsize' | 'tradecount'
 let expandMode = 'collapse'; // 'expand' | 'collapse' (reflects last bulk action)
 let showBrokerTotal = false; // per-broker dynamic total column (DPNL/PNL/PNL TAX)
+let showPercent = false; // when true, DPNL/PNL cells show % of AMI turnover ((entry+exit)*ami_qty*lot)
 let showPnlTax = false;
 let pnlMode = 'pnl'; // 'dpnl' | 'pnl' | 'pnltax'  (default view; change here)
 let showLotPnl = false;
@@ -1095,6 +1100,7 @@ applyPnlMode(); // apply DPNL/PNL/PNL-TAX view + button label
 applyLotMode(); // apply HIDE/LOT SIZE/TRADE COUNT view
 updateExpandModeSeg(); // reflect last expand/collapse choice
 updateToggleBar(); // reflect Filtered Totals / Drawdown on-state
+updateValueModeSeg(); // reflect $ Value / % Value on-state
 // Set up event delegation for strategy filter checkboxes
 elements.strategyFilterList.addEventListener('change', function(e) {
 if (e.target.classList.contains('strategy-filter-checkbox')) {
@@ -1572,6 +1578,8 @@ expandMode = savedExpandMode;
 }
 const savedBrokerTotal = localStorage.getItem('strategyPerformance_showBrokerTotal');
 if (savedBrokerTotal !== null) showBrokerTotal = savedBrokerTotal === 'true';
+const savedPercent = localStorage.getItem('strategyPerformance_showPercent');
+if (savedPercent !== null) showPercent = savedPercent === 'true';
 } catch (e) {
 hiddenStrategies = new Set();
 }
@@ -1676,6 +1684,19 @@ if (mode === pnlMode) return; // already active
 pnlMode = mode;
 try { localStorage.setItem('strategyPerformance_pnlMode', pnlMode); } catch (e) {}
 applyPnlMode();
+processAndDisplayData();
+}
+function updateValueModeSeg() {
+const seg = document.getElementById('valueModeSeg');
+if (!seg) return;
+seg.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.valuemode === (showPercent ? 'percent' : 'dollar')));
+}
+function setValueMode(mode) {
+const want = (mode === 'percent');
+if (want === showPercent) return;
+showPercent = want;
+try { localStorage.setItem('strategyPerformance_showPercent', showPercent.toString()); } catch (e) {}
+updateValueModeSeg();
 processAndDisplayData();
 }
 function updateStrategyFilterList() {
@@ -2091,6 +2112,16 @@ if (num === 0) return '';
 const formatted = Math.abs(num).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 return num >= 0 ? formatted : `-${formatted}`;
 }
+// ===== % Value support: % = pnl / turnover * 100, turnover = (AMI entry + AMI exit) * AMI qty * lot size, summed over traded rows =====
+function rawPnlOf(sd) { return sd ? (showPnlTax ? (sd.net || 0) : (sd.pnl || 0)) : 0; }
+function formatPnlPercent(rupee, turnover) {
+if (!rupee) return '';
+if (!turnover) return '\u2013';
+const pct = (rupee / turnover) * 100;
+const str = Math.abs(pct).toFixed(2) + '%';
+return pct >= 0 ? str : '-' + str;
+}
+function fmtPnl(rupee, turnover) { return showPercent ? formatPnlPercent(rupee, turnover) : formatNumber(rupee); }
 function initializeHeadersOnly() {
 const tempAProStrategies = ['A.PRO 2', 'A.PRO 3'], tempBrokerStrategies = ['B1PRO2', 'B1PRO3', 'B2PRO2', 'B2PRO3'], tempStrategies = [...tempAProStrategies, ...tempBrokerStrategies], aproStrategies = tempAProStrategies, brokerStrategies = tempBrokerStrategies;
 const brokerGroups = {};
@@ -2290,10 +2321,10 @@ if (!dailyFilteredTotals[monthKey][dateKey]) dailyFilteredTotals[monthKey][dateK
 Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
 strategies.add(stratName);
 if (!monthlyData[monthKey][stratName]) {
-monthlyData[monthKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+monthlyData[monthKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
 }
 if (!dailyData[monthKey][dateKey][stratName]) {
-dailyData[monthKey][dateKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+dailyData[monthKey][dateKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
 }
 if (details.lot > 0) {
 monthlyData[monthKey][stratName].lotSum += details.lot;
@@ -2302,6 +2333,7 @@ monthlyData[monthKey][stratName].tradeCount += 1;
 }
 monthlyData[monthKey][stratName].pnl += details.pnl;
 monthlyData[monthKey][stratName].dpnl += details.dpnl;
+monthlyData[monthKey][stratName].value += (details.lot > 0 ? (((trade.entry||0)+(trade.exit||0))*(trade.qty||0)*details.lot) : 0);
 monthlyData[monthKey][stratName].net += (trade.strategyPnlTax[stratName] || 0);
 if (details.lot > 0) {
 dailyData[monthKey][dateKey][stratName].lotSum += details.lot;
@@ -2310,6 +2342,7 @@ dailyData[monthKey][dateKey][stratName].tradeCount += 1;
 }
 dailyData[monthKey][dateKey][stratName].pnl += details.pnl;
 dailyData[monthKey][dateKey][stratName].dpnl += details.dpnl;
+dailyData[monthKey][dateKey][stratName].value += (details.lot > 0 ? (((trade.entry||0)+(trade.exit||0))*(trade.qty||0)*details.lot) : 0);
 dailyData[monthKey][dateKey][stratName].net += (trade.strategyPnlTax[stratName] || 0);
 const isAPro = stratName.startsWith('A.PRO');
 if (!isAPro) {
@@ -2849,7 +2882,7 @@ return result;
 }
 function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses, marginDrawdownData) {
 const brokerPnlValue = (sd) => { if (!sd) return 0; if (showLotPnl) { const al = sd.lotCount > 0 ? sd.lotSum / sd.lotCount : 0; return al > 0 ? (showPnlTax ? sd.net / al : sd.pnl / al) : 0; } return showPnlTax ? sd.net : sd.pnl; };
-const brokerTotalTd = (val, sectionCls) => showBrokerTotal ? `<td class="number-col ${sectionCls} broker-total-col ${val >= 0 ? 'positive' : 'negative'}">${formatNumber(val)}</td>` : '';
+const brokerTotalTd = (val, sectionCls, turnover) => showBrokerTotal ? `<td class="number-col ${sectionCls} broker-total-col ${val >= 0 ? 'positive' : 'negative'}">${(showPercent && turnover !== undefined) ? formatPnlPercent(val, turnover) : formatNumber(val)}</td>` : '';
 if (strategies.length === 0) {
 const drawdownHeader = showDrawdown ? '<th class="number-col">DRAWDOWN</th>' : '';
 const colspan = showDrawdown ? '3' : '2';
@@ -2989,7 +3022,7 @@ return monthA.localeCompare(monthB);
 });
 const totals = { strategies: {}, totalProfits: 0, netBrProfits: 0, totalAmiPnl: 0, totalExpenses: 0, totalMarginSum: 0, monthCount: 0 };
 strategies.forEach(strat => {
-totals.strategies[strat] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+totals.strategies[strat] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
 });
 const totalsToUse = showFilteredTotals ? monthlyFilteredTotals : monthlyTotals;
 Object.values(totalsToUse).forEach(monthTotal => {
@@ -3021,13 +3054,14 @@ let yearFirstDateMargin = 0; // Reset for each year
 // Calculate year totals for each strategy
 const yearTotals = {};
 strategies.forEach(strat => {
-yearTotals[strat] = { pnl: 0, dpnl: 0, net: 0, lotSum: 0, lotCount: 0 };
+yearTotals[strat] = { pnl: 0, dpnl: 0, net: 0, lotSum: 0, lotCount: 0, value: 0 };
 });
 yearMonths.forEach(month => {
 strategies.forEach(strat => {
 const stratData = monthlyData[month][strat] || { pnl: 0, dpnl: 0, net: 0, lotSum: 0, lotCount: 0 };
 yearTotals[strat].pnl += stratData.pnl;
 yearTotals[strat].dpnl += stratData.dpnl;
+yearTotals[strat].value += (stratData.value || 0);
 yearTotals[strat].net += stratData.net;
 yearTotals[strat].lotSum += stratData.lotSum;
 yearTotals[strat].lotCount += stratData.lotCount;
@@ -3089,14 +3123,15 @@ bodyHtml += `<td class="number-col lot-col ${bgClass}${boundaryClass}">${display
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
 const dpnl = yearTotals[strategy]?.dpnl || 0;
+const __dTO = yearTotals[strategy]?.value || 0;
 const stratIndex = allStrategies.indexOf(strategy);
 const bgClass = `strategy-bg-${stratIndex % 5}`;
 const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
+bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${fmtPnl(dpnl, __dTO)}</td>`;
 });
-bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+((yearTotals[s]||{}).dpnl||0),0), 'dpnl-section');
+bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+((yearTotals[s]||{}).dpnl||0),0), 'dpnl-section', brokerGroups[brokerCode].reduce((a,s)=>a+((yearTotals[s]||{}).value||0),0));
 });
 
 // Add PNL section (respect showPnlTax and showLotPnl)
@@ -3115,9 +3150,9 @@ const bgClass = `strategy-bg-${stratIndex % 5}`;
 const isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${showPercent ? formatPnlPercent(rawPnlOf(stratData), (stratData.value || 0)) : formatNumber(pnl)}</td>`;
 });
-bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+brokerPnlValue(yearTotals[s]),0), 'pnl-section');
+bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+(showPercent?rawPnlOf(yearTotals[s]):brokerPnlValue(yearTotals[s])),0), 'pnl-section', brokerGroups[brokerCode].reduce((a,s)=>a+((yearTotals[s]||{}).value||0),0));
 });
 // Add AMI PNL
 bodyHtml += `<td class="number-col total-net-col ${yearAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(yearAmiPnl)}</td>`;
@@ -3174,6 +3209,7 @@ totals.strategies[strategy].lotSum += lotSum;
 totals.strategies[strategy].lotCount += lotCount;
 totals.strategies[strategy].pnl += pnl;
 totals.strategies[strategy].dpnl += dpnl;
+totals.strategies[strategy].value += (stratData.value || 0);
 totals.strategies[strategy].net += net;
 totals.strategies[strategy].tradeCount += tradeCount;
 });
@@ -3199,12 +3235,13 @@ bodyHtml += `<td class="number-col lot-col ${bgClass}${boundaryClass}">${display
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
 const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+const __dTO = stratData.value || 0;
 const dpnl = stratData.dpnl, stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
+bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${fmtPnl(dpnl, __dTO)}</td>`;
 });
-bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+((monthlyData[month][s]||{}).dpnl||0),0), 'dpnl-section');
+bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+((monthlyData[month][s]||{}).dpnl||0),0), 'dpnl-section', brokerGroups[brokerCode].reduce((a,s)=>a+((monthlyData[month][s]||{}).value||0),0));
 });
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
@@ -3219,9 +3256,9 @@ pnl = showPnlTax ? stratData.net : stratData.pnl;
 const stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${showPercent ? formatPnlPercent(rawPnlOf(stratData), (stratData.value || 0)) : formatNumber(pnl)}</td>`;
 });
-bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+brokerPnlValue(monthlyData[month][s]),0), 'pnl-section');
+bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+(showPercent?rawPnlOf(monthlyData[month][s]):brokerPnlValue(monthlyData[month][s])),0), 'pnl-section', brokerGroups[brokerCode].reduce((a,s)=>a+((monthlyData[month][s]||{}).value||0),0));
 });
 const monthAmiPnl = totalsToUse[month]?.amiPnl || 0;
 bodyHtml += `<td class="number-col total-net-col ${monthAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(monthAmiPnl)}</td>`;
@@ -3373,12 +3410,13 @@ bodyHtml += `<td class="number-col lot-col ${bgClass}${boundaryClass}">${display
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
 const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
+const __dTO = stratData.value || 0;
 const dpnl = stratData.dpnl, stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(dpnl)}</td>`;
+bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${fmtPnl(dpnl, __dTO)}</td>`;
 });
-bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+(((dailyData[month][date]||{})[s]||{}).dpnl||0),0), 'dpnl-section');
+bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+(((dailyData[month][date]||{})[s]||{}).dpnl||0),0), 'dpnl-section', brokerGroups[brokerCode].reduce((a,s)=>a+(((dailyData[month][date]||{})[s]||{}).value||0),0));
 });
 sortedBrokers.forEach((brokerCode, brokerIdx) => {
 brokerGroups[brokerCode].forEach((strategy, idx) => {
@@ -3393,9 +3431,9 @@ pnl = showPnlTax ? stratData.net : stratData.pnl;
 const stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === brokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === sortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnl)}</td>`;
+bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${showPercent ? formatPnlPercent(rawPnlOf(stratData), (stratData.value || 0)) : formatNumber(pnl)}</td>`;
 });
-bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+brokerPnlValue((dailyData[month][date]||{})[s]),0), 'pnl-section');
+bodyHtml += brokerTotalTd(brokerGroups[brokerCode].reduce((a,s)=>a+(showPercent?rawPnlOf((dailyData[month][date]||{})[s]):brokerPnlValue((dailyData[month][date]||{})[s])),0), 'pnl-section', brokerGroups[brokerCode].reduce((a,s)=>a+(((dailyData[month][date]||{})[s]||{}).value||0),0));
 });
 const dayAmiPnl = totalsToUse[month][date]?.amiPnl || 0;
 bodyHtml += `<td class="number-col total-net-col ${dayAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(dayAmiPnl)}</td>`;
@@ -3509,9 +3547,9 @@ totalBrokerGroups[brokerCode].forEach((strategy, idx) => {
 const stratTotal = totals.strategies[strategy], stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === totalBrokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === totalSortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(stratTotal.dpnl)}</td>`;
+bodyHtml += `<td class="number-col dpnl-section ${bgClass} ${stratTotal.dpnl >= 0 ? 'positive' : 'negative'}${boundaryClass}">${fmtPnl(stratTotal.dpnl, stratTotal.value || 0)}</td>`;
 });
-bodyHtml += brokerTotalTd(totalBrokerGroups[brokerCode].reduce((a,s)=>a+((totals.strategies[s]||{}).dpnl||0),0), 'dpnl-section');
+bodyHtml += brokerTotalTd(totalBrokerGroups[brokerCode].reduce((a,s)=>a+((totals.strategies[s]||{}).dpnl||0),0), 'dpnl-section', totalBrokerGroups[brokerCode].reduce((a,s)=>a+((totals.strategies[s]||{}).value||0),0));
 });
 totalSortedBrokers.forEach((brokerCode, brokerIdx) => {
 totalBrokerGroups[brokerCode].forEach((strategy, idx) => {
@@ -3526,9 +3564,9 @@ pnlValue = showPnlTax ? stratTotal.net : stratTotal.pnl;
 const stratIndex = allStrategies.indexOf(strategy), bgClass = `strategy-bg-${stratIndex % 5}`, isLastInBroker = idx === totalBrokerGroups[brokerCode].length - 1;
 const isLastBroker = brokerIdx === totalSortedBrokers.length - 1;
 const boundaryClass = (isLastInBroker && isLastBroker) ? ' broker-boundary' : '';
-bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnlValue >= 0 ? 'positive' : 'negative'}${boundaryClass}">${formatNumber(pnlValue)}</td>`;
+bodyHtml += `<td class="number-col pnl-section ${bgClass} ${pnlValue >= 0 ? 'positive' : 'negative'}${boundaryClass}">${showPercent ? formatPnlPercent(rawPnlOf(stratTotal), (stratTotal.value || 0)) : formatNumber(pnlValue)}</td>`;
 });
-bodyHtml += brokerTotalTd(totalBrokerGroups[brokerCode].reduce((a,s)=>a+brokerPnlValue(totals.strategies[s]),0), 'pnl-section');
+bodyHtml += brokerTotalTd(totalBrokerGroups[brokerCode].reduce((a,s)=>a+(showPercent?rawPnlOf(totals.strategies[s]):brokerPnlValue(totals.strategies[s])),0), 'pnl-section', totalBrokerGroups[brokerCode].reduce((a,s)=>a+((totals.strategies[s]||{}).value||0),0));
 });
 bodyHtml += `<td class="number-col total-net-col ${totals.totalAmiPnl >= 0 ? 'positive' : 'negative'}">${formatNumber(totals.totalAmiPnl)}</td>`;
 const totalNetPnlValue = showPnlTax ? totals.netBrProfits : totals.totalProfits;
