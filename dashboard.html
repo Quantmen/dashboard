@@ -791,8 +791,30 @@ canvas { width: 100% !important; height: 100% !important; }
         
         function parseTableValue(val) {
             if (!val || val === '-' || val === '') return null;
-            // Remove ₹, commas, whitespace
-            const cleaned = val.replace(/[₹,\s]/g, '');
+            const trimmed = val.trim();
+            
+            // Time format HH:MM or HH:MM:SS → seconds since midnight
+            // (parseFloat("14:37:00") would return just 14, breaking time sorts)
+            const timeMatch = trimmed.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+            if (timeMatch) {
+                return (+timeMatch[1]) * 3600 + (+timeMatch[2]) * 60 + (+(timeMatch[3] || 0));
+            }
+            
+            // Date format DD-MMM-YY / DD-MMM-YYYY → epoch millis
+            // (parseFloat("03-JUL-26") would return just 3, breaking date sorts across months)
+            const dateMatch = trimmed.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
+            if (dateMatch) {
+                const months = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5, JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+                const m = months[dateMatch[2].toUpperCase()];
+                if (m !== undefined) {
+                    let y = +dateMatch[3];
+                    if (y < 100) y += 2000;
+                    return new Date(y, m, +dateMatch[1]).getTime();
+                }
+            }
+            
+            // Remove ₹, commas, whitespace, %
+            const cleaned = trimmed.replace(/[₹,\s%]/g, '');
             if (cleaned === '' || cleaned === '-') return null;
             const num = parseFloat(cleaned);
             return isNaN(num) ? null : num;
@@ -1457,7 +1479,15 @@ canvas { width: 100% !important; height: 100% !important; }
             
             htmlParts.push('</tbody></table></div>');
             elements.ordersSummary.innerHTML = htmlParts.join('');
-            attachTableSort(elements.ordersSummary.querySelector('.orders-table'), 'brokerOrder');
+            const ordersTable = elements.ordersSummary.querySelector('.orders-table');
+            attachTableSort(ordersTable, 'brokerOrder');
+            
+            // Re-apply persisted sort so switching strategy tabs keeps the rows
+            // actually sorted, not just the header arrow
+            const persistedSort = sortState.brokerOrder;
+            if (persistedSort && ordersTable) {
+                sortTableRows(ordersTable, persistedSort.colIndex, persistedSort.direction, 'brokerOrder');
+            }
         }
         
         function selectStrategy(strategy) {
