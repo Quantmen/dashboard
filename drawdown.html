@@ -991,13 +991,15 @@ body[data-view="strategy"] .group-b2 { display: none; }
                 // Store full trades data for broker margin calculation
                 originalTradesData = event.data.data || data;
                 
+                // Load saved filters FIRST so lotMargin/customLotMargins are restored
+                // before stgMargin is computed in processTradesForDrawdown()
+                loadSavedFilters();
+                
                 // Reset to ALL TIME and update date inputs based on available data
                 resetToAllTimeWithDataRange();
                 
                 // Apply date filtering and process
                 applyDateFilterAndProcess();
-                
-                loadSavedFilters();
                 populateStrategyOptions();
                 populateBrokerOptions();
                 populateStudyStrategyDropdown();
