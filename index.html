@@ -179,8 +179,9 @@
         <span id="mainToastText"></span>
     </div>
 
-    <!-- Hidden file input for centralized file upload -->
+    <!-- Hidden inputs for centralized file / folder upload -->
     <input type="file" id="hiddenFileInput" accept=".xlsx,.xls" style="display: none;" />
+    <input type="file" id="hiddenFolderInput" accept=".xlsx,.xls" webkitdirectory directory multiple style="display: none;" />
 
     <iframe id="sidebar" src="sidebar.html"></iframe>
     <div class="main-content-container" id="mainContentContainer">
@@ -201,6 +202,7 @@
         const reportFrame = document.getElementById('reportFrame');
         const chartAnalysisFrame = document.getElementById('chartAnalysisFrame');
         const hiddenFileInput = document.getElementById('hiddenFileInput');
+        const hiddenFolderInput = document.getElementById('hiddenFolderInput');
         
         // Loading overlay elements
         const loadingOverlay = document.getElementById('mainLoadingOverlay');
@@ -243,7 +245,7 @@
 
         // Optimized message handler
         window.addEventListener('message', function(event) {
-            const { type, data, page, collapsed, text, progress, success } = event.data;
+            const { type, data, page, collapsed, text, progress, success, file } = event.data;
             
             switch(type) {
                 case 'SHOW_LOADING':
@@ -277,8 +279,12 @@
                     window.location.reload();
                     break;
                 case 'TRIGGER_FILE_UPLOAD':
-                    // Sidebar requests file upload - trigger the hidden input
+                    // Sidebar requests a single Excel file.
                     hiddenFileInput.click();
+                    break;
+                case 'TRIGGER_FOLDER_UPLOAD':
+                    // Folder import request from sidebar.
+                    openPnlFolderPicker();
                     break;
                 case 'TRIGGER_DRIVE_LINK_SET':
                     // Sidebar requests to set Google Drive link
@@ -397,6 +403,229 @@
                 showMainToast('❌ Failed to load file', false);
                 hideMainLoading();
             }
+        });
+
+
+        // Persist the selected folder handle so Import Folder can reuse the same folder.
+        // FileSystemDirectoryHandle objects can be stored in IndexedDB in supported Chromium browsers.
+        const PNL_FOLDER_DB_NAME = 'TradingDashboardFolderStore';
+        const PNL_FOLDER_DB_VERSION = 1;
+        const PNL_FOLDER_STORE = 'folderHandles';
+        const PNL_FOLDER_KEY = 'pnl-report-summary-folder';
+
+        function openFolderHandleDb() {
+            return new Promise((resolve, reject) => {
+                if (!('indexedDB' in window)) {
+                    reject(new Error('IndexedDB is not available'));
+                    return;
+                }
+
+                const request = indexedDB.open(PNL_FOLDER_DB_NAME, PNL_FOLDER_DB_VERSION);
+                request.onupgradeneeded = () => {
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains(PNL_FOLDER_STORE)) {
+                        db.createObjectStore(PNL_FOLDER_STORE);
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error || new Error('Failed to open folder store'));
+            });
+        }
+
+        async function savePnlFolderHandle(directoryHandle) {
+            if (!directoryHandle) return;
+            try {
+                const db = await openFolderHandleDb();
+                await new Promise((resolve, reject) => {
+                    const tx = db.transaction(PNL_FOLDER_STORE, 'readwrite');
+                    tx.objectStore(PNL_FOLDER_STORE).put(directoryHandle, PNL_FOLDER_KEY);
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error || new Error('Failed to save folder handle'));
+                    tx.onabort = () => reject(tx.error || new Error('Folder handle save aborted'));
+                });
+                db.close();
+            } catch (err) {
+                // Remembering the folder is a convenience feature; import should still work if storage fails.
+                console.warn('Could not remember folder handle:', err);
+            }
+        }
+
+        async function getSavedPnlFolderHandle() {
+            try {
+                const db = await openFolderHandleDb();
+                const handle = await new Promise((resolve, reject) => {
+                    const tx = db.transaction(PNL_FOLDER_STORE, 'readonly');
+                    const request = tx.objectStore(PNL_FOLDER_STORE).get(PNL_FOLDER_KEY);
+                    request.onsuccess = () => resolve(request.result || null);
+                    request.onerror = () => reject(request.error || new Error('Failed to read saved folder handle'));
+                });
+                db.close();
+                return handle;
+            } catch (err) {
+                console.warn('Could not read remembered folder handle:', err);
+                return null;
+            }
+        }
+
+        async function hasFolderReadPermission(directoryHandle, requestIfNeeded = false) {
+            if (!directoryHandle) return false;
+            try {
+                if (typeof directoryHandle.queryPermission !== 'function') return true;
+
+                let state = await directoryHandle.queryPermission({ mode: 'read' });
+                if (state === 'granted') return true;
+
+                if (requestIfNeeded && state === 'prompt' && typeof directoryHandle.requestPermission === 'function') {
+                    state = await directoryHandle.requestPermission({ mode: 'read' });
+                    return state === 'granted';
+                }
+            } catch (err) {
+                console.warn('Folder permission check failed:', err);
+            }
+            return false;
+        }
+
+        const normalizePnlSummaryName = (name) => name
+            .toLowerCase()
+            .replace(/\.(xlsx|xls)$/i, '')
+            .replace(/[\s_-]+/g, '');
+
+        async function collectPnlSummaryMatches(dirHandle, path = '') {
+            const matches = [];
+            for await (const entry of dirHandle.values()) {
+                const entryPath = path ? `${path}/${entry.name}` : entry.name;
+                if (entry.kind === 'directory') {
+                    matches.push(...await collectPnlSummaryMatches(entry, entryPath));
+                    continue;
+                }
+                if (entry.kind !== 'file' || entry.name.startsWith('~$') || !/\.(xlsx|xls)$/i.test(entry.name)) {
+                    continue;
+                }
+                const normalized = normalizePnlSummaryName(entry.name);
+                if (normalized.includes('pnlreportsummary')) {
+                    matches.push({ handle: entry, path: entryPath, normalized });
+                }
+            }
+            return matches;
+        }
+
+        async function loadPnlSummaryFromDirectory(directoryHandle) {
+            const matches = await collectPnlSummaryMatches(directoryHandle);
+            matches.sort((a, b) => {
+                const aExact = a.normalized === 'pnlreportsummary' ? 0 : 1;
+                const bExact = b.normalized === 'pnlreportsummary' ? 0 : 1;
+                if (aExact !== bExact) return aExact - bExact;
+                const depthDiff = a.path.split('/').length - b.path.split('/').length;
+                return depthDiff || a.path.localeCompare(b.path);
+            });
+
+            if (!matches.length) {
+                showMainToast('❌ PNL_Report_Summary Excel file not found in this folder', false);
+                return false;
+            }
+
+            const selectedFile = await matches[0].handle.getFile();
+            await loadPnlSummaryFile(selectedFile);
+            return true;
+        }
+
+        // Open/reuse the folder from the TOP-LEVEL page. A previously selected folder is
+        // reused first; otherwise the browser folder picker is shown and the handle is saved.
+        async function openPnlFolderPicker() {
+            if ('showDirectoryPicker' in window) {
+                const savedHandle = await getSavedPnlFolderHandle();
+
+                if (savedHandle) {
+                    try {
+                        const permitted = await hasFolderReadPermission(savedHandle, true);
+                        if (permitted) {
+                            await loadPnlSummaryFromDirectory(savedHandle);
+                            return;
+                        }
+                    } catch (err) {
+                        console.warn('Remembered folder is no longer accessible:', err);
+                    }
+                }
+
+                try {
+                    const directoryHandle = await window.showDirectoryPicker({
+                        id: 'pnl-report-summary-folder',
+                        mode: 'read'
+                    });
+
+                    // Save immediately after the user chooses it, then process it.
+                    await savePnlFolderHandle(directoryHandle);
+                    await loadPnlSummaryFromDirectory(directoryHandle);
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return;
+                    console.warn('Modern folder picker unavailable, using compatible fallback:', err);
+                }
+            }
+
+            // Compatibility fallback for browsers without File System Access API.
+            // Browsers do not expose a persistent directory handle through webkitdirectory,
+            // so those browsers may still require choosing the folder again.
+            hiddenFolderInput.click();
+        }
+
+        // Expose this function so the same-origin sidebar can invoke it from the user's click.
+        window.openPnlFolderPicker = openPnlFolderPicker;
+
+        // Load the PNL_Report_Summary workbook selected through the folder picker.
+        async function loadPnlSummaryFile(file) {
+            if (!file) return;
+
+            showMainLoading(`Reading ${file.name}...`);
+            try {
+                const buffer = await file.arrayBuffer();
+                const wb = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+                await processWorkbook(wb);
+                showMainToast(`✅ ${file.name} loaded successfully`);
+            } catch (err) {
+                console.error('Folder import error:', err);
+                showMainToast('❌ Failed to load PNL_Report_Summary file', false);
+            } finally {
+                hideMainLoading();
+            }
+        }
+
+        // Legacy folder input fallback for browsers without showDirectoryPicker().
+        hiddenFolderInput.addEventListener('change', async function(event) {
+            const files = Array.from(event.target.files || []);
+            if (!files.length) return;
+
+            const normalizeName = (name) => name
+                .toLowerCase()
+                .replace(/\.(xlsx|xls)$/i, '')
+                .replace(/[\s_-]+/g, '');
+
+            const excelFiles = files.filter(file =>
+                /\.(xlsx|xls)$/i.test(file.name) && !file.name.startsWith('~$')
+            );
+
+            const exactMatch = excelFiles.find(file =>
+                normalizeName(file.name) === 'pnlreportsummary'
+            );
+            const partialMatches = excelFiles
+                .filter(file => normalizeName(file.name).includes('pnlreportsummary'))
+                .sort((a, b) => {
+                    const aPath = a.webkitRelativePath || a.name;
+                    const bPath = b.webkitRelativePath || b.name;
+                    const depthDiff = aPath.split('/').length - bPath.split('/').length;
+                    return depthDiff || aPath.localeCompare(bPath);
+                });
+
+            const file = exactMatch || partialMatches[0];
+
+            if (!file) {
+                showMainToast('❌ PNL_Report_Summary Excel file not found in this folder', false);
+                event.target.value = '';
+                return;
+            }
+
+            await loadPnlSummaryFile(file);
+            event.target.value = ''; // Allow selecting the same folder again later.
         });
 
         // Google Drive link management
