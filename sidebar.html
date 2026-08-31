@@ -417,7 +417,7 @@
         <span class="sidebar-text">Data Management</span>
       </a>
 
-      <a class="sidebar-item" data-label="Import Folder" title="Import Folder" onclick="handleFolderUploadTrigger(event)">
+      <a class="sidebar-item" data-label="Import Folder" title="Import Folder (Shift+Click to change folder)" onclick="handleFolderUploadTrigger(event)">
         <span class="sidebar-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
@@ -435,7 +435,7 @@
         <span class="status-dot"></span>
         <span class="label">Live</span>
       </span>
-      <span class="version-tag">v3.4</span>
+      <span class="version-tag">v3.5</span>
     </footer>
 
   </aside>
@@ -486,12 +486,13 @@
 
     function handleFolderUploadTrigger(event) {
       event.preventDefault();
+      const forceNewFolder = !!event.shiftKey;
 
       // Run the picker in the top-level dashboard rather than this iframe.
       // This avoids Chrome/Edge iframe folder-access failures.
       try {
         if (window.parent && typeof window.parent.openPnlFolderPicker === 'function') {
-          window.parent.openPnlFolderPicker();
+          window.parent.openPnlFolderPicker(forceNewFolder);
           return;
         }
       } catch (err) {
@@ -499,7 +500,7 @@
       }
 
       // Fallback message for environments where direct parent access is restricted.
-      postMessage('TRIGGER_FOLDER_UPLOAD');
+      postMessage('TRIGGER_FOLDER_UPLOAD', { forceNewFolder });
     }
   </script>
 </body>
