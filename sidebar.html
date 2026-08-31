@@ -417,6 +417,16 @@
         <span class="sidebar-text">Data Management</span>
       </a>
 
+      <a class="sidebar-item" data-label="Import Folder" title="Import Folder" onclick="handleFolderUploadTrigger(event)">
+        <span class="sidebar-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+            <path d="M12 11v5M9.5 13.5 12 11l2.5 2.5"/>
+          </svg>
+        </span>
+        <span class="sidebar-text">Import Folder</span>
+      </a>
+
     </nav>
 
     <!-- FOOTER -->
@@ -425,7 +435,7 @@
         <span class="status-dot"></span>
         <span class="label">Live</span>
       </span>
-      <span class="version-tag">v3.0</span>
+      <span class="version-tag">v3.4</span>
     </footer>
 
   </aside>
@@ -472,6 +482,24 @@
     function handleFileUploadTrigger(event) {
       event.preventDefault();
       postMessage('TRIGGER_FILE_UPLOAD');
+    }
+
+    function handleFolderUploadTrigger(event) {
+      event.preventDefault();
+
+      // Run the picker in the top-level dashboard rather than this iframe.
+      // This avoids Chrome/Edge iframe folder-access failures.
+      try {
+        if (window.parent && typeof window.parent.openPnlFolderPicker === 'function') {
+          window.parent.openPnlFolderPicker();
+          return;
+        }
+      } catch (err) {
+        console.warn('Direct parent folder picker unavailable:', err);
+      }
+
+      // Fallback message for environments where direct parent access is restricted.
+      postMessage('TRIGGER_FOLDER_UPLOAD');
     }
   </script>
 </body>
