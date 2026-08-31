@@ -2321,10 +2321,10 @@ if (!dailyFilteredTotals[monthKey][dateKey]) dailyFilteredTotals[monthKey][dateK
 Object.entries(trade.strategyDetails).forEach(([stratName, details]) => {
 strategies.add(stratName);
 if (!monthlyData[monthKey][stratName]) {
-monthlyData[monthKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
+monthlyData[monthKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, lotPnl: 0, lotPnlTax: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
 }
 if (!dailyData[monthKey][dateKey][stratName]) {
-dailyData[monthKey][dateKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
+dailyData[monthKey][dateKey][stratName] = { lot: 0, pnl: 0, dpnl: 0, net: 0, lotPnl: 0, lotPnlTax: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
 }
 if (details.lot > 0) {
 monthlyData[monthKey][stratName].lotSum += details.lot;
@@ -2335,6 +2335,12 @@ monthlyData[monthKey][stratName].pnl += details.pnl;
 monthlyData[monthKey][stratName].dpnl += details.dpnl;
 monthlyData[monthKey][stratName].value += (details.lot > 0 ? (((trade.entry||0)+(trade.exit||0))*(trade.qty||0)*details.lot) : 0);
 monthlyData[monthKey][stratName].net += (trade.strategyPnlTax[stratName] || 0);
+// LOT PNL matches Python Monthly Summary: sum each trade's PNL / that trade's LOT.
+// Zero-lot rows are excluded, matching pandas lots.replace(0, NA).
+if (details.lot !== 0) {
+monthlyData[monthKey][stratName].lotPnl += (details.pnl / details.lot);
+monthlyData[monthKey][stratName].lotPnlTax += ((trade.strategyPnlTax[stratName] || 0) / details.lot);
+}
 if (details.lot > 0) {
 dailyData[monthKey][dateKey][stratName].lotSum += details.lot;
 dailyData[monthKey][dateKey][stratName].lotCount += 1;
@@ -2344,6 +2350,10 @@ dailyData[monthKey][dateKey][stratName].pnl += details.pnl;
 dailyData[monthKey][dateKey][stratName].dpnl += details.dpnl;
 dailyData[monthKey][dateKey][stratName].value += (details.lot > 0 ? (((trade.entry||0)+(trade.exit||0))*(trade.qty||0)*details.lot) : 0);
 dailyData[monthKey][dateKey][stratName].net += (trade.strategyPnlTax[stratName] || 0);
+if (details.lot !== 0) {
+dailyData[monthKey][dateKey][stratName].lotPnl += (details.pnl / details.lot);
+dailyData[monthKey][dateKey][stratName].lotPnlTax += ((trade.strategyPnlTax[stratName] || 0) / details.lot);
+}
 const isAPro = stratName.startsWith('A.PRO');
 if (!isAPro) {
 const netPnl = trade.strategyPnlTax[stratName] || 0;
@@ -2881,7 +2891,7 @@ drawdown: drawdown  // Will be 0 when currentMargin == peakMargin (new high)
 return result;
 }
 function renderPivotTable(monthlyData, dailyData, strategies, monthlyTotals, dailyTotals, monthlyFilteredTotals, dailyFilteredTotals, cumulativeData, monthlyExpensesAndMargins, dailyTotalMargins, dailyExpenses, marginDrawdownData) {
-const brokerPnlValue = (sd) => { if (!sd) return 0; if (showLotPnl) { const al = sd.lotCount > 0 ? sd.lotSum / sd.lotCount : 0; return al > 0 ? (showPnlTax ? sd.net / al : sd.pnl / al) : 0; } return showPnlTax ? sd.net : sd.pnl; };
+const brokerPnlValue = (sd) => { if (!sd) return 0; if (showLotPnl) return showPnlTax ? (sd.lotPnlTax || 0) : (sd.lotPnl || 0); return showPnlTax ? sd.net : sd.pnl; };
 const brokerTotalTd = (val, sectionCls, turnover) => showBrokerTotal ? `<td class="number-col ${sectionCls} broker-total-col ${val >= 0 ? 'positive' : 'negative'}">${(showPercent && turnover !== undefined) ? formatPnlPercent(val, turnover) : formatNumber(val)}</td>` : '';
 if (strategies.length === 0) {
 const drawdownHeader = showDrawdown ? '<th class="number-col">DRAWDOWN</th>' : '';
@@ -3022,7 +3032,7 @@ return monthA.localeCompare(monthB);
 });
 const totals = { strategies: {}, totalProfits: 0, netBrProfits: 0, totalAmiPnl: 0, totalExpenses: 0, totalMarginSum: 0, monthCount: 0 };
 strategies.forEach(strat => {
-totals.strategies[strat] = { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
+totals.strategies[strat] = { lot: 0, pnl: 0, dpnl: 0, net: 0, lotPnl: 0, lotPnlTax: 0, tradeCount: 0, lotSum: 0, lotCount: 0, value: 0 };
 });
 const totalsToUse = showFilteredTotals ? monthlyFilteredTotals : monthlyTotals;
 Object.values(totalsToUse).forEach(monthTotal => {
@@ -3054,15 +3064,17 @@ let yearFirstDateMargin = 0; // Reset for each year
 // Calculate year totals for each strategy
 const yearTotals = {};
 strategies.forEach(strat => {
-yearTotals[strat] = { pnl: 0, dpnl: 0, net: 0, lotSum: 0, lotCount: 0, value: 0 };
+yearTotals[strat] = { pnl: 0, dpnl: 0, net: 0, lotPnl: 0, lotPnlTax: 0, lotSum: 0, lotCount: 0, value: 0 };
 });
 yearMonths.forEach(month => {
 strategies.forEach(strat => {
-const stratData = monthlyData[month][strat] || { pnl: 0, dpnl: 0, net: 0, lotSum: 0, lotCount: 0 };
+const stratData = monthlyData[month][strat] || { pnl: 0, dpnl: 0, net: 0, lotPnl: 0, lotPnlTax: 0, lotSum: 0, lotCount: 0 };
 yearTotals[strat].pnl += stratData.pnl;
 yearTotals[strat].dpnl += stratData.dpnl;
 yearTotals[strat].value += (stratData.value || 0);
 yearTotals[strat].net += stratData.net;
+yearTotals[strat].lotPnl += (stratData.lotPnl || 0);
+yearTotals[strat].lotPnlTax += (stratData.lotPnlTax || 0);
 yearTotals[strat].lotSum += stratData.lotSum;
 yearTotals[strat].lotCount += stratData.lotCount;
 });
@@ -3140,8 +3152,7 @@ brokerGroups[brokerCode].forEach((strategy, idx) => {
 const stratData = yearTotals[strategy] || { pnl: 0, net: 0, lotSum: 0, lotCount: 0 };
 let pnl;
 if (showLotPnl) {
-const avgLot = stratData.lotCount > 0 ? (stratData.lotSum / stratData.lotCount) : 0;
-pnl = avgLot > 0 ? (showPnlTax ? (stratData.net / avgLot) : (stratData.pnl / avgLot)) : 0;
+pnl = showPnlTax ? (stratData.lotPnlTax || 0) : (stratData.lotPnl || 0);
 } else {
 pnl = showPnlTax ? stratData.net : stratData.pnl;
 }
@@ -3211,6 +3222,8 @@ totals.strategies[strategy].pnl += pnl;
 totals.strategies[strategy].dpnl += dpnl;
 totals.strategies[strategy].value += (stratData.value || 0);
 totals.strategies[strategy].net += net;
+totals.strategies[strategy].lotPnl += (stratData.lotPnl || 0);
+totals.strategies[strategy].lotPnlTax += (stratData.lotPnlTax || 0);
 totals.strategies[strategy].tradeCount += tradeCount;
 });
 aproStrategies.forEach((strategy, idx) => {
@@ -3248,8 +3261,7 @@ brokerGroups[brokerCode].forEach((strategy, idx) => {
 const stratData = monthlyData[month][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
 let pnl;
 if (showLotPnl) {
-const avgLot = stratData.lotCount > 0 ? (stratData.lotSum / stratData.lotCount) : 0;
-pnl = avgLot > 0 ? (showPnlTax ? (stratData.net / avgLot) : (stratData.pnl / avgLot)) : 0;
+pnl = showPnlTax ? (stratData.lotPnlTax || 0) : (stratData.lotPnl || 0);
 } else {
 pnl = showPnlTax ? stratData.net : stratData.pnl;
 }
@@ -3423,8 +3435,7 @@ brokerGroups[brokerCode].forEach((strategy, idx) => {
 const stratData = dailyData[month][date][strategy] || { lot: 0, pnl: 0, dpnl: 0, net: 0, tradeCount: 0, lotSum: 0, lotCount: 0 };
 let pnl;
 if (showLotPnl) {
-const avgLot = stratData.lotCount > 0 ? (stratData.lotSum / stratData.lotCount) : 0;
-pnl = avgLot > 0 ? (showPnlTax ? (stratData.net / avgLot) : (stratData.pnl / avgLot)) : 0;
+pnl = showPnlTax ? (stratData.lotPnlTax || 0) : (stratData.lotPnl || 0);
 } else {
 pnl = showPnlTax ? stratData.net : stratData.pnl;
 }
@@ -3556,8 +3567,7 @@ totalBrokerGroups[brokerCode].forEach((strategy, idx) => {
 const stratTotal = totals.strategies[strategy];
 let pnlValue;
 if (showLotPnl) {
-const avgLot = stratTotal.lotCount > 0 ? (stratTotal.lotSum / stratTotal.lotCount) : 0;
-pnlValue = avgLot > 0 ? (showPnlTax ? (stratTotal.net / avgLot) : (stratTotal.pnl / avgLot)) : 0;
+pnlValue = showPnlTax ? (stratTotal.lotPnlTax || 0) : (stratTotal.lotPnl || 0);
 } else {
 pnlValue = showPnlTax ? stratTotal.net : stratTotal.pnl;
 }
