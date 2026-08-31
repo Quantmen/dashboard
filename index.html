@@ -283,8 +283,8 @@
                     hiddenFileInput.click();
                     break;
                 case 'TRIGGER_FOLDER_UPLOAD':
-                    // Folder import request from sidebar.
-                    openPnlFolderPicker();
+                    // Folder import request from sidebar. Shift+Click forces a new folder.
+                    openPnlFolderPicker(!!event.data.forceNewFolder);
                     break;
                 case 'TRIGGER_DRIVE_LINK_SET':
                     // Sidebar requests to set Google Drive link
@@ -531,8 +531,27 @@
 
         // Open/reuse the folder from the TOP-LEVEL page. A previously selected folder is
         // reused first; otherwise the browser folder picker is shown and the handle is saved.
-        async function openPnlFolderPicker() {
+        async function openPnlFolderPicker(forceNewFolder = false) {
             if ('showDirectoryPicker' in window) {
+                // Shift+Click: bypass the remembered handle and immediately open the
+                // browser folder picker so the user can replace the saved location.
+                if (forceNewFolder) {
+                    try {
+                        const directoryHandle = await window.showDirectoryPicker({
+                            id: 'pnl-report-summary-folder',
+                            mode: 'read'
+                        });
+                        await savePnlFolderHandle(directoryHandle);
+                        await loadPnlSummaryFromDirectory(directoryHandle);
+                        return;
+                    } catch (err) {
+                        if (err && err.name === 'AbortError') return;
+                        console.warn('Change-folder picker unavailable, using compatible fallback:', err);
+                        hiddenFolderInput.click();
+                        return;
+                    }
+                }
+
                 const savedHandle = await getSavedPnlFolderHandle();
 
                 if (savedHandle) {
